@@ -1,11 +1,11 @@
-import { Contract } from 'web3-eth-contract';
-import { getWeb3WsProvider, getWeb3HttpProvider } from '../helperFunctions/Web3.js'
+import { Contract } from "web3-eth-contract";
+import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
 
 function isCupsErr(err: Error): boolean {
-  return err.message.includes('compute units per second capacity');
+  return err.message.includes("compute units per second capacity");
 }
 
 function isError(err: unknown): err is Error {
@@ -34,9 +34,9 @@ export async function getCurrentBlockNumber(): Promise<number | null> {
         await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (400 - 200 + 1) + 200)));
       } else {
         if (isError(error)) {
-          console.log('Error in getCurrentBlockNumber', blockNumber, error.message);
+          console.log("Error in getCurrentBlockNumber", blockNumber, error.message);
         } else {
-          console.log('Error in getCurrentBlockNumber', blockNumber, 'Unknown error');
+          console.log("Error in getCurrentBlockNumber", blockNumber, "Unknown error");
         }
         shouldContinue = false;
       }
@@ -103,23 +103,22 @@ export async function getPastEvents(
   return EVENT_ARRAY;
 }
 
-
 interface BlockNumber {
   block: string | number;
 }
 
-export async function web3Call(CONTRACT: Contract, method: string, params: any[], blockNumber: BlockNumber | number = { block: 'latest' }): Promise<any> {
+export async function web3Call(CONTRACT: Contract, method: string, params: any[], blockNumber: BlockNumber | number = { block: "latest" }): Promise<any> {
   let shouldContinue = true;
   let retries = 0;
   while (shouldContinue && retries < 12) {
     try {
       return await CONTRACT.methods[method](...params).call(blockNumber);
     } catch (error) {
-      if (isError(error) && (!isCupsErr(error))) {
+      if (isError(error) && !isCupsErr(error)) {
         console.log(`${error} | Contract: ${CONTRACT.options.address} | method: ${method} | params: ${params} | blockNumber: ${blockNumber}`);
         shouldContinue = false;
       } else {
-        await randomDelay()
+        await randomDelay();
       }
     }
     retries++;

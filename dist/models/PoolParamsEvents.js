@@ -5,8 +5,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 // PoolParamsEvents.ts
-import { Model, Table, Column, PrimaryKey, AutoIncrement, ForeignKey, DataType, BelongsTo, } from 'sequelize-typescript';
-import { Pool } from './Pools.js';
+import { Model, Table, Column, PrimaryKey, AutoIncrement, ForeignKey, DataType, BelongsTo } from "sequelize-typescript";
+import { Pool } from "./Pools.js";
 let PoolParamsEvents = class PoolParamsEvents extends Model {
 };
 __decorate([
@@ -40,7 +40,7 @@ __decorate([
     Column(DataType.INTEGER)
 ], PoolParamsEvents.prototype, "event_timestamp", void 0);
 PoolParamsEvents = __decorate([
-    Table({ tableName: 'pool_params_events' })
+    Table({ tableName: "pool_params_events" })
 ], PoolParamsEvents);
 export { PoolParamsEvents };
 //# sourceMappingURL=PoolParamsEvents.js.map

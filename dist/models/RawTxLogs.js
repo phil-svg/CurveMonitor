@@ -4,8 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, } from 'sequelize-typescript';
-import { Pool } from './Pools.js';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { Pool } from "./Pools.js";
 let RawTxLogs = class RawTxLogs extends Model {
 };
 __decorate([
@@ -17,25 +17,25 @@ __decorate([
 ], RawTxLogs.prototype, "address", void 0);
 __decorate([
     Column({
-        field: 'block_number',
+        field: "block_number",
         type: DataType.INTEGER,
     })
 ], RawTxLogs.prototype, "blockNumber", void 0);
 __decorate([
     Column({
-        field: 'transaction_hash',
+        field: "transaction_hash",
         type: DataType.STRING,
     })
 ], RawTxLogs.prototype, "transactionHash", void 0);
 __decorate([
     Column({
-        field: 'transaction_index',
+        field: "transaction_index",
         type: DataType.INTEGER,
     })
 ], RawTxLogs.prototype, "transactionIndex", void 0);
 __decorate([
     Column({
-        field: 'block_hash',
+        field: "block_hash",
         type: DataType.STRING,
     })
 ], RawTxLogs.prototype, "blockHash", void 0);
@@ -65,12 +65,12 @@ __decorate([
 ], RawTxLogs.prototype, "pool", void 0);
 RawTxLogs = __decorate([
     Table({
-        tableName: 'raw_tx_logs',
+        tableName: "raw_tx_logs",
         indexes: [
             {
-                name: 'unique_blockhash_logindex',
+                name: "unique_blockhash_logindex",
                 unique: true,
-                fields: ['block_hash', 'logIndex'],
+                fields: ["block_hash", "logIndex"],
             },
         ],
     })

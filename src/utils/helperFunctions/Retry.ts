@@ -5,7 +5,7 @@ export async function retry<T>(func: () => Promise<T>, maxRetries = 12, retryDel
       return await func();
     } catch (error) {
       if (error instanceof Error) console.log("Error message:", error.message);
-      if (error instanceof Error && (error.message.includes('timeout') || error.message.includes('Invalid JSON RPC response'))) {
+      if (error instanceof Error && (error.message.includes("timeout") || error.message.includes("Invalid JSON RPC response"))) {
         retries++;
         if (retries < maxRetries) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
@@ -16,5 +16,5 @@ export async function retry<T>(func: () => Promise<T>, maxRetries = 12, retryDel
     }
   }
 
-  throw new Error('Maximum retries reached');
+  throw new Error("Maximum retries reached");
 }

@@ -4,12 +4,12 @@
  * Uses either the inception block, or in some cases the first block in which there was an event.
  */
 import Web3 from "web3";
-import { getAllPoolIds, getInceptionBlockBy, getAddressById, getVersionBy } from './readFunctions/Pools.js';
-import { getAbiBy } from './Abi.js';
-import { InitialParams } from '../../models/InitialParams.js';
+import { getAllPoolIds, getInceptionBlockBy, getAddressById, getVersionBy } from "./readFunctions/Pools.js";
+import { getAbiBy } from "./Abi.js";
+import { InitialParams } from "../../models/InitialParams.js";
 import { getPastEvents } from "../web3Calls/generic.js";
 if (!process.env.WEB3_HTTP) {
-    console.error('Error: WEB3_WSS environment variable is not defined.');
+    console.error("Error: WEB3_WSS environment variable is not defined.");
     process.exit(1);
 }
 var WEB3 = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP));
@@ -74,15 +74,15 @@ async function saveGamma(poolId, gamma) {
 }
 async function hasAEntry(poolId) {
     const entry = await InitialParams.findOne({ where: { pool_id: poolId } });
-    return entry !== null && entry.A !== null && entry.A !== '';
+    return entry !== null && entry.A !== null && entry.A !== "";
 }
 async function hasFeeEntry(poolId) {
     const entry = await InitialParams.findOne({ where: { pool_id: poolId } });
-    return entry !== null && entry.fee !== null && entry.fee !== '';
+    return entry !== null && entry.fee !== null && entry.fee !== "";
 }
 async function hasGammaEntry(poolId) {
     const entry = await InitialParams.findOne({ where: { pool_id: poolId } });
-    return entry !== null && entry.gamma !== null && entry.gamma !== '';
+    return entry !== null && entry.gamma !== null && entry.gamma !== "";
 }
 async function getAFromChain(poolAddress, POOL_ABI, blockNumber) {
     const CONTRACT = new WEB3.eth.Contract(POOL_ABI, poolAddress);
@@ -100,21 +100,21 @@ async function getGammaFromChain(poolAddress, POOL_ABI, blockNumber) {
     return GAMMA;
 }
 async function handleVersion1(poolId, INCEPTION_BLOCK, POOL_ADDRESS, POOL_ABI) {
-    if (!await hasAEntry(poolId)) {
+    if (!(await hasAEntry(poolId))) {
         const A = await getAFromChain(POOL_ADDRESS, POOL_ABI, INCEPTION_BLOCK);
         await saveA(poolId, A);
     }
-    if (!await hasFeeEntry(poolId)) {
+    if (!(await hasFeeEntry(poolId))) {
         const FEE = await getFeeFromChain(POOL_ADDRESS, POOL_ABI, INCEPTION_BLOCK);
         await saveFee(poolId, FEE);
     }
 }
 async function handleVersion2(poolId, INCEPTION_BLOCK, POOL_ADDRESS, POOL_ABI) {
-    if (!await hasAEntry(poolId)) {
+    if (!(await hasAEntry(poolId))) {
         const A = await getAFromChain(POOL_ADDRESS, POOL_ABI, INCEPTION_BLOCK);
         await saveA(poolId, A);
     }
-    if (!await hasFeeEntry(poolId)) {
+    if (!(await hasFeeEntry(poolId))) {
         const RELEVANT_BLOCK = await getRelevantEventBlock(POOL_ADDRESS, POOL_ABI, INCEPTION_BLOCK);
         if (RELEVANT_BLOCK === 0) {
             await saveFee(poolId, "0");
@@ -124,7 +124,7 @@ async function handleVersion2(poolId, INCEPTION_BLOCK, POOL_ADDRESS, POOL_ABI) {
             await saveFee(poolId, FEE);
         }
     }
-    if (!await hasGammaEntry(poolId)) {
+    if (!(await hasGammaEntry(poolId))) {
         const GAMMA = await getGammaFromChain(POOL_ADDRESS, POOL_ABI, INCEPTION_BLOCK);
         await saveGamma(poolId, GAMMA);
     }
@@ -137,13 +137,13 @@ async function solveInitParams(poolId) {
     const POOL_ADDRESS = await getAddressById(poolId);
     if (!POOL_ADDRESS)
         return;
-    const POOL_ABI = await getAbiBy('AbisPools', { id: poolId });
+    const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
     if (!POOL_ABI)
         return;
-    if (VERSION === 'v1') {
+    if (VERSION === "v1") {
         await handleVersion1(poolId, INCEPTION_BLOCK, POOL_ADDRESS, POOL_ABI);
     }
-    else if (VERSION === 'v2') {
+    else if (VERSION === "v2") {
         await handleVersion2(poolId, INCEPTION_BLOCK, POOL_ADDRESS, POOL_ABI);
     }
 }

@@ -1,7 +1,7 @@
 import Web3 from "web3";
-import { Contract } from 'web3-eth-contract';
-import { getAbiBy } from '../postgresTables/Abi.js';
-import { getAddressById, getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
+import { Contract } from "web3-eth-contract";
+import { getAbiBy } from "../postgresTables/Abi.js";
+import { getAddressById, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
 
 let web3WsProvider: Web3 | null = null;
 
@@ -24,32 +24,30 @@ export function getWeb3HttpProvider(): Web3 {
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
 
-export async function getContractByAddress(poolAddress:string): Promise<Contract | void> {
-
-  const POOL_ID = await getIdByAddress(poolAddress)
-  if(!POOL_ID){
-    console.log(`Err fetching ABI for pool ${poolAddress}`)
-    return
+export async function getContractByAddress(poolAddress: string): Promise<Contract | void> {
+  const POOL_ID = await getIdByAddress(poolAddress);
+  if (!POOL_ID) {
+    console.log(`Err fetching ABI for pool ${poolAddress}`);
+    return;
   }
 
   const CONTRACT = await getContractByPoolID(POOL_ID);
-  return CONTRACT
+  return CONTRACT;
 }
 
-export async function getContractByPoolID(poolId:number): Promise<Contract | void> {
-
-  const POOL_ABI = await getAbiBy('AbisPools', { id: poolId });
-  if(!POOL_ABI){
-    console.log(`Err fetching ABI for pool ${poolId}`)
-    return
+export async function getContractByPoolID(poolId: number): Promise<Contract | void> {
+  const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
+  if (!POOL_ABI) {
+    console.log(`Err fetching ABI for pool ${poolId}`);
+    return;
   }
 
-  const POOL_ADDRESS = await getAddressById(poolId)
-  if(!POOL_ADDRESS){
-    console.log(`Err fetching Address for pool ${poolId}`)
-    return
+  const POOL_ADDRESS = await getAddressById(poolId);
+  if (!POOL_ADDRESS) {
+    console.log(`Err fetching Address for pool ${poolId}`);
+    return;
   }
 
   const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
-  return CONTRACT
+  return CONTRACT;
 }

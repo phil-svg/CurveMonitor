@@ -1,4 +1,4 @@
-import { Pool } from '../../../models/Pools.js';
+import { Pool } from "../../../models/Pools.js";
 
 export const getIdByAddress = async (poolAddress: string): Promise<number | null> => {
   const pool = await Pool.findOne({ where: { address: poolAddress } });
@@ -11,7 +11,7 @@ export const getPoolBy = async (options: { id?: number; address?: string }): Pro
   } else if (options.address) {
     return await Pool.findOne({ where: { address: options.address } });
   } else {
-    throw new Error('You must provide either id or address');
+    throw new Error("You must provide either id or address");
   }
 };
 

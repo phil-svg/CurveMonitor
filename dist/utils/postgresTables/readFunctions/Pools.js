@@ -1,4 +1,4 @@
-import { Pool } from '../../../models/Pools.js';
+import { Pool } from "../../../models/Pools.js";
 export const getIdByAddress = async (poolAddress) => {
     const pool = await Pool.findOne({ where: { address: poolAddress } });
     return pool ? pool.id : null;
@@ -11,7 +11,7 @@ export const getPoolBy = async (options) => {
         return await Pool.findOne({ where: { address: options.address } });
     }
     else {
-        throw new Error('You must provide either id or address');
+        throw new Error("You must provide either id or address");
     }
 };
 export const getAllPoolIds = async () => {

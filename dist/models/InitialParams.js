@@ -5,8 +5,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 // InitialParams.ts
-import { Model, Table, Column, PrimaryKey, AutoIncrement, ForeignKey, DataType, BelongsTo, } from 'sequelize-typescript';
-import { Pool } from './Pools.js';
+import { Model, Table, Column, PrimaryKey, AutoIncrement, ForeignKey, DataType, BelongsTo } from "sequelize-typescript";
+import { Pool } from "./Pools.js";
 let InitialParams = class InitialParams extends Model {
 };
 __decorate([
@@ -31,7 +31,7 @@ __decorate([
     Column(DataType.STRING)
 ], InitialParams.prototype, "gamma", void 0);
 InitialParams = __decorate([
-    Table({ tableName: 'initial_params' })
+    Table({ tableName: "initial_params" })
 ], InitialParams);
 export { InitialParams };
 //# sourceMappingURL=InitialParams.js.map

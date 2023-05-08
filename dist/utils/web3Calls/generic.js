@@ -1,8 +1,8 @@
-import { getWeb3WsProvider, getWeb3HttpProvider } from '../helperFunctions/Web3.js';
+import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
 function isCupsErr(err) {
-    return err.message.includes('compute units per second capacity');
+    return err.message.includes("compute units per second capacity");
 }
 function isError(err) {
     return err instanceof Error;
@@ -28,10 +28,10 @@ export async function getCurrentBlockNumber() {
             }
             else {
                 if (isError(error)) {
-                    console.log('Error in getCurrentBlockNumber', blockNumber, error.message);
+                    console.log("Error in getCurrentBlockNumber", blockNumber, error.message);
                 }
                 else {
-                    console.log('Error in getCurrentBlockNumber', blockNumber, 'Unknown error');
+                    console.log("Error in getCurrentBlockNumber", blockNumber, "Unknown error");
                 }
                 shouldContinue = false;
             }
@@ -85,7 +85,7 @@ export async function getPastEvents(CONTRACT, eventName, fromBlock, toBlock) {
     }
     return EVENT_ARRAY;
 }
-export async function web3Call(CONTRACT, method, params, blockNumber = { block: 'latest' }) {
+export async function web3Call(CONTRACT, method, params, blockNumber = { block: "latest" }) {
     let shouldContinue = true;
     let retries = 0;
     while (shouldContinue && retries < 12) {
@@ -93,7 +93,7 @@ export async function web3Call(CONTRACT, method, params, blockNumber = { block: 
             return await CONTRACT.methods[method](...params).call(blockNumber);
         }
         catch (error) {
-            if (isError(error) && (!isCupsErr(error))) {
+            if (isError(error) && !isCupsErr(error)) {
                 console.log(`${error} | Contract: ${CONTRACT.options.address} | method: ${method} | params: ${params} | blockNumber: ${blockNumber}`);
                 shouldContinue = false;
             }

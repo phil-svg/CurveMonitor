@@ -1,17 +1,8 @@
 // PoolParamsEvents.ts
-import {
-  Model,
-  Table,
-  Column,
-  PrimaryKey,
-  AutoIncrement,
-  ForeignKey,
-  DataType,
-  BelongsTo,
-} from 'sequelize-typescript';
-import { Pool } from './Pools.js';
+import { Model, Table, Column, PrimaryKey, AutoIncrement, ForeignKey, DataType, BelongsTo } from "sequelize-typescript";
+import { Pool } from "./Pools.js";
 
-@Table({ tableName: 'pool_params_events' })
+@Table({ tableName: "pool_params_events" })
 export class PoolParamsEvents extends Model {
   @PrimaryKey
   @AutoIncrement

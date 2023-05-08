@@ -1,10 +1,10 @@
-import { RawTxLogs } from '../../../models/RawTxLogs.js';
+import { RawTxLogs } from "../../../models/RawTxLogs.js";
 
 export async function getHighestStoredBlockForPoolId(poolId: number): Promise<number> {
   try {
     const highestBlock = await RawTxLogs.findOne({
       where: { pool_id: poolId },
-      order: [['block_number', 'DESC']],
+      order: [["block_number", "DESC"]],
     });
 
     if (highestBlock) {
@@ -13,7 +13,7 @@ export async function getHighestStoredBlockForPoolId(poolId: number): Promise<nu
       return 0;
     }
   } catch (error) {
-    console.error('Error retrieving the highest block number:', error);
+    console.error("Error retrieving the highest block number:", error);
     return 0;
   }
 }

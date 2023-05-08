@@ -1,12 +1,12 @@
 import Web3 from "web3";
-import { getAbiBy } from './Abi.js';
-import { db } from '../../config/Database.js';
-import { PoolCountFromProvider } from '../../models/PoolCountFromProvider.js';
-import { Pool, PoolVersion } from '../../models/Pools.js';
-import { Op } from 'sequelize';
-import { getProvidedAddress } from '../../AddressProviderEntryPoint.js';
+import { getAbiBy } from "./Abi.js";
+import { db } from "../../config/Database.js";
+import { PoolCountFromProvider } from "../../models/PoolCountFromProvider.js";
+import { Pool, PoolVersion } from "../../models/Pools.js";
+import { Op } from "sequelize";
+import { getProvidedAddress } from "../../AddressProviderEntryPoint.js";
 if (!process.env.WEB3_WSS) {
-    console.error('Error: WEB3_WSS environment variable is not defined.');
+    console.error("Error: WEB3_WSS environment variable is not defined.");
     process.exit(1);
 }
 const WEB3 = new Web3(new Web3.providers.WebsocketProvider(process.env.WEB3_WSS));
@@ -33,7 +33,7 @@ async function addAddressToPools(provider, address) {
     try {
         await db.models.Pool.create({
             address: address,
-            source_address: provider
+            source_address: provider,
         });
         console.log(`Address "${address}" added to the 'pools' table.`);
     }
@@ -100,7 +100,7 @@ async function hasGetLpToken(address) {
         return null;
     }
     for (const FUNCTION of ABI) {
-        if (FUNCTION.name === 'get_lp_token')
+        if (FUNCTION.name === "get_lp_token")
             return true;
     }
     return false;
@@ -112,7 +112,7 @@ async function hasGetToken(address) {
         return null;
     }
     for (const FUNCTION of ABI) {
-        if (FUNCTION.name === 'get_token')
+        if (FUNCTION.name === "get_token")
             return true;
     }
     return false;
@@ -124,7 +124,7 @@ async function hasGetGauge(address) {
         return null;
     }
     for (const FUNCTION of ABI) {
-        if (FUNCTION.name === 'get_gauge')
+        if (FUNCTION.name === "get_gauge")
             return true;
     }
     return false;
@@ -148,16 +148,20 @@ async function getLpTokenAddress(poolAddress, sourceAddress) {
         const GAUGE_ADDRESS = await CONTRACT.methods.get_gauge(poolAddress).call();
         if (GAUGE_ADDRESS === NULL_ADDRESS)
             return poolAddress;
-        const ABI_LP_TOKEN = [{
-                "stateMutability": "view",
-                "type": "function",
-                "name": "lp_token",
-                "inputs": [],
-                "outputs": [{
-                        "name": "",
-                        "type": "address"
-                    }]
-            }];
+        const ABI_LP_TOKEN = [
+            {
+                stateMutability: "view",
+                type: "function",
+                name: "lp_token",
+                inputs: [],
+                outputs: [
+                    {
+                        name: "",
+                        type: "address",
+                    },
+                ],
+            },
+        ];
         const GAUGE_CONTRACT = new WEB3.eth.Contract(ABI_LP_TOKEN, GAUGE_ADDRESS);
         const LP_ADDRESS = await GAUGE_CONTRACT.methods.lp_token().call();
         return LP_ADDRESS;
@@ -177,29 +181,33 @@ async function updateLpTokenAddresses() {
         let i = 0;
         for (const pool of poolsWithoutLpToken) {
             i += 1;
-            const lpTokenAddress = await getLpTokenAddress(pool.address, (_a = pool.source_address) !== null && _a !== void 0 ? _a : '');
+            const lpTokenAddress = await getLpTokenAddress(pool.address, (_a = pool.source_address) !== null && _a !== void 0 ? _a : "");
             pool.lp_token = lpTokenAddress;
             console.log(`${i} saving LP-Token-Address ${lpTokenAddress} for ${pool.address}`);
             await pool.save();
         }
     }
     catch (error) {
-        console.error('Error updating lp_token:', error);
+        console.error("Error updating lp_token:", error);
         throw error;
     }
 }
 /** *********************** Adding Names *********************** */
 async function getPoolNameFromLpToken(tokenAddress) {
-    const ABI_NAME = [{
-            "stateMutability": "view",
-            "type": "function",
-            "name": "name",
-            "inputs": [],
-            "outputs": [{
-                    "name": "",
-                    "type": "string"
-                }]
-        }];
+    const ABI_NAME = [
+        {
+            stateMutability: "view",
+            type: "function",
+            name: "name",
+            inputs: [],
+            outputs: [
+                {
+                    name: "",
+                    type: "string",
+                },
+            ],
+        },
+    ];
     const CONTRACT = new WEB3.eth.Contract(ABI_NAME, tokenAddress);
     const NAME = await CONTRACT.methods.name().call();
     return NAME;
@@ -225,7 +233,7 @@ async function updateNames() {
         }
     }
     catch (error) {
-        console.error('Error updating names:', error);
+        console.error("Error updating names:", error);
         throw error;
     }
 }
@@ -238,7 +246,7 @@ async function getCoins(poolAddress, sourceAddress) {
     }
     const CONTRACT = new WEB3.eth.Contract(ABI, sourceAddress);
     const COINS = await CONTRACT.methods.get_coins(poolAddress).call();
-    return COINS.filter((value) => value !== '0x0000000000000000000000000000000000000000');
+    return COINS.filter((value) => value !== "0x0000000000000000000000000000000000000000");
 }
 export async function updateCoins() {
     var _a;
@@ -255,14 +263,14 @@ export async function updateCoins() {
             if (!pool.lp_token)
                 continue;
             i += 1;
-            const COINS = await getCoins(pool.address, (_a = pool.source_address) !== null && _a !== void 0 ? _a : '');
+            const COINS = await getCoins(pool.address, (_a = pool.source_address) !== null && _a !== void 0 ? _a : "");
             pool.coins = COINS;
             console.log(`${i}/${poolsWithoutCoins.length} saving Coins ${COINS} for ${pool.address}`);
             await pool.save();
         }
     }
     catch (error) {
-        console.error('Error updating coins:', error);
+        console.error("Error updating coins:", error);
         throw error;
     }
 }
@@ -301,7 +309,7 @@ async function updateNCoins() {
         }
     }
     catch (error) {
-        console.error('Error updating n_coins:', error);
+        console.error("Error updating n_coins:", error);
         throw error;
     }
 }
@@ -345,7 +353,7 @@ async function updateInceptionBlock() {
         }
     }
     catch (error) {
-        console.error('Error updating inception_block:', error);
+        console.error("Error updating inception_block:", error);
         throw error;
     }
 }
@@ -385,7 +393,7 @@ async function updateCreationTimestamp() {
         }
     }
     catch (error) {
-        console.error('Error updating creation_timestamp:', error);
+        console.error("Error updating creation_timestamp:", error);
         throw error;
     }
 }
@@ -437,7 +445,7 @@ async function updateBasepool() {
         }
     }
     catch (error) {
-        console.error('Error updating base_pool:', error);
+        console.error("Error updating base_pool:", error);
         throw error;
     }
 }
@@ -480,7 +488,7 @@ async function updateVersions() {
         }
     }
     catch (error) {
-        console.error('Error updating version:', error);
+        console.error("Error updating version:", error);
         throw error;
     }
 }
@@ -492,7 +500,7 @@ async function hasPoolCount(address) {
         return null;
     }
     for (const FUNCTION of ABI) {
-        if (FUNCTION.name === 'pool_count')
+        if (FUNCTION.name === "pool_count")
             return true;
     }
     return false;
@@ -523,7 +531,7 @@ async function getPoolCount(address) {
     const POOL_COUNT = await CONTRACT.methods.pool_count().call();
     return POOL_COUNT;
 }
-// goes through the address returned by the address provider. Finds Contracts which have pool-lists inside, and iterates over these lists. 
+// goes through the address returned by the address provider. Finds Contracts which have pool-lists inside, and iterates over these lists.
 // adds new pools to the table 'pools'
 export async function updatePools() {
     const POOL_COUNT_CONTRACTS = await getHasPoolCountContracts();

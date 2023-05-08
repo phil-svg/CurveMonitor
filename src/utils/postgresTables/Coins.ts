@@ -1,39 +1,47 @@
 import Web3 from "web3";
-import { db } from '../../config/Database.js';
-import { Coins } from '../../models/Coins.js';
-import { Op, Sequelize, QueryTypes  } from 'sequelize';
-import { AbiItem } from 'web3-utils';
+import { db } from "../../config/Database.js";
+import { Coins } from "../../models/Coins.js";
+import { Op, Sequelize, QueryTypes } from "sequelize";
+import { AbiItem } from "web3-utils";
 
 if (!process.env.WEB3_WSS) {
-  console.error('Error: WEB3_WSS environment variable is not defined.');
+  console.error("Error: WEB3_WSS environment variable is not defined.");
   process.exit(1);
 }
 
 const WEB3 = new Web3(new Web3.providers.WebsocketProvider(process.env.WEB3_WSS));
 
-const ABI_SYMBOL: AbiItem[] = [{
-  "name":"symbol",
-  "outputs":[{
-    "type":"string",
-    "name":""
-  }],
-  "inputs":[],
-  "stateMutability":"view",
-  "type":"function",
-  "gas":6876
-} as AbiItem];
+const ABI_SYMBOL: AbiItem[] = [
+  {
+    name: "symbol",
+    outputs: [
+      {
+        type: "string",
+        name: "",
+      },
+    ],
+    inputs: [],
+    stateMutability: "view",
+    type: "function",
+    gas: 6876,
+  } as AbiItem,
+];
 
-const ABI_DECIMALS: AbiItem[] = [{
-  "name":"decimals",
-  "outputs":[{
-    "type":"uint256",
-    "name":""
-  }],
-  "inputs":[],
-  "stateMutability":"view",
-  "type":"function",
-  "gas":1481
-} as AbiItem];
+const ABI_DECIMALS: AbiItem[] = [
+  {
+    name: "decimals",
+    outputs: [
+      {
+        type: "uint256",
+        name: "",
+      },
+    ],
+    inputs: [],
+    stateMutability: "view",
+    type: "function",
+    gas: 1481,
+  } as AbiItem,
+];
 
 const ADDRESS_ETH = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const ADDRESS_MKR = "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2";
@@ -59,11 +67,10 @@ async function getAllUniqueCoinAddressesFromPoolTable(): Promise<string[]> {
 
     return UNIQUE_ADDRESSES;
   } catch (error) {
-    console.error('Error fetching unique coin addresses:', error);
+    console.error("Error fetching unique coin addresses:", error);
     return [];
   }
 }
-
 
 /** *********************** Adding init Entry *********************** */
 
@@ -73,34 +80,33 @@ async function isCoinAddressInTable(address: string): Promise<boolean> {
 
     return coin !== null;
   } catch (error) {
-    console.error('Error checking coin address:', error);
+    console.error("Error checking coin address:", error);
     return false;
   }
 }
 
 async function updateAddresses(): Promise<void> {
-  const UNIQUE_ADDRESSES = await getAllUniqueCoinAddressesFromPoolTable()
+  const UNIQUE_ADDRESSES = await getAllUniqueCoinAddressesFromPoolTable();
   for (const UNIQUE_ADDRESSE of UNIQUE_ADDRESSES) {
     try {
       const exists = await isCoinAddressInTable(UNIQUE_ADDRESSE);
-      if(exists) return
+      if (exists) return;
       await Coins.create({ address: UNIQUE_ADDRESSE }); // Fix here: Use 'address' instead of 'UNIQUE_ADDRESSE'
       console.log(`Coin address ${UNIQUE_ADDRESSE} added to table.`);
     } catch (error) {
-      console.error('Error adding coin address to table:', error);
+      console.error("Error adding coin address to table:", error);
     }
   }
 }
 
-
 /** *********************** Adding Symbol *********************** */
 
 async function fetchSymbolFromChain(coinAddress: string): Promise<string> {
-  if( coinAddress === ADDRESS_ETH) return "ETH";
-  if( coinAddress === ADDRESS_MKR) return "MKR";
-  if( coinAddress === ADDRESS_REUSD) return "REUSD";
+  if (coinAddress === ADDRESS_ETH) return "ETH";
+  if (coinAddress === ADDRESS_MKR) return "MKR";
+  if (coinAddress === ADDRESS_REUSD) return "REUSD";
   const CONTRACT = new WEB3.eth.Contract(ABI_SYMBOL, coinAddress);
-  return CONTRACT.methods.symbol().call()
+  return CONTRACT.methods.symbol().call();
 }
 
 async function updateSymbols(): Promise<void> {
@@ -124,18 +130,17 @@ async function updateSymbols(): Promise<void> {
       await coin.save();
     }
   } catch (error) {
-    console.error('Error updating symbol:', error);
+    console.error("Error updating symbol:", error);
     throw error;
   }
 }
 
-
 /** *********************** Adding Decimals *********************** */
 
 async function fetchDecimalsFromChain(coinAddress: string): Promise<number> {
-  if( coinAddress === ADDRESS_ETH) return 18;
+  if (coinAddress === ADDRESS_ETH) return 18;
   const CONTRACT = new WEB3.eth.Contract(ABI_DECIMALS, coinAddress);
-  return CONTRACT.methods.decimals().call()
+  return CONTRACT.methods.decimals().call();
 }
 
 async function updateDecimals(): Promise<void> {
@@ -159,11 +164,10 @@ async function updateDecimals(): Promise<void> {
       await coin.save();
     }
   } catch (error) {
-    console.error('Error updating symbol:', error);
+    console.error("Error updating symbol:", error);
     throw error;
   }
 }
-
 
 /** *********************** Final *********************** */
 

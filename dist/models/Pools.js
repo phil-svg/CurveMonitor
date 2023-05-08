@@ -5,9 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 // pools.ts
-import { Table, Column, Model, PrimaryKey, AutoIncrement, DataType, CreatedAt, AllowNull, HasMany, HasOne, } from 'sequelize-typescript';
-import { PoolParamsEvents } from './PoolParamsEvents.js';
-import { InitialParams } from './InitialParams.js';
+import { Table, Column, Model, PrimaryKey, AutoIncrement, DataType, CreatedAt, AllowNull, HasMany, HasOne } from "sequelize-typescript";
+import { PoolParamsEvents } from "./PoolParamsEvents.js";
+import { InitialParams } from "./InitialParams.js";
 export var PoolVersion;
 (function (PoolVersion) {
     PoolVersion["v1"] = "v1";
@@ -61,7 +61,7 @@ __decorate([
 __decorate([
     AllowNull(true),
     Column({
-        field: 'creation_timestamp',
+        field: "creation_timestamp",
         type: DataType.INTEGER,
     })
 ], Pool.prototype, "creation_timestamp", void 0);
@@ -69,7 +69,7 @@ __decorate([
     AllowNull(true),
     CreatedAt,
     Column({
-        field: 'creation_date',
+        field: "creation_date",
         type: DataType.DATE,
     })
 ], Pool.prototype, "creation_date", void 0);
@@ -80,7 +80,7 @@ __decorate([
     HasOne(() => InitialParams)
 ], Pool.prototype, "initialParams", void 0);
 Pool = __decorate([
-    Table({ tableName: 'pools' })
+    Table({ tableName: "pools" })
 ], Pool);
 export { Pool };
 //# sourceMappingURL=Pools.js.map

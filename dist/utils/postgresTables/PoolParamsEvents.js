@@ -1,12 +1,12 @@
 import Web3 from "web3";
-import { getVersionBy, getInceptionBlockBy, getAllPoolIds, getAddressById } from './readFunctions/Pools.js';
-import { getPastEvents, getBlockTimeStamp } from '../web3Calls/generic.js';
-import { getAbiBy } from './Abi.js';
-import { PoolParamsEvents } from '../../models/PoolParamsEvents.js';
-import { retry } from '../helperFunctions/Retry.js';
+import { getVersionBy, getInceptionBlockBy, getAllPoolIds, getAddressById } from "./readFunctions/Pools.js";
+import { getPastEvents, getBlockTimeStamp } from "../web3Calls/generic.js";
+import { getAbiBy } from "./Abi.js";
+import { PoolParamsEvents } from "../../models/PoolParamsEvents.js";
+import { retry } from "../helperFunctions/Retry.js";
 import { getLatestEventTimestampFromSubgraph } from "../subgraph/DaoSubgraph.js";
 if (!process.env.WEB3_HTTP) {
-    console.error('Error: WEB3_WSS environment variable is not defined.');
+    console.error("Error: WEB3_WSS environment variable is not defined.");
     process.exit(1);
 }
 const WEB3 = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP));
@@ -17,7 +17,7 @@ async function addPoolParamsEvent(pool_id, log_index, event_name, raw_log, event
         event_name,
         raw_log,
         event_block,
-        event_timestamp
+        event_timestamp,
     });
     await newPoolParamsEvent.save();
 }
@@ -43,7 +43,7 @@ async function handleEvent(poolId, eventName, EVENT) {
     console.log("saving", POOL_ID, LOG_INDEX);
 }
 function isEventInABI(abi, eventName) {
-    return abi.some((entry) => entry.type === 'event' && entry.name === eventName);
+    return abi.some((entry) => entry.type === "event" && entry.name === eventName);
 }
 async function handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, POTENTIAL_EVENTS) {
     const CONTRACT = new WEB3.eth.Contract(POOL_ABI, POOL_ADDRESS);
@@ -72,20 +72,20 @@ async function solveParamEvents(poolId, CURRENT_BLOCK) {
     const POOL_ADDRESS = await getAddressById(poolId);
     if (!POOL_ADDRESS)
         return;
-    const POOL_ABI = await getAbiBy('AbisPools', { id: poolId });
+    const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
     if (!POOL_ABI)
         return;
-    if (VERSION === 'v1') {
+    if (VERSION === "v1") {
         await handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, ["NewFee", "RampA", "StopRampA", "NewParameters", "CommitNewParameters"]);
     }
-    else if (VERSION === 'v2') {
+    else if (VERSION === "v2") {
         await handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, ["NewParameters", "RampAgamma", "StopRampA"]);
     }
     await updateLastBlockChecked(poolId, CURRENT_BLOCK);
 }
 export async function updatePoolParamsEvents() {
     const latestEventTimestampFromSubgraph = Number(await getLatestEventTimestampFromSubgraph());
-    const LAST_BLOCK_CHECKED = await PoolParamsEvents.min('last_block_checked');
+    const LAST_BLOCK_CHECKED = (await PoolParamsEvents.min("last_block_checked"));
     const LAST_UNIXTIME_CHECKED = await getBlockTimeStamp(LAST_BLOCK_CHECKED);
     // gets triggered if say the last check was Monday, it is now Friday, and Subgraph shows Event for Wednesday.
     if (latestEventTimestampFromSubgraph >= LAST_UNIXTIME_CHECKED) {

@@ -1,6 +1,6 @@
-import { AbisPools, AbisRelatedToAddressProvider } from '../../models/Abi.js';
-import axios from 'axios';
-import { getAddressById, getAllPoolIds } from './readFunctions/Pools.js';
+import { AbisPools, AbisRelatedToAddressProvider } from "../../models/Abi.js";
+import axios from "axios";
+import { getAddressById, getAllPoolIds } from "./readFunctions/Pools.js";
 
 const resolveAddress = async (options: { address?: string; id?: number }): Promise<string | null> => {
   if (options.address) {
@@ -12,7 +12,7 @@ const resolveAddress = async (options: { address?: string; id?: number }): Promi
     }
     return address;
   } else {
-    throw new Error('You must provide either an address or a pool id');
+    throw new Error("You must provide either an address or a pool id");
   }
 };
 
@@ -35,7 +35,6 @@ const getAbiByForAddressProvider = async (options: { address?: string; id?: numb
   return abiRecord ? abiRecord.abi : null;
 };
 
-
 // Fetches ABI from Etherscan
 export async function fetchAbiFromEtherscan(address: string): Promise<any[]> {
   const URL = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${process.env.ETHERSCAN_KEY}`;
@@ -47,10 +46,10 @@ export async function fetchAbiFromEtherscan(address: string): Promise<any[]> {
 export async function isAbiStored(tableName: string, address: string): Promise<boolean> {
   const lowerCaseAddress = address.toLowerCase();
   let abiRecord;
-  if (tableName === 'AbisPools') {
+  if (tableName === "AbisPools") {
     abiRecord = await AbisPools.findOne({ where: { address: lowerCaseAddress } });
   }
-  if (tableName === 'AbisRelatedToAddressProvider') {
+  if (tableName === "AbisRelatedToAddressProvider") {
     abiRecord = await AbisRelatedToAddressProvider.findOne({ where: { address: lowerCaseAddress } });
   }
   return abiRecord !== null;
@@ -65,7 +64,7 @@ async function storeAbiForPools(pool_id: number, abi: any[]): Promise<void> {
     await AbisPools.create({ pool_id, abi });
     console.log(`Abi for pool_id ${pool_id} stored successfully`);
   } catch (err) {
-    console.error('Error storing abi for AbisPools:', err);
+    console.error("Error storing abi for AbisPools:", err);
   }
 }
 
@@ -79,7 +78,7 @@ export async function storeAbiForAddressProvider(address: string, abi: any[]): P
     await AbisRelatedToAddressProvider.create({ address: lowerCaseAddress, abi });
     console.log(`Abi for ${address} stored successfully`);
   } catch (err) {
-    console.error('Error storing abi for AbisRelatedToAddressProvider:', err);
+    console.error("Error storing abi for AbisRelatedToAddressProvider:", err);
   }
 }
 
@@ -102,9 +101,9 @@ export async function getAbiBy(tableName: string, options: { address?: string; i
 
     let abi: any[] | null;
 
-    if (tableName === 'AbisPools') {
+    if (tableName === "AbisPools") {
       abi = await getAbiByForPools(options);
-    } else if (tableName === 'AbisRelatedToAddressProvider') {
+    } else if (tableName === "AbisRelatedToAddressProvider") {
       abi = await getAbiByForAddressProvider(options);
     } else {
       console.error(`Error: Invalid table name "${tableName}".`);
@@ -116,13 +115,13 @@ export async function getAbiBy(tableName: string, options: { address?: string; i
       if (options.id) {
         await storeAbiForPools(options.id, abi);
       } else {
-        console.error('Error: Missing pool_id to store the ABI in AbisPools table');
+        console.error("Error: Missing pool_id to store the ABI in AbisPools table");
       }
     }
 
     return abi;
   } catch (err) {
-    console.error('Error retrieving ABI:', err);
+    console.error("Error retrieving ABI:", err);
     return null;
   }
 }
@@ -132,7 +131,7 @@ export async function updatePoolAbis(): Promise<void> {
   let i = 0;
   for (const POOL_ID of ALL_POOL_IDS) {
     i += 1;
-    await getAbiBy('AbisPools', {id: POOL_ID});
+    await getAbiBy("AbisPools", { id: POOL_ID });
   }
   console.log(`[✓] Table: ABIs  | Pool-ABIs' synced successfully.`);
 }

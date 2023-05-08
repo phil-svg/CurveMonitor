@@ -1,17 +1,8 @@
 // InitialParams.ts
-import {
-  Model,
-  Table,
-  Column,
-  PrimaryKey,
-  AutoIncrement,
-  ForeignKey,
-  DataType,
-  BelongsTo,
-} from 'sequelize-typescript';
-import { Pool } from './Pools.js';
+import { Model, Table, Column, PrimaryKey, AutoIncrement, ForeignKey, DataType, BelongsTo } from "sequelize-typescript";
+import { Pool } from "./Pools.js";
 
-@Table({ tableName: 'initial_params' })
+@Table({ tableName: "initial_params" })
 export class InitialParams extends Model {
   @PrimaryKey
   @AutoIncrement

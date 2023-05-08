@@ -1,33 +1,33 @@
-console.clear()
+console.clear();
 
-import { db } from './config/Database.js';
-import { loadAddressProvider } from './AddressProviderEntryPoint.js'
-import { updatePools } from './utils/postgresTables/Pools.js';
-import { updateCoinTable } from './utils/postgresTables/Coins.js';
-import { updatePoolAbis } from './utils/postgresTables/Abi.js';
-import { updateInitialPoolParams } from './utils/postgresTables/InitialParams.js';
-import { updatePoolParamsEvents } from './utils/postgresTables/PoolParamsEvents.js';
-import { updateRawLogs } from './utils/postgresTables/RawLogs.js'
+import { db } from "./config/Database.js";
+import { loadAddressProvider } from "./AddressProviderEntryPoint.js";
+import { updatePools } from "./utils/postgresTables/Pools.js";
+import { updateCoinTable } from "./utils/postgresTables/Coins.js";
+import { updatePoolAbis } from "./utils/postgresTables/Abi.js";
+import { updateInitialPoolParams } from "./utils/postgresTables/InitialParams.js";
+import { updatePoolParamsEvents } from "./utils/postgresTables/PoolParamsEvents.js";
+import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
 
 async function initDatabase() {
   try {
     await db.sync();
-    console.log('[✓] Database synced successfully.');
+    console.log("[✓] Database synced successfully.");
   } catch (err) {
-    console.error('Error syncing database:', err);
+    console.error("Error syncing database:", err);
   }
 }
 
 await initDatabase();
 await loadAddressProvider();
-await updatePools()
-await updateCoinTable()
-await updatePoolAbis()
-await updateInitialPoolParams()
-await updatePoolParamsEvents()
-console.log("[✓] Syncing configs complete.")
+await updatePools();
+await updateCoinTable();
+await updatePoolAbis();
+await updateInitialPoolParams();
+await updatePoolParamsEvents();
+console.log("[✓] Syncing configs complete.");
 
-await updateRawLogs()
+await updateRawLogs();
 
 // here goes code
 // simplified problem: Save raw log for only 3pool for only 1h. in a table
@@ -43,4 +43,4 @@ await updateRawLogs()
  * added folder logic to deal with raw logs
  */
 
-process.exit()
+process.exit();

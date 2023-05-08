@@ -1,10 +1,10 @@
-import { getAllPoolAddresses, getIdByAddress } from './readFunctions/Pools.js';
-import { getContractByAddress } from '../helperFunctions/Web3.js';
-import { getPastEvents } from '../web3Calls/generic.js';
-import { RawTxLogs } from '../../models/RawTxLogs.js';
-import { updateConsoleOutput, displayProgressBar } from '../helperFunctions/QualityOfLifeStuff.js';
+import { getAllPoolAddresses, getIdByAddress } from "./readFunctions/Pools.js";
+import { getContractByAddress } from "../helperFunctions/Web3.js";
+import { getPastEvents } from "../web3Calls/generic.js";
+import { RawTxLogs } from "../../models/RawTxLogs.js";
+import { updateConsoleOutput, displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
 export async function storeEvent(event, poolId) {
-    const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw, } = event;
+    const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw } = event;
     try {
         await RawTxLogs.create({
             pool_id: poolId,
@@ -23,7 +23,7 @@ export async function storeEvent(event, poolId) {
         });
     }
     catch (error) {
-        if (error.name !== 'SequelizeUniqueConstraintError') {
+        if (error.name !== "SequelizeUniqueConstraintError") {
             throw error;
         }
     }
@@ -62,7 +62,7 @@ async function processAddress(poolAddress) {
             console.error("Invalid block range");
             return;
         }
-        else if ('start' in PAST_EVENTS) {
+        else if ("start" in PAST_EVENTS) {
             // If the response contains a suggested block range, update the currentToBlock with the suggested end block number.
             currentToBlock = PAST_EVENTS.end;
         }
@@ -83,10 +83,10 @@ export async function updateRawLogs() {
     const ALL_POOL_ADDRESSES = await getAllPoolAddresses();
     try {
         await processAllAddressesSequentially(ALL_POOL_ADDRESSES);
-        updateConsoleOutput('[✓] Raw Logs updated successfully.\n');
+        updateConsoleOutput("[✓] Raw Logs updated successfully.\n");
     }
     catch (error) {
-        console.error('Error processing addresses:', error);
+        console.error("Error processing addresses:", error);
     }
 }
 //# sourceMappingURL=RawLogs.js.map

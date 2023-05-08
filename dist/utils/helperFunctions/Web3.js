@@ -1,6 +1,6 @@
 import Web3 from "web3";
-import { getAbiBy } from '../postgresTables/Abi.js';
-import { getAddressById, getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
+import { getAbiBy } from "../postgresTables/Abi.js";
+import { getAddressById, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
 let web3WsProvider = null;
 export function getWeb3WsProvider() {
     if (!web3WsProvider) {
@@ -27,7 +27,7 @@ export async function getContractByAddress(poolAddress) {
     return CONTRACT;
 }
 export async function getContractByPoolID(poolId) {
-    const POOL_ABI = await getAbiBy('AbisPools', { id: poolId });
+    const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
     if (!POOL_ABI) {
         console.log(`Err fetching ABI for pool ${poolId}`);
         return;

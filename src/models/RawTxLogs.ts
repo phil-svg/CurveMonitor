@@ -1,21 +1,13 @@
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-  ForeignKey,
-  BelongsTo,
-  Index,
-} from 'sequelize-typescript';
-import { Pool } from './Pools.js';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Index } from "sequelize-typescript";
+import { Pool } from "./Pools.js";
 
 @Table({
-  tableName: 'raw_tx_logs',
+  tableName: "raw_tx_logs",
   indexes: [
     {
-      name: 'unique_blockhash_logindex',
+      name: "unique_blockhash_logindex",
       unique: true,
-      fields: ['block_hash', 'logIndex'],
+      fields: ["block_hash", "logIndex"],
     },
   ],
 })
@@ -28,25 +20,25 @@ export class RawTxLogs extends Model {
   address!: string;
 
   @Column({
-    field: 'block_number',
+    field: "block_number",
     type: DataType.INTEGER,
   })
   blockNumber!: number;
 
   @Column({
-    field: 'transaction_hash',
+    field: "transaction_hash",
     type: DataType.STRING,
   })
   transactionHash!: string;
 
   @Column({
-    field: 'transaction_index',
+    field: "transaction_index",
     type: DataType.INTEGER,
   })
   transactionIndex!: number;
 
   @Column({
-    field: 'block_hash',
+    field: "block_hash",
     type: DataType.STRING,
   })
   blockHash!: string;
