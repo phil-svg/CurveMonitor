@@ -27,9 +27,6 @@ await updatePoolParamsEvents();
 console.log("[✓] Syncing configs complete.");
 await updateRawLogs();
 await parseEvents();
-// here goes code
-// problem: Adding stuff to the transaction table
-// simplified problem:
-//
+// todo
 process.exit();
 //# sourceMappingURL=App.js.map
