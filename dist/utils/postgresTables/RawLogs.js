@@ -82,7 +82,7 @@ async function processAllAddressesSequentially(addresses) {
 export async function updateRawLogs() {
     const ALL_POOL_ADDRESSES = await getAllPoolAddresses();
     try {
-        await processAllAddressesSequentially(ALL_POOL_ADDRESSES);
+        // await processAllAddressesSequentially(ALL_POOL_ADDRESSES);
         updateConsoleOutput("[✓] Raw Logs updated successfully.\n");
     }
     catch (error) {

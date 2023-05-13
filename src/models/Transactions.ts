@@ -37,7 +37,7 @@ export class Transactions extends Model {
   trader!: string;
 
   @Column(DataType.INTEGER)
-  position!: number;
+  tx_position!: number;
 
   @AllowNull(true)
   @Column(DataType.DECIMAL(30, 15))

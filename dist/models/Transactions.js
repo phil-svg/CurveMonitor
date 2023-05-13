@@ -43,7 +43,7 @@ __decorate([
 ], Transactions.prototype, "trader", void 0);
 __decorate([
     Column(DataType.INTEGER)
-], Transactions.prototype, "position", void 0);
+], Transactions.prototype, "tx_position", void 0);
 __decorate([
     AllowNull(true),
     Column(DataType.DECIMAL(30, 15))
