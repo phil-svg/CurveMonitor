@@ -111,4 +111,14 @@ export async function getBlockTimeStamp(blockNumber) {
     const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
     return Number(BLOCK.timestamp);
 }
+export async function getTxReceipt(txHash) {
+    try {
+        const TX_RECEIPT = await WEB3_HTTP_PROVIDER.eth.getTransactionReceipt(txHash);
+        return TX_RECEIPT;
+    }
+    catch (error) {
+        console.error(`Failed to fetch transaction receipt for hash: ${txHash}. Error: ${error.message}`);
+        return null;
+    }
+}
 //# sourceMappingURL=generic.js.map

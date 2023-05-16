@@ -15,8 +15,6 @@ export function getWeb3HttpProvider() {
     }
     return web3HttpProvider;
 }
-const WEB3_WS_PROVIDER = getWeb3WsProvider();
-const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
 export async function getContractByAddress(poolAddress) {
     const POOL_ID = await getIdByAddress(poolAddress);
     if (!POOL_ID) {
@@ -37,7 +35,26 @@ export async function getContractByPoolID(poolId) {
         console.log(`Err fetching Address for pool ${poolId}`);
         return;
     }
+    const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
     const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
     return CONTRACT;
+}
+export function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS) {
+    const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
+    const decodedLogs = [];
+    for (const log of TOKEN_TRANSFER_EVENTS) {
+        if (log.topics.length < 3)
+            continue;
+        const fromAddress = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("address", log.topics[1]);
+        const toAddress = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("address", log.topics[2]);
+        const value = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("uint256", log.data);
+        decodedLogs.push({
+            tokenAddress: log.address,
+            fromAddress,
+            toAddress,
+            value,
+        });
+    }
+    return decodedLogs;
 }
 //# sourceMappingURL=Web3.js.map

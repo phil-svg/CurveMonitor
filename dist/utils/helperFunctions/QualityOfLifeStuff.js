@@ -6,12 +6,12 @@ export function updateConsoleOutput(message, yOffset = 0) {
     process.stdout.write(message);
     readline.moveCursor(process.stdout, 0, -yOffset);
 }
-export function displayProgressBar(current, total) {
+export function displayProgressBar(infoText, current, total) {
     const length = 40;
     const ratio = current / total;
     const filled = Math.round(ratio * length);
-    const empty = length - filled;
+    const empty = Math.max(0, length - filled);
     const bar = `[${"#".repeat(filled)}${"-".repeat(empty)}]`;
-    updateConsoleOutput(`Processing Pools: ${bar} ${current}/${total}`);
+    updateConsoleOutput(`${infoText} ${bar} ${current}/${total}`);
 }
 //# sourceMappingURL=QualityOfLifeStuff.js.map

@@ -99,5 +99,6 @@ export async function updatePoolParamsEvents() {
         }
     }
     console.log(`[✓] Table: Param | Parameter-Events synced successfully.`);
+    console.log("[✓] Syncing configs complete.");
 }
 //# sourceMappingURL=PoolParamsEvents.js.map

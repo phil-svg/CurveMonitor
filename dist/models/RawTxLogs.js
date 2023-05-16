@@ -4,10 +4,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey, AutoIncrement } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 let RawTxLogs = class RawTxLogs extends Model {
 };
+__decorate([
+    PrimaryKey,
+    AutoIncrement,
+    Column({
+        field: "event_id",
+        type: DataType.INTEGER,
+    })
+], RawTxLogs.prototype, "eventId", void 0);
 __decorate([
     ForeignKey(() => Pool),
     Column(DataType.INTEGER)

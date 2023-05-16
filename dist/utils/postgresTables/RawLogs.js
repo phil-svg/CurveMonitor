@@ -75,14 +75,14 @@ async function processAddress(poolAddress) {
 }
 async function processAllAddressesSequentially(addresses) {
     for (let i = 0; i < addresses.length; i++) {
-        displayProgressBar(i + 1, addresses.length);
+        displayProgressBar("Processing Pools:", i + 1, addresses.length);
         await processAddress(addresses[i]);
     }
 }
 export async function updateRawLogs() {
     const ALL_POOL_ADDRESSES = await getAllPoolAddresses();
     try {
-        // await processAllAddressesSequentially(ALL_POOL_ADDRESSES);
+        await processAllAddressesSequentially(ALL_POOL_ADDRESSES);
         updateConsoleOutput("[✓] Raw Logs updated successfully.\n");
     }
     catch (error) {

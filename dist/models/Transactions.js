@@ -4,9 +4,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 import { Coins } from "./Coins.js";
+import { RawTxLogs } from "./RawTxLogs.js";
 export var TransactionType;
 (function (TransactionType) {
     TransactionType["Swap"] = "swap";
@@ -16,6 +17,11 @@ export var TransactionType;
 let Transactions = class Transactions extends Model {
 };
 __decorate([
+    AutoIncrement,
+    PrimaryKey,
+    Column(DataType.INTEGER)
+], Transactions.prototype, "tx_id", void 0);
+__decorate([
     ForeignKey(() => Pool),
     Column(DataType.INTEGER)
 ], Transactions.prototype, "pool_id", void 0);
@@ -23,7 +29,11 @@ __decorate([
     BelongsTo(() => Pool)
 ], Transactions.prototype, "pool", void 0);
 __decorate([
-    PrimaryKey,
+    AllowNull(true),
+    ForeignKey(() => RawTxLogs),
+    Column(DataType.INTEGER)
+], Transactions.prototype, "event_id", void 0);
+__decorate([
     Column(DataType.STRING)
 ], Transactions.prototype, "tx_hash", void 0);
 __decorate([
@@ -31,7 +41,7 @@ __decorate([
 ], Transactions.prototype, "block_number", void 0);
 __decorate([
     Column(DataType.BIGINT)
-], Transactions.prototype, "unixtime", void 0);
+], Transactions.prototype, "block_unixtime", void 0);
 __decorate([
     Column({
         type: DataType.ENUM,
@@ -76,6 +86,9 @@ __decorate([
 __decorate([
     BelongsTo(() => Coins, "coin_id_out")
 ], Transactions.prototype, "coinOut", void 0);
+__decorate([
+    BelongsTo(() => RawTxLogs)
+], Transactions.prototype, "rawTxLog", void 0);
 Transactions = __decorate([
     Table({ tableName: "transactions" })
 ], Transactions);

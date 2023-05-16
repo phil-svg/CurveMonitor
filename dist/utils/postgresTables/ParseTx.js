@@ -1,5 +1,5 @@
 import { getAllPoolIds } from "./readFunctions/Pools.js";
-import { fetchPoolEventsInBatches } from "./readFunctions/RawLogs.js";
+import { fetchPoolEventsInBatches, getEntriesByBlockNumberIndex, countEvents } from "./readFunctions/RawLogs.js";
 async function parseEventsForPoolID(poolId) {
     let offset = 0;
     const BATCH_SIZE = 1000;
@@ -19,6 +19,12 @@ export async function parseEvents() {
     for (const POOL_ID of ALL_POOL_IDS) {
         await parseEventsForPoolID(POOL_ID);
     }
-    console.log("[✓] Events parsed successfully.");
+    //
+    // brainstorm
+    console.log(await countEvents());
+    console.log(await getEntriesByBlockNumberIndex(1));
+    // console.log(await getEntriesByTransactionHash("0xdf96c2702ced9d79aa484fa9f03b8014010dff34f7d63b938611cdcc725ee75a"));
+    //
+    // console.log("[✓] Events parsed successfully.");
 }
 //# sourceMappingURL=ParseTx.js.map
