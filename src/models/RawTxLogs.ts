@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Index } from "sequelize-typescript";
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Index, PrimaryKey, AutoIncrement } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 
 @Table({
@@ -12,6 +12,14 @@ import { Pool } from "./Pools.js";
   ],
 })
 export class RawTxLogs extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column({
+    field: "event_id",
+    type: DataType.INTEGER,
+  })
+  eventId!: number;
+
   @ForeignKey(() => Pool)
   @Column(DataType.INTEGER)
   pool_id!: number;

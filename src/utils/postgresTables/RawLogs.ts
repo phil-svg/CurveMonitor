@@ -92,7 +92,7 @@ async function processAddress(poolAddress: string): Promise<void> {
 
 async function processAllAddressesSequentially(addresses: string[]): Promise<void> {
   for (let i = 0; i < addresses.length; i++) {
-    displayProgressBar(i + 1, addresses.length);
+    displayProgressBar("Processing Pools:", i + 1, addresses.length);
     await processAddress(addresses[i]);
   }
 }
@@ -101,7 +101,7 @@ export async function updateRawLogs(): Promise<void> {
   const ALL_POOL_ADDRESSES = await getAllPoolAddresses();
 
   try {
-    // await processAllAddressesSequentially(ALL_POOL_ADDRESSES);
+    await processAllAddressesSequentially(ALL_POOL_ADDRESSES);
     updateConsoleOutput("[✓] Raw Logs updated successfully.\n");
   } catch (error) {
     console.error("Error processing addresses:", error);

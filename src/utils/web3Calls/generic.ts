@@ -1,5 +1,6 @@
 import { Contract } from "web3-eth-contract";
 import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.js";
+import { TransactionReceipt } from "web3-core";
 
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
@@ -131,4 +132,14 @@ export async function web3Call(CONTRACT: Contract, method: string, params: any[]
 export async function getBlockTimeStamp(blockNumber: number): Promise<number> {
   const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
   return Number(BLOCK.timestamp);
+}
+
+export async function getTxReceipt(txHash: string): Promise<TransactionReceipt | null> {
+  try {
+    const TX_RECEIPT = await WEB3_HTTP_PROVIDER.eth.getTransactionReceipt(txHash);
+    return TX_RECEIPT;
+  } catch (error: any) {
+    console.error(`Failed to fetch transaction receipt for hash: ${txHash}. Error: ${error.message}`);
+    return null;
+  }
 }

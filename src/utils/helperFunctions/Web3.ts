@@ -2,6 +2,7 @@ import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
 import { getAbiBy } from "../postgresTables/Abi.js";
 import { getAddressById, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
+import { Log } from "web3-core";
 
 let web3WsProvider: Web3 | null = null;
 
@@ -20,9 +21,6 @@ export function getWeb3HttpProvider(): Web3 {
   }
   return web3HttpProvider;
 }
-
-const WEB3_WS_PROVIDER = getWeb3WsProvider();
-const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
 
 export async function getContractByAddress(poolAddress: string): Promise<Contract | void> {
   const POOL_ID = await getIdByAddress(poolAddress);
@@ -48,6 +46,29 @@ export async function getContractByPoolID(poolId: number): Promise<Contract | vo
     return;
   }
 
+  const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
   const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
   return CONTRACT;
+}
+
+export function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS: Log[]): any[] {
+  const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
+  const decodedLogs = [];
+
+  for (const log of TOKEN_TRANSFER_EVENTS) {
+    if (log.topics.length < 3) continue;
+
+    const fromAddress = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("address", log.topics[1]);
+    const toAddress = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("address", log.topics[2]);
+    const value = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("uint256", log.data);
+
+    decodedLogs.push({
+      tokenAddress: log.address,
+      fromAddress,
+      toAddress,
+      value,
+    });
+  }
+
+  return decodedLogs;
 }

@@ -113,4 +113,5 @@ export async function updatePoolParamsEvents(): Promise<void> {
     }
   }
   console.log(`[✓] Table: Param | Parameter-Events synced successfully.`);
+  console.log("[✓] Syncing configs complete.");
 }

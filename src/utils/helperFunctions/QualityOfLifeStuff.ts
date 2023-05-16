@@ -8,13 +8,13 @@ export function updateConsoleOutput(message: string, yOffset: number = 0): void 
   readline.moveCursor(process.stdout, 0, -yOffset);
 }
 
-export function displayProgressBar(current: number, total: number): void {
+export function displayProgressBar(infoText: string, current: number, total: number): void {
   const length = 40;
   const ratio = current / total;
   const filled = Math.round(ratio * length);
-  const empty = length - filled;
+  const empty = Math.max(0, length - filled);
 
   const bar = `[${"#".repeat(filled)}${"-".repeat(empty)}]`;
 
-  updateConsoleOutput(`Processing Pools: ${bar} ${current}/${total}`);
+  updateConsoleOutput(`${infoText} ${bar} ${current}/${total}`);
 }

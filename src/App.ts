@@ -8,7 +8,7 @@ import { updatePoolAbis } from "./utils/postgresTables/Abi.js";
 import { updateInitialPoolParams } from "./utils/postgresTables/InitialParams.js";
 import { updatePoolParamsEvents } from "./utils/postgresTables/PoolParamsEvents.js";
 import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
-import { parseEvents } from "./utils/postgresTables/ParseTx.js";
+import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
 
 async function initDatabase() {
   try {
@@ -26,8 +26,6 @@ await updateCoinTable();
 await updatePoolAbis();
 await updateInitialPoolParams();
 await updatePoolParamsEvents();
-console.log("[✓] Syncing configs complete.");
-
 await updateRawLogs();
 await parseEvents();
 
