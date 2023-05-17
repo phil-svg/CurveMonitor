@@ -111,6 +111,15 @@ export async function getBlockTimeStamp(blockNumber) {
     const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
     return Number(BLOCK.timestamp);
 }
+export async function getBlockTimeStampsInBatches(blockNumbers) {
+    const blockTimestamps = {};
+    for (const blockNumber of blockNumbers) {
+        console.log(blockNumber, blockNumbers.length);
+        const block = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
+        blockTimestamps[blockNumber] = Number(block.timestamp);
+    }
+    return blockTimestamps;
+}
 export async function getTxReceipt(txHash) {
     try {
         const TX_RECEIPT = await WEB3_HTTP_PROVIDER.eth.getTransactionReceipt(txHash);

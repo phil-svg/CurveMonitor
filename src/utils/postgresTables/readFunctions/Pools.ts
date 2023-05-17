@@ -59,6 +59,17 @@ export const getCoinsBy = async (options: { id?: number; address?: string }): Pr
   return pool?.coins ?? null;
 };
 
+export const getCoinsInBatchesByPools = async (poolIds: number[]): Promise<{ [poolId: number]: string[] | null }> => {
+  const poolCoins: { [poolId: number]: string[] | null } = {};
+  for (const poolId of poolIds) {
+    const pool = await getPoolBy({ id: poolId });
+    if (pool?.coins) {
+      poolCoins[poolId] = pool.coins;
+    }
+  }
+  return poolCoins;
+};
+
 export const getLpTokenBy = async (options: { id?: number; address?: string }): Promise<string | null> => {
   const pool = await getPoolBy(options);
   return pool?.lp_token ?? null;

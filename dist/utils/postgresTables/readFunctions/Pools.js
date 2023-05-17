@@ -54,6 +54,16 @@ export const getCoinsBy = async (options) => {
     const pool = await getPoolBy(options);
     return (_a = pool === null || pool === void 0 ? void 0 : pool.coins) !== null && _a !== void 0 ? _a : null;
 };
+export const getCoinsInBatchesByPools = async (poolIds) => {
+    const poolCoins = {};
+    for (const poolId of poolIds) {
+        const pool = await getPoolBy({ id: poolId });
+        if (pool === null || pool === void 0 ? void 0 : pool.coins) {
+            poolCoins[poolId] = pool.coins;
+        }
+    }
+    return poolCoins;
+};
 export const getLpTokenBy = async (options) => {
     var _a;
     const pool = await getPoolBy(options);

@@ -40,12 +40,9 @@ async function getCoinAddressFromTxReceipt(event: any, POOL_COINS: string[]): Pr
   return null;
 }
 
-export async function parseRemoveLiquidityOne(event: any): Promise<void> {
+export async function parseRemoveLiquidityOne(event: any, BLOCK_UNIXTIME: any, POOL_COINS: any): Promise<void> {
   if (await transactionExists(event.eventId)) return;
 
-  const BLOCK_UNIXTIME = await getBlockTimeStamp(event.blockNumber);
-
-  const POOL_COINS = await getCoinsBy({ id: event.pool_id });
   if (!POOL_COINS) return;
 
   let coinAddress;

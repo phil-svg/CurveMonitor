@@ -1,7 +1,6 @@
 import { saveTransaction } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
-import { getBlockTimeStamp, getTxReceipt } from "../../web3Calls/generic.js";
-import { getCoinsBy } from "../readFunctions/Pools.js";
+import { getTxReceipt } from "../../web3Calls/generic.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
@@ -36,11 +35,9 @@ async function getCoinAddressFromTxReceipt(event, POOL_COINS) {
     }
     return null;
 }
-export async function parseRemoveLiquidityOne(event) {
+export async function parseRemoveLiquidityOne(event, BLOCK_UNIXTIME, POOL_COINS) {
     if (await transactionExists(event.eventId))
         return;
-    const BLOCK_UNIXTIME = await getBlockTimeStamp(event.blockNumber);
-    const POOL_COINS = await getCoinsBy({ id: event.pool_id });
     if (!POOL_COINS)
         return;
     let coinAddress;

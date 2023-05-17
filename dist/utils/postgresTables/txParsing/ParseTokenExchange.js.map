@@ -1,1 +1,1 @@
-{"version":3,"file":"ParseTokenExchange.js","sourceRoot":"","sources":["../../../../src/utils/postgresTables/txParsing/ParseTokenExchange.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,KAAK,UAAU,kBAAkB,CAAC,KAAU;IACjD,EAAE;AACJ,CAAC"}
+{"version":3,"file":"ParseTokenExchange.js","sourceRoot":"","sources":["../../../../src/utils/postgresTables/txParsing/ParseTokenExchange.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,KAAK,UAAU,kBAAkB,CAAC,KAAU,EAAE,cAAmB,EAAE,UAAe;IACvF,EAAE;AACJ,CAAC"}

@@ -50,6 +50,17 @@ export async function fetchDistinctBlockNumbers() {
   return distinctBlockNumbers.map((row) => row.getDataValue("block_number"));
 }
 
+export async function fetchDistinctBlockNumbersInBatch(offset: number, batchSize: number) {
+  const distinctBlockNumbers = await RawTxLogs.findAll({
+    attributes: [[fn("DISTINCT", col("block_number")), "block_number"]],
+    order: [["block_number", "ASC"]],
+    offset: offset,
+    limit: batchSize,
+  });
+
+  return distinctBlockNumbers.map((row) => row.getDataValue("block_number"));
+}
+
 export async function fetchEventsForBlockNumberRange(startBlock: number, endBlock: number): Promise<Partial<RawTxLogs>[]> {
   const events = await RawTxLogs.findAll({
     where: {

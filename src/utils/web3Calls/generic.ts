@@ -134,6 +134,17 @@ export async function getBlockTimeStamp(blockNumber: number): Promise<number> {
   return Number(BLOCK.timestamp);
 }
 
+export async function getBlockTimeStampsInBatches(blockNumbers: number[]): Promise<{ [blockNumber: number]: number }> {
+  const blockTimestamps: { [blockNumber: number]: number } = {};
+
+  for (const blockNumber of blockNumbers) {
+    console.log(blockNumber, blockNumbers.length);
+    const block = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
+    blockTimestamps[blockNumber] = Number(block.timestamp);
+  }
+  return blockTimestamps;
+}
+
 export async function getTxReceipt(txHash: string): Promise<TransactionReceipt | null> {
   try {
     const TX_RECEIPT = await WEB3_HTTP_PROVIDER.eth.getTransactionReceipt(txHash);

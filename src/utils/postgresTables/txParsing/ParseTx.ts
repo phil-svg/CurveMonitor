@@ -1,4 +1,4 @@
-import { getAllPoolIds } from "../readFunctions/Pools.js";
+import { getAllPoolIds, getCoinsBy, getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
 import {
   fetchPoolEventsInBatches,
   fetchEventsForBlockNumberRange,
@@ -15,37 +15,39 @@ import { parseRemoveLiquidityOne } from "./ParseRemoveLiquidityOne.js";
 import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
 import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
+import { getBlockTimeStamp, getBlockTimeStampsInBatches } from "../../web3Calls/generic.js";
+import { getTimestampByBlockNumber, getTimestampsByBlockNumbers } from "../readFunctions/Blocks.js";
 
-async function sortAndProcess(EVENT: any): Promise<void> {
+async function sortAndProcess(EVENT: any, BLOCK_UNIXTIME: any, POOL_COINS: any): Promise<void> {
   switch (EVENT.event) {
     case "RemoveLiquidity":
-      await parseRemoveLiquidity(EVENT);
+      await parseRemoveLiquidity(EVENT, BLOCK_UNIXTIME, POOL_COINS);
       break;
     case "AddLiquidity":
-      await parseAddLiquidity(EVENT);
+      await parseAddLiquidity(EVENT, BLOCK_UNIXTIME, POOL_COINS);
       break;
     case "RemoveLiquidityOne":
-      await parseRemoveLiquidityOne(EVENT);
+      await parseRemoveLiquidityOne(EVENT, BLOCK_UNIXTIME, POOL_COINS);
       break;
     case "TokenExchange":
-      await parseTokenExchange(EVENT);
+      await parseTokenExchange(EVENT, BLOCK_UNIXTIME, POOL_COINS);
       break;
     case "TokenExchangeUnderlying":
-      await parseTokenExchangeUnderlying(EVENT);
+      await parseTokenExchangeUnderlying(EVENT, BLOCK_UNIXTIME, POOL_COINS);
       break;
     case "RemoveLiquidityImbalance":
-      await parseRemoveLiquidityImbalance(EVENT);
+      await parseRemoveLiquidityImbalance(EVENT, BLOCK_UNIXTIME, POOL_COINS);
       break;
   }
 }
 
 async function parseEventsMain(): Promise<void> {
   const BATCH_SIZE = 1000;
-
   const blockNumbers = await fetchDistinctBlockNumbers();
   const AMOUNT_OF_EVENTS_STORED = await countRawTxLogs();
 
   let parsedCounter = 0;
+  console.time();
 
   for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
     const startBlock = blockNumbers[i];
@@ -53,13 +55,24 @@ async function parseEventsMain(): Promise<void> {
 
     const EVENTS = await fetchEventsForBlockNumberRange(startBlock, endBlock);
 
+    // Get block timestamps
+    const eventBlockNumbers = EVENTS.flatMap((event) => (event.blockNumber !== undefined ? [event.blockNumber] : []));
+    const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbers(eventBlockNumbers);
+
+    // Get pool coins
+    const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
+
     for (const EVENT of EVENTS) {
-      await sortAndProcess(EVENT);
+      if (EVENT.blockNumber === undefined || EVENT.pool_id === undefined) continue;
+
+      await sortAndProcess(EVENT, BLOCK_UNIXTIMES[EVENT.blockNumber], POOL_COINS[EVENT.pool_id]);
 
       parsedCounter++;
       displayProgressBar("Processing Events:", parsedCounter, AMOUNT_OF_EVENTS_STORED);
     }
   }
+
+  console.timeEnd();
 }
 
 export async function parseEvents(): Promise<void> {
