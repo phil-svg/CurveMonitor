@@ -67,6 +67,9 @@ export class Transactions extends Model {
   @Column(DataType.INTEGER)
   coin_id_out?: number;
 
+  @Column(DataType.TEXT)
+  raw_fees?: string | null;
+
   @AllowNull(true)
   @Column(DataType.DECIMAL(30, 15))
   fee_usd?: number;

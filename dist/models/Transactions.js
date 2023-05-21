@@ -73,6 +73,9 @@ __decorate([
     Column(DataType.INTEGER)
 ], Transactions.prototype, "coin_id_out", void 0);
 __decorate([
+    Column(DataType.TEXT)
+], Transactions.prototype, "raw_fees", void 0);
+__decorate([
     AllowNull(true),
     Column(DataType.DECIMAL(30, 15))
 ], Transactions.prototype, "fee_usd", void 0);

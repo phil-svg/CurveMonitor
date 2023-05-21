@@ -3,7 +3,7 @@ import { getVersionBy, getInceptionBlockBy, getAllPoolIds, getAddressById } from
 import { getPastEvents, getBlockTimeStamp } from "../web3Calls/generic.js";
 import { getAbiBy } from "./Abi.js";
 import { PoolParamsEvents } from "../../models/PoolParamsEvents.js";
-import { retry } from "../helperFunctions/Retry.js";
+import { retry } from "../helperFunctions/Web3Retry.js";
 import { getLatestEventTimestampFromSubgraph } from "../subgraph/DaoSubgraph.js";
 if (!process.env.WEB3_HTTP) {
     console.error("Error: WEB3_WSS environment variable is not defined.");

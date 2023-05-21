@@ -1,6 +1,8 @@
 import { Contract } from "web3-eth-contract";
 import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { TransactionReceipt } from "web3-core";
+import axios from "axios";
+import Bottleneck from "bottleneck";
 
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
@@ -145,7 +147,7 @@ export async function getBlockTimeStampsInBatches(blockNumbers: number[]): Promi
   return blockTimestamps;
 }
 
-export async function getTxReceipt(txHash: string): Promise<TransactionReceipt | null> {
+export async function getTxReceiptClassic(txHash: string): Promise<TransactionReceipt | null> {
   try {
     const TX_RECEIPT = await WEB3_HTTP_PROVIDER.eth.getTransactionReceipt(txHash);
     return TX_RECEIPT;
@@ -153,4 +155,61 @@ export async function getTxReceipt(txHash: string): Promise<TransactionReceipt |
     console.error(`Failed to fetch transaction receipt for hash: ${txHash}. Error: ${error.message}`);
     return null;
   }
+}
+
+// maxConcurrent defines the maximum number of tasks that can be running at once.
+// minTime defines the minimum amount of time between starting tasks.
+const limiter = new Bottleneck({
+  maxConcurrent: 100,
+  minTime: 25,
+});
+
+/*
+  maxConcurrent: 1,
+  minTime: 100,
+  2:44
+  100%
+
+  maxConcurrent: 100,
+  minTime: 100,
+  2:00
+  100%
+
+  maxConcurrent: 100,
+  minTime: 50,
+  1:02
+  100%
+
+
+*/
+
+// maxConcurrent = 10 = 100% in 3min something
+
+export async function getTxReceipt(txHash: string): Promise<any> {
+  return limiter.schedule(async () => {
+    try {
+      const response = await axios.post(
+        `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY!}`,
+        {
+          id: 1,
+          jsonrpc: "2.0",
+          method: "eth_getTransactionReceipt",
+          params: [txHash],
+        },
+        {
+          timeout: 5000, // Set a timeout of 5000 milliseconds
+        }
+      );
+
+      if (response.data && response.data.result) {
+        return response.data.result;
+      } else {
+        console.log(response);
+        return null;
+      }
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  });
 }

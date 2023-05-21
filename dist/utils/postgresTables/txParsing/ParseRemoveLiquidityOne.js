@@ -4,6 +4,7 @@ import { getTxReceipt } from "../../web3Calls/generic.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
+const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 async function transactionExists(eventId) {
     const existingTransaction = await Transactions.findOne({ where: { event_id: eventId } });
     return !!existingTransaction;
@@ -24,7 +25,7 @@ async function getCoinAddressFromTxReceipt(event, POOL_COINS) {
     const RECEIPT = await getTxReceipt(event.transactionHash);
     if (!RECEIPT)
         return null;
-    const TOKEN_TRANSFER_EVENTS = RECEIPT.logs.filter((log) => POOL_COINS.includes(log.address));
+    const TOKEN_TRANSFER_EVENTS = RECEIPT.logs.filter((log) => POOL_COINS.map((addr) => addr.toLowerCase()).includes(log.address.toLowerCase()));
     if (TOKEN_TRANSFER_EVENTS.length === 0)
         return null;
     let decodedLogs = decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS);
@@ -46,8 +47,13 @@ export async function parseRemoveLiquidityOne(event, BLOCK_UNIXTIME, POOL_COINS)
     }
     else {
         coinAddress = await getCoinAddressFromTxReceipt(event, POOL_COINS);
-        if (!coinAddress)
+        // Check for the special case when the Address was Ether, since it will not show up as and ERC20-Transfer.
+        if (coinAddress === null && POOL_COINS.includes(ETHER)) {
+            coinAddress = ETHER;
+        }
+        else if (!coinAddress) {
             return;
+        }
     }
     const COIN_ID = await findCoinIdByAddress(coinAddress);
     if (!COIN_ID)
@@ -69,6 +75,7 @@ export async function parseRemoveLiquidityOne(event, BLOCK_UNIXTIME, POOL_COINS)
         coin_id_in: null,
         amount_out: coinAmount,
         coin_id_out: COIN_ID,
+        raw_fees: null,
         fee_usd: null,
         value_usd: null,
         event_id: event.eventId,
