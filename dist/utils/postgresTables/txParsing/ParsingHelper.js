@@ -9,4 +9,8 @@ export async function saveTransaction(transactionData) {
         throw error;
     }
 }
+export async function transactionExists(eventId) {
+    const existingTransaction = await Transactions.findOne({ where: { event_id: eventId } });
+    return !!existingTransaction;
+}
 //# sourceMappingURL=ParsingHelper.js.map

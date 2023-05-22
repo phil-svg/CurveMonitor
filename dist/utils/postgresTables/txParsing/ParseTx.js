@@ -14,17 +14,37 @@ async function sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS) {
         AddLiquidity: parseAddLiquidity,
         RemoveLiquidityOne: parseRemoveLiquidityOne,
         TokenExchange: parseTokenExchange,
-        TokenExchangeUnderlying: parseTokenExchangeUnderlying,
         RemoveLiquidityImbalance: parseRemoveLiquidityImbalance,
     };
-    const promises = EVENTS.map((EVENT) => {
+    const tokenExchangeUnderlyingEvents = [];
+    const otherEvents = [];
+    EVENTS.forEach((EVENT) => {
+        if (EVENT.event === "TokenExchangeUnderlying") {
+            tokenExchangeUnderlyingEvents.push(EVENT);
+        }
+        else {
+            otherEvents.push(EVENT); // Per batch, making sure that the Events of type 'ExchangeUnderlyings' run last.
+        }
+    });
+    const otherPromises = otherEvents
+        .map((EVENT) => {
         const func = functions[EVENT.event];
         if (func) {
             return func(EVENT, BLOCK_UNIXTIMES[EVENT.blockNumber], POOL_COINS[EVENT.pool_id]);
         }
-    }).filter(Boolean);
+    })
+        .filter(Boolean);
     try {
-        await Promise.all(promises);
+        await Promise.all(otherPromises);
+    }
+    catch (error) {
+        console.error(error);
+    }
+    const tokenExchangeUnderlyingPromises = tokenExchangeUnderlyingEvents.map((EVENT) => {
+        return parseTokenExchangeUnderlying(EVENT, BLOCK_UNIXTIMES[EVENT.blockNumber], POOL_COINS[EVENT.pool_id]);
+    });
+    try {
+        await Promise.all(tokenExchangeUnderlyingPromises);
     }
     catch (error) {
         console.error(error);
@@ -59,25 +79,6 @@ export async function parseEvents() {
 /**
 Event Examples
 
-RemoveLiquidity
-{
-  eventId: 2936,
-  pool_id: 45,
-  address: '0xDcEF968d416a41Cdac0ED8702fAC8128A64241A2',
-  blockNumber: 17115410,
-  transactionHash: '0xb38410f0ddc6eb4ecb4b9e4df38a22b17756dc887737dc89917918a2e49e2c92',
-  transactionIndex: 41,
-  logIndex: 94,
-  removed: false,
-  event: 'RemoveLiquidity',
-  returnValues: {
-    provider: '0x5De4EF4879F4fe3bBADF2227D2aC5d0E2D76C895',
-    token_amounts: [ '14306241372836033295580', '8627046978' ],
-    fees: [ '0', '0' ],
-    token_supply: '497911581245115411300288400'
-  }
-}
-
 AddLiquidity
 {
   eventId: 13570,
@@ -94,6 +95,44 @@ AddLiquidity
     token_amounts: [ '42600000000000000000000', '49815573620404875891389' ],
     fee: '0',
     token_supply: '0'
+  }
+}
+
+RemoveLiquidityOne ** solved **
+{
+  eventId: 2012,
+  pool_id: 360,
+  address: '0xd658A338613198204DCa1143Ac3F01A722b5d94A',
+  blockNumber: 17115142,
+  transactionHash: '0x82abf58e4cf2bf82a0ffc1478a2f7733c97fb247d8ebae5fad65d08d6502de8a',
+  transactionIndex: 72,
+  logIndex: 184,
+  removed: false,
+  event: 'RemoveLiquidityOne',
+  returnValues: {
+    provider: '0xC6142e98b9187A9F18B171e0f2463A2e581FF8cA',
+    token_amount: '81463957051156349422',
+    coin_index: '0',
+    coin_amount: '159796967792349040810'
+  }
+}
+
+RemoveLiquidity
+{
+  eventId: 2936,
+  pool_id: 45,
+  address: '0xDcEF968d416a41Cdac0ED8702fAC8128A64241A2',
+  blockNumber: 17115410,
+  transactionHash: '0xb38410f0ddc6eb4ecb4b9e4df38a22b17756dc887737dc89917918a2e49e2c92',
+  transactionIndex: 41,
+  logIndex: 94,
+  removed: false,
+  event: 'RemoveLiquidity',
+  returnValues: {
+    provider: '0x5De4EF4879F4fe3bBADF2227D2aC5d0E2D76C895',
+    token_amounts: [ '14306241372836033295580', '8627046978' ],
+    fees: [ '0', '0' ],
+    token_supply: '497911581245115411300288400'
   }
 }
 
@@ -159,25 +198,6 @@ RemoveLiquidityImbalance
     ],
     invariant: '56782871212835051929526282',
     token_supply: '53360124344959706125839884'
-  }
-}
-
-RemoveLiquidityOne ** solved **
-{
-  eventId: 2012,
-  pool_id: 360,
-  address: '0xd658A338613198204DCa1143Ac3F01A722b5d94A',
-  blockNumber: 17115142,
-  transactionHash: '0x82abf58e4cf2bf82a0ffc1478a2f7733c97fb247d8ebae5fad65d08d6502de8a',
-  transactionIndex: 72,
-  logIndex: 184,
-  removed: false,
-  event: 'RemoveLiquidityOne',
-  returnValues: {
-    provider: '0xC6142e98b9187A9F18B171e0f2463A2e581FF8cA',
-    token_amount: '81463957051156349422',
-    coin_index: '0',
-    coin_amount: '159796967792349040810'
   }
 }
 

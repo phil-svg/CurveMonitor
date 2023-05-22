@@ -9,3 +9,8 @@ export async function saveTransaction(transactionData: TransactionData): Promise
     throw error;
   }
 }
+
+export async function transactionExists(eventId: number): Promise<boolean> {
+  const existingTransaction = await Transactions.findOne({ where: { event_id: eventId } });
+  return !!existingTransaction;
+}

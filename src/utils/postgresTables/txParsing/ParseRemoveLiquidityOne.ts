@@ -1,4 +1,4 @@
-import { saveTransaction } from "./ParsingHelper.js";
+import { saveTransaction, transactionExists } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
 import { getBlockTimeStamp, getTxReceipt } from "../../web3Calls/generic.js";
 import { getCoinsBy } from "../readFunctions/Pools.js";
@@ -8,11 +8,6 @@ import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
 import { copyFileSync } from "fs";
 
 const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-
-async function transactionExists(eventId: number): Promise<boolean> {
-  const existingTransaction = await Transactions.findOne({ where: { event_id: eventId } });
-  return !!existingTransaction;
-}
 
 /**
  * Retrieves the address of the token that was removed during a liquidity event.
