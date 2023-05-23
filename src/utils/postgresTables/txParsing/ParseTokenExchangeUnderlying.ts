@@ -115,16 +115,7 @@ export async function parseTokenExchangeUnderlying(event: any, BLOCK_UNIXTIME: a
     const coinsWithTxId = coinAmounts.map((coin) => ({ tx_id: transaction.tx_id, COIN_ID: coin.COIN_ID, coinAmount: coin.amount, direction: coin.direction }));
     const validCoins = coinsWithTxId.filter((coin) => coin.COIN_ID !== null) as { tx_id: number; COIN_ID: number; coinAmount: number; direction: string }[];
 
-    if (validCoins.length < 2) {
-      console.log("\nWarning: Swap Underlying Bug ");
-      console.log("validCoins", validCoins);
-      console.log("coinsWithTxId", coinsWithTxId);
-      console.log("coinAmounts", coinAmounts);
-      console.log("soldCoinID", soldCoinID);
-      console.log("boughtCoinID", boughtCoinID);
-      console.log("boughtCoinEventID", boughtCoinEventID);
-      console.log("Event: ", event);
-    }
+    if (validCoins.length < 2) return;
 
     await saveCoins(validCoins);
   } catch (error) {
