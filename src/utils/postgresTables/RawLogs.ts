@@ -4,7 +4,7 @@ import { getPastEvents } from "../web3Calls/generic.js";
 import { getHighestStoredBlockForPoolId } from "./readFunctions/RawLogs.js";
 import { RawTxLogs } from "../../models/RawTxLogs.js";
 import { updateConsoleOutput, displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
-import { EventObject } from "../types.js";
+import { EventObject } from "../Interfaces.js";
 
 export async function storeEvent(event: EventObject, poolId: number): Promise<void> {
   const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw } = event;

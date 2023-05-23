@@ -1,5 +1,5 @@
 import { getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
-import { fetchEventsForBlockNumberRange, fetchDistinctBlockNumbers, countEvents, countRawTxLogs, } from "../readFunctions/RawLogs.js";
+import { fetchEventsForBlockNumberRange, fetchDistinctBlockNumbers, countEvents, countRawTxLogs } from "../readFunctions/RawLogs.js";
 import { parseAddLiquidity } from "./ParseAddLiquidity.js";
 import { parseRemoveLiquidity } from "./ParseRemoveLiquidity.js";
 import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.js";
@@ -79,7 +79,7 @@ export async function parseEvents() {
 /**
 Event Examples
 
-AddLiquidity
+AddLiquidity ** solved **
 {
   eventId: 13570,
   pool_id: 592,
@@ -117,7 +117,7 @@ RemoveLiquidityOne ** solved **
   }
 }
 
-RemoveLiquidity
+RemoveLiquidity ** solved **
 {
   eventId: 2936,
   pool_id: 45,
@@ -136,7 +136,7 @@ RemoveLiquidity
   }
 }
 
-TokenExchange
+TokenExchange ** solved **
 {
   eventId: 14820,
   pool_id: 333,
@@ -156,7 +156,7 @@ TokenExchange
   }
 }
 
-TokenExchangeUnderlying
+TokenExchangeUnderlying ** solved **
 {
   eventId: 13758,
   pool_id: 16,
@@ -176,7 +176,7 @@ TokenExchangeUnderlying
   }
 }
 
-RemoveLiquidityImbalance
+RemoveLiquidityImbalance ** solved **
 {
   eventId: 13759,
   pool_id: 16,

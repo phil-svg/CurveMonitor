@@ -6,7 +6,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
-import { Coins } from "./Coins.js";
 import { RawTxLogs } from "./RawTxLogs.js";
 export var TransactionType;
 (function (TransactionType) {
@@ -56,23 +55,6 @@ __decorate([
 ], Transactions.prototype, "tx_position", void 0);
 __decorate([
     AllowNull(true),
-    Column(DataType.DECIMAL(30, 15))
-], Transactions.prototype, "amount_in", void 0);
-__decorate([
-    AllowNull(true),
-    ForeignKey(() => Coins),
-    Column(DataType.INTEGER)
-], Transactions.prototype, "coin_id_in", void 0);
-__decorate([
-    AllowNull(true),
-    Column(DataType.DECIMAL(30, 15))
-], Transactions.prototype, "amount_out", void 0);
-__decorate([
-    AllowNull(true),
-    ForeignKey(() => Coins),
-    Column(DataType.INTEGER)
-], Transactions.prototype, "coin_id_out", void 0);
-__decorate([
     Column(DataType.TEXT)
 ], Transactions.prototype, "raw_fees", void 0);
 __decorate([
@@ -83,12 +65,6 @@ __decorate([
     AllowNull(true),
     Column(DataType.DECIMAL(30, 15))
 ], Transactions.prototype, "value_usd", void 0);
-__decorate([
-    BelongsTo(() => Coins, "coin_id_in")
-], Transactions.prototype, "coinIn", void 0);
-__decorate([
-    BelongsTo(() => Coins, "coin_id_out")
-], Transactions.prototype, "coinOut", void 0);
 __decorate([
     BelongsTo(() => RawTxLogs)
 ], Transactions.prototype, "rawTxLog", void 0);

@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 import Web3 from "web3";
 import { getAbiBy, isAbiStored, fetchAbiFromEtherscan, storeAbiForAddressProvider } from "./utils/postgresTables/Abi.js";
+import { countEvents } from "./utils/postgresTables/readFunctions/RawLogs.js";
 
 // only requires the address of the Address-Provider.
 // Collects addresses provided together with their ABIs.
@@ -32,6 +33,7 @@ export async function getProvidedAddress(): Promise<string[] | null> {
 
   for (var i = 0; i <= MAX_ID; i++) {
     const ADDRESS = await CONTRACT_ADDRESS_PROVIDER.methods.get_address(i).call();
+    if (ADDRESS === "0x0000000000000000000000000000000000000000") continue;
     ADDRESS_ARR.push(ADDRESS);
   }
 

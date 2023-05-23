@@ -75,7 +75,7 @@ async function updateAddresses() {
         try {
             const exists = await isCoinAddressInTable(UNIQUE_ADDRESSE);
             if (exists)
-                return;
+                continue;
             await Coins.create({ address: UNIQUE_ADDRESSE }); // Fix here: Use 'address' instead of 'UNIQUE_ADDRESSE'
             console.log(`Coin address ${UNIQUE_ADDRESSE} added to table.`);
         }

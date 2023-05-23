@@ -1,4 +1,4 @@
-import { saveTransaction, transactionExists } from "./ParsingHelper.js";
+import { saveTransaction, saveCoins, transactionExists } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
 import { getBlockTimeStamp, getTxReceipt } from "../../web3Calls/generic.js";
 import { getCoinsBy } from "../readFunctions/Pools.js";
@@ -6,6 +6,7 @@ import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coin
 import { Transactions } from "../../../models/Transactions.js";
 import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
 import { copyFileSync } from "fs";
+import { TransactionCoins } from "../../../models/TransactionCoins.js";
 
 const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
@@ -76,10 +77,6 @@ export async function parseRemoveLiquidityOne(event: any, BLOCK_UNIXTIME: any, P
     transaction_type: TransactionType.Remove,
     trader: event.returnValues.provider,
     tx_position: event.transactionIndex,
-    amount_in: null,
-    coin_id_in: null,
-    amount_out: coinAmount,
-    coin_id_out: COIN_ID,
     raw_fees: null,
     fee_usd: null,
     value_usd: null,
@@ -87,7 +84,8 @@ export async function parseRemoveLiquidityOne(event: any, BLOCK_UNIXTIME: any, P
   };
 
   try {
-    await saveTransaction(transactionData);
+    const transaction = await saveTransaction(transactionData);
+    await saveCoins([{ tx_id: transaction.tx_id, COIN_ID: COIN_ID, coinAmount: coinAmount, direction: "out" }]);
   } catch (error) {
     console.error("Error saving transaction:", error);
   }

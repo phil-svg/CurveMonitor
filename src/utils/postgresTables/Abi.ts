@@ -1,5 +1,5 @@
 import { AbisPools, AbisRelatedToAddressProvider } from "../../models/Abi.js";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { getAddressById, getAllPoolIds } from "./readFunctions/Pools.js";
 
 const resolveAddress = async (options: { address?: string; id?: number }): Promise<string | null> => {
@@ -35,11 +35,30 @@ const getAbiByForAddressProvider = async (options: { address?: string; id?: numb
   return abiRecord ? abiRecord.abi : null;
 };
 
+async function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Fetches ABI from Etherscan
 export async function fetchAbiFromEtherscan(address: string): Promise<any[]> {
   const URL = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${process.env.ETHERSCAN_KEY}`;
-  const ABI = (await axios.get(URL)).data.result;
-  return JSON.parse(ABI);
+
+  const MAX_RETRIES = 12;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const ABI = (await axios.get(URL)).data.result;
+      return JSON.parse(ABI);
+    } catch (error) {
+      if (error instanceof AxiosError && error.response && error.response.status === 429) {
+        // HTTP 429 Too Many Requests
+        console.log(`Attempt ${attempt} failed, retrying in ${attempt * 2} seconds...`);
+        await delay(attempt * 2000);
+      } else {
+        throw error; // if the error is something else, rethrow it.
+      }
+    }
+  }
+  throw new Error(`Failed to fetch ABI from Etherscan after ${MAX_RETRIES} attempts.`);
 }
 
 // Checks if ABI is stored in the specified table

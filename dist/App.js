@@ -18,8 +18,9 @@ await initDatabase();
 // await updateInitialPoolParams();
 // await updatePoolParamsEvents();
 // await updateBlockTimestamps();
-//await updateRawLogs();
+// await updateRawLogs();
 await parseEvents();
+//  https://defillama.com/docs/api
 // todo
 process.exit();
 //# sourceMappingURL=App.js.map

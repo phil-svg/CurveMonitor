@@ -1,13 +1,5 @@
-import { getAllPoolIds, getCoinsBy, getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
-import {
-  fetchPoolEventsInBatches,
-  fetchEventsForBlockNumberRange,
-  fetchDistinctBlockNumbers,
-  getEntriesByBlockNumberIndex,
-  getEntriesByTransactionHash,
-  countEvents,
-  countRawTxLogs,
-} from "../readFunctions/RawLogs.js";
+import { getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
+import { fetchEventsForBlockNumberRange, fetchDistinctBlockNumbers, countEvents, countRawTxLogs } from "../readFunctions/RawLogs.js";
 import { parseAddLiquidity } from "./ParseAddLiquidity.js";
 import { parseRemoveLiquidity } from "./ParseRemoveLiquidity.js";
 import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.js";
@@ -15,9 +7,7 @@ import { parseRemoveLiquidityOne } from "./ParseRemoveLiquidityOne.js";
 import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
 import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { getBlockTimeStamp, getBlockTimeStampsInBatches } from "../../web3Calls/generic.js";
-import { getTimestampByBlockNumber, getTimestampsByBlockNumbers } from "../readFunctions/Blocks.js";
-import { copyFileSync } from "fs";
+import { getTimestampsByBlockNumbers } from "../readFunctions/Blocks.js";
 
 async function sortAndProcess(EVENTS: any, BLOCK_UNIXTIMES: any, POOL_COINS: any): Promise<void> {
   const functions = {
@@ -101,7 +91,7 @@ export async function parseEvents(): Promise<void> {
 /**
 Event Examples
 
-AddLiquidity
+AddLiquidity ** solved **
 {
   eventId: 13570,
   pool_id: 592,
@@ -139,7 +129,7 @@ RemoveLiquidityOne ** solved **
   }
 }
 
-RemoveLiquidity
+RemoveLiquidity ** solved **
 {
   eventId: 2936,
   pool_id: 45,
@@ -158,7 +148,7 @@ RemoveLiquidity
   }
 }
 
-TokenExchange
+TokenExchange ** solved **
 {
   eventId: 14820,
   pool_id: 333,
@@ -178,7 +168,7 @@ TokenExchange
   }
 }
 
-TokenExchangeUnderlying
+TokenExchangeUnderlying ** solved **
 {
   eventId: 13758,
   pool_id: 16,
@@ -198,7 +188,7 @@ TokenExchangeUnderlying
   }
 }
 
-RemoveLiquidityImbalance
+RemoveLiquidityImbalance ** solved **
 {
   eventId: 13759,
   pool_id: 16,

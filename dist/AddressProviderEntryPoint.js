@@ -23,6 +23,8 @@ export async function getProvidedAddress() {
     const ADDRESS_ARR = [];
     for (var i = 0; i <= MAX_ID; i++) {
         const ADDRESS = await CONTRACT_ADDRESS_PROVIDER.methods.get_address(i).call();
+        if (ADDRESS === "0x0000000000000000000000000000000000000000")
+            continue;
         ADDRESS_ARR.push(ADDRESS);
     }
     return ADDRESS_ARR;

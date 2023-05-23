@@ -50,50 +50,22 @@ export class Transactions extends Model {
   tx_position!: number;
 
   @AllowNull(true)
-  @Column(DataType.DECIMAL(30, 15))
-  amount_in?: number;
-
-  @AllowNull(true)
-  @ForeignKey(() => Coins)
-  @Column(DataType.INTEGER)
-  coin_id_in?: number;
-
-  @AllowNull(true)
-  @Column(DataType.DECIMAL(30, 15))
-  amount_out?: number;
-
-  @AllowNull(true)
-  @ForeignKey(() => Coins)
-  @Column(DataType.INTEGER)
-  coin_id_out?: number;
-
   @Column(DataType.TEXT)
-  raw_fees?: string | null;
+  raw_fees?: number | null;
 
   @AllowNull(true)
   @Column(DataType.DECIMAL(30, 15))
-  fee_usd?: number;
+  fee_usd?: number | null;
 
   @AllowNull(true)
   @Column(DataType.DECIMAL(30, 15))
-  value_usd?: number;
-
-  @BelongsTo(() => Coins, "coin_id_in")
-  coinIn!: Coins;
-
-  @BelongsTo(() => Coins, "coin_id_out")
-  coinOut!: Coins;
+  value_usd?: number | null;
 
   @BelongsTo(() => RawTxLogs)
   rawTxLog!: RawTxLogs;
 }
 
-export type TransactionData = Pick<Transactions, "pool_id" | "tx_hash" | "block_number" | "block_unixtime" | "transaction_type" | "trader" | "tx_position"> & {
-  amount_in?: number | null;
-  coin_id_in?: number | null;
-  amount_out?: number | null;
-  coin_id_out?: number | null;
-  fee_usd?: number | null;
-  value_usd?: number | null;
-  event_id?: number | null;
-};
+export type TransactionData = Pick<
+  Transactions,
+  "pool_id" | "tx_hash" | "block_number" | "block_unixtime" | "transaction_type" | "trader" | "tx_position" | "raw_fees" | "fee_usd" | "value_usd" | "event_id"
+>;
