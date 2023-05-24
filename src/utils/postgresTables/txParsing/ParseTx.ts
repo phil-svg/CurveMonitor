@@ -8,6 +8,9 @@ import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
 import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
 import { getTimestampsByBlockNumbers } from "../readFunctions/Blocks.js";
+import { RawTxLogs } from "../../../models/RawTxLogs.js";
+import { Transactions } from "../../../models/Transactions.js";
+import { Op } from "sequelize";
 
 async function sortAndProcess(EVENTS: any, BLOCK_UNIXTIMES: any, POOL_COINS: any): Promise<void> {
   const functions = {

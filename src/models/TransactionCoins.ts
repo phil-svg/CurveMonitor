@@ -23,6 +23,9 @@ export class TransactionCoins extends Model {
   @Column(DataType.DECIMAL(30, 15))
   amount!: number;
 
+  @Column(DataType.DECIMAL(30, 15))
+  dollar_value?: number | null;
+
   @Column({
     type: DataType.ENUM,
     values: ["in", "out"],

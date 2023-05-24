@@ -29,6 +29,9 @@ __decorate([
     Column(DataType.DECIMAL(30, 15))
 ], TransactionCoins.prototype, "amount", void 0);
 __decorate([
+    Column(DataType.DECIMAL(30, 15))
+], TransactionCoins.prototype, "dollar_value", void 0);
+__decorate([
     Column({
         type: DataType.ENUM,
         values: ["in", "out"],

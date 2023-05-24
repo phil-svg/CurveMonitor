@@ -74,6 +74,7 @@ export async function parseTokenExchangeUnderlying(event: any, BLOCK_UNIXTIME: a
     const NEAREST_COIN_MOVEMENT_AMOUNT = findNearestCoinMovementAmount(LP_AMOUNT, COIN_MOVEMENTS_IN_BASEPOOL, SOLD_COIN_ADDRESS);
     soldCoinAmount = NEAREST_COIN_MOVEMENT_AMOUNT;
   }
+
   if (boughtCoinEventID !== 0) {
     const BASEPOOL_ADDRESS = await getBasePoolBy({ id: event.pool_id });
     if (!BASEPOOL_ADDRESS) return;

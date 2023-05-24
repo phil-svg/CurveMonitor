@@ -1,12 +1,8 @@
 import { saveTransaction, saveCoins, transactionExists } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
-import { getBlockTimeStamp, getTxReceipt } from "../../web3Calls/generic.js";
-import { getCoinsBy } from "../readFunctions/Pools.js";
+import { getTxReceipt } from "../../web3Calls/generic.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
-import { Transactions } from "../../../models/Transactions.js";
 import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
-import { copyFileSync } from "fs";
-import { TransactionCoins } from "../../../models/TransactionCoins.js";
 
 const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
