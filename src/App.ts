@@ -10,6 +10,7 @@ import { updatePoolParamsEvents } from "./utils/postgresTables/PoolParamsEvents.
 import { updateBlockTimestamps } from "./utils/postgresTables/Blocks.js";
 import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
 import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
+import { updateTokenDollarValues } from "./utils/postgresTables/tokenPrices/Prices.js";
 
 async function initDatabase() {
   try {
@@ -29,9 +30,10 @@ await initDatabase();
 // await updatePoolParamsEvents();
 // await updateBlockTimestamps();
 // await updateRawLogs();
-await parseEvents();
+// await parseEvents();
+await updateTokenDollarValues();
 
 //  https://defillama.com/docs/api
 // todo
 
-process.exit();
+// process.exit();

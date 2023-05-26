@@ -36,4 +36,11 @@ export async function findTransactionCoinsByTxIds(tx_ids) {
         return Object.assign(Object.assign({}, rest), { coin: coinRest });
     });
 }
+export async function getAllCoinIds() {
+    const coinIds = await TransactionCoins.findAll({
+        attributes: ["coin_id"],
+        group: ["coin_id"],
+    });
+    return coinIds.map((transactionCoin) => transactionCoin.coin_id);
+}
 //# sourceMappingURL=TransactionCoins.js.map

@@ -84,10 +84,8 @@ async function parseEventsMain(): Promise<void> {
 }
 
 export async function parseEvents(): Promise<void> {
-  console.log(await countEvents());
-  console.time();
+  // console.log(await countEvents());
   await parseEventsMain();
-  console.timeEnd();
   updateConsoleOutput("[✓] Events parsed successfully.\n");
 }
 

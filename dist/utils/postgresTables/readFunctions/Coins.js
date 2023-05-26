@@ -26,4 +26,59 @@ export async function findCoinDecimalsById(id) {
         throw error;
     }
 }
+export async function findCoinAddressById(id) {
+    const coin = await Coins.findByPk(id);
+    if (!coin)
+        return null;
+    return coin.address;
+}
+export async function findCoinAddressesByIds(ids) {
+    try {
+        const coins = await Coins.findAll({
+            where: {
+                id: {
+                    [Op.in]: ids,
+                },
+            },
+        });
+        // Filter out any undefined or null addresses before returning
+        return coins.map((coin) => coin.address).filter(Boolean);
+    }
+    catch (error) {
+        console.error("Error finding coin addresses by ids:", error);
+        throw error;
+    }
+}
+export async function findCoinSymbolByAddress(address) {
+    try {
+        const coin = await Coins.findOne({
+            where: {
+                address: {
+                    [Op.iLike]: address.toLowerCase(),
+                },
+            },
+        });
+        return coin && coin.symbol !== undefined ? coin.symbol : null;
+    }
+    catch (error) {
+        console.error("Error finding coin symbol by address:", error);
+        throw error;
+    }
+}
+export async function findCoinAddressBySymbol(symbol) {
+    try {
+        const coin = await Coins.findOne({
+            where: {
+                symbol: symbol,
+            },
+        });
+        if (!coin)
+            return null;
+        return coin.address;
+    }
+    catch (error) {
+        console.error("Error finding coin address by symbol:", error);
+        throw error;
+    }
+}
 //# sourceMappingURL=Coins.js.map

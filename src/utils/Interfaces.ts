@@ -26,3 +26,31 @@ export interface CoinMovement {
   direction: "in" | "out";
   coin: Coin;
 }
+
+export interface DefillamaSingleResponse {
+  coins: Record<
+    string,
+    {
+      decimals: number;
+      price: number;
+      symbol: string;
+      timestamp: number;
+    }
+  >;
+}
+
+export interface DefillamaChartResponse {
+  coins: Record<string, CoinInfo>;
+}
+
+export interface CoinPriceData {
+  timestamp: number;
+  price: number;
+}
+
+export interface CoinInfo {
+  decimals: number;
+  confidence: number;
+  prices: CoinPriceData[];
+  symbol: string;
+}

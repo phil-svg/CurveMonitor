@@ -1,5 +1,5 @@
 import { getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
-import { fetchEventsForBlockNumberRange, fetchDistinctBlockNumbers, countEvents, countRawTxLogs } from "../readFunctions/RawLogs.js";
+import { fetchEventsForBlockNumberRange, fetchDistinctBlockNumbers, countRawTxLogs } from "../readFunctions/RawLogs.js";
 import { parseAddLiquidity } from "./ParseAddLiquidity.js";
 import { parseRemoveLiquidity } from "./ParseRemoveLiquidity.js";
 import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.js";
@@ -70,10 +70,8 @@ async function parseEventsMain() {
     }
 }
 export async function parseEvents() {
-    console.log(await countEvents());
-    console.time();
+    // console.log(await countEvents());
     await parseEventsMain();
-    console.timeEnd();
     updateConsoleOutput("[✓] Events parsed successfully.\n");
 }
 /**

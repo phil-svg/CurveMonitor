@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { Pool } from "../../../models/Pools.js";
 
 export const getIdByAddress = async (poolAddress: string): Promise<number | null> => {
@@ -99,3 +100,15 @@ export const getCreationTimestampBy = async (options: { id?: number; address?: s
   const pool = await getPoolBy(options);
   return pool?.creation_timestamp ?? null;
 };
+
+export async function getPoolsByCoinAddress(coinAddress: string): Promise<number[]> {
+  const pools = await Pool.findAll({
+    where: {
+      coins: {
+        [Op.contains]: [coinAddress],
+      },
+    },
+  });
+
+  return pools.map((pool) => pool.id);
+}

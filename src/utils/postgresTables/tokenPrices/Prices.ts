@@ -1,0 +1,80 @@
+import axios, { AxiosResponse } from "axios";
+import { findCoinAddressesByIds } from "../readFunctions/Coins.js";
+import { getAllPoolIds, getCoinsInBatchesByPools, getCreationTimestampBy } from "../readFunctions/Pools.js";
+import { CoinPriceData, DefillamaChartResponse, DefillamaSingleResponse } from "../../Interfaces.js";
+
+async function getEarliestPoolInceptionByCoinId(coinId: number): Promise<number | null> {
+  const ALL_POOL_IDS = await getAllPoolIds();
+
+  const coinAddress = await findCoinAddressesByIds([coinId]);
+
+  if (!coinAddress) {
+    console.log(`No address found for coin ID: ${coinId}`);
+    return null;
+  }
+
+  const coinAddressStr = coinAddress[0];
+
+  const poolCoins = await getCoinsInBatchesByPools(ALL_POOL_IDS);
+
+  const relevantPoolIds = Object.entries(poolCoins)
+    .filter(([_, coinAddresses]) => coinAddresses?.includes(coinAddressStr))
+    .map(([poolId, _]) => Number(poolId));
+
+  const poolTimestamps = await Promise.all(relevantPoolIds.map((poolId) => getCreationTimestampBy({ id: poolId })));
+
+  const validPoolTimestamps = poolTimestamps.filter((timestamp): timestamp is number => timestamp !== null);
+
+  if (validPoolTimestamps.length === 0) {
+    console.log(`No valid timestamps found for Coin ID ${coinId}`);
+    return null;
+  }
+
+  const minTimestamp = Math.min(...validPoolTimestamps);
+
+  return minTimestamp;
+}
+
+async function getHistoricalPriceOnce(contractAddress: string, unixTimestamp: number): Promise<number | null> {
+  const baseUrl = "https://coins.llama.fi";
+  const endpoint = `/prices/historical/${unixTimestamp}/ethereum:${contractAddress}`;
+
+  const url = `${baseUrl}${endpoint}`;
+
+  try {
+    const response = await axios.get<DefillamaSingleResponse>(url, { params: { searchWidth: "4h" } });
+    const coinPriceData = response.data.coins[`ethereum:${contractAddress}`];
+    return coinPriceData ? coinPriceData.price : null;
+  } catch (error) {
+    console.error(`Failed to fetch historical price for ${contractAddress}: ${error}`);
+    return null;
+  }
+}
+
+async function getHistoricalPriceChart(contractAddresses: string[], start: number, span: number, period: string, searchWidth: string): Promise<CoinPriceData[] | null> {
+  const baseUrl = "https://coins.llama.fi";
+  const contracts = contractAddresses.map((address) => `ethereum:${address}`).join(",");
+  const endpoint = `/chart/${contracts}`;
+
+  const url = `${baseUrl}${endpoint}?start=${start}&span=${span}&period=${period}&searchWidth=${searchWidth}`;
+
+  try {
+    const response: AxiosResponse<DefillamaChartResponse> = await axios.get(url);
+    if (response.data && response.data.coins) {
+      const firstContractKey = Object.keys(response.data.coins)[0];
+      return response.data.coins[firstContractKey].prices;
+    }
+    return null;
+  } catch (error) {
+    console.error(`Failed to fetch historical price chart for ${contracts}: ${error}`);
+    return null;
+  }
+}
+
+export async function updateTokenDollarValues(): Promise<void> {
+  let historicalPriceOnce = await getHistoricalPriceOnce("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", 1661212800);
+  console.log(historicalPriceOnce);
+  let historicalPriceChart = await getHistoricalPriceChart(["0xdF574c24545E5FfEcb9a659c229253D4111d87e1"], 1682467200, 10, "1d", "600");
+  console.log(historicalPriceChart);
+  // updateConsoleOutput("[✓] Events parsed successfully.\n");
+}

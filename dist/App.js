@@ -1,6 +1,6 @@
 console.clear();
 import { db } from "./config/Database.js";
-import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
+import { updateTokenDollarValues } from "./utils/postgresTables/tokenPrices/Prices.js";
 async function initDatabase() {
     try {
         await db.sync();
@@ -19,8 +19,9 @@ await initDatabase();
 // await updatePoolParamsEvents();
 // await updateBlockTimestamps();
 // await updateRawLogs();
-await parseEvents();
+// await parseEvents();
+await updateTokenDollarValues();
 //  https://defillama.com/docs/api
 // todo
-process.exit();
+// process.exit();
 //# sourceMappingURL=App.js.map

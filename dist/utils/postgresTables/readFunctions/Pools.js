@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { Pool } from "../../../models/Pools.js";
 export const getIdByAddress = async (poolAddress) => {
     const pool = await Pool.findOne({ where: { address: poolAddress } });
@@ -94,4 +95,14 @@ export const getCreationTimestampBy = async (options) => {
     const pool = await getPoolBy(options);
     return (_a = pool === null || pool === void 0 ? void 0 : pool.creation_timestamp) !== null && _a !== void 0 ? _a : null;
 };
+export async function getPoolsByCoinAddress(coinAddress) {
+    const pools = await Pool.findAll({
+        where: {
+            coins: {
+                [Op.contains]: [coinAddress],
+            },
+        },
+    });
+    return pools.map((pool) => pool.id);
+}
 //# sourceMappingURL=Pools.js.map
