@@ -21,6 +21,11 @@ export type TransactionCoinData = {
 export async function saveCoins(coins: { tx_id: number; COIN_ID: number; coinAmount: number; direction: string }[]): Promise<void> {
   try {
     for (const coin of coins) {
+      // Check if coinAmount is zero
+      if (coin.coinAmount === 0) {
+        continue; // Skip to next iteration if coinAmount is zero
+      }
+
       const transactionCoinData = {
         tx_id: coin.tx_id,
         coin_id: coin.COIN_ID,

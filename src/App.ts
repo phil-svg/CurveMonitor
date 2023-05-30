@@ -1,7 +1,7 @@
 console.clear();
 
 import { db } from "./config/Database.js";
-import { loadAddressProvider } from "./AddressProviderEntryPoint.js";
+import { loadAddressProvider } from "./utils/AddressProviderEntryPoint.js";
 import { updatePools } from "./utils/postgresTables/Pools.js";
 import { updateCoinTable } from "./utils/postgresTables/Coins.js";
 import { updatePoolAbis } from "./utils/postgresTables/Abi.js";
@@ -33,7 +33,6 @@ await initDatabase();
 // await parseEvents();
 await updateTokenDollarValues();
 
-//  https://defillama.com/docs/api
 // todo
 
-// process.exit();
+process.exit();

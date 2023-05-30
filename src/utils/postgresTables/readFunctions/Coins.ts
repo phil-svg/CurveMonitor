@@ -86,3 +86,14 @@ export async function findCoinAddressBySymbol(symbol: string): Promise<string | 
     throw error;
   }
 }
+
+export async function findCoinSymbolById(id: number): Promise<string | null> {
+  try {
+    const coin = await Coins.findByPk(id);
+
+    return coin && coin.symbol !== undefined ? coin.symbol : null;
+  } catch (error) {
+    console.error("Error finding coin symbol by id:", error);
+    throw error;
+  }
+}

@@ -81,4 +81,14 @@ export async function findCoinAddressBySymbol(symbol) {
         throw error;
     }
 }
+export async function findCoinSymbolById(id) {
+    try {
+        const coin = await Coins.findByPk(id);
+        return coin && coin.symbol !== undefined ? coin.symbol : null;
+    }
+    catch (error) {
+        console.error("Error finding coin symbol by id:", error);
+        throw error;
+    }
+}
 //# sourceMappingURL=Coins.js.map

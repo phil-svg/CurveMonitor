@@ -4,7 +4,7 @@ import { db } from "../../config/Database.js";
 import { PoolCountFromProvider } from "../../models/PoolCountFromProvider.js";
 import { Pool, PoolVersion } from "../../models/Pools.js";
 import { Op } from "sequelize";
-import { getProvidedAddress } from "../../AddressProviderEntryPoint.js";
+import { getProvidedAddress } from "../AddressProviderEntryPoint.js";
 if (!process.env.WEB3_WSS) {
     console.error("Error: WEB3_WSS environment variable is not defined.");
     process.exit(1);

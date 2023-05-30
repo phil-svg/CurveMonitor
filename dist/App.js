@@ -21,7 +21,6 @@ await initDatabase();
 // await updateRawLogs();
 // await parseEvents();
 await updateTokenDollarValues();
-//  https://defillama.com/docs/api
 // todo
-// process.exit();
+process.exit();
 //# sourceMappingURL=App.js.map

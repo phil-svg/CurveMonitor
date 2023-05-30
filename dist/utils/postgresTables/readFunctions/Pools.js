@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { Pool } from "../../../models/Pools.js";
+import { findCoinAddressesByIds } from "./Coins.js";
 export const getIdByAddress = async (poolAddress) => {
     const pool = await Pool.findOne({ where: { address: poolAddress } });
     return pool ? pool.id : null;
@@ -104,5 +105,26 @@ export async function getPoolsByCoinAddress(coinAddress) {
         },
     });
     return pools.map((pool) => pool.id);
+}
+export async function getEarliestPoolInceptionByCoinId(coinId) {
+    const ALL_POOL_IDS = await getAllPoolIds();
+    const coinAddress = await findCoinAddressesByIds([coinId]);
+    if (!coinAddress) {
+        console.log(`No address found for coin ID: ${coinId}`);
+        return null;
+    }
+    const coinAddressStr = coinAddress[0];
+    const poolCoins = await getCoinsInBatchesByPools(ALL_POOL_IDS);
+    const relevantPoolIds = Object.entries(poolCoins)
+        .filter(([_, coinAddresses]) => coinAddresses === null || coinAddresses === void 0 ? void 0 : coinAddresses.includes(coinAddressStr))
+        .map(([poolId, _]) => Number(poolId));
+    const poolTimestamps = await Promise.all(relevantPoolIds.map((poolId) => getCreationTimestampBy({ id: poolId })));
+    const validPoolTimestamps = poolTimestamps.filter((timestamp) => timestamp !== null);
+    if (validPoolTimestamps.length === 0) {
+        console.log(`No valid timestamps found for Coin ID ${coinId}`);
+        return null;
+    }
+    const minTimestamp = Math.min(...validPoolTimestamps);
+    return minTimestamp;
 }
 //# sourceMappingURL=Pools.js.map

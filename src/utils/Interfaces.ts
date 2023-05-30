@@ -54,3 +54,14 @@ export interface CoinInfo {
   prices: CoinPriceData[];
   symbol: string;
 }
+
+export interface DefillamaFirstAppearanceResponse {
+  coins: Record<
+    string,
+    {
+      symbol: string;
+      price: number;
+      timestamp: number;
+    }
+  >;
+}
