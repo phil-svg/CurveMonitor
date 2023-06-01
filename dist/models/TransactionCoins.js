@@ -26,7 +26,7 @@ __decorate([
     BelongsTo(() => Coins)
 ], TransactionCoins.prototype, "coin", void 0);
 __decorate([
-    Column(DataType.DECIMAL(30, 15))
+    Column(DataType.DECIMAL(50, 15))
 ], TransactionCoins.prototype, "amount", void 0);
 __decorate([
     Column(DataType.DECIMAL(30, 15))

@@ -20,7 +20,7 @@ export class TransactionCoins extends Model {
   @BelongsTo(() => Coins)
   coin!: Coins;
 
-  @Column(DataType.DECIMAL(30, 15))
+  @Column(DataType.DECIMAL(50, 15))
   amount!: number;
 
   @Column(DataType.DECIMAL(30, 15))

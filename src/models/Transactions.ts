@@ -1,7 +1,8 @@
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 import { Coins } from "./Coins.js";
 import { RawTxLogs } from "./RawTxLogs.js";
+import { TransactionCoins } from "./TransactionCoins.js";
 
 export enum TransactionType {
   Swap = "swap",
@@ -63,9 +64,12 @@ export class Transactions extends Model {
 
   @BelongsTo(() => RawTxLogs)
   rawTxLog!: RawTxLogs;
+
+  @HasMany(() => TransactionCoins)
+  transactionCoins!: TransactionCoins[];
 }
 
 export type TransactionData = Pick<
   Transactions,
   "pool_id" | "tx_hash" | "block_number" | "block_unixtime" | "transaction_type" | "trader" | "tx_position" | "raw_fees" | "fee_usd" | "value_usd" | "event_id"
->;
+> & { tx_id?: number };

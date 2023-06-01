@@ -1,3 +1,5 @@
+import { TransactionCoins } from "../models/TransactionCoins";
+
 export interface EventObject {
   address: string;
   blockHash: string;
@@ -64,4 +66,13 @@ export interface DefillamaFirstAppearanceResponse {
       timestamp: number;
     }
   >;
+}
+
+export interface TransactionCoinRecord {
+  tx_id: number;
+  coin_id: number;
+  amount: number;
+  dollar_value?: number | null;
+  direction: "in" | "out";
+  coin_symbol: string | null;
 }

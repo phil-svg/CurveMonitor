@@ -39,3 +39,18 @@ export async function getTransactionUnixtimes(txIds: number[]): Promise<{ tx_id:
 
   return result;
 }
+
+export async function fetchTransactionsBatch(offset: number, BATCH_SIZE: number): Promise<TransactionData[]> {
+  const transactions = await Transactions.findAll({
+    attributes: ["tx_id", "pool_id", "event_id", "tx_hash", "block_number", "block_unixtime", "transaction_type", "trader", "tx_position"], // the attributes to select
+    limit: BATCH_SIZE,
+    offset: offset,
+    raw: true, // this makes Sequelize return the raw data
+    order: [
+      ["block_number", "ASC"],
+      ["pool_id", "ASC"],
+    ], // order by block_number and pool_id to ensure consistency between batches
+  });
+
+  return transactions;
+}

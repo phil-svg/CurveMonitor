@@ -8,7 +8,7 @@ async function fetchGraphQLData(query) {
 }
 // Function to get the result using the specified query
 export async function getBlockTimestamps(blockNumbers) {
-    const queue = new PQueue({ concurrency: 8 }); // Adjust based on what the server can handle
+    const queue = new PQueue({ concurrency: 4 }); // Adjust based on what the server can handle
     const BATCH_SIZE = 100;
     let blocks = [];
     for (let i = 0; i < blockNumbers.length; i += BATCH_SIZE) {

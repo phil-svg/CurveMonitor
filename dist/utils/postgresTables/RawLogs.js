@@ -52,8 +52,8 @@ async function processAddress(poolAddress) {
     // ~ 62 days 16740930
     // from Alchemy API suggested "to": 16800767
     // now 17180318
-    const FROM_BLOCK = 17115135;
-    const TO_BLOCK = 17180318;
+    const FROM_BLOCK = 17145330;
+    const TO_BLOCK = 17380136;
     let currentFromBlock = FROM_BLOCK;
     let currentToBlock = TO_BLOCK;
     while (currentFromBlock < currentToBlock) {

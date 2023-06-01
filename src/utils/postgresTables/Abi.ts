@@ -140,7 +140,12 @@ export async function getAbiBy(tableName: string, options: { address?: string; i
 
     return abi;
   } catch (err) {
-    console.error("Error retrieving ABI:", err);
+    if (err instanceof Error) {
+      console.error("Error retrieving ABI:", err.message);
+      console.log("Contract source code probably not verified");
+    } else {
+      console.error("Error retrieving ABI:", err);
+    }
     return null;
   }
 }

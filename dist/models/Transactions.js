@@ -4,9 +4,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 import { RawTxLogs } from "./RawTxLogs.js";
+import { TransactionCoins } from "./TransactionCoins.js";
 export var TransactionType;
 (function (TransactionType) {
     TransactionType["Swap"] = "swap";
@@ -68,6 +69,9 @@ __decorate([
 __decorate([
     BelongsTo(() => RawTxLogs)
 ], Transactions.prototype, "rawTxLog", void 0);
+__decorate([
+    HasMany(() => TransactionCoins)
+], Transactions.prototype, "transactionCoins", void 0);
 Transactions = __decorate([
     Table({ tableName: "transactions" })
 ], Transactions);

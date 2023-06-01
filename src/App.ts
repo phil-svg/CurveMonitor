@@ -11,6 +11,7 @@ import { updateBlockTimestamps } from "./utils/postgresTables/Blocks.js";
 import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
 import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
 import { updateTokenDollarValues } from "./utils/postgresTables/tokenPrices/Prices.js";
+import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetection.js";
 
 async function initDatabase() {
   try {
@@ -28,10 +29,11 @@ await initDatabase();
 // await updatePoolAbis();
 // await updateInitialPoolParams();
 // await updatePoolParamsEvents();
-// await updateBlockTimestamps();
 // await updateRawLogs();
+// await updateBlockTimestamps();
 // await parseEvents();
-await updateTokenDollarValues();
+// await updateTokenDollarValues();
+await updateMevDetection();
 
 // todo
 
