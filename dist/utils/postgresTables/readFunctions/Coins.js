@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { Coins } from "../../../models/Coins.js";
+import { getLpTokenBy } from "./Pools.js";
 export async function findCoinIdByAddress(address) {
     try {
         const coin = await Coins.findOne({
@@ -91,4 +92,12 @@ export async function findCoinSymbolById(id) {
         throw error;
     }
 }
+export const getLpTokenIdByPoolId = async (poolId) => {
+    const lpTokenAddress = await getLpTokenBy({ id: poolId });
+    if (!lpTokenAddress) {
+        return null;
+    }
+    const lpTokenId = await findCoinIdByAddress(lpTokenAddress);
+    return lpTokenId;
+};
 //# sourceMappingURL=Coins.js.map

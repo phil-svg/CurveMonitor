@@ -209,3 +209,24 @@ export async function getEntriesByTransactionHash(transactionHash: string): Prom
 export async function countRawTxLogs(): Promise<number> {
   return await RawTxLogs.count();
 }
+
+export async function getEventById(id: number): Promise<string> {
+  const record = await RawTxLogs.findOne({ where: { eventId: id } });
+
+  if (!record) {
+    throw new Error(`Record with id ${id} not found`);
+  }
+
+  return record.event;
+}
+
+export async function getReturnValuesByEventId(eventId: number): Promise<any | null> {
+  const logEntry = await RawTxLogs.findOne({ where: { eventId } });
+
+  if (!logEntry) {
+    console.log(`No RawTxLogs entry found with eventId ${eventId}.`);
+    return null;
+  }
+
+  return logEntry.returnValues;
+}

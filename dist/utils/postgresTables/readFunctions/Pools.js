@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import { Pool } from "../../../models/Pools.js";
-import { findCoinAddressesByIds } from "./Coins.js";
+import { findCoinAddressById, findCoinAddressesByIds } from "./Coins.js";
 export const getIdByAddress = async (poolAddress) => {
     const pool = await Pool.findOne({ where: { address: poolAddress } });
     return pool ? pool.id : null;
@@ -126,5 +126,26 @@ export async function getEarliestPoolInceptionByCoinId(coinId) {
     }
     const minTimestamp = Math.min(...validPoolTimestamps);
     return minTimestamp;
+}
+export async function getCoinPositionInPoolByCoinAddress(poolId, coinAddress) {
+    try {
+        const pool = await Pool.findOne({
+            where: {
+                id: poolId,
+            },
+        });
+        if (pool && pool.coins) {
+            return pool.coins.map((coin) => coin.toLowerCase()).indexOf(coinAddress.toLowerCase());
+        }
+        return null;
+    }
+    catch (error) {
+        console.error("Error getting coin position in pool:", error);
+        throw error;
+    }
+}
+export async function getCoinPositionInPoolByCoinId(poolId, COIN_ID) {
+    const COIN_ADDRESS = await findCoinAddressById(COIN_ID);
+    return await getCoinPositionInPoolByCoinAddress(poolId, COIN_ADDRESS);
 }
 //# sourceMappingURL=Pools.js.map

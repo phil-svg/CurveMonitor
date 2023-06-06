@@ -54,3 +54,7 @@ export async function fetchTransactionsBatch(offset: number, BATCH_SIZE: number)
 
   return transactions;
 }
+
+export async function getTotalTransactionsCount(): Promise<number> {
+  return await Transactions.count();
+}

@@ -12,6 +12,8 @@ import { RawTxLogs } from "../models/RawTxLogs.js";
 import { Transactions } from "../models/Transactions.js";
 import { Blocks } from "../models/Blocks.js";
 import { TransactionCoins } from "../models/TransactionCoins.js";
+import { Labels } from "../models/Labels.js";
+import { Sandwiches } from "../models/Sandwiches.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,7 +27,7 @@ const sequelize = new Sequelize({
   host: process.env.DATABASE_HOST,
   port: Number(process.env.DATABASE_PORT) || 5432,
   dialect: "postgres",
-  models: [...AbiModels, Pool, PoolCountFromProvider, RawTxLogs, Transactions, Coins, PoolParamsEvents, InitialParams, Blocks, TransactionCoins],
+  models: [...AbiModels, Pool, PoolCountFromProvider, RawTxLogs, Transactions, Labels, Sandwiches, Coins, PoolParamsEvents, InitialParams, Blocks, TransactionCoins],
   logging: false,
 });
 

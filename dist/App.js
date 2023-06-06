@@ -1,6 +1,5 @@
 console.clear();
 import { db } from "./config/Database.js";
-import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetection.js";
 async function initDatabase() {
     try {
         await db.sync();
@@ -21,7 +20,8 @@ await initDatabase();
 // await updateBlockTimestamps();
 // await parseEvents();
 // await updateTokenDollarValues();
-await updateMevDetection();
+// await updateMevDetection();
+// await updateLabels();
 // todo
 process.exit();
 //# sourceMappingURL=App.js.map

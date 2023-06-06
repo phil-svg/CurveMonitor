@@ -1,6 +1,8 @@
 import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import axios from "axios";
 import Bottleneck from "bottleneck";
+import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
+import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
 function isCupsErr(err) {
@@ -87,6 +89,11 @@ export async function getPastEvents(CONTRACT, eventName, fromBlock, toBlock) {
     }
     return EVENT_ARRAY;
 }
+export async function getTokenTransferEvents(coinID, blockNumber) {
+    const COIN_ADDRESS = await findCoinAddressById(coinID);
+    const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI_TRANSFER, COIN_ADDRESS);
+    return await getPastEvents(CONTRACT, "Transfer", blockNumber, blockNumber);
+}
 export async function web3Call(CONTRACT, method, params, blockNumber = { block: "latest" }) {
     let shouldContinue = true;
     let retries = 0;
@@ -138,25 +145,6 @@ const limiter = new Bottleneck({
     maxConcurrent: 100,
     minTime: 25,
 });
-/*
-  maxConcurrent: 1,
-  minTime: 100,
-  2:44
-  100%
-
-  maxConcurrent: 100,
-  minTime: 100,
-  2:00
-  100%
-
-  maxConcurrent: 100,
-  minTime: 50,
-  1:02
-  100%
-
-
-*/
-// maxConcurrent = 10 = 100% in 3min something
 export async function getTxReceipt(txHash) {
     return limiter.schedule(async () => {
         try {

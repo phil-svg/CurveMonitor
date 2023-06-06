@@ -44,4 +44,7 @@ export async function fetchTransactionsBatch(offset, BATCH_SIZE) {
     });
     return transactions;
 }
+export async function getTotalTransactionsCount() {
+    return await Transactions.count();
+}
 //# sourceMappingURL=Transactions.js.map

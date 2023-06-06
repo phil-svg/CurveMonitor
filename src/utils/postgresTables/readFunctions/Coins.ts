@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { Coins } from "../../../models/Coins.js";
+import { getLpTokenBy } from "./Pools.js";
 
 export async function findCoinIdByAddress(address: string): Promise<number | null> {
   try {
@@ -97,3 +98,12 @@ export async function findCoinSymbolById(id: number): Promise<string | null> {
     throw error;
   }
 }
+
+export const getLpTokenIdByPoolId = async (poolId: number): Promise<number | null> => {
+  const lpTokenAddress = await getLpTokenBy({ id: poolId });
+  if (!lpTokenAddress) {
+    return null;
+  }
+  const lpTokenId = await findCoinIdByAddress(lpTokenAddress);
+  return lpTokenId;
+};

@@ -1,16 +1,31 @@
-import { fetchTransactionsBatch } from "../readFunctions/Transactions.js";
-import { enrichCandidateWithCoinInfo, enrichCandidateWithSymbol } from "./SandwichHelper.js";
+import { fetchTransactionsBatch, getTotalTransactionsCount } from "../readFunctions/Transactions.js";
+import { enrichCandidateWithCoinInfo, removeProcessedTransactions } from "./SandwichUtils.js";
+import { screenCandidate } from "./SandwichCandidateScreening.js";
+import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
+/**
+ * Explanation for the term "Candidate":
+ * A Candidate is basically an array of transactions.
+ * These tx occured in the same pool in the same block.
+ * Requirment is at least 2 tx, otherwise there is no possibilty for a sandwich.
+ *
+ * This Array is considered a Candidate for a Sandwich, and will then get screened for mev.
+ */
+// queries the db, and runs the parsed tx in batches through the detection process.
 async function detectSandwichesInAllTransactions() {
+    let totalTransactionsCount = await getTotalTransactionsCount();
     const BATCH_SIZE = 10000;
     let offset = 0;
     while (true) {
+        displayProgressBar("Processing transactions", offset, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
         const transactions = await fetchTransactionsBatch(offset, BATCH_SIZE);
         if (transactions.length === 0)
             break;
-        await findCandidatesInBatch(transactions);
+        const filteredTransactions = await removeProcessedTransactions(transactions);
+        await findCandidatesInBatch(filteredTransactions);
         offset += BATCH_SIZE;
     }
 }
+// filters the batches for multiple tx in the same pool in the same block. Runs the filtered data further down the detection process.
 async function findCandidatesInBatch(batch) {
     const groups = {};
     // group transactions by `block_number` and `pool_id`
@@ -23,6 +38,7 @@ async function findCandidatesInBatch(batch) {
     }
     await searchInCandidatesClusterForSandwiches(groups);
 }
+// splits the array of "Candidates" to run them one by one further down the detection process.
 async function searchInCandidatesClusterForSandwiches(groups) {
     for (const key in groups) {
         const candidate = groups[key];
@@ -31,85 +47,15 @@ async function searchInCandidatesClusterForSandwiches(groups) {
         }
     }
 }
-let manualStopper = -1;
+// adding coin details
 async function scanCandidate(candidate) {
-    let candidateWithCoinInfo = await enrichCandidateWithCoinInfo(candidate); // adds info about coins involved
-    if (!candidateWithCoinInfo)
+    let enrichedCandidate = await enrichCandidateWithCoinInfo(candidate);
+    if (!enrichedCandidate)
         return;
-    candidate = await enrichCandidateWithSymbol(candidateWithCoinInfo);
-    manualStopper++;
-    if (manualStopper < 9)
-        return;
-    if (manualStopper > 9)
-        return;
-    console.log(`Current Candidate with ${candidate.length} entries.`);
-    // console.log("candidate", candidate);
-    if (candidate.length === 2) {
-        await candidateLength2(candidate);
-        return;
-    }
-    if (candidate.length === 3) {
-        await candidateLength3(candidate);
-        return;
-    }
-    console.log(candidate, "manualStopper", manualStopper);
-}
-async function candidateLength2(candidate) {
-    const GAP_IN_BLOCK = Math.abs(candidate[0].tx_position - candidate[1].tx_position);
-    if (GAP_IN_BLOCK === 0) {
-        console.log(`Aborted, since it was in fact a single tx.`);
-        return;
-    }
-    if (GAP_IN_BLOCK === 1) {
-        console.log(`Aborted, since it was a follow up tx.`);
-        return;
-    }
-    if (GAP_IN_BLOCK !== 2) {
-        console.log(`Aborted, since gap is ${GAP_IN_BLOCK}.`);
-        return;
-    }
-    console.log(candidate, "manualStopper", manualStopper);
-}
-async function candidateLength3(candidate) {
-    candidate.sort((a, b) => a.tx_position - b.tx_position);
-    let i = 0;
-    let flag = false;
-    while (i < candidate.length - 1) {
-        if (candidate[i + 1].tx_position === candidate[i].tx_position + 1) {
-            if (i < candidate.length - 2 && candidate[i + 2].tx_position === candidate[i].tx_position + 2) {
-                console.log("Found candidateWithThreeConsecutiveTransactions");
-                await candidateWithThreeConsecutiveTransactions([candidate[i], candidate[i + 1], candidate[i + 2]]);
-                flag = true;
-                i += 3;
-            }
-            else {
-                i++;
-            }
-            continue;
-        }
-        if (candidate[i + 1].tx_position === candidate[i].tx_position + 2) {
-            console.log("Found candidateLength2 in length=3");
-            await candidateLength2([candidate[i], candidate[i + 1]]);
-            flag = true;
-            i += 2;
-            continue;
-        }
-        if (candidate[i + 1].tx_position > candidate[i].tx_position + 2) {
-            i++;
-            continue;
-        }
-    }
-    if (!flag) {
-        console.log(`Aborted, since no logical gap was found.`);
-    }
-}
-async function candidateWithThreeConsecutiveTransactions(candidate) {
-    console.log("candidate in candidateWithThreeConsecutiveTransactions");
-    console.dir(candidate, { depth: null, colors: true });
+    await screenCandidate(enrichedCandidate);
 }
 export async function updateSandwichDetection() {
-    console.log("Running Sandwich Detection..\n\n\n");
     await detectSandwichesInAllTransactions();
-    console.log("\n\n\n[✓] Sandwich-Detection completed successfully.\n");
+    updateConsoleOutput("[✓] Sandwich-Detection completed successfully.");
 }
 //# sourceMappingURL=SandwichDetection.js.map

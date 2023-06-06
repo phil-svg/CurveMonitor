@@ -92,8 +92,8 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
         boughtCoinAmount = NEAREST_COIN_MOVEMENT_AMOUNT;
     }
     const coinAmounts = [
-        { COIN_ID: soldCoinID, amount: Number(soldCoinAmount), direction: "out" },
-        { COIN_ID: boughtCoinID, amount: Number(boughtCoinAmount), direction: "in" },
+        { COIN_ID: soldCoinID, amount: Number(soldCoinAmount), direction: "in" },
+        { COIN_ID: boughtCoinID, amount: Number(boughtCoinAmount), direction: "out" },
     ];
     const transactionData = {
         pool_id: event.pool_id,

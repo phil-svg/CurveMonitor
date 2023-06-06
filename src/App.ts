@@ -33,7 +33,8 @@ await initDatabase();
 // await updateBlockTimestamps();
 // await parseEvents();
 // await updateTokenDollarValues();
-await updateMevDetection();
+// await updateMevDetection();
+// await updateLabels();
 
 // todo
 
