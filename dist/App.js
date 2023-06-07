@@ -1,5 +1,6 @@
 console.clear();
 import { db } from "./config/Database.js";
+import { updateLabels } from "./utils/postgresTables/Labels.js";
 async function initDatabase() {
     try {
         await db.sync();
@@ -21,7 +22,7 @@ await initDatabase();
 // await parseEvents();
 // await updateTokenDollarValues();
 // await updateMevDetection();
-// await updateLabels();
+await updateLabels();
 // todo
 process.exit();
 //# sourceMappingURL=App.js.map

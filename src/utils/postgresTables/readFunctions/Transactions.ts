@@ -58,3 +58,23 @@ export async function fetchTransactionsBatch(offset: number, BATCH_SIZE: number)
 export async function getTotalTransactionsCount(): Promise<number> {
   return await Transactions.count();
 }
+
+export async function getTxHashByTxId(tx_id: number): Promise<string | null> {
+  try {
+    const transaction = await Transactions.findOne({
+      where: {
+        tx_id: tx_id,
+      },
+    });
+
+    if (transaction) {
+      return transaction.tx_hash;
+    } else {
+      console.log(`Transaction with tx_id ${tx_id} not found.`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error while fetching transaction with tx_id ${tx_id}: ${error}`);
+    return null;
+  }
+}

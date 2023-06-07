@@ -4,9 +4,10 @@ import { TransactionData } from "../../../models/Transactions.js";
 import { ExtendedTransactionData, SandwichLoss, TransactionCoin, TransactionCoinRecord } from "../../Interfaces.js";
 import { findCoinSymbolById } from "../readFunctions/Coins.js";
 import { calculateLossForDeposit, calculateLossForSwap, calculateLossForWithdraw } from "./VictimLossFromSandwich.js";
-import { getTokenTransferEvents } from "../../web3Calls/generic.js";
+import { getTokenTransferEvents, getTxFromTxId } from "../../web3Calls/generic.js";
 import { getAbiBy } from "../Abi.js";
 import { LossTransaction, Sandwiches } from "../../../models/Sandwiches.js";
+import { readSandwichesInBatches } from "../readFunctions/Sandwiches.js";
 
 export async function enrichCandidateWithCoinInfo(candidate: TransactionData[]): Promise<ExtendedTransactionData[] | null> {
   // Extract tx_ids from candidate array
@@ -116,4 +117,35 @@ export async function removeProcessedTransactions(transactions: TransactionData[
 
   // Filter out transactions that already appear in the sandwiches table
   return transactions.filter((transaction) => !processedTxIds.has(transaction.tx_id!));
+}
+
+function isValidEthereumAddress(someString: string): boolean {
+  // Ethereum addresses are 42 characters long (including the '0x') and consist only of hexadecimal characters
+  const ethereumAddressRegex = /^0x[a-fA-F0-9]{40}$/;
+  return ethereumAddressRegex.test(someString);
+}
+
+export async function addAddressesForLabeling(): Promise<void> {
+  try {
+    const batches = await readSandwichesInBatches();
+    if (!batches) return;
+    for (const batch of batches) {
+      for (const lossTx of batch) {
+        const tx = await getTxFromTxId(lossTx.loss_transactions[0].tx_id);
+        if (!tx) {
+          console.log(`Could not retrieve transaction for tx_id: ${lossTx.loss_transactions[0].tx_id}`);
+          continue;
+        }
+
+        if (typeof tx.to !== "string" || !isValidEthereumAddress(tx.to)) {
+          console.log(`Invalid Ethereum address for tx_id: ${lossTx.loss_transactions[0].tx_id}`);
+          continue;
+        }
+
+        await Sandwiches.update({ source_of_loss_contract_address: tx.to }, { where: { id: lossTx.id } });
+      }
+    }
+  } catch (error) {
+    console.error(`Error reading sandwiches in batches: ${error}`);
+  }
 }

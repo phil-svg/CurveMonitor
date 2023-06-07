@@ -6,6 +6,7 @@ import Bottleneck from "bottleneck";
 import { BlockNumber } from "../Interfaces.js";
 import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
 import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
+import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js";
 
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
@@ -196,4 +197,15 @@ export async function getTxReceipt(txHash: string): Promise<any> {
       return null;
     }
   });
+}
+
+export async function getTxFromTxId(tx_id: number): Promise<any | null> {
+  try {
+    const txHash = await getTxHashByTxId(tx_id);
+    const TX = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash!);
+    return TX;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 }

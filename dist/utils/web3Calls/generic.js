@@ -3,6 +3,7 @@ import axios from "axios";
 import Bottleneck from "bottleneck";
 import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
 import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
+import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js";
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
 function isCupsErr(err) {
@@ -169,5 +170,16 @@ export async function getTxReceipt(txHash) {
             return null;
         }
     });
+}
+export async function getTxFromTxId(tx_id) {
+    try {
+        const txHash = await getTxHashByTxId(tx_id);
+        const TX = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash);
+        return TX;
+    }
+    catch (err) {
+        console.log(err);
+        return null;
+    }
 }
 //# sourceMappingURL=generic.js.map

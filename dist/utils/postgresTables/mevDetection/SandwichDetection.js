@@ -1,5 +1,5 @@
 import { fetchTransactionsBatch, getTotalTransactionsCount } from "../readFunctions/Transactions.js";
-import { enrichCandidateWithCoinInfo, removeProcessedTransactions } from "./SandwichUtils.js";
+import { addAddressesForLabeling, enrichCandidateWithCoinInfo, removeProcessedTransactions } from "./SandwichUtils.js";
 import { screenCandidate } from "./SandwichCandidateScreening.js";
 import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
 /**
@@ -56,6 +56,7 @@ async function scanCandidate(candidate) {
 }
 export async function updateSandwichDetection() {
     await detectSandwichesInAllTransactions();
+    await addAddressesForLabeling();
     updateConsoleOutput("[✓] Sandwich-Detection completed successfully.");
 }
 //# sourceMappingURL=SandwichDetection.js.map

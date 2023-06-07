@@ -12,6 +12,7 @@ import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
 import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
 import { updateTokenDollarValues } from "./utils/postgresTables/tokenPrices/Prices.js";
 import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetection.js";
+import { updateLabels } from "./utils/postgresTables/Labels.js";
 
 async function initDatabase() {
   try {
@@ -34,7 +35,7 @@ await initDatabase();
 // await parseEvents();
 // await updateTokenDollarValues();
 // await updateMevDetection();
-// await updateLabels();
+await updateLabels();
 
 // todo
 
