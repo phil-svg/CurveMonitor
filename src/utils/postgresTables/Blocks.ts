@@ -1,5 +1,5 @@
 import { Blocks } from "../../models/Blocks.js";
-import { fetchDistinctBlockNumbers, fetchDistinctBlockNumbersInBatch, countRawTxLogs, fetchEventsForBlockNumberRange } from "../postgresTables/readFunctions/RawLogs.js";
+import { fetchDistinctBlockNumbers, fetchDistinctBlockNumbersInBatch } from "../postgresTables/readFunctions/RawLogs.js";
 import { displayProgressBar, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { fetchBlockNumbers } from "../postgresTables/readFunctions/Blocks.js";
 import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";

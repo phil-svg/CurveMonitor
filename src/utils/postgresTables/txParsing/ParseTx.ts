@@ -1,5 +1,5 @@
 import { getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
-import { fetchEventsForBlockNumberRange, fetchDistinctBlockNumbers, countEvents, countRawTxLogs } from "../readFunctions/RawLogs.js";
+import { fetchEventsForBlockNumberRange, fetchDistinctBlockNumbers, countRawTxLogs } from "../readFunctions/RawLogs.js";
 import { parseAddLiquidity } from "./ParseAddLiquidity.js";
 import { parseRemoveLiquidity } from "./ParseRemoveLiquidity.js";
 import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.js";
@@ -8,9 +8,7 @@ import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
 import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
 import { getTimestampsByBlockNumbers } from "../readFunctions/Blocks.js";
-import { RawTxLogs } from "../../../models/RawTxLogs.js";
-import { Transactions } from "../../../models/Transactions.js";
-import { Op } from "sequelize";
+import { readScannedBlockRangesEventParsing, updateScannedBlocksEventParsing } from "../readFunctions/BlockScanningData.js";
 
 async function sortAndProcess(EVENTS: any, BLOCK_UNIXTIMES: any, POOL_COINS: any): Promise<void> {
   const functions = {
@@ -64,23 +62,54 @@ async function parseEventsMain(): Promise<void> {
   const AMOUNT_OF_EVENTS_STORED = await countRawTxLogs();
   let counter = 0;
 
-  for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
-    const startBlock = blockNumbers[i];
-    const endBlock = blockNumbers[Math.min(i + BATCH_SIZE, blockNumbers.length - 1)];
+  // Read the previously scanned block ranges
+  let storedBlockRangesData = await readScannedBlockRangesEventParsing();
 
-    const EVENTS = await fetchEventsForBlockNumberRange(startBlock, endBlock);
+  // If the table is new or no ranges were previously stored, process the entire range
+  let storedBlockRanges: number[][] = storedBlockRangesData === "new table" ? [] : storedBlockRangesData;
 
-    // Get block timestamps
-    const eventBlockNumbers = EVENTS.flatMap((event) => (event.blockNumber !== undefined ? [event.blockNumber] : []));
-    const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbers(eventBlockNumbers);
+  // Sort the block ranges
+  const sortedBlockRanges = storedBlockRanges.sort((a, b) => a[0] - b[0]);
 
-    // Get pool coins
-    const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
+  // Get the smallest and largest scanned block numbers
+  const smallestBlockNumberStored = sortedBlockRanges.length > 0 ? sortedBlockRanges[0][0] : null;
+  const largestBlockNumberStored = sortedBlockRanges.length > 0 ? sortedBlockRanges[sortedBlockRanges.length - 1][1] : null;
 
-    await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
-    counter += EVENTS.length;
-    displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
+  const startBlock = smallestBlockNumberStored || blockNumbers[0];
+  const endBlock = largestBlockNumberStored || blockNumbers[blockNumbers.length - 1];
+
+  for (let i = startBlock; i <= endBlock; i += BATCH_SIZE) {
+    // Only process the batch if it was not previously processed
+    if (!isBlockInRange([i, Math.min(i + BATCH_SIZE, endBlock)], sortedBlockRanges)) {
+      const EVENTS = await fetchEventsForBlockNumberRange(i, Math.min(i + BATCH_SIZE, endBlock));
+
+      // Get block timestamps
+      const eventBlockNumbers = EVENTS.flatMap((event) => (event.blockNumber !== undefined ? [event.blockNumber] : []));
+      const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbers(eventBlockNumbers);
+
+      // Get pool coins
+      const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
+
+      await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
+      counter += EVENTS.length;
+      displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
+
+      // Update the scanned block range in the database
+      sortedBlockRanges.push([i, Math.min(i + BATCH_SIZE, endBlock)]);
+      await updateScannedBlocksEventParsing(sortedBlockRanges);
+    }
   }
+}
+
+// Helper function to check if a block range was previously processed
+function isBlockInRange(blockRange: number[], storedBlockRanges: number[][]): boolean {
+  for (let i = 0; i < storedBlockRanges.length; i++) {
+    if (storedBlockRanges[i][0] <= blockRange[0] && storedBlockRanges[i][1] >= blockRange[1]) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export async function parseEvents(): Promise<void> {

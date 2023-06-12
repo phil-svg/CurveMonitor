@@ -209,4 +209,18 @@ export async function getReturnValuesByEventId(eventId) {
     }
     return logEntry.returnValues;
 }
+export async function getSmallestBlockNumber() {
+    const minBlockNumber = await RawTxLogs.min("blockNumber");
+    if (typeof minBlockNumber === "number") {
+        return minBlockNumber;
+    }
+    return null;
+}
+export async function getLargestBlockNumber() {
+    const maxBlockNumber = await RawTxLogs.max("blockNumber");
+    if (typeof maxBlockNumber === "number") {
+        return maxBlockNumber;
+    }
+    return null;
+}
 //# sourceMappingURL=RawLogs.js.map

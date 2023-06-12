@@ -5,12 +5,9 @@ import { loadAddressProvider } from "./utils/AddressProviderEntryPoint.js";
 import { updatePools } from "./utils/postgresTables/Pools.js";
 import { updateCoinTable } from "./utils/postgresTables/Coins.js";
 import { updatePoolAbis } from "./utils/postgresTables/Abi.js";
-import { updateInitialPoolParams } from "./utils/postgresTables/InitialParams.js";
-import { updatePoolParamsEvents } from "./utils/postgresTables/PoolParamsEvents.js";
 import { updateBlockTimestamps } from "./utils/postgresTables/Blocks.js";
 import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
 import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
-import { updateTokenDollarValues } from "./utils/postgresTables/tokenPrices/Prices.js";
 import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetection.js";
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 
@@ -24,17 +21,17 @@ async function initDatabase() {
 }
 
 await initDatabase();
-// await loadAddressProvider();
-// await updatePools();
-// await updateCoinTable();
-// await updatePoolAbis();
-// await updateInitialPoolParams();
-// await updatePoolParamsEvents();
-// await updateRawLogs();
-// await updateBlockTimestamps();
-// await parseEvents();
-// await updateTokenDollarValues();
-// await updateMevDetection();
+await loadAddressProvider();
+await updatePools();
+await updateCoinTable();
+await updatePoolAbis();
+// await updateInitialPoolParams(); // muted until useful
+// await updatePoolParamsEvents(); // muted until useful
+await updateRawLogs();
+await updateBlockTimestamps();
+await parseEvents();
+// await updateTokenDollarValues(); // muted until useful
+await updateMevDetection();
 await updateLabels();
 
 // todo

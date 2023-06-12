@@ -99,19 +99,19 @@ export async function storeAbiForAddressProvider(address, abi) {
 }
 // Main function to retrieve the ABI based on the provided table name and input options.
 export async function getAbiBy(tableName, options) {
+    if (!options.address && !options.id) {
+        console.error("Error: Both address and id are not provided.");
+        return null;
+    }
+    if (options.address) {
+        options.address = options.address.toLowerCase();
+    }
+    const address = await resolveAddress(options);
+    if (!address) {
+        return null;
+    }
+    let abi;
     try {
-        if (!options.address && !options.id) {
-            console.error("Error: Both address and id are not provided.");
-            return null;
-        }
-        if (options.address) {
-            options.address = options.address.toLowerCase();
-        }
-        const address = await resolveAddress(options);
-        if (!address) {
-            return null;
-        }
-        let abi;
         if (tableName === "AbisPools") {
             abi = await getAbiByForPools(options);
         }
@@ -123,6 +123,7 @@ export async function getAbiBy(tableName, options) {
             return null;
         }
         if (!abi) {
+            console.error(`Fetching ABI from Etherscan for Pool "${address}".`);
             abi = await fetchAbiFromEtherscan(address);
             if (options.id) {
                 await storeAbiForPools(options.id, abi);
@@ -135,8 +136,7 @@ export async function getAbiBy(tableName, options) {
     }
     catch (err) {
         if (err instanceof Error) {
-            console.error("Error retrieving ABI:", err.message);
-            console.log("Contract source code probably not verified");
+            console.log("Contract source code probably not verified for pool", address, err.message);
         }
         else {
             console.error("Error retrieving ABI:", err);

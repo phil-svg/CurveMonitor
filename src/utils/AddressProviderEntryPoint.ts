@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 import Web3 from "web3";
 import { getAbiBy, isAbiStored, fetchAbiFromEtherscan, storeAbiForAddressProvider } from "./postgresTables/Abi.js";
-import { countEvents } from "./postgresTables/readFunctions/RawLogs.js";
 
 // only requires the address of the Address-Provider.
 // Collects addresses provided together with their ABIs.

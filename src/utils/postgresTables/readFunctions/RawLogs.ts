@@ -230,3 +230,23 @@ export async function getReturnValuesByEventId(eventId: number): Promise<any | n
 
   return logEntry.returnValues;
 }
+
+export async function getSmallestBlockNumber(): Promise<number | null> {
+  const minBlockNumber = await RawTxLogs.min("blockNumber");
+
+  if (typeof minBlockNumber === "number") {
+    return minBlockNumber;
+  }
+
+  return null;
+}
+
+export async function getLargestBlockNumber(): Promise<number | null> {
+  const maxBlockNumber = await RawTxLogs.max("blockNumber");
+
+  if (typeof maxBlockNumber === "number") {
+    return maxBlockNumber;
+  }
+
+  return null;
+}

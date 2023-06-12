@@ -34,21 +34,26 @@ export async function getContractByAddress(poolAddress: string): Promise<Contrac
 }
 
 export async function getContractByPoolID(poolId: number): Promise<Contract | void> {
-  const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
-  if (!POOL_ABI) {
+  try {
+    const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
+    if (!POOL_ABI) {
+      console.log(`Err fetching ABI for pool ${poolId}`);
+      return;
+    }
+
+    const POOL_ADDRESS = await getAddressById(poolId);
+    if (!POOL_ADDRESS) {
+      console.log(`Err fetching Address for pool ${poolId}`);
+      return;
+    }
+
+    const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
+    const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
+    return CONTRACT;
+  } catch (err) {
     console.log(`Err fetching ABI for pool ${poolId}`);
     return;
   }
-
-  const POOL_ADDRESS = await getAddressById(poolId);
-  if (!POOL_ADDRESS) {
-    console.log(`Err fetching Address for pool ${poolId}`);
-    return;
-  }
-
-  const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
-  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
-  return CONTRACT;
 }
 
 export function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS: Log[]): any[] {

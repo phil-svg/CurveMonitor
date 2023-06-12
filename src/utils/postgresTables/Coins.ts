@@ -1,7 +1,7 @@
 import Web3 from "web3";
 import { db } from "../../config/Database.js";
 import { Coins } from "../../models/Coins.js";
-import { Op, Sequelize, QueryTypes } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import { AbiItem } from "web3-utils";
 
 if (!process.env.WEB3_WSS) {

@@ -103,23 +103,23 @@ export async function storeAbiForAddressProvider(address: string, abi: any[]): P
 
 // Main function to retrieve the ABI based on the provided table name and input options.
 export async function getAbiBy(tableName: string, options: { address?: string; id?: number }): Promise<any[] | null> {
+  if (!options.address && !options.id) {
+    console.error("Error: Both address and id are not provided.");
+    return null;
+  }
+
+  if (options.address) {
+    options.address = options.address.toLowerCase();
+  }
+
+  const address = await resolveAddress(options);
+  if (!address) {
+    return null;
+  }
+
+  let abi: any[] | null;
+
   try {
-    if (!options.address && !options.id) {
-      console.error("Error: Both address and id are not provided.");
-      return null;
-    }
-
-    if (options.address) {
-      options.address = options.address.toLowerCase();
-    }
-
-    const address = await resolveAddress(options);
-    if (!address) {
-      return null;
-    }
-
-    let abi: any[] | null;
-
     if (tableName === "AbisPools") {
       abi = await getAbiByForPools(options);
     } else if (tableName === "AbisRelatedToAddressProvider") {
@@ -130,6 +130,7 @@ export async function getAbiBy(tableName: string, options: { address?: string; i
     }
 
     if (!abi) {
+      console.error(`Fetching ABI from Etherscan for Pool "${address}".`);
       abi = await fetchAbiFromEtherscan(address);
       if (options.id) {
         await storeAbiForPools(options.id, abi);
@@ -141,8 +142,7 @@ export async function getAbiBy(tableName: string, options: { address?: string; i
     return abi;
   } catch (err) {
     if (err instanceof Error) {
-      console.error("Error retrieving ABI:", err.message);
-      console.log("Contract source code probably not verified");
+      console.log("Contract source code probably not verified for pool", address, err.message);
     } else {
       console.error("Error retrieving ABI:", err);
     }
