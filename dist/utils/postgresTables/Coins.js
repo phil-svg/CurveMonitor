@@ -113,7 +113,6 @@ async function updateSymbols() {
                 continue;
             const SYMBOL = await fetchSymbolFromChain(coin.address);
             coin.symbol = SYMBOL;
-            console.log(`${i}/${coinsWithoutSymbols.length} saving Symbols ${SYMBOL} for ${coin.address}`);
             await coin.save();
         }
     }
@@ -147,7 +146,6 @@ async function updateDecimals() {
                 continue;
             const DECIMALS = await fetchDecimalsFromChain(coin.address);
             coin.decimals = DECIMALS;
-            console.log(`${i}/${coinsWithoutDecimals.length} saving Decimal ${DECIMALS} for ${coin.address}`);
             await coin.save();
         }
     }
@@ -159,10 +157,8 @@ async function updateDecimals() {
 /** *********************** Final *********************** */
 export async function updateCoinTable() {
     await updateAddresses();
-    console.log(`[✓] Table: Coins | Addresses synced successfully.`);
     await updateSymbols();
-    console.log(`[✓] Table: Coins | Symbols synced successfully.`);
     await updateDecimals();
-    console.log(`[✓] Table: Coins | Decimals synced successfully.`);
+    console.log(`[✓] Coins synced successfully.`);
 }
 //# sourceMappingURL=Coins.js.map

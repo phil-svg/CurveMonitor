@@ -66,7 +66,7 @@ export async function fetchEventsForBlockNumberRange(startBlock: number, endBloc
     where: {
       block_number: {
         [Op.gte]: startBlock,
-        [Op.lt]: endBlock,
+        [Op.lte]: endBlock,
       },
     },
     order: [["block_number", "ASC"]],

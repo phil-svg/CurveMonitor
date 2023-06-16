@@ -9,6 +9,8 @@ import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
 import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
 import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetection.js";
 import { updateLabels } from "./utils/postgresTables/Labels.js";
+import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
+import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogs.js";
 async function initDatabase() {
     try {
         await db.sync();
@@ -23,14 +25,16 @@ await loadAddressProvider();
 await updatePools();
 await updateCoinTable();
 await updatePoolAbis();
+await subscribeToNewBlocks();
 // await updateInitialPoolParams(); // muted until useful
 // await updatePoolParamsEvents(); // muted until useful
-await updateRawLogs();
+await preparingLiveModeForRawEvents();
+await updateRawLogs(); // takes 3:30.627 (m:ss.mmm) to run
 await updateBlockTimestamps();
 await parseEvents();
 // await updateTokenDollarValues(); // muted until useful
 await updateMevDetection();
 await updateLabels();
 // todo
-process.exit();
+// process.exit();
 //# sourceMappingURL=App.js.map

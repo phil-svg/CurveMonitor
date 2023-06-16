@@ -15,6 +15,7 @@ import { TransactionCoins } from "../models/TransactionCoins.js";
 import { Labels } from "../models/Labels.js";
 import { Sandwiches } from "../models/Sandwiches.js";
 import { BlockScanningData } from "../models/BlockScanningData.js";
+import { CurrentBlock } from "../models/CurrentBlock.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 config({ path: resolve(__dirname, "..", "..", ".env") });
@@ -39,6 +40,7 @@ const sequelize = new Sequelize({
         InitialParams,
         Blocks,
         TransactionCoins,
+        CurrentBlock,
     ],
     logging: false,
 });

@@ -4,8 +4,20 @@ import { displayProgressBar, updateConsoleOutput } from "../helperFunctions/Qual
 import { fetchBlockNumbers } from "../postgresTables/readFunctions/Blocks.js";
 import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
 
-async function writeBlocks(blocks: { block_number: number; timestamp: number }[]): Promise<void> {
-  await Blocks.bulkCreate(blocks);
+export async function writeBlock(block_number: number, timestamp: number): Promise<void> {
+  const block = await Blocks.findOne({ where: { block_number } });
+
+  if (block) {
+    await block.update({ timestamp });
+  } else {
+    await Blocks.create({ block_number, timestamp });
+  }
+}
+
+export async function writeBlocks(blocks: { block_number: number; timestamp: number }[]): Promise<void> {
+  await Blocks.bulkCreate(blocks, {
+    updateOnDuplicate: ["timestamp"],
+  });
 }
 
 async function main() {

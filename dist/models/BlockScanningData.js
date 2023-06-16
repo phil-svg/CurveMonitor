@@ -9,16 +9,28 @@ let BlockScanningData = class BlockScanningData extends Model {
 };
 __decorate([
     Column({
-        field: "scanned_block_range_raw_logs",
-        type: DataType.ARRAY(DataType.STRING),
+        field: "from_block_raw_logs",
+        type: DataType.INTEGER,
     })
-], BlockScanningData.prototype, "scannedBlockRangeRawLogs", void 0);
+], BlockScanningData.prototype, "fromBlockRawLogs", void 0);
 __decorate([
     Column({
-        field: "scanned_block_range_event_parsing",
-        type: DataType.ARRAY(DataType.STRING),
+        field: "to_block_raw_logs",
+        type: DataType.INTEGER,
     })
-], BlockScanningData.prototype, "scannedBlockRangeEventParsing", void 0);
+], BlockScanningData.prototype, "toBlockRawLogs", void 0);
+__decorate([
+    Column({
+        field: "from_block_event_parsing",
+        type: DataType.INTEGER,
+    })
+], BlockScanningData.prototype, "fromBlockEventParsing", void 0);
+__decorate([
+    Column({
+        field: "to_block_event_parsing",
+        type: DataType.INTEGER,
+    })
+], BlockScanningData.prototype, "toBlockEventParsing", void 0);
 BlockScanningData = __decorate([
     Table({
         tableName: "block_scanning_data",

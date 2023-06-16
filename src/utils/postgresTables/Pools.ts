@@ -97,7 +97,6 @@ async function updatePoolTableForAddresses(address: string, poolCount: number): 
   const PREV_MAX_COUNT = await getCountByAddress(address);
 
   for (let i = PREV_MAX_COUNT; i < poolCount; i++) {
-    console.log(address, i, poolCount);
     const POOL_ADDRESS = await CONTRACT.methods.pool_list(i).call();
     if (await isAddressStoredInPools(POOL_ADDRESS)) continue;
     await addAddressToPools(address, POOL_ADDRESS);
@@ -197,7 +196,6 @@ async function updateLpTokenAddresses(): Promise<void> {
       i += 1;
       const lpTokenAddress = await getLpTokenAddress(pool.address, pool.source_address ?? "");
       pool.lp_token = lpTokenAddress;
-      console.log(`${i} saving LP-Token-Address ${lpTokenAddress} for ${pool.address}`);
       await pool.save();
     }
   } catch (error) {
@@ -244,7 +242,6 @@ async function updateNames(): Promise<void> {
       i += 1;
       const NAME = await getPoolNameFromLpToken(pool.lp_token);
       pool.name = NAME;
-      console.log(`${i}/${poolsWithoutNames.length} saving Name ${NAME} for ${pool.address}`);
       await pool.save();
     }
   } catch (error) {
@@ -282,7 +279,6 @@ export async function updateCoins(): Promise<void> {
       i += 1;
       const COINS = await getCoins(pool.address, pool.source_address ?? "");
       pool.coins = COINS;
-      console.log(`${i}/${poolsWithoutCoins.length} saving Coins ${COINS} for ${pool.address}`);
       await pool.save();
     }
   } catch (error) {
@@ -325,7 +321,6 @@ async function updateNCoins(): Promise<void> {
       i += 1;
       const N_COINS = await getNCoins(pool.address);
       pool.n_coins = N_COINS;
-      console.log(`${i}/${poolsWithoutNCoins.length} saving Coins ${N_COINS} for ${pool.address}`);
       await pool.save();
     }
   } catch (error) {
@@ -374,7 +369,6 @@ async function updateInceptionBlock(): Promise<void> {
       const INCEPION_BLOCK = await getInceptionBlock(HIGHEST_BLOCK, POOL.address);
       if (!INCEPION_BLOCK) continue;
       POOL.inception_block = INCEPION_BLOCK;
-      console.log(`${i}/${POOLS_WITHOUT_INCEPTION_BLOCK.length} saving Inception Block ${INCEPION_BLOCK} for ${POOL.address}`);
       await POOL.save();
     }
   } catch (error) {
@@ -420,7 +414,6 @@ async function updateCreationTimestamp(): Promise<void> {
       const CREATION_TIMESTAMP = await getCreationTimestamp(POOL.address);
       if (!CREATION_TIMESTAMP) continue;
       POOL.creation_timestamp = CREATION_TIMESTAMP;
-      console.log(`${i}/${POOLS_WITHOUT_CREATION_TIMESTAMP.length} saving Creation Timestamp ${CREATION_TIMESTAMP} for ${POOL.address}`);
       await POOL.save();
     }
   } catch (error) {
@@ -477,7 +470,6 @@ async function updateBasepool(): Promise<void> {
       const BASEPOOL = await findPoolAddressByCoinLpToken(COINS);
       if (!BASEPOOL) continue;
       POOL.base_pool = BASEPOOL;
-      console.log(`${i}/${POOLS_WITHOUT_BASEPOOL.length} saving basepool ${BASEPOOL} for ${POOL.address}`);
       await POOL.save();
     }
   } catch (error) {
@@ -520,7 +512,6 @@ async function updateVersions(): Promise<void> {
       const VERSION = await getVersionForDatabase(POOL.address);
       if (!VERSION) continue;
       POOL.version = VERSION;
-      console.log(`${i}/${POOLS_WITHOUT_VERSIONS.length} saving version ${VERSION} for ${POOL.address}`);
       await POOL.save();
     }
   } catch (error) {
@@ -585,29 +576,15 @@ export async function updatePools() {
       }
     }
   }
-  console.log(`[✓] Pool Addresses synced successfully.`);
 
   await updateLpTokenAddresses();
-  console.log(`[✓] Table: Pools | LP-Token-Addresses synced successfully.`);
-
   await updateNames();
-  console.log(`[✓] Table: Pools | Names synced successfully.`);
-
   await updateCoins();
-  console.log(`[✓] Table: Pools | Coins synced successfully.`);
-
   await updateNCoins();
-  console.log(`[✓] Table: Pools | N_Coins synced successfully.`);
-
   await updateInceptionBlock();
-  console.log(`[✓] Table: Pools | Inception Blocks synced successfully.`);
-
   await updateCreationTimestamp();
-  console.log(`[✓] Table: Pools | Creation Timestamps synced successfully.`);
-
   await updateBasepool();
-  console.log(`[✓] Table: Pools | Basepools synced successfully.`);
-
   await updateVersions();
-  console.log(`[✓] Table: Pools | Versions synced successfully.`);
+
+  console.log(`[✓] Pools synced successfully.`);
 }

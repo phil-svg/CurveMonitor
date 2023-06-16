@@ -5,14 +5,26 @@ import { Table, Column, Model, DataType } from "sequelize-typescript";
 })
 export class BlockScanningData extends Model {
   @Column({
-    field: "scanned_block_range_raw_logs",
-    type: DataType.ARRAY(DataType.STRING),
+    field: "from_block_raw_logs",
+    type: DataType.INTEGER,
   })
-  scannedBlockRangeRawLogs!: string[];
+  fromBlockRawLogs!: number;
 
   @Column({
-    field: "scanned_block_range_event_parsing",
-    type: DataType.ARRAY(DataType.STRING),
+    field: "to_block_raw_logs",
+    type: DataType.INTEGER,
   })
-  scannedBlockRangeEventParsing?: string[];
+  toBlockRawLogs!: number;
+
+  @Column({
+    field: "from_block_event_parsing",
+    type: DataType.INTEGER,
+  })
+  fromBlockEventParsing?: number;
+
+  @Column({
+    field: "to_block_event_parsing",
+    type: DataType.INTEGER,
+  })
+  toBlockEventParsing?: number;
 }

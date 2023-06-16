@@ -126,7 +126,6 @@ async function updateSymbols(): Promise<void> {
       if (!coin.address) continue;
       const SYMBOL = await fetchSymbolFromChain(coin.address);
       coin.symbol = SYMBOL;
-      console.log(`${i}/${coinsWithoutSymbols.length} saving Symbols ${SYMBOL} for ${coin.address}`);
       await coin.save();
     }
   } catch (error) {
@@ -160,7 +159,6 @@ async function updateDecimals(): Promise<void> {
       if (!coin.address) continue;
       const DECIMALS = await fetchDecimalsFromChain(coin.address);
       coin.decimals = DECIMALS;
-      console.log(`${i}/${coinsWithoutDecimals.length} saving Decimal ${DECIMALS} for ${coin.address}`);
       await coin.save();
     }
   } catch (error) {
@@ -173,11 +171,8 @@ async function updateDecimals(): Promise<void> {
 
 export async function updateCoinTable(): Promise<void> {
   await updateAddresses();
-  console.log(`[✓] Table: Coins | Addresses synced successfully.`);
-
   await updateSymbols();
-  console.log(`[✓] Table: Coins | Symbols synced successfully.`);
-
   await updateDecimals();
-  console.log(`[✓] Table: Coins | Decimals synced successfully.`);
+
+  console.log(`[✓] Coins synced successfully.`);
 }

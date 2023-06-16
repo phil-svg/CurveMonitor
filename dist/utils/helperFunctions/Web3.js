@@ -4,7 +4,18 @@ import { getAddressById, getIdByAddress } from "../postgresTables/readFunctions/
 let web3WsProvider = null;
 export function getWeb3WsProvider() {
     if (!web3WsProvider) {
-        web3WsProvider = new Web3(new Web3.providers.WebsocketProvider(process.env.WEB3_WSS));
+        const wsProvider = new Web3.providers.WebsocketProvider(process.env.WEB3_WSS);
+        // Attach 'end' event listener
+        wsProvider.on("end", (err) => {
+            console.log("WS connection ended, reconnecting...", err);
+            web3WsProvider = null; // Clear instance so that it can be recreated.
+            getWeb3WsProvider(); // Recursive call to recreate the provider.
+        });
+        // Attach 'error' event listener
+        wsProvider.on("error", () => {
+            console.error("WS encountered an error");
+        });
+        web3WsProvider = new Web3(wsProvider);
     }
     return web3WsProvider;
 }
@@ -23,6 +34,36 @@ export async function getContractByAddress(poolAddress) {
     }
     const CONTRACT = await getContractByPoolID(POOL_ID);
     return CONTRACT;
+}
+export async function getContractByAddressWithWebsocket(poolAddress) {
+    const POOL_ID = await getIdByAddress(poolAddress);
+    if (!POOL_ID) {
+        console.log(`Err fetching ABI for pool ${poolAddress}`);
+        return;
+    }
+    const CONTRACT = await getContractByPoolIDWithWebsocket(POOL_ID);
+    return CONTRACT;
+}
+export async function getContractByPoolIDWithWebsocket(poolId) {
+    try {
+        const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
+        if (!POOL_ABI) {
+            console.log(`Err fetching ABI for pool ${poolId}`);
+            return;
+        }
+        const POOL_ADDRESS = await getAddressById(poolId);
+        if (!POOL_ADDRESS) {
+            console.log(`Err fetching Address for pool ${poolId}`);
+            return;
+        }
+        const web3 = getWeb3WsProvider();
+        const CONTRACT = new web3.eth.Contract(POOL_ABI, POOL_ADDRESS);
+        return CONTRACT;
+    }
+    catch (err) {
+        console.log(`Err fetching ABI for pool ${poolId}`);
+        return;
+    }
 }
 export async function getContractByPoolID(poolId) {
     try {

@@ -18,3 +18,15 @@ export function displayProgressBar(infoText: string, current: number, total: num
 
   updateConsoleOutput(`${infoText} ${bar} ${current}/${total}`);
 }
+
+export function getCurrentTimeString(): string {
+  const date = new Date();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "pm" : "am";
+
+  hours %= 12;
+  hours = hours || 12;
+
+  return `${hours}:${minutes < 10 ? "0" : ""}${minutes}${ampm}`;
+}

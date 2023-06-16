@@ -3,8 +3,19 @@ import { fetchDistinctBlockNumbers, fetchDistinctBlockNumbersInBatch } from "../
 import { displayProgressBar, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { fetchBlockNumbers } from "../postgresTables/readFunctions/Blocks.js";
 import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
-async function writeBlocks(blocks) {
-    await Blocks.bulkCreate(blocks);
+export async function writeBlock(block_number, timestamp) {
+    const block = await Blocks.findOne({ where: { block_number } });
+    if (block) {
+        await block.update({ timestamp });
+    }
+    else {
+        await Blocks.create({ block_number, timestamp });
+    }
+}
+export async function writeBlocks(blocks) {
+    await Blocks.bulkCreate(blocks, {
+        updateOnDuplicate: ["timestamp"],
+    });
 }
 async function main() {
     const NUM_OF_BLOCKS = (await fetchDistinctBlockNumbers()).length;

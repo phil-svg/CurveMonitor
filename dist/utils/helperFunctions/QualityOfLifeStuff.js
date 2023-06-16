@@ -14,4 +14,13 @@ export function displayProgressBar(infoText, current, total) {
     const bar = `[${"#".repeat(filled)}${"-".repeat(empty)}]`;
     updateConsoleOutput(`${infoText} ${bar} ${current}/${total}`);
 }
+export function getCurrentTimeString() {
+    const date = new Date();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "pm" : "am";
+    hours %= 12;
+    hours = hours || 12;
+    return `${hours}:${minutes < 10 ? "0" : ""}${minutes}${ampm}`;
+}
 //# sourceMappingURL=QualityOfLifeStuff.js.map

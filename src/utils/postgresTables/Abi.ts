@@ -81,7 +81,6 @@ async function storeAbiForPools(pool_id: number, abi: any[]): Promise<void> {
       return; // Abi for the pool_id is already stored.
     }
     await AbisPools.create({ pool_id, abi });
-    console.log(`Abi for pool_id ${pool_id} stored successfully`);
   } catch (err) {
     console.error("Error storing abi for AbisPools:", err);
   }
@@ -95,7 +94,6 @@ export async function storeAbiForAddressProvider(address: string, abi: any[]): P
       return; // Abi for the address is already stored.
     }
     await AbisRelatedToAddressProvider.create({ address: lowerCaseAddress, abi });
-    console.log(`Abi for ${address} stored successfully`);
   } catch (err) {
     console.error("Error storing abi for AbisRelatedToAddressProvider:", err);
   }
@@ -130,7 +128,6 @@ export async function getAbiBy(tableName: string, options: { address?: string; i
     }
 
     if (!abi) {
-      console.error(`Fetching ABI from Etherscan for Pool "${address}".`);
       abi = await fetchAbiFromEtherscan(address);
       if (options.id) {
         await storeAbiForPools(options.id, abi);
@@ -157,5 +154,5 @@ export async function updatePoolAbis(): Promise<void> {
     i += 1;
     await getAbiBy("AbisPools", { id: POOL_ID });
   }
-  console.log(`[✓] Table: ABIs  | Pool-ABIs' synced successfully.`);
+  console.log(`[✓] Pool-ABIs' synced successfully.`);
 }

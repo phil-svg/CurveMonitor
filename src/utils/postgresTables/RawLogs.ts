@@ -4,7 +4,9 @@ import { getPastEvents } from "../web3Calls/generic.js";
 import { RawTxLogs } from "../../models/RawTxLogs.js";
 import { updateConsoleOutput, displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
 import { EventObject } from "../Interfaces.js";
-import { readScannedBlockRangesRawLogs, updateScannedBlocksRawLogs } from "./readFunctions/BlockScanningData.js";
+import { getRawLogsFromBlock, getRawLogsToBlock, updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
+import { getCurrentBlockNumberFromLocalDB } from "./CurrentBlock.js";
+import eventEmitter from "../goingLive/EventEmitter.js";
 
 export async function storeEvent(event: EventObject, poolId: number): Promise<void> {
   const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw } = event;
@@ -42,7 +44,7 @@ async function processPastEvents(
 ): Promise<{ newFromBlock: number; newToBlock: number }> {
   const progressPercentage = ((currentToBlock - fromBlock) / (toBlock - fromBlock)) * 100;
   const message = `Fetching Raw Logs for: ${poolAddress} ${progressPercentage.toFixed(0)}%`;
-  updateConsoleOutput(message, 1);
+  // updateConsoleOutput(message, 1);
 
   for (const event of pastEvents) {
     await storeEvent(event, poolId);
@@ -77,49 +79,58 @@ async function processAddress(poolAddress: string, fromBlock: number, toBlock: n
       const { newFromBlock, newToBlock } = await processPastEvents(PAST_EVENTS as EventObject[], POOL_ID, poolAddress, fromBlock, toBlock, currentToBlock);
       currentFromBlock = newFromBlock;
       currentToBlock = newToBlock;
+    } else {
+      console.log("Err in processing Address.");
+    }
+  }
+}
+
+async function processBlocksUntilCurrent(address: string, fromBlock: number) {
+  while (true) {
+    let currentBlockNumber = await getCurrentBlockNumberFromLocalDB();
+    if (currentBlockNumber === null) {
+      console.error("Failed to fetch current block number");
+      return;
+    }
+
+    if (fromBlock < currentBlockNumber) {
+      await processAddress(address, fromBlock + 1, currentBlockNumber);
+      fromBlock = currentBlockNumber;
+    }
+
+    let updatedBlockNumber = await getCurrentBlockNumberFromLocalDB();
+    if (updatedBlockNumber === null || updatedBlockNumber !== currentBlockNumber) {
+      continue;
+    } else {
+      eventEmitter.emit("ready for subscription", address);
+      return;
     }
   }
 }
 
 async function processAllAddressesSequentially(addresses: string[]): Promise<void> {
-  // global scan-range
-  let fromBlockScanRange = 17145330;
-  let toBlockScanRange = 17380136;
+  let fromBlock = 17145330;
+  let nowBlock = await getCurrentBlockNumberFromLocalDB();
 
-  let storedBlockRangesData = await readScannedBlockRangesRawLogs();
+  let smallestBlockNumberStored = await getRawLogsFromBlock();
+  let largestBlockNumberStored = await getRawLogsToBlock();
 
-  let storedBlockRanges: number[][] = storedBlockRangesData === "new table" ? [] : storedBlockRangesData;
-
-  // Sort the block ranges
-  const sortedBlockRanges = storedBlockRanges.sort((a, b) => a[0] - b[0]);
-
-  // Get the smallest and largest scanned block numbers
-  const smallestBlockNumberStored = sortedBlockRanges.length > 0 ? sortedBlockRanges[0][0] : null;
-  const largestBlockNumberStored = sortedBlockRanges.length > 0 ? sortedBlockRanges[sortedBlockRanges.length - 1][1] : null;
-
-  // Only process the lower missing end if the smallest block number is larger than the fromBlockScanRange
-  if (smallestBlockNumberStored === null || smallestBlockNumberStored > fromBlockScanRange) {
+  // Case: We have events fetched, but not as far back in time as fromBlock dictates, so we fetch the missing section.
+  if (smallestBlockNumberStored && fromBlock < smallestBlockNumberStored) {
     for (let i = 0; i < addresses.length; i++) {
-      displayProgressBar("Processing Pools:", i + 1, addresses.length);
-      await processAddress(addresses[i], fromBlockScanRange, smallestBlockNumberStored ? smallestBlockNumberStored - 1 : toBlockScanRange); // Subtract 1 to avoid overlap
+      // displayProgressBar("Fetching Raw Logs:", i + 1, addresses.length);
+      await processAddress(addresses[i], fromBlock, smallestBlockNumberStored - 1);
     }
-    // When processing is done, update the scanned block ranges
-    sortedBlockRanges.unshift([fromBlockScanRange, smallestBlockNumberStored ? smallestBlockNumberStored - 1 : toBlockScanRange]);
   }
 
-  // Only process the higher missing end if the largest block number is smaller than the toBlockScanRange
-  if (largestBlockNumberStored === null || largestBlockNumberStored < toBlockScanRange) {
-    for (let i = 0; i < addresses.length; i++) {
-      displayProgressBar("Processing Pools:", i + 1, addresses.length);
-      await processAddress(addresses[i], largestBlockNumberStored ? largestBlockNumberStored + 1 : fromBlockScanRange, toBlockScanRange); // Add 1 to avoid overlap
-    }
-    // When processing is done, update the scanned block ranges
-    sortedBlockRanges.push([largestBlockNumberStored ? largestBlockNumberStored + 1 : fromBlockScanRange, toBlockScanRange]);
+  for (let i = 0; i < addresses.length; i++) {
+    // displayProgressBar("Fetching Raw Logs:", i + 1, addresses.length);
+    if (!largestBlockNumberStored) largestBlockNumberStored = fromBlock;
+    await processBlocksUntilCurrent(addresses[i], largestBlockNumberStored);
   }
 
-  if (storedBlockRangesData === "new table" || smallestBlockNumberStored !== null || largestBlockNumberStored !== null) {
-    await updateScannedBlocksRawLogs(sortedBlockRanges);
-  }
+  await updateRawLogsFromBlock(fromBlock);
+  if (nowBlock) await updateRawLogsToBlock(nowBlock);
 }
 
 export async function updateRawLogs(): Promise<void> {

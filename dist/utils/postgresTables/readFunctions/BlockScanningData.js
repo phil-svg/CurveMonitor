@@ -1,39 +1,42 @@
 import { BlockScanningData } from "../../../models/BlockScanningData.js";
-export async function readScannedBlockRangesRawLogs() {
-    return await readScannedBlockRanges("scannedBlockRangeRawLogs");
+// Function to get the raw logs from block
+export async function getRawLogsFromBlock() {
+    const blockData = await BlockScanningData.findOne();
+    return (blockData === null || blockData === void 0 ? void 0 : blockData.fromBlockRawLogs) || null;
 }
-export async function readScannedBlockRangesEventParsing() {
-    return await readScannedBlockRanges("scannedBlockRangeEventParsing");
+// Function to get the raw logs to block
+export async function getRawLogsToBlock() {
+    const blockData = await BlockScanningData.findOne();
+    return (blockData === null || blockData === void 0 ? void 0 : blockData.toBlockRawLogs) || null;
 }
-async function readScannedBlockRanges(rangeField) {
-    var _a;
-    const scannedBlocksData = await BlockScanningData.findByPk(1);
-    if (!scannedBlocksData || !scannedBlocksData[rangeField]) {
-        return "new table";
-    }
-    let storedBlockRanges = ((_a = scannedBlocksData[rangeField]) === null || _a === void 0 ? void 0 : _a.map((range) => {
-        const [start, end] = range.split("-").map(Number);
-        return [start, end];
-    })) || [];
-    return storedBlockRanges;
+// Function to update the raw logs from block
+export async function updateRawLogsFromBlock(fromBlock) {
+    const [blockData] = await BlockScanningData.findOrCreate({ where: {} });
+    await blockData.update({ fromBlockRawLogs: fromBlock });
 }
-export async function updateScannedBlocksRawLogs(blockRanges) {
-    await updateScannedBlockRanges("scannedBlockRangeRawLogs", blockRanges);
+// Function to update the raw logs to block
+export async function updateRawLogsToBlock(toBlock) {
+    const [blockData] = await BlockScanningData.findOrCreate({ where: {} });
+    await blockData.update({ toBlockRawLogs: toBlock });
 }
-export async function updateScannedBlocksEventParsing(blockRanges) {
-    await updateScannedBlockRanges("scannedBlockRangeEventParsing", blockRanges);
+// Function to get the event parsing from block
+export async function getEventParsingFromBlock() {
+    const blockData = await BlockScanningData.findOne();
+    return (blockData === null || blockData === void 0 ? void 0 : blockData.fromBlockEventParsing) || null;
 }
-async function updateScannedBlockRanges(rangeField, blockRanges) {
-    const formattedBlockRanges = blockRanges.map((range) => `${range[0]}-${range[1]}`);
-    const blockScanningData = await BlockScanningData.findByPk(1);
-    if (!blockScanningData) {
-        await BlockScanningData.create({
-            [rangeField]: formattedBlockRanges,
-        });
-    }
-    else {
-        blockScanningData[rangeField] = formattedBlockRanges;
-        await blockScanningData.save();
-    }
+// Function to get the event parsing to block
+export async function getEventParsingToBlock() {
+    const blockData = await BlockScanningData.findOne();
+    return (blockData === null || blockData === void 0 ? void 0 : blockData.toBlockEventParsing) || null;
+}
+// Function to update the event parsing from block
+export async function updateEventParsingFromBlock(fromBlock) {
+    const [blockData] = await BlockScanningData.findOrCreate({ where: {} });
+    await blockData.update({ fromBlockEventParsing: fromBlock });
+}
+// Function to update the event parsing to block
+export async function updateEventParsingToBlock(toBlock) {
+    const [blockData] = await BlockScanningData.findOrCreate({ where: {} });
+    await blockData.update({ toBlockEventParsing: toBlock });
 }
 //# sourceMappingURL=BlockScanningData.js.map

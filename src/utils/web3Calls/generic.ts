@@ -163,14 +163,13 @@ export async function getTxReceiptClassic(txHash: string): Promise<TransactionRe
   }
 }
 
-// maxConcurrent defines the maximum number of tasks that can be running at once.
-// minTime defines the minimum amount of time between starting tasks.
-const limiter = new Bottleneck({
-  maxConcurrent: 100,
-  minTime: 25,
-});
-
 export async function getTxReceipt(txHash: string): Promise<any> {
+  // maxConcurrent defines the maximum number of tasks that can be running at once.
+  // minTime defines the minimum amount of time between starting tasks.
+  const limiter = new Bottleneck({
+    maxConcurrent: 100,
+    minTime: 30,
+  });
   return limiter.schedule(async () => {
     try {
       const response = await axios.post(
