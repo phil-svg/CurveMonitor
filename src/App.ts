@@ -32,7 +32,11 @@ await subscribeToNewBlocks();
 // await updatePoolParamsEvents(); // muted until useful
 
 await preparingLiveModeForRawEvents();
-await updateRawLogs(); // takes 3:30.627 (m:ss.mmm) to run
+
+console.time();
+await updateRawLogs(); // takes 3:30.627 (m:ss.mmm) to run || takes 2:08.546 (m:ss.mmm) to run
+console.timeEnd();
+
 await updateBlockTimestamps();
 
 await parseEvents();

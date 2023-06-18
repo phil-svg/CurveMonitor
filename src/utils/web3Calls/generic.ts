@@ -7,6 +7,7 @@ import { BlockNumber } from "../Interfaces.js";
 import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
 import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
 import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js";
+import axiosRetry from "axios-retry";
 
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
@@ -164,12 +165,16 @@ export async function getTxReceiptClassic(txHash: string): Promise<TransactionRe
 }
 
 export async function getTxReceipt(txHash: string): Promise<any> {
-  // maxConcurrent defines the maximum number of tasks that can be running at once.
-  // minTime defines the minimum amount of time between starting tasks.
+  // Max concurrent defines the maximum number of tasks that can be running at once.
+  // MinTime defines the minimum amount of time between starting tasks.
   const limiter = new Bottleneck({
     maxConcurrent: 100,
     minTime: 30,
   });
+
+  // Configure axios to retry on failure
+  axiosRetry(axios, { retries: 3 });
+
   return limiter.schedule(async () => {
     try {
       const response = await axios.post(
@@ -192,7 +197,12 @@ export async function getTxReceipt(txHash: string): Promise<any> {
         return null;
       }
     } catch (error) {
-      console.log(error);
+      if ((error as Error).message === "ECONNABORTED") {
+        console.log(`getTxReceipt: ${(error as Error).message}`);
+      } else {
+        console.log(error);
+      }
+
       return null;
     }
   });

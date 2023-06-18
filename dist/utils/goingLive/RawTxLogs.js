@@ -13,7 +13,6 @@ export async function preparingLiveModeForRawEvents() {
 }
 // buffers events, and processes them in block-chunks (waits for block to be done before parsing.)
 async function subscribeToAddress(address) {
-    console.log(`Subscribing with the address: ${address}`);
     const contract = await getContractByAddressWithWebsocket(address);
     const poolId = await getIdByAddress(address);
     if (!contract)
@@ -45,7 +44,8 @@ async function processBufferedEvents() {
     const POOL_COINS = await getCoinsInBatchesByPools(validPoolIds);
     const EVENTS = await fetchEventsForBlockNumberRange(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
     const timeStr = getCurrentTimeString();
-    console.log(`${timeStr} New Event(s) picked up ${EVENTS}`);
+    console.log(`${timeStr} New Event(s) picked up`);
+    console.dir(EVENTS, { depth: null, colors: true });
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
     eventBuffer = [];
 }
