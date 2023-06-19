@@ -13,7 +13,7 @@ export async function getTimestampByBlockNumber(blockNumber: number): Promise<nu
   return block ? block.timestamp : null;
 }
 
-export async function getTimestampsByBlockNumbers(blockNumbers: number[]): Promise<{ [blockNumber: number]: number | null }> {
+export async function getTimestampsByBlockNumbersFromLocalDatabase(blockNumbers: number[]): Promise<{ [blockNumber: number]: number | null }> {
   // Find blocks with the specified block numbers
   const blocks = await Blocks.findAll({ where: { block_number: blockNumbers } });
 

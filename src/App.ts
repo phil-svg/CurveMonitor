@@ -11,7 +11,8 @@ import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
 import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetection.js";
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
-import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogs.js";
+import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
+import sequelize from "sequelize/types/sequelize.js";
 
 async function initDatabase() {
   try {
@@ -23,6 +24,7 @@ async function initDatabase() {
 }
 
 await initDatabase();
+
 await loadAddressProvider();
 await updatePools();
 await updateCoinTable();
@@ -30,15 +32,9 @@ await updatePoolAbis();
 await subscribeToNewBlocks();
 // await updateInitialPoolParams(); // muted until useful
 // await updatePoolParamsEvents(); // muted until useful
-
 await preparingLiveModeForRawEvents();
-
-console.time();
-await updateRawLogs(); // takes 3:30.627 (m:ss.mmm) to run || takes 2:08.546 (m:ss.mmm) to run
-console.timeEnd();
-
+await updateRawLogs();
 await updateBlockTimestamps();
-
 await parseEvents();
 // await updateTokenDollarValues(); // muted until useful
 await updateMevDetection();

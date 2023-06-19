@@ -1,7 +1,7 @@
 import { getCurrentTimeString } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
-import { getTimestampsByBlockNumbers } from "../postgresTables/readFunctions/Blocks.js";
+import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
 import { getCoinsInBatchesByPools, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
 import { fetchEventsForBlockNumberRange } from "../postgresTables/readFunctions/RawLogs.js";
 import { sortAndProcess } from "../postgresTables/txParsing/ParseTx.js";
@@ -42,7 +42,7 @@ async function processBufferedEvents() {
 
   const eventBlockNumbers = eventBuffer.flatMap((event) => (event.event.blockNumber !== undefined ? [event.event.blockNumber] : []));
 
-  const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbers(eventBlockNumbers);
+  const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
 
   const poolAddresses = eventBuffer.map((event) => event.address); // Get all addresses from the events
   const poolIdsPromises = poolAddresses.map(getIdByAddress); // Convert each address to a Promise<id>
@@ -54,8 +54,8 @@ async function processBufferedEvents() {
   const EVENTS = await fetchEventsForBlockNumberRange(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
 
   const timeStr = getCurrentTimeString();
-  console.log(`${timeStr} New Event(s) picked up`);
-  console.dir(EVENTS, { depth: null, colors: true });
+  // console.log(`\n${timeStr} New Event(s) picked up`);
+  // console.dir(EVENTS, { depth: null, colors: true });
 
   await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
   eventBuffer = [];

@@ -7,29 +7,34 @@ import { parseRemoveLiquidityOne } from "./ParseRemoveLiquidityOne.js";
 import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
 import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { getTimestampsByBlockNumbers } from "../readFunctions/Blocks.js";
+import { getTimestampsByBlockNumbersFromLocalDatabase } from "../readFunctions/Blocks.js";
 import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
+import Bottleneck from "bottleneck";
+import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from "../../../config/Alchemy.js";
 
 export async function sortAndProcess(EVENTS: any, BLOCK_UNIXTIMES: any, POOL_COINS: any): Promise<void> {
   const functions = {
     RemoveLiquidity: parseRemoveLiquidity,
     AddLiquidity: parseAddLiquidity,
-    RemoveLiquidityOne: parseRemoveLiquidityOne,
     TokenExchange: parseTokenExchange,
     RemoveLiquidityImbalance: parseRemoveLiquidityImbalance,
   };
 
   const tokenExchangeUnderlyingEvents: any[] = [];
+  const removeLiquidityOneEvents: any[] = [];
   const otherEvents: any[] = [];
 
   EVENTS.forEach((EVENT: any) => {
     if (EVENT.event === "TokenExchangeUnderlying") {
       tokenExchangeUnderlyingEvents.push(EVENT);
+    } else if (EVENT.event === "RemoveLiquidityOne") {
+      removeLiquidityOneEvents.push(EVENT);
     } else {
-      otherEvents.push(EVENT); // Per batch, making sure that the Events of type 'ExchangeUnderlyings' run last.
+      otherEvents.push(EVENT);
     }
   });
 
+  /** first parses the most basic event types */
   const otherPromises = otherEvents
     .map((EVENT: any) => {
       const func = functions[EVENT.event as keyof typeof functions];
@@ -45,6 +50,24 @@ export async function sortAndProcess(EVENTS: any, BLOCK_UNIXTIMES: any, POOL_COI
     console.error(error);
   }
 
+  /** then parses RemoveLiquidityOne, can require web3 calls, therefore, solving uniquely for best speed */
+  const limiter = new Bottleneck({
+    maxConcurrent: 10,
+    minTime: 1000 / MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND,
+  });
+  // limiter is sensitive, right now stable.
+
+  const removeLiquidityOnePromises = removeLiquidityOneEvents.map((EVENT: any) => {
+    return limiter.schedule(() => parseRemoveLiquidityOne(EVENT, BLOCK_UNIXTIMES[EVENT.blockNumber], POOL_COINS[EVENT.pool_id]));
+  });
+
+  try {
+    await Promise.all(removeLiquidityOnePromises);
+  } catch (error) {
+    console.error(error);
+  }
+
+  /** lastly parsing underlying exchanges, since we can now include pre-solved events which occured in the same tx. */
   const tokenExchangeUnderlyingPromises = tokenExchangeUnderlyingEvents.map((EVENT: any) => {
     return parseTokenExchangeUnderlying(EVENT, BLOCK_UNIXTIMES[EVENT.blockNumber], POOL_COINS[EVENT.pool_id]);
   });
@@ -76,7 +99,7 @@ async function parseEventsMain() {
 
     // Get block timestamps
     const eventBlockNumbers = EVENTS.flatMap((event) => (event.blockNumber !== undefined ? [event.blockNumber] : []));
-    const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbers(eventBlockNumbers);
+    const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
 
     // Get pool coins
     const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
@@ -91,7 +114,6 @@ async function parseEventsMain() {
 }
 
 export async function parseEvents(): Promise<void> {
-  // console.log(await countEvents());
   await parseEventsMain();
   updateConsoleOutput("[✓] Events parsed successfully.\n");
 }

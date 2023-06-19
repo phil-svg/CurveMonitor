@@ -30,9 +30,34 @@ export function getWeb3WsProvider(): Web3 {
 
 let web3HttpProvider: Web3 | null = null;
 
-export function getWeb3HttpProvider(): Web3 {
+export async function getWeb3HttpProvider(): Promise<Web3> {
   if (!web3HttpProvider) {
-    web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP!));
+    const MAX_RETRIES = 5; // Maximum number of retries
+    const RETRY_DELAY = 5000; // Delay between retries in milliseconds
+    let retries = 0;
+
+    while (retries < MAX_RETRIES) {
+      try {
+        web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP!));
+        await web3HttpProvider.eth.net.isListening(); // This will throw an error if it can't connect
+        return web3HttpProvider;
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          const err = error as any;
+          if (err.code === "ECONNABORTED") {
+            console.log(`HTTP Provider connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+          } else if (err.message && err.message.includes("CONNECTION ERROR")) {
+            console.log(`HTTP Provider connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+          } else {
+            console.log(`Failed to connect to Ethereum node. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+          }
+          retries++;
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+        }
+      }
+    }
+
+    throw new Error("Failed to connect to Ethereum node after several attempts. Please check your connection and the status of the Ethereum node.");
   }
   return web3HttpProvider;
 }
@@ -96,7 +121,7 @@ export async function getContractByPoolID(poolId: number): Promise<Contract | vo
       return;
     }
 
-    const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
+    const WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
     const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
     return CONTRACT;
   } catch (err) {
@@ -105,8 +130,8 @@ export async function getContractByPoolID(poolId: number): Promise<Contract | vo
   }
 }
 
-export function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS: Log[]): any[] {
-  const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
+export async function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS: Log[]): Promise<any[]> {
+  const WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
   const decodedLogs = [];
 
   for (const log of TOKEN_TRANSFER_EVENTS) {

@@ -9,7 +9,7 @@ export async function getTimestampByBlockNumber(blockNumber) {
     const block = await Blocks.findOne({ where: { block_number: blockNumber } });
     return block ? block.timestamp : null;
 }
-export async function getTimestampsByBlockNumbers(blockNumbers) {
+export async function getTimestampsByBlockNumbersFromLocalDatabase(blockNumbers) {
     // Find blocks with the specified block numbers
     const blocks = await Blocks.findAll({ where: { block_number: blockNumbers } });
     // Create an object that maps block numbers to timestamps

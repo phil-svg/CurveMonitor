@@ -87,6 +87,8 @@ export async function updatePoolParamsEvents() {
     const latestEventTimestampFromSubgraph = Number(await getLatestEventTimestampFromSubgraph());
     const LAST_BLOCK_CHECKED = (await PoolParamsEvents.min("last_block_checked"));
     const LAST_UNIXTIME_CHECKED = await getBlockTimeStamp(LAST_BLOCK_CHECKED);
+    if (!LAST_UNIXTIME_CHECKED)
+        return;
     // gets triggered if say the last check was Monday, it is now Friday, and Subgraph shows Event for Wednesday.
     if (latestEventTimestampFromSubgraph >= LAST_UNIXTIME_CHECKED) {
         const ALL_POOL_IDS = (await getAllPoolIds()).sort((a, b) => a - b);

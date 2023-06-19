@@ -3,6 +3,7 @@ import { TransactionType } from "../../../models/Transactions.js";
 import { getTxReceipt } from "../../web3Calls/generic.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
+import { retry } from "../../helperFunctions/Web3Retry.js";
 
 const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
@@ -26,7 +27,7 @@ async function getCoinAddressFromTxReceipt(event: any, POOL_COINS: string[]): Pr
 
   if (TOKEN_TRANSFER_EVENTS.length === 0) return null;
 
-  let decodedLogs = decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS);
+  let decodedLogs = await decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS);
 
   for (const decodedLog of decodedLogs) {
     if (decodedLog.value === event.returnValues.coin_amount && decodedLog.fromAddress === event.address) {
@@ -42,18 +43,26 @@ export async function parseRemoveLiquidityOne(event: any, BLOCK_UNIXTIME: any, P
 
   if (!POOL_COINS) return;
 
-  let coinAddress;
-  if (event.returnValues.coin_index) {
-    coinAddress = POOL_COINS[event.returnValues.coin_index];
-  } else {
-    coinAddress = await getCoinAddressFromTxReceipt(event, POOL_COINS);
+  let coinAddress = await retry(async () => {
+    if (event.returnValues.coin_index) {
+      return POOL_COINS[event.returnValues.coin_index];
+    } else {
+      const addr = await getCoinAddressFromTxReceipt(event, POOL_COINS);
 
-    // Check for the special case when the Address was Ether, since it will not show up as and ERC20-Transfer.
-    if (coinAddress === null && POOL_COINS.includes(ETHER)) {
-      coinAddress = ETHER;
-    } else if (!coinAddress) {
-      return;
+      // Check for the special case when the Address was Ether, since it will not show up as an ERC20-Transfer.
+      if (addr === null && POOL_COINS.includes(ETHER)) {
+        return ETHER;
+      } else if (!addr) {
+        return null;
+      } else {
+        return addr;
+      }
     }
+  });
+
+  if (!coinAddress) {
+    console.log(`\nNo CoinAddress was found for ${event.transactionHash}`);
+    return;
   }
 
   const COIN_ID = await findCoinIdByAddress(coinAddress);

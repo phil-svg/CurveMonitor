@@ -2,10 +2,11 @@ import { getAllPoolAddresses, getIdByAddress } from "./readFunctions/Pools.js";
 import { getContractByAddress } from "../helperFunctions/Web3.js";
 import { getPastEvents } from "../web3Calls/generic.js";
 import { RawTxLogs } from "../../models/RawTxLogs.js";
-import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
+import { updateConsoleOutput, displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getRawLogsFromBlock, getRawLogsToBlock, updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
 import { getCurrentBlockNumberFromLocalDB } from "./CurrentBlock.js";
 import eventEmitter from "../goingLive/EventEmitter.js";
+import { retry } from "../helperFunctions/Web3Retry.js";
 export async function storeEvent(event, poolId) {
     const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw } = event;
     try {
@@ -53,13 +54,12 @@ async function processAddress(poolAddress, fromBlock, toBlock) {
     let currentFromBlock = fromBlock;
     let currentToBlock = toBlock;
     while (currentFromBlock < currentToBlock) {
-        const PAST_EVENTS = await getPastEvents(CONTRACT, "allEvents", currentFromBlock, currentToBlock);
+        const PAST_EVENTS = await retry(() => getPastEvents(CONTRACT, "allEvents", currentFromBlock, currentToBlock));
         if (PAST_EVENTS === null) {
             console.error("Invalid block range");
             return;
         }
         else if ("start" in PAST_EVENTS) {
-            // If the response contains a suggested block range, update the currentToBlock with the suggested end block number.
             currentToBlock = PAST_EVENTS.end;
         }
         else if (Array.isArray(PAST_EVENTS)) {
@@ -94,7 +94,7 @@ async function processBlocksUntilCurrent(address, fromBlock) {
     }
 }
 async function processAllAddressesSequentially(addresses) {
-    let fromBlock = 17145330;
+    let fromBlock = 17307083;
     let nowBlock = await getCurrentBlockNumberFromLocalDB();
     let smallestBlockNumberStored = await getRawLogsFromBlock();
     let largestBlockNumberStored = await getRawLogsToBlock();
@@ -106,7 +106,7 @@ async function processAllAddressesSequentially(addresses) {
         }
     }
     for (let i = 0; i < addresses.length; i++) {
-        // displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
+        displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
         if (!largestBlockNumberStored)
             largestBlockNumberStored = fromBlock;
         await processBlocksUntilCurrent(addresses[i], largestBlockNumberStored);

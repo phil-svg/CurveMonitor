@@ -1,7 +1,7 @@
 import { Contract } from "web3-eth-contract";
 import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { TransactionReceipt } from "web3-core";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import Bottleneck from "bottleneck";
 import { BlockNumber } from "../Interfaces.js";
 import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
@@ -10,7 +10,7 @@ import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js
 import axiosRetry from "axios-retry";
 
 const WEB3_WS_PROVIDER = getWeb3WsProvider();
-const WEB3_HTTP_PROVIDER = getWeb3HttpProvider();
+const WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
 
 function isCupsErr(err: Error): boolean {
   return err.message.includes("compute units per second capacity");
@@ -138,18 +138,67 @@ export async function web3Call(CONTRACT: Contract, method: string, params: any[]
   }
 }
 
-export async function getBlockTimeStamp(blockNumber: number): Promise<number> {
-  const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
-  return Number(BLOCK.timestamp);
+export async function getBlockTimeStamp(blockNumber: number): Promise<number | null> {
+  const MAX_RETRIES = 5; // Maximum number of retries
+  const RETRY_DELAY = 600; // Delay between retries in milliseconds
+  let retries = 0;
+
+  while (retries < MAX_RETRIES) {
+    try {
+      const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
+      return Number(BLOCK.timestamp);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        const err = error as any;
+        if (err.code === "ECONNABORTED") {
+          console.log(`getBlockTimeStamp connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+        } else if (err.message && err.message.includes("CONNECTION ERROR")) {
+          console.log(`getBlockTimeStamp connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+        } else {
+          console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+        }
+        retries++;
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      }
+    }
+  }
+
+  console.log("Failed to get block timestamp after several attempts. Please check your connection and the status of the Ethereum node.");
+  return null;
 }
 
-export async function getBlockTimeStampsInBatches(blockNumbers: number[]): Promise<{ [blockNumber: number]: number }> {
-  const blockTimestamps: { [blockNumber: number]: number } = {};
+export async function getBlockTimeStampsInBatches(blockNumbers: number[]): Promise<{ [blockNumber: number]: number | null }> {
+  const blockTimestamps: { [blockNumber: number]: number | null } = {};
+  const MAX_RETRIES = 5; // Maximum number of retries
+  const RETRY_DELAY = 5000; // Delay between retries in milliseconds
 
   for (const blockNumber of blockNumbers) {
-    console.log(blockNumber, blockNumbers.length);
-    const block = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
-    blockTimestamps[blockNumber] = Number(block.timestamp);
+    let retries = 0;
+    while (retries < MAX_RETRIES) {
+      try {
+        console.log(blockNumber, blockNumbers.length);
+        const block = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
+        blockTimestamps[blockNumber] = Number(block.timestamp);
+        break;
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          const err = error as any;
+          if (err.code === "ECONNABORTED") {
+            console.log(`getBlockTimeStampsInBatches connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+          } else if (err.message && err.message.includes("CONNECTION ERROR")) {
+            console.log(`getBlockTimeStampsInBatches connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+          } else {
+            console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+          }
+          retries++;
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+        }
+      }
+      if (retries === MAX_RETRIES) {
+        console.log(`Failed to get timestamp for block number ${blockNumber} after several attempts. Please check your connection and the status of the Ethereum node.`);
+        blockTimestamps[blockNumber] = null;
+      }
+    }
   }
   return blockTimestamps;
 }
@@ -165,15 +214,20 @@ export async function getTxReceiptClassic(txHash: string): Promise<TransactionRe
 }
 
 export async function getTxReceipt(txHash: string): Promise<any> {
-  // Max concurrent defines the maximum number of tasks that can be running at once.
-  // MinTime defines the minimum amount of time between starting tasks.
   const limiter = new Bottleneck({
     maxConcurrent: 100,
     minTime: 30,
   });
 
-  // Configure axios to retry on failure
-  axiosRetry(axios, { retries: 3 });
+  axiosRetry(axios, {
+    retries: 3,
+    retryDelay: (retryCount) => {
+      return retryCount * 2000;
+    },
+    retryCondition: (error) => {
+      return error.code === "ECONNABORTED" || error.code === "ERR_SOCKET_CONNECTION_TIMEOUT";
+    },
+  });
 
   return limiter.schedule(async () => {
     try {
@@ -186,35 +240,51 @@ export async function getTxReceipt(txHash: string): Promise<any> {
           params: [txHash],
         },
         {
-          timeout: 5000, // Set a timeout of 5000 milliseconds
+          timeout: 1000,
         }
       );
 
       if (response.data && response.data.result) {
         return response.data.result;
       } else {
-        console.log(response);
         return null;
       }
     } catch (error) {
-      if ((error as Error).message === "ECONNABORTED") {
-        console.log(`getTxReceipt: ${(error as Error).message}`);
-      } else {
-        console.log(error);
+      const axiosError = error as AxiosError;
+      if (axiosError.code !== "ECONNABORTED" && axiosError.code !== "ERR_SOCKET_CONNECTION_TIMEOUT") {
+        console.log(axiosError);
       }
-
       return null;
     }
   });
 }
 
 export async function getTxFromTxId(tx_id: number): Promise<any | null> {
-  try {
-    const txHash = await getTxHashByTxId(tx_id);
-    const TX = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash!);
-    return TX;
-  } catch (err) {
-    console.log(err);
-    return null;
+  const MAX_RETRIES = 5; // Maximum number of retries
+  const RETRY_DELAY = 5000; // Delay between retries in milliseconds
+  let retries = 0;
+
+  while (retries < MAX_RETRIES) {
+    try {
+      const txHash = await getTxHashByTxId(tx_id);
+      const TX = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash!);
+      return TX;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        const err = error as any;
+        if (err.code === "ECONNABORTED") {
+          console.log(`getTxFromTxId connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+        } else if (err.message && err.message.includes("CONNECTION ERROR")) {
+          console.log(`getTxFromTxId connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+        } else {
+          console.log(`Failed to get transaction by ID. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+        }
+        retries++;
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      }
+    }
   }
+
+  console.log(`Failed to get transaction by ID ${tx_id} after several attempts. Please check your connection and the status of the Ethereum node.`);
+  return null;
 }

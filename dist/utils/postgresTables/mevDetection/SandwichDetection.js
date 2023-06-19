@@ -16,7 +16,7 @@ async function detectSandwichesInAllTransactions() {
     const BATCH_SIZE = 10000;
     let offset = 0;
     while (true) {
-        displayProgressBar("Processing transactions", offset, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
+        displayProgressBar("Sandwich-Detection", offset, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
         const transactions = await fetchTransactionsBatch(offset, BATCH_SIZE);
         if (transactions.length === 0)
             break;

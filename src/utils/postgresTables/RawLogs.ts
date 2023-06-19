@@ -7,6 +7,9 @@ import { EventObject } from "../Interfaces.js";
 import { getRawLogsFromBlock, getRawLogsToBlock, updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
 import { getCurrentBlockNumberFromLocalDB } from "./CurrentBlock.js";
 import eventEmitter from "../goingLive/EventEmitter.js";
+import Bottleneck from "bottleneck";
+import { concat } from "lodash";
+import { retry } from "../helperFunctions/Web3Retry.js";
 
 export async function storeEvent(event: EventObject, poolId: number): Promise<void> {
   const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw } = event;
@@ -67,13 +70,12 @@ async function processAddress(poolAddress: string, fromBlock: number, toBlock: n
   let currentToBlock = toBlock;
 
   while (currentFromBlock < currentToBlock) {
-    const PAST_EVENTS = await getPastEvents(CONTRACT, "allEvents", currentFromBlock, currentToBlock);
+    const PAST_EVENTS = await retry(() => getPastEvents(CONTRACT, "allEvents", currentFromBlock, currentToBlock));
 
     if (PAST_EVENTS === null) {
       console.error("Invalid block range");
       return;
     } else if ("start" in PAST_EVENTS) {
-      // If the response contains a suggested block range, update the currentToBlock with the suggested end block number.
       currentToBlock = PAST_EVENTS.end;
     } else if (Array.isArray(PAST_EVENTS)) {
       const { newFromBlock, newToBlock } = await processPastEvents(PAST_EVENTS as EventObject[], POOL_ID, poolAddress, fromBlock, toBlock, currentToBlock);
@@ -109,7 +111,7 @@ async function processBlocksUntilCurrent(address: string, fromBlock: number) {
 }
 
 async function processAllAddressesSequentially(addresses: string[]): Promise<void> {
-  let fromBlock = 17145330;
+  let fromBlock = 17307083;
   let nowBlock = await getCurrentBlockNumberFromLocalDB();
 
   let smallestBlockNumberStored = await getRawLogsFromBlock();
@@ -124,7 +126,7 @@ async function processAllAddressesSequentially(addresses: string[]): Promise<voi
   }
 
   for (let i = 0; i < addresses.length; i++) {
-    // displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
+    displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
     if (!largestBlockNumberStored) largestBlockNumberStored = fromBlock;
     await processBlocksUntilCurrent(addresses[i], largestBlockNumberStored);
   }

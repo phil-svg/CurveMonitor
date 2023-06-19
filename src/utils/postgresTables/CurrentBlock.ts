@@ -44,10 +44,11 @@ export async function subscribeToNewBlocks(): Promise<void> {
         await updateCurrentBlockNumber(blockHeader.number); // updating the latest block in the db
 
         const timestamp = await getBlockTimeStamp(blockHeader.number); // fetching the timestamp of the new block
+        if (!timestamp) return;
         await writeBlock(blockHeader.number, timestamp); // writing the timestamp to db
 
         eventEmitter.emit("new block spotted", blockHeader.number); // emitting new block event for live-parser
       }
     })
-    .on("error", console.error); // Log errors
+    .on("error", console.error);
 }

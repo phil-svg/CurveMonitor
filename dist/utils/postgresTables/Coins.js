@@ -107,13 +107,18 @@ async function updateSymbols() {
         let i = 0;
         for (const coin of coinsWithoutSymbols) {
             i += 1;
-            if (coin.symbol)
-                continue; // Fix here: Continue if 'symbol' already exists
-            if (!coin.address)
-                continue;
-            const SYMBOL = await fetchSymbolFromChain(coin.address);
-            coin.symbol = SYMBOL;
-            await coin.save();
+            try {
+                if (coin.symbol)
+                    continue; // Continue if 'symbol' already exists
+                if (!coin.address)
+                    continue;
+                const SYMBOL = await fetchSymbolFromChain(coin.address);
+                coin.symbol = SYMBOL;
+                await coin.save();
+            }
+            catch (error) {
+                console.warn("Warning: No Symbol for", coin.address);
+            }
         }
     }
     catch (error) {
@@ -140,17 +145,22 @@ async function updateDecimals() {
         let i = 0;
         for (const coin of coinsWithoutDecimals) {
             i += 1;
-            if (coin.decimals)
-                continue; // Fix here: Continue if 'decimals' already exists
-            if (!coin.address)
-                continue;
-            const DECIMALS = await fetchDecimalsFromChain(coin.address);
-            coin.decimals = DECIMALS;
-            await coin.save();
+            try {
+                if (coin.decimals)
+                    continue; // Continue if 'decimals' already exists
+                if (!coin.address)
+                    continue;
+                const DECIMALS = await fetchDecimalsFromChain(coin.address);
+                coin.decimals = DECIMALS;
+                await coin.save();
+            }
+            catch (error) {
+                console.warn("Warning: No Decimals for", coin.address);
+            }
         }
     }
     catch (error) {
-        console.error("Error updating symbol:", error);
+        console.error("Error updating decimal:", error);
         throw error;
     }
 }

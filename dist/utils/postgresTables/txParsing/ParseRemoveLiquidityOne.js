@@ -3,6 +3,7 @@ import { TransactionType } from "../../../models/Transactions.js";
 import { getTxReceipt } from "../../web3Calls/generic.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
+import { retry } from "../../helperFunctions/Web3Retry.js";
 const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 /**
  * Retrieves the address of the token that was removed during a liquidity event.
@@ -23,7 +24,7 @@ async function getCoinAddressFromTxReceipt(event, POOL_COINS) {
     const TOKEN_TRANSFER_EVENTS = RECEIPT.logs.filter((log) => POOL_COINS.map((addr) => addr.toLowerCase()).includes(log.address.toLowerCase()));
     if (TOKEN_TRANSFER_EVENTS.length === 0)
         return null;
-    let decodedLogs = decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS);
+    let decodedLogs = await decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS);
     for (const decodedLog of decodedLogs) {
         if (decodedLog.value === event.returnValues.coin_amount && decodedLog.fromAddress === event.address) {
             return decodedLog.tokenAddress;
@@ -36,19 +37,27 @@ export async function parseRemoveLiquidityOne(event, BLOCK_UNIXTIME, POOL_COINS)
         return;
     if (!POOL_COINS)
         return;
-    let coinAddress;
-    if (event.returnValues.coin_index) {
-        coinAddress = POOL_COINS[event.returnValues.coin_index];
-    }
-    else {
-        coinAddress = await getCoinAddressFromTxReceipt(event, POOL_COINS);
-        // Check for the special case when the Address was Ether, since it will not show up as and ERC20-Transfer.
-        if (coinAddress === null && POOL_COINS.includes(ETHER)) {
-            coinAddress = ETHER;
+    let coinAddress = await retry(async () => {
+        if (event.returnValues.coin_index) {
+            return POOL_COINS[event.returnValues.coin_index];
         }
-        else if (!coinAddress) {
-            return;
+        else {
+            const addr = await getCoinAddressFromTxReceipt(event, POOL_COINS);
+            // Check for the special case when the Address was Ether, since it will not show up as an ERC20-Transfer.
+            if (addr === null && POOL_COINS.includes(ETHER)) {
+                return ETHER;
+            }
+            else if (!addr) {
+                return null;
+            }
+            else {
+                return addr;
+            }
         }
+    });
+    if (!coinAddress) {
+        console.log(`\nNo CoinAddress was found for ${event.transactionHash}`);
+        return;
     }
     const COIN_ID = await findCoinIdByAddress(coinAddress);
     if (!COIN_ID)

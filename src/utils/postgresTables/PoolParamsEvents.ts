@@ -45,7 +45,7 @@ async function handleEvent(poolId: number, eventName: string, EVENT: any): Promi
   const RAW_LOG = EVENT;
   const EVENT_BLOCK = EVENT.blockNumber;
   const EVENT_TIMESTAMP = await getBlockTimeStamp(EVENT_BLOCK);
-  await addPoolParamsEvent(POOL_ID, LOG_INDEX, EVENT_NAME, RAW_LOG, EVENT_BLOCK, EVENT_TIMESTAMP);
+  await addPoolParamsEvent(POOL_ID, LOG_INDEX, EVENT_NAME, RAW_LOG, EVENT_BLOCK, EVENT_TIMESTAMP!);
   console.log("saving", POOL_ID, LOG_INDEX);
 }
 
@@ -100,6 +100,7 @@ export async function updatePoolParamsEvents(): Promise<void> {
 
   const LAST_BLOCK_CHECKED = (await PoolParamsEvents.min("last_block_checked")) as number;
   const LAST_UNIXTIME_CHECKED = await getBlockTimeStamp(LAST_BLOCK_CHECKED);
+  if (!LAST_UNIXTIME_CHECKED) return;
 
   // gets triggered if say the last check was Monday, it is now Friday, and Subgraph shows Event for Wednesday.
   if (latestEventTimestampFromSubgraph >= LAST_UNIXTIME_CHECKED) {
