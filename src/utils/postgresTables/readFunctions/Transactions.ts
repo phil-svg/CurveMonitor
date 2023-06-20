@@ -55,6 +55,22 @@ export async function fetchTransactionsBatch(offset: number, BATCH_SIZE: number)
   return transactions;
 }
 
+export async function fetchTransactionsForBlock(blockNumber: number): Promise<TransactionData[]> {
+  const transactions = await Transactions.findAll({
+    attributes: ["tx_id", "pool_id", "event_id", "tx_hash", "block_number", "block_unixtime", "transaction_type", "trader", "tx_position"], // the attributes to select
+    where: {
+      block_number: blockNumber,
+    },
+    raw: true, // this makes Sequelize return the raw data
+    order: [
+      ["block_number", "ASC"],
+      ["pool_id", "ASC"],
+    ], // order by block_number and pool_id
+  });
+
+  return transactions;
+}
+
 export async function getTotalTransactionsCount(): Promise<number> {
   return await Transactions.count();
 }

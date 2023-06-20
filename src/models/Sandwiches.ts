@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType, AllowNull } from "sequelize-typescript";
+import { Table, Column, Model, DataType, AllowNull, HasMany } from "sequelize-typescript";
+import { Transactions } from "./Transactions.js";
 
 export interface LossTransaction {
   tx_id: number;
@@ -25,4 +26,7 @@ export class Sandwiches extends Model {
   @AllowNull(true)
   @Column(DataType.STRING)
   source_of_loss_contract_address?: string | null;
+
+  @HasMany(() => Transactions, "tx_id")
+  transactions!: Transactions[];
 }

@@ -1,9 +1,12 @@
 import { getCurrentTimeString } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
+import { findCandidatesInBatch } from "../postgresTables/mevDetection/SandwichDetection.js";
+import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/SandwichUtils.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
 import { getCoinsInBatchesByPools, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
 import { fetchEventsForBlockNumberRange } from "../postgresTables/readFunctions/RawLogs.js";
+import { fetchTransactionsForBlock } from "../postgresTables/readFunctions/Transactions.js";
 import { sortAndProcess } from "../postgresTables/txParsing/ParseTx.js";
 import eventEmitter from "./EventEmitter.js";
 // when histo-parsing is finished, subscribe to new events.
@@ -48,5 +51,8 @@ async function processBufferedEvents() {
     // console.dir(EVENTS, { depth: null, colors: true });
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
     eventBuffer = [];
+    let parsedTx = await fetchTransactionsForBlock(eventBlockNumbers[0]);
+    await findCandidatesInBatch(parsedTx);
+    await addAddressesForLabelingForBlock(eventBlockNumbers[0]);
 }
 //# sourceMappingURL=RawTxLogsLive.js.map

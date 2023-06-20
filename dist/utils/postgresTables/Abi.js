@@ -25,7 +25,7 @@ const getAbiByForPools = async (options) => {
     return abiRecord ? abiRecord.abi : null;
 };
 // Fetches the ABI record for the given address or id from the AbisRelatedToAddressProvider table.
-const getAbiByForAddressProvider = async (options) => {
+export const getAbiByForAddressProvider = async (options) => {
     const address = await resolveAddress(options);
     if (!address) {
         return null;

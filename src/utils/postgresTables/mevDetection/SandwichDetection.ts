@@ -33,7 +33,7 @@ async function detectSandwichesInAllTransactions(): Promise<void> {
 }
 
 // filters the batches for multiple tx in the same pool in the same block. Runs the filtered data further down the detection process.
-async function findCandidatesInBatch(batch: TransactionData[]): Promise<void> {
+export async function findCandidatesInBatch(batch: TransactionData[]): Promise<void> {
   const groups: { [key: string]: TransactionData[] } = {};
 
   // group transactions by `block_number` and `pool_id`
@@ -62,7 +62,7 @@ async function searchInCandidatesClusterForSandwiches(groups: { [key: string]: T
 }
 
 // adding coin details
-async function scanCandidate(candidate: TransactionData[]): Promise<void> {
+export async function scanCandidate(candidate: TransactionData[]): Promise<void> {
   let enrichedCandidate = await enrichCandidateWithCoinInfo(candidate);
   if (!enrichedCandidate) return;
   await screenCandidate(enrichedCandidate);

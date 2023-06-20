@@ -44,6 +44,20 @@ export async function fetchTransactionsBatch(offset, BATCH_SIZE) {
     });
     return transactions;
 }
+export async function fetchTransactionsForBlock(blockNumber) {
+    const transactions = await Transactions.findAll({
+        attributes: ["tx_id", "pool_id", "event_id", "tx_hash", "block_number", "block_unixtime", "transaction_type", "trader", "tx_position"],
+        where: {
+            block_number: blockNumber,
+        },
+        raw: true,
+        order: [
+            ["block_number", "ASC"],
+            ["pool_id", "ASC"],
+        ], // order by block_number and pool_id
+    });
+    return transactions;
+}
 export async function getTotalTransactionsCount() {
     return await Transactions.count();
 }

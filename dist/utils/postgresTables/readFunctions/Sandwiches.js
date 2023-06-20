@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import { Sandwiches } from "../../../models/Sandwiches.js";
+import { Transactions } from "../../../models/Transactions.js";
 export async function readSandwichesInBatches(batchSize = 100) {
     let offset = 0;
     const batches = [];
@@ -9,6 +10,37 @@ export async function readSandwichesInBatches(batchSize = 100) {
                 extracted_from_curve: true,
                 source_of_loss_contract_address: null,
             },
+            limit: batchSize,
+            offset: offset,
+        });
+        if (sandwiches.length === 0) {
+            break;
+        }
+        const transformedSandwiches = sandwiches.map((sandwich) => ({
+            id: sandwich.id,
+            loss_transactions: sandwich.loss_transactions,
+        }));
+        batches.push(transformedSandwiches);
+        offset += batchSize;
+    }
+    return batches;
+}
+export async function readSandwichesInBatchesForBlock(blockNumber, batchSize = 100) {
+    let offset = 0;
+    const batches = [];
+    while (true) {
+        const sandwiches = await Sandwiches.findAll({
+            where: {
+                extracted_from_curve: true,
+                source_of_loss_contract_address: null,
+            },
+            include: [
+                {
+                    model: Transactions,
+                    where: { block_number: blockNumber },
+                    required: true,
+                },
+            ],
             limit: batchSize,
             offset: offset,
         });

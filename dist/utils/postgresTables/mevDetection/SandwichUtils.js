@@ -5,7 +5,7 @@ import { calculateLossForDeposit, calculateLossForSwap, calculateLossForWithdraw
 import { getTokenTransferEvents, getTxFromTxId } from "../../web3Calls/generic.js";
 import { getAbiBy } from "../Abi.js";
 import { Sandwiches } from "../../../models/Sandwiches.js";
-import { readSandwichesInBatches } from "../readFunctions/Sandwiches.js";
+import { readSandwichesInBatches, readSandwichesInBatchesForBlock } from "../readFunctions/Sandwiches.js";
 export async function enrichCandidateWithCoinInfo(candidate) {
     // Extract tx_ids from candidate array
     const txIds = candidate.map((transaction) => transaction.tx_id);
@@ -101,25 +101,37 @@ function isValidEthereumAddress(someString) {
 export async function addAddressesForLabeling() {
     try {
         const batches = await readSandwichesInBatches();
-        if (!batches)
-            return;
-        for (const batch of batches) {
-            for (const lossTx of batch) {
-                const tx = await getTxFromTxId(lossTx.loss_transactions[0].tx_id);
-                if (!tx) {
-                    console.log(`Could not retrieve transaction for tx_id: ${lossTx.loss_transactions[0].tx_id}`);
-                    continue;
-                }
-                if (typeof tx.to !== "string" || !isValidEthereumAddress(tx.to)) {
-                    console.log(`Invalid Ethereum address for tx_id: ${lossTx.loss_transactions[0].tx_id}`);
-                    continue;
-                }
-                await Sandwiches.update({ source_of_loss_contract_address: tx.to }, { where: { id: lossTx.id } });
-            }
-        }
+        await solveBatches(batches);
     }
     catch (error) {
         console.error(`Error reading sandwiches in batches: ${error}`);
+    }
+}
+export async function addAddressesForLabelingForBlock(blockNumber) {
+    try {
+        const batches = await readSandwichesInBatchesForBlock(blockNumber);
+        await solveBatches(batches);
+    }
+    catch (error) {
+        console.error(`Error reading sandwiches in batches: ${error}`);
+    }
+}
+async function solveBatches(batches) {
+    if (!batches)
+        return;
+    for (const batch of batches) {
+        for (const lossTx of batch) {
+            const tx = await getTxFromTxId(lossTx.loss_transactions[0].tx_id);
+            if (!tx) {
+                console.log(`Could not retrieve transaction for tx_id: ${lossTx.loss_transactions[0].tx_id}`);
+                continue;
+            }
+            if (typeof tx.to !== "string" || !isValidEthereumAddress(tx.to)) {
+                console.log(`Invalid Ethereum address for tx_id: ${lossTx.loss_transactions[0].tx_id}`);
+                continue;
+            }
+            await Sandwiches.update({ source_of_loss_contract_address: tx.to }, { where: { id: lossTx.id } });
+        }
     }
 }
 //# sourceMappingURL=SandwichUtils.js.map

@@ -12,7 +12,6 @@ import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetec
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
-import sequelize from "sequelize/types/sequelize.js";
 
 async function initDatabase() {
   try {

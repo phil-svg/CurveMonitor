@@ -26,7 +26,7 @@ async function detectSandwichesInAllTransactions() {
     }
 }
 // filters the batches for multiple tx in the same pool in the same block. Runs the filtered data further down the detection process.
-async function findCandidatesInBatch(batch) {
+export async function findCandidatesInBatch(batch) {
     const groups = {};
     // group transactions by `block_number` and `pool_id`
     for (const transaction of batch) {
@@ -48,7 +48,7 @@ async function searchInCandidatesClusterForSandwiches(groups) {
     }
 }
 // adding coin details
-async function scanCandidate(candidate) {
+export async function scanCandidate(candidate) {
     let enrichedCandidate = await enrichCandidateWithCoinInfo(candidate);
     if (!enrichedCandidate)
         return;

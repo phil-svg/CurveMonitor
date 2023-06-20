@@ -6,6 +6,7 @@ import { Pool, PoolVersion } from "../../models/Pools.js";
 import { Op } from "sequelize";
 import { AbiItem } from "web3-utils";
 import { getProvidedAddress } from "../AddressProviderEntryPoint.js";
+import eventEmitter from "../goingLive/EventEmitter.js";
 
 if (!process.env.WEB3_WSS) {
   console.error("Error: WEB3_WSS environment variable is not defined.");
@@ -586,5 +587,6 @@ export async function updatePools() {
   await updateBasepool();
   await updateVersions();
 
+  eventEmitter.emit("ready for new pool subscription");
   console.log(`[✓] Pools synced successfully.`);
 }
