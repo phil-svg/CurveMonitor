@@ -12,6 +12,8 @@ import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetec
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
+import { startAPI } from "./utils/api/StartAPI.js";
+import { startTestClient } from "./utils/api/Client.js";
 
 async function initDatabase() {
   try {
@@ -24,20 +26,29 @@ async function initDatabase() {
 
 await initDatabase();
 
-await loadAddressProvider();
-await updatePools();
-await updateCoinTable();
-await updatePoolAbis();
-await subscribeToNewBlocks();
+// await loadAddressProvider();
+// await updatePools();
+// await updateCoinTable();
+// await updatePoolAbis();
+// await subscribeToNewBlocks();
+
 // await updateInitialPoolParams(); // muted until useful
 // await updatePoolParamsEvents(); // muted until useful
-await preparingLiveModeForRawEvents();
-await updateRawLogs();
-await updateBlockTimestamps();
-await parseEvents();
+
+// await preparingLiveModeForRawEvents();
+// await updateRawLogs();
+// await updateBlockTimestamps();
+// await parseEvents();
+
 // await updateTokenDollarValues(); // muted until useful
-await updateMevDetection();
-await updateLabels();
+
+// await updateMevDetection();
+// await updateLabels();
+
+await startAPI();
+
+await new Promise((resolve) => setTimeout(resolve, 2000));
+startTestClient();
 
 // todo
 

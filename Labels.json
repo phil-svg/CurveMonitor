@@ -162,5 +162,9 @@
   {
     "Address": "0xb576491f1e6e5e62f1d8f26062ee822b40b0e0d4",
     "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x92F3f71CeF740ED5784874B8C70Ff87ECdF33588",
+    "Label": "1Inch"
   }
 ]
