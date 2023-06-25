@@ -26,29 +26,29 @@ async function initDatabase() {
 
 await initDatabase();
 
-// await loadAddressProvider();
-// await updatePools();
-// await updateCoinTable();
-// await updatePoolAbis();
-// await subscribeToNewBlocks();
+await loadAddressProvider();
+await updatePools();
+await updateCoinTable();
+await updatePoolAbis();
+await subscribeToNewBlocks();
 
 // await updateInitialPoolParams(); // muted until useful
 // await updatePoolParamsEvents(); // muted until useful
 
-// await preparingLiveModeForRawEvents();
-// await updateRawLogs();
-// await updateBlockTimestamps();
-// await parseEvents();
+await preparingLiveModeForRawEvents();
+await updateRawLogs();
+await updateBlockTimestamps();
+await parseEvents();
 
 // await updateTokenDollarValues(); // muted until useful
 
-// await updateMevDetection();
-// await updateLabels();
+await updateMevDetection();
+await updateLabels();
 
-await startAPI();
+// await startAPI();
 
-await new Promise((resolve) => setTimeout(resolve, 2000));
-startTestClient();
+// await new Promise((resolve) => setTimeout(resolve, 2000));
+// startTestClient();
 
 // todo
 
