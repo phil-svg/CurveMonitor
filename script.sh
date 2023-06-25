@@ -9,7 +9,7 @@ docker stop curvemonitor-container
 docker rm curvemonitor-container
 
 # run the new Docker image
-docker run --name curvemonitor-container --network some-network -p 3000:3000 -d curvemonitor
+docker run --name curvemonitor-container --network some-network -p 3000:3000 -d --env-file .env curvemonitor
 
 # view the application logs
 docker logs -f curvemonitor-container
