@@ -14,7 +14,10 @@ if [ $(docker ps -a -q -f name=curvemonitor-container) ]; then
 fi
 
 # run the new Docker image
-docker run --name curvemonitor-container --network some-network -p 3000:3000 -d --env-file .env curvemonitor
+docker run -d --network some-network --name curvemonitor-container -p 3000:3000 \
+    --env-file .env \
+    curvemonitor:latest
+
 
 # view the application logs
 docker logs -f curvemonitor-container
