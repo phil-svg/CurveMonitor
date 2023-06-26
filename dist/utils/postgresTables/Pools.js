@@ -6,6 +6,7 @@ import { Pool, PoolVersion } from "../../models/Pools.js";
 import { Op } from "sequelize";
 import { getProvidedAddress } from "../AddressProviderEntryPoint.js";
 import eventEmitter from "../goingLive/EventEmitter.js";
+import { displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
 if (!process.env.WEB3_WSS) {
     console.error("Error: WEB3_WSS environment variable is not defined.");
     process.exit(1);
@@ -340,6 +341,7 @@ async function updateInceptionBlock() {
         let i = 0;
         for (const POOL of POOLS_WITHOUT_INCEPTION_BLOCK) {
             i += 1;
+            displayProgressBar(`Solving Inception-Block`, i, POOLS_WITHOUT_INCEPTION_BLOCK.length);
             const INCEPION_BLOCK = await getInceptionBlock(HIGHEST_BLOCK, POOL.address);
             if (!INCEPION_BLOCK)
                 continue;
