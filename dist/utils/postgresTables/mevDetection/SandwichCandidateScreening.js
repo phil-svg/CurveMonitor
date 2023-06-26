@@ -109,7 +109,7 @@ async function processSingleSandwich(botTransaction, candidate) {
     if (lossTransactions.length === 0) {
         lossTransactions = null;
     }
-    console.log("saw new sandwich", extractedFromCurve, lossTransactions);
+    // console.log("saw new sandwich", lossTransactions);
     await saveSandwich(botTransaction[0].tx_id, botTransaction[1].tx_id, extractedFromCurve, lossTransactions);
 }
 export async function screenCandidate(candidate) {

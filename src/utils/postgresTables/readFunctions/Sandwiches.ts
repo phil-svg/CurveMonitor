@@ -45,6 +45,13 @@ export async function readSandwichesInBatchesForBlock(blockNumber: number, batch
       include: [
         {
           model: Transactions,
+          as: "frontrunTransaction",
+          where: { block_number: blockNumber },
+          required: true,
+        },
+        {
+          model: Transactions,
+          as: "backrunTransaction",
           where: { block_number: blockNumber },
           required: true,
         },

@@ -7,8 +7,6 @@ import { EventObject } from "../Interfaces.js";
 import { getRawLogsFromBlock, getRawLogsToBlock, updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
 import { getCurrentBlockNumberFromLocalDB } from "./CurrentBlock.js";
 import eventEmitter from "../goingLive/EventEmitter.js";
-import Bottleneck from "bottleneck";
-import { concat } from "lodash";
 import { retry } from "../helperFunctions/Web3Retry.js";
 
 export async function storeEvent(event: EventObject, poolId: number): Promise<void> {
