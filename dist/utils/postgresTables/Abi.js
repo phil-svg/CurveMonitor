@@ -1,6 +1,7 @@
 import { AbisPools, AbisRelatedToAddressProvider } from "../../models/Abi.js";
 import axios, { AxiosError } from "axios";
 import { getAddressById, getAllPoolIds } from "./readFunctions/Pools.js";
+import { displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
 const resolveAddress = async (options) => {
     if (options.address) {
         return options.address.toLowerCase();
@@ -141,13 +142,40 @@ export async function getAbiBy(tableName, options) {
         return null;
     }
 }
-export async function updatePoolAbis() {
+export async function fetchMissingPoolAbisFromEtherscan() {
+    const limit = 5; // adjust according to API rate limit
+    const delayInMilliseconds = 1000; // adjust delay time based API rules and rate limit
+    // Get all pool_ids from the database
+    const allPoolIdsInDB = await AbisPools.findAll({ attributes: ["pool_id"] });
+    const allPoolIdsInDBArray = allPoolIdsInDB.map((pool) => pool.pool_id);
+    // Get all pool_ids
     const ALL_POOL_IDS = (await getAllPoolIds()).sort((a, b) => a - b);
-    let i = 0;
-    for (const POOL_ID of ALL_POOL_IDS) {
-        i += 1;
-        await getAbiBy("AbisPools", { id: POOL_ID });
+    // Find missing pool_ids
+    const missingPoolIds = ALL_POOL_IDS.filter((poolId) => !allPoolIdsInDBArray.includes(poolId));
+    // Fetch and store missing ABIs
+    for (let i = 0; i < missingPoolIds.length; i += limit) {
+        displayProgressBar(`Fetching ABIs from Etherscan`, i, missingPoolIds.length);
+        const poolIdsSegment = missingPoolIds.slice(i, i + limit);
+        const promises = poolIdsSegment.map(async (poolId) => {
+            const address = await getAddressById(poolId); // Get the pool address by its id
+            if (address === null) {
+                console.error(`Error: Address for poolId ${poolId} is null.`);
+                return;
+            }
+            const abi = await fetchAbiFromEtherscan(address);
+            if (abi) {
+                await storeAbiForPools(poolId, abi);
+            }
+        });
+        await Promise.all(promises);
+        // Delay to avoid hitting rate limit
+        if (i + limit < missingPoolIds.length) {
+            await new Promise((resolve) => setTimeout(resolve, delayInMilliseconds));
+        }
     }
+}
+export async function updatePoolAbis() {
+    await fetchMissingPoolAbisFromEtherscan();
     console.log(`[✓] Pool-ABIs' synced successfully.`);
 }
 //# sourceMappingURL=Abi.js.map
