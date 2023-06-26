@@ -578,13 +578,28 @@ export async function updatePools() {
     }
   }
 
+  console.log("running updateLpTokenAddresses");
   await updateLpTokenAddresses();
+
+  console.log("running updateNames");
   await updateNames();
+
+  console.log("running updateCoins");
   await updateCoins();
+
+  console.log("running updateNCoins");
   await updateNCoins();
+
+  console.log("running updateInceptionBlock");
   await updateInceptionBlock();
+
+  console.log("running updateCreationTimestamp");
   await updateCreationTimestamp();
+
+  console.log("running updateBasepool");
   await updateBasepool();
+
+  console.log("running updateVersions");
   await updateVersions();
 
   eventEmitter.emit("ready for new pool subscription");

@@ -12,7 +12,6 @@ import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
 async function initDatabase() {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
     try {
         await db.sync();
         console.log("[✓] Database synced successfully.");

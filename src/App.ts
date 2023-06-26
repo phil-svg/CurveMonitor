@@ -16,7 +16,6 @@ import { startAPI } from "./utils/api/StartAPI.js";
 import { startTestClient } from "./utils/api/Client.js";
 
 async function initDatabase() {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
   try {
     await db.sync();
     console.log("[✓] Database synced successfully.");
