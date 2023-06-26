@@ -7,7 +7,8 @@ git pull
 docker build -t curvemonitor .
 
 # check if the container already exists
-if [ $(docker ps -a -q -f name=curvemonitor-container) ]; then
+CONTAINER_ID=$(docker ps -a -q -f name=curvemonitor-container)
+if [ ! -z "$CONTAINER_ID" ]; then
     # stop and remove the existing container if it exists
     docker stop curvemonitor-container
     docker rm curvemonitor-container
@@ -17,7 +18,6 @@ fi
 docker run -d --network some-network --name curvemonitor-container -p 3000:3000 \
     --env-file .env \
     curvemonitor:latest
-
 
 # view the application logs
 docker logs -f curvemonitor-container
