@@ -1,5 +1,7 @@
 import fs from "fs";
 import _ from "lodash";
+import path from "path";
+import { fileURLToPath } from "url";
 import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { findUniqueSourceOfLossAddresses } from "./readFunctions/Sandwiches.js";
 import { findUniqueLabeledAddresses } from "./readFunctions/Labels.js";
@@ -34,7 +36,13 @@ export async function updateLabels(): Promise<void> {
   const inTableUnlabeledAddresses = await getUnlabeledAddresses();
 
   // Read the labels from the file
-  const labelsFromFile = JSON.parse(fs.readFileSync("../Labels.json", "utf8"));
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const labelsFilePath = path.join(__dirname, "..", "..", "..", "Labels.json");
+  const labelsFromFile = JSON.parse(fs.readFileSync(labelsFilePath, "utf8"));
+  console.log("labelsFromFile", labelsFromFile);
+
+  console.log("labelsFromFile", labelsFromFile);
 
   // Iterate over the unlabeled addresses
   for (const unlabeledAddress of inTableUnlabeledAddresses) {
