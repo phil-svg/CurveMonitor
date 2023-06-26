@@ -1,7 +1,7 @@
 import { fetchTransactionsBatch, getTotalTransactionsCount } from "../readFunctions/Transactions.js";
 import { addAddressesForLabeling, enrichCandidateWithCoinInfo, removeProcessedTransactions } from "./SandwichUtils.js";
 import { screenCandidate } from "./SandwichCandidateScreening.js";
-import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
+import { updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
 /**
  * Explanation for the term "Candidate":
  * A Candidate is basically an array of transactions.
@@ -16,7 +16,8 @@ async function detectSandwichesInAllTransactions() {
     const BATCH_SIZE = 10000;
     let offset = 0;
     while (true) {
-        displayProgressBar("Sandwich-Detection", offset, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
+        // displayProgressBar("Sandwich-Detection", offset, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
+        console.log("Sandwich-Detection", offset, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
         const transactions = await fetchTransactionsBatch(offset, BATCH_SIZE);
         if (transactions.length === 0)
             break;

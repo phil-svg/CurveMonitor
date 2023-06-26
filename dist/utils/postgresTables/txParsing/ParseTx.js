@@ -6,7 +6,7 @@ import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.j
 import { parseRemoveLiquidityOne } from "./ParseRemoveLiquidityOne.js";
 import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
-import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
+import { updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../readFunctions/Blocks.js";
 import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
 import Bottleneck from "bottleneck";
@@ -94,7 +94,8 @@ async function parseEventsMain() {
         const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
         await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
         counter += EVENTS.length;
-        displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
+        // displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
+        console.log("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
     }
     await updateEventParsingFromBlock(blockNumbers[0]);
     await updateEventParsingToBlock(blockNumbers[blockNumbers.length - 1]);

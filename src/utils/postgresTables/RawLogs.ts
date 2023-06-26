@@ -126,7 +126,8 @@ async function processAllAddressesSequentially(addresses: string[]): Promise<voi
   }
 
   for (let i = 0; i < addresses.length; i++) {
-    displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
+    // displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
+    console.log("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
     if (!largestBlockNumberStored) largestBlockNumberStored = fromBlock;
     await processBlocksUntilCurrent(addresses[i], largestBlockNumberStored);
   }

@@ -2,7 +2,7 @@ import { getAllPoolAddresses, getIdByAddress } from "./readFunctions/Pools.js";
 import { getContractByAddress } from "../helperFunctions/Web3.js";
 import { getPastEvents } from "../web3Calls/generic.js";
 import { RawTxLogs } from "../../models/RawTxLogs.js";
-import { updateConsoleOutput, displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
+import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getRawLogsFromBlock, getRawLogsToBlock, updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
 import { getCurrentBlockNumberFromLocalDB } from "./CurrentBlock.js";
 import eventEmitter from "../goingLive/EventEmitter.js";
@@ -106,7 +106,8 @@ async function processAllAddressesSequentially(addresses) {
         }
     }
     for (let i = 0; i < addresses.length; i++) {
-        displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
+        // displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
+        console.log("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
         if (!largestBlockNumberStored)
             largestBlockNumberStored = fromBlock;
         await processBlocksUntilCurrent(addresses[i], largestBlockNumberStored);
