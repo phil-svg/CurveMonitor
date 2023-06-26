@@ -10,6 +10,9 @@ COPY package*.json ./
 # Install any needed packages specified in package.json
 RUN npm install
 
+# Copy the Labels.json file into the Docker image.
+COPY Labels.json ./
+
 # Bundle app source inside the docker image (copy dist directory)
 COPY dist ./dist
 
