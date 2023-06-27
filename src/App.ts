@@ -24,7 +24,7 @@ async function initDatabase() {
 }
 
 await initDatabase();
-
+await startAPI();
 await loadAddressProvider();
 await updatePools();
 await updateCoinTable();
@@ -43,8 +43,6 @@ await parseEvents();
 
 await updateMevDetection();
 await updateLabels();
-
-await startAPI();
 
 // todo
 

@@ -22,6 +22,7 @@ async function initDatabase() {
     }
 }
 await initDatabase();
+await startAPI();
 await loadAddressProvider();
 await updatePools();
 await updateCoinTable();
@@ -36,7 +37,6 @@ await parseEvents();
 // await updateTokenDollarValues(); // muted until useful
 await updateMevDetection();
 await updateLabels();
-await startAPI();
 // todo
 // process.exit();
 //# sourceMappingURL=App.js.map

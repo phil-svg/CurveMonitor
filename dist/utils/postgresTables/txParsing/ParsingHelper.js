@@ -1,7 +1,9 @@
 import { Transactions } from "../../../models/Transactions.js";
 import { TransactionCoins } from "../../../models/TransactionCoins.js";
+import eventEmitter from "../../goingLive/EventEmitter.js";
 export async function saveTransaction(transactionData) {
     try {
+        eventEmitter.emit("new tx for demo room", transactionData);
         const transaction = await Transactions.create(transactionData);
         return transaction;
     }

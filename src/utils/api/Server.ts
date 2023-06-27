@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { getLabelsRankingDecendingAbsOccurences } from "./queries/query_sandwiches.js";
+import eventEmitter from "../goingLive/EventEmitter.js";
 
 export const initServer = (): void => {
   const io = new Server(443, {
@@ -9,24 +10,19 @@ export const initServer = (): void => {
     },
   });
 
+  const allTxDemoRoom = io.of("/allTxDemoRoom");
+  allTxDemoRoom.on("connection", async (socket) => {
+    socket.join("allTxDemoRoom");
+  });
+
+  eventEmitter.on("new tx for demo room", async (data: any) => {
+    allTxDemoRoom.in("allTxDemoRoom").emit("DemoNewTx", data);
+  });
+
   io.on("connection", (socket) => {
     console.log("Client connected.");
 
     socket.emit("message", "Hi there!");
-
-    socket.on("runSequenceUpdate", () => {
-      const sequence = ["It", "works", "even", "better", "than", "before!"];
-      let index = 0;
-
-      const interval = setInterval(() => {
-        socket.emit("sequenceUpdate", sequence[index]);
-        index++;
-
-        if (index >= sequence.length) {
-          index = 0;
-        }
-      }, 300);
-    });
 
     socket.on("getLabelsRanking", async () => {
       try {

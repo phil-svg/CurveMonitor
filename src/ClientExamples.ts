@@ -3,29 +3,24 @@ import { io } from "socket.io-client";
 console.clear();
 
 export function startTestClient() {
-  const socket = io("wss://api.curvemonitor.com", {
-    //const socket = io("https://api.curvemonitor.com:443", {
-  });
+  const socket = io("wss://api.curvemonitor.com", {});
 
   socket.on("connect", () => {
     console.log("Connected to the server.");
 
-    // request for ws-connection test
-    socket.emit("runSequenceUpdate");
-
     // request for labels ranking
     // socket.emit("getLabelsRanking");
 
-    socket.on("message", (msg) => {
-      console.log("Server said: " + msg);
-    });
-
-    socket.on("sequenceUpdate", (testMessage) => {
-      console.log(testMessage);
-    });
-
     socket.on("labelsRanking", (labelsRanking) => {
       console.log("Received labels ranking: ", labelsRanking);
+    });
+
+    socket.on("DemoNewTx", (demoTx) => {
+      console.log("Saw new Tx in Demo-Mode: ", demoTx);
+    });
+
+    socket.on("message", (msg) => {
+      console.log("Server said: " + msg);
     });
 
     socket.emit("message", "Hello from the client!");
@@ -40,5 +35,4 @@ export function startTestClient() {
   });
 }
 
-// Call the function to start the client
 startTestClient();
