@@ -17,7 +17,7 @@ COPY Labels.json ./
 COPY dist ./dist
 
 # Make port 3000 available to the world outside this container
-EXPOSE 3000
+EXPOSE 433
 
 # Define the command to run the app
 CMD [ "node", "dist/App.js" ]

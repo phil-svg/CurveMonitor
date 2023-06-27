@@ -12,7 +12,6 @@ import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
 import { startAPI } from "./utils/api/StartAPI.js";
-import { startTestClient } from "./utils/api/Client.js";
 async function initDatabase() {
     try {
         await db.sync();
@@ -38,8 +37,8 @@ await parseEvents();
 await updateMevDetection();
 await updateLabels();
 await startAPI();
-await new Promise((resolve) => setTimeout(resolve, 2000));
-startTestClient();
+// await new Promise((resolve) => setTimeout(resolve, 2000));
+// startTestClient();
 // todo
 // process.exit();
 //# sourceMappingURL=App.js.map

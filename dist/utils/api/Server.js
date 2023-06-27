@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { getLabelsRankingDecendingAbsOccurences } from "./queries/query_sandwiches.js";
-export const initServer = (port = process.env.PORT || 3000) => {
-    const io = new Server(3000, {
+export const initServer = () => {
+    const io = new Server(443, {
         cors: {
             origin: "*",
             methods: ["GET", "POST"],
@@ -44,6 +44,6 @@ export const initServer = (port = process.env.PORT || 3000) => {
             console.log("Client said: " + msg);
         });
     });
-    console.log(`Server started on port 3000`);
+    console.log(`Server started on port 433`);
 };
 //# sourceMappingURL=Server.js.map

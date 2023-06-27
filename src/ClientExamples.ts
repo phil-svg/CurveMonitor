@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 export function startTestClient() {
-  const socket = io("http://localhost:433", {
+  const socket = io("https://api.curvemonitor.com:443", {
     extraHeaders: {
       "X-API-KEY": "your_secret_api_key",
     },
@@ -26,4 +26,15 @@ export function startTestClient() {
 
     socket.emit("message", "Hello from the client!");
   });
+
+  socket.on("connect_error", (err) => {
+    console.log(`Connection Error: ${err}`);
+  });
+
+  socket.on("error", (err) => {
+    console.log(`Error: ${err}`);
+  });
 }
+
+// Call the function to start the client
+startTestClient();

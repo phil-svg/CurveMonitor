@@ -16,7 +16,7 @@ if [ -n "$existing_container" ]; then
 fi
 
 # run the new Docker image
-docker run -d --network some-network --name curvemonitor-container -p 3000:3000 \
+docker run -d --network some-network --name curvemonitor-container -p 433:443 \
     --env-file .env \
     curvemonitor:latest
 

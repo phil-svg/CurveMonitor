@@ -47,8 +47,8 @@ await updateLabels();
 
 await startAPI();
 
-await new Promise((resolve) => setTimeout(resolve, 2000));
-startTestClient();
+// await new Promise((resolve) => setTimeout(resolve, 2000));
+// startTestClient();
 
 // todo
 
