@@ -1,10 +1,8 @@
 import { io } from "socket.io-client";
 
 export function startTestClient() {
-  const socket = io("https://api.curvemonitor.com:443", {
-    extraHeaders: {
-      "X-API-KEY": "your_secret_api_key",
-    },
+  const socket = io("wss://api.curvemonitor.com", {
+    //const socket = io("https://api.curvemonitor.com:443", {
   });
 
   socket.on("connect", () => {

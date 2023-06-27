@@ -9,15 +9,6 @@ export const initServer = (): void => {
     },
   });
 
-  io.use((socket, next) => {
-    const apiKey = socket.handshake.headers["x-api-key"];
-    if (apiKey === "your_secret_api_key") {
-      next();
-    } else {
-      next(new Error("Authentication error"));
-    }
-  });
-
   io.on("connection", (socket) => {
     console.log("Client connected.");
 
