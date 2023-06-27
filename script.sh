@@ -18,6 +18,8 @@ fi
 # run the new Docker image
 docker run -d --network some-network --name curvemonitor-container -p 8443:443 \
     --env-file .env \
+    -v /etc/letsencrypt/live/api.curvemonitor.com/fullchain.pem:/usr/src/app/fullchain.pem \
+    -v /etc/letsencrypt/live/api.curvemonitor.com/privkey.pem:/usr/src/app/privkey.pem \
     curvemonitor:latest
 
 # view the application logs

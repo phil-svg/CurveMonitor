@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 console.clear();
 export function startTestClient() {
-    const socket = io("wss://api.curvemonitor.com", {});
+    const socket = io("wss://api.curvemonitor.com/allTxDemoRoom", {});
     socket.on("connect", () => {
         console.log("Connected to the server.");
         // request for labels ranking
