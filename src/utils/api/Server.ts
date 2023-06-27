@@ -23,7 +23,7 @@ export const initServer = (): void => {
         index++;
 
         if (index >= sequence.length) {
-          clearInterval(interval);
+          index = 0;
         }
       }, 300);
     });

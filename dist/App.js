@@ -37,8 +37,6 @@ await parseEvents();
 await updateMevDetection();
 await updateLabels();
 await startAPI();
-// await new Promise((resolve) => setTimeout(resolve, 2000));
-// startTestClient();
 // todo
 // process.exit();
 //# sourceMappingURL=App.js.map

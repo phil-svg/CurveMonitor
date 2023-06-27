@@ -17,7 +17,7 @@ export const initServer = () => {
                 socket.emit("sequenceUpdate", sequence[index]);
                 index++;
                 if (index >= sequence.length) {
-                    clearInterval(interval);
+                    index = 0;
                 }
             }, 300);
         });

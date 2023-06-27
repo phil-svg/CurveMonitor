@@ -1,5 +1,7 @@
 import { io } from "socket.io-client";
 
+console.clear();
+
 export function startTestClient() {
   const socket = io("wss://api.curvemonitor.com", {
     //const socket = io("https://api.curvemonitor.com:443", {
@@ -16,6 +18,10 @@ export function startTestClient() {
 
     socket.on("message", (msg) => {
       console.log("Server said: " + msg);
+    });
+
+    socket.on("sequenceUpdate", (testMessage) => {
+      console.log(testMessage);
     });
 
     socket.on("labelsRanking", (labelsRanking) => {
