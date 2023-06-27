@@ -8,7 +8,7 @@ export function startTestClient() {
     socket.on("connect", () => {
         console.log("Connected to the server.");
         // request for ping-pong updates
-        socket.emit("runPingPongUpdate");
+        socket.emit("runSequenceUpdate");
         // request for labels ranking
         // socket.emit("getLabelsRanking");
         socket.on("message", (msg) => {

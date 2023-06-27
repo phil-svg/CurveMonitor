@@ -23,11 +23,18 @@ export const initServer = (port: number | string = process.env.PORT || 3000): vo
 
     socket.emit("message", "Hi there!");
 
-    socket.on("runPingPongUpdate", () => {
-      setInterval(() => {
-        socket.emit("message", "ping");
-        setTimeout(() => socket.emit("message", "pong"), 500);
-      }, 1000);
+    socket.on("runSequenceUpdate", () => {
+      const sequence = ["It", "works", "even", "better", "than", "before!"];
+      let index = 0;
+
+      const interval = setInterval(() => {
+        socket.emit("sequenceUpdate", sequence[index]);
+        index++;
+
+        if (index >= sequence.length) {
+          clearInterval(interval);
+        }
+      }, 300);
     });
 
     socket.on("getLabelsRanking", async () => {

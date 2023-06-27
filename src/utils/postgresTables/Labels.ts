@@ -40,7 +40,6 @@ export async function updateLabels(): Promise<void> {
 
   for (const dir of possibleDirs) {
     const tryPath = path.join(dir, "Labels.json");
-    console.log("Checking: ", tryPath);
     if (fs.existsSync(tryPath)) {
       labelsFilePath = tryPath;
       break;

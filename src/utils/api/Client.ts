@@ -11,7 +11,7 @@ export function startTestClient() {
     console.log("Connected to the server.");
 
     // request for ping-pong updates
-    socket.emit("runPingPongUpdate");
+    socket.emit("runSequenceUpdate");
 
     // request for labels ranking
     // socket.emit("getLabelsRanking");
