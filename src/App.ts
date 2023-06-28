@@ -14,7 +14,7 @@ import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
 import { startAPI } from "./utils/api/StartAPI.js";
 
-async function initDatabase() {
+export async function initDatabase() {
   try {
     await db.sync();
     console.log("[✓] Database synced successfully.");
@@ -24,6 +24,7 @@ async function initDatabase() {
 }
 
 await initDatabase();
+
 await startAPI();
 await loadAddressProvider();
 await updatePools();
@@ -46,4 +47,4 @@ await updateLabels();
 
 // todo
 
-// process.exit();
+process.exit();

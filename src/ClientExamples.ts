@@ -3,7 +3,8 @@ import { io } from "socket.io-client";
 console.clear();
 
 export function startTestClient() {
-  const socket = io("wss://api.curvemonitor.com/allTxDemoRoom", {});
+  // const socket = io("wss://api.curvemonitor.com/allTxDemoRoom", {});
+  const socket = io("http://localhost:443/allTxDemoRoom", {});
 
   socket.on("connect", () => {
     console.log("Connected to the server.");
