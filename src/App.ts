@@ -12,7 +12,10 @@ import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetec
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
-import { startAPI } from "./utils/api/StartAPI.js";
+import { startAPI } from "./utils/api/Server.js";
+import { startTestClient } from "./Client.js";
+import { updateTransactionsCalls } from "./utils/postgresTables/TransactionsCalls.js";
+import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 
 export async function initDatabase() {
   try {
@@ -25,7 +28,9 @@ export async function initDatabase() {
 
 await initDatabase();
 
-await startAPI();
+startAPI();
+//await startTestClient();
+
 await loadAddressProvider();
 await updatePools();
 await updateCoinTable();
@@ -39,6 +44,8 @@ await preparingLiveModeForRawEvents();
 await updateRawLogs();
 await updateBlockTimestamps();
 await parseEvents();
+await updateTransactionsCalls();
+await updateAddressCounts();
 
 // await updateTokenDollarValues(); // muted until useful
 
@@ -47,4 +54,4 @@ await updateLabels();
 
 // todo
 
-process.exit();
+// process.exit();

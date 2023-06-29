@@ -1,6 +1,8 @@
 import { Sequelize } from "sequelize";
 import { Sandwiches } from "../../../models/Sandwiches.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
+import { RawTxLogs } from "../../../models/RawTxLogs.js";
+import { AddressesCalledCounts } from "../../../models/AddressesCalledCount.js";
 
 export async function getTotalAmountOfSandwichesInLocalDB(): Promise<number> {
   const count = await Sandwiches.count();
@@ -44,6 +46,39 @@ export async function getLabelsRankingDecendingAbsOccurences(): Promise<{ addres
     return labelsOccurrences;
   } catch (error) {
     console.error(`Error in getLabelsRankingDecendingAbsOccurences: ${error}`);
+    return null;
+  }
+}
+
+export async function getSandwichLabelOccurrences(): Promise<{ address: string; label: string; occurrences: number; numOfAllTx: number }[] | null> {
+  try {
+    const labelsRanking = await getLabelsRankingDecendingAbsOccurences();
+
+    // If labelsRanking is null, something went wrong in getLabelsRankingDecendingAbsOccurences
+    if (!labelsRanking) {
+      console.error("Error: getLabelsRankingDecendingAbsOccurences returned null.");
+      return null;
+    }
+
+    // For each unique address, get its count in AddressesCalledCounts
+    const labelsOccurrences: { address: string; label: string; occurrences: number; numOfAllTx: number }[] = [];
+    for (const labelRanking of labelsRanking) {
+      const address = labelRanking.address;
+      if (!address) {
+        console.log(`err with address ${address} in labelsOccurrences`);
+        continue;
+      }
+
+      // Fetch address count from AddressesCalledCounts table
+      const addressCountRecord = await AddressesCalledCounts.findOne({ where: { called_address: address } });
+      const allTxCount = addressCountRecord ? addressCountRecord.count : 0;
+
+      labelsOccurrences.push({ ...labelRanking, numOfAllTx: allTxCount });
+    }
+
+    return labelsOccurrences;
+  } catch (error) {
+    console.error(`Error in getSandwichLabelOccurrences: ${error}`);
     return null;
   }
 }

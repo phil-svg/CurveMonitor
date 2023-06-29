@@ -1,37 +1,20 @@
 import { Server } from "socket.io";
-import { getLabelsRankingDecendingAbsOccurences } from "./queries/query_sandwiches.js";
-import eventEmitter from "../goingLive/EventEmitter.js";
-export const initServer = () => {
-    const io = new Server(443, {
+import { startPingPongRoom } from "./endpoints/ping.js";
+import { startAllTxDemoRoom } from "./endpoints/allTxDemoRoom.js";
+import { startAbsolutLabelsRankingRoom } from "./endpoints/absolutLabelsRanking.js";
+import { startSandwichLabelOccurrencesRoom } from "./endpoints/relativeLabelsRaking.js";
+const port = 443;
+export const startAPI = () => {
+    const io = new Server(port, {
         cors: {
             origin: "*",
             methods: ["GET", "POST"],
         },
     });
-    const allTxDemoRoom = io.of("/allTxDemoRoom");
-    allTxDemoRoom.on("connection", async (socket) => {
-        socket.join("allTxDemoRoom");
-    });
-    eventEmitter.on("new tx for demo room", async (data) => {
-        allTxDemoRoom.in("allTxDemoRoom").emit("DemoNewTx", data);
-    });
-    io.on("connection", (socket) => {
-        console.log("Client connected.");
-        socket.emit("message", "Hi there!");
-        socket.on("getLabelsRanking", async () => {
-            try {
-                const labelsRanking = await getLabelsRankingDecendingAbsOccurences();
-                socket.emit("labelsRanking", labelsRanking);
-            }
-            catch (error) {
-                console.error(error);
-                socket.emit("error", "Internal Server Error");
-            }
-        });
-        socket.on("message", (msg) => {
-            console.log("Client said: " + msg);
-        });
-    });
-    console.log(`Server started on port 433`);
+    startPingPongRoom(io);
+    startAllTxDemoRoom(io);
+    startAbsolutLabelsRankingRoom(io);
+    startSandwichLabelOccurrencesRoom(io);
+    console.log(`Server started on port ${port}`);
 };
 //# sourceMappingURL=Server.js.map

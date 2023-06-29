@@ -16,6 +16,8 @@ import { Labels } from "../models/Labels.js";
 import { Sandwiches } from "../models/Sandwiches.js";
 import { BlockScanningData } from "../models/BlockScanningData.js";
 import { CurrentBlock } from "../models/CurrentBlock.js";
+import { TransactionCalls } from "../models/TransactionCalls.js";
+import { AddressesCalledCounts } from "../models/AddressesCalledCount.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,6 +46,8 @@ const sequelize = new Sequelize({
     Blocks,
     TransactionCoins,
     CurrentBlock,
+    TransactionCalls,
+    AddressesCalledCounts,
   ],
   logging: false,
 });

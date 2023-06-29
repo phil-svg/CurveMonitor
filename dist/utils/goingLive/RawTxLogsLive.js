@@ -1,6 +1,7 @@
 import { getCurrentTimeString } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
+import { solveSingleTdId } from "../postgresTables/TransactionsCalls.js";
 import { findCandidatesInBatch } from "../postgresTables/mevDetection/SandwichDetection.js";
 import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/SandwichUtils.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
@@ -54,5 +55,10 @@ async function processBufferedEvents() {
     let parsedTx = await fetchTransactionsForBlock(eventBlockNumbers[0]);
     await findCandidatesInBatch(parsedTx);
     await addAddressesForLabelingForBlock(eventBlockNumbers[0]);
+    for (let transaction of parsedTx) {
+        if (transaction.tx_id) {
+            await solveSingleTdId(transaction.tx_id);
+        }
+    }
 }
 //# sourceMappingURL=RawTxLogsLive.js.map
