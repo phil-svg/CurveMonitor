@@ -29,7 +29,7 @@ export async function initDatabase() {
 await initDatabase();
 
 startAPI();
-// await startTestClient();
+//await startTestClient();
 
 async function main() {
   await loadAddressProvider();
@@ -58,4 +58,4 @@ async function main() {
   // process.exit();
 }
 
-await main();
+// await main();

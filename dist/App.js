@@ -25,7 +25,7 @@ export async function initDatabase() {
 }
 await initDatabase();
 startAPI();
-// await startTestClient();
+//await startTestClient();
 async function main() {
     await loadAddressProvider();
     await updatePools();
@@ -46,5 +46,5 @@ async function main() {
     // todo
     // process.exit();
 }
-await main();
+// await main();
 //# sourceMappingURL=App.js.map

@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client";
+import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
 // const url = "http://localhost:443";
