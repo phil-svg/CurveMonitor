@@ -58,4 +58,4 @@ async function main() {
   // process.exit();
 }
 
-// await main();
+await main();

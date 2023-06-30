@@ -46,5 +46,5 @@ async function main() {
     // todo
     // process.exit();
 }
-// await main();
+await main();
 //# sourceMappingURL=App.js.map
