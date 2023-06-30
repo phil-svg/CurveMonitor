@@ -3,7 +3,7 @@ import { fn, col } from "sequelize";
 import { Pool } from "../../../models/Pools.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { getIdByAddress } from "../../postgresTables/readFunctions/Pools.js";
-import { poolNamesManualLabor } from "./PoolNamesManualLabor.js";
+import { manualLaborLabels } from "./PoolNamesManualLabor.js";
 import { Coins } from "../../../models/Coins.js";
 async function getPoolTransactionCount(poolId) {
     if (poolId === null) {
@@ -18,10 +18,10 @@ async function getPoolTransactionCount(poolId) {
     });
     return transactions.length;
 }
-export async function getModifiedPoolName(poolAddress) {
+async function getModifiedPoolName(poolAddress) {
     const lowercasedAddress = poolAddress.toLowerCase();
-    if (poolNamesManualLabor.hasOwnProperty(lowercasedAddress)) {
-        return poolNamesManualLabor[lowercasedAddress];
+    if (manualLaborLabels.hasOwnProperty(lowercasedAddress)) {
+        return manualLaborLabels[lowercasedAddress];
     }
     const poolId = await getIdByAddress(poolAddress);
     if (poolId === null) {

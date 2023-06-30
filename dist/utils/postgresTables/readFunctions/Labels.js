@@ -9,12 +9,9 @@ export async function findUniqueLabeledAddresses() {
 }
 export async function getLabelNameFromAddress(address) {
     try {
+        const lowerCaseAddress = address.toLowerCase();
         const labelRecord = await Labels.findOne({
-            where: {
-                address: {
-                    [Op.iLike]: address,
-                },
-            },
+            where: Sequelize.where(Sequelize.fn("lower", Sequelize.col("address")), lowerCaseAddress),
         });
         if (labelRecord) {
             return labelRecord.label;

@@ -9,7 +9,7 @@ import { getModifiedPoolName } from "../api/utils/SearchBar.js";
 import { fetchAbiFromEtherscan } from "./Abi.js";
 import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { web3Call } from "../web3Calls/generic.js";
-import { otherManualLaborLabels } from "../api/utils/PoolNamesManualLabor.js";
+import { manualLaborLabels } from "../api/utils/PoolNamesManualLabor.js";
 
 /**
  * Function to retrieve addresses that are not yet labeled
@@ -58,11 +58,50 @@ async function vyper_contract() {
       }
     } else {
       // Plan B: Use manual label if it exists
-      if (otherManualLaborLabels[address]) {
-        const label = otherManualLaborLabels[address];
+      if (manualLaborLabels[address]) {
+        const label = manualLaborLabels[address];
 
         // Update label in the Labels table for the given address
         await Labels.update({ label: label }, { where: { address: address } });
+      }
+    }
+  }
+}
+
+async function fetchAllAddresses(): Promise<string[]> {
+  try {
+    const labels = await Labels.findAll();
+    return labels.map((label) => label.getDataValue("address"));
+  } catch (error) {
+    console.error(`Error in fetchAllAddresses: ${error}`);
+    return [];
+  }
+}
+
+async function addCustomLabels() {
+  // Fetch all records from the Labels table
+  const existingLabels = await Labels.findAll();
+
+  const labelsMap = new Map();
+  existingLabels.forEach((labelRecord) => {
+    // Convert address to lower case for case insensitive comparison
+    const lowerCaseAddress = labelRecord.address.toLowerCase();
+    labelsMap.set(lowerCaseAddress, labelRecord);
+  });
+
+  for (const [address, label] of Object.entries(manualLaborLabels)) {
+    // Convert address to lower case
+    const lowerCaseAddress = address.toLowerCase();
+
+    if (!labelsMap.has(lowerCaseAddress)) {
+      // Add new entry to the Labels table for the given address
+      await Labels.create({ address: address, label: label });
+    } else {
+      // If the label differs, update it
+      const existingLabelRecord = labelsMap.get(lowerCaseAddress);
+      if (existingLabelRecord.label !== label) {
+        existingLabelRecord.label = label;
+        await existingLabelRecord.save();
       }
     }
   }
@@ -113,6 +152,7 @@ export async function updateLabels(): Promise<void> {
   }
 
   await vyper_contract();
+  await addCustomLabels();
 
   updateConsoleOutput(`[✓] Labels synced successfully.`);
 }

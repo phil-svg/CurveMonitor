@@ -2,8 +2,8 @@ import { io, Socket } from "socket.io-client";
 import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
-// const url = "http://localhost:443";
-const url = "wss://api.curvemonitor.com";
+const url = "http://localhost:443";
+// const url = "wss://api.curvemonitor.com";
 
 /**
  * List of Endpoints:
@@ -131,10 +131,10 @@ export function startSandwichLabelOccurrencesClient() {
       // console.log("Number of labels:", labelsOccurrence.length);
 
       const bestPerforming = topBestPerformingLabels(labelsOccurrence);
-      //console.log("Best performing labels: ", bestPerforming);
+      console.log("Best performing labels: ", bestPerforming);
 
       const worstPerforming = topWorstPerformingLabels(labelsOccurrence);
-      //console.log("Worst performing labels: ", worstPerforming);
+      console.log("Worst performing labels: ", worstPerforming);
     });
 
     handleErrors(labelsOccurrenceSocket, "/sandwichLabelOccurrences");

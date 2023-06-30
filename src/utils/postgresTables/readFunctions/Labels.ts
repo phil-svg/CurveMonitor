@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import { Labels } from "../../../models/Labels.js";
-import { Op } from "sequelize";
+import { Op, fn, col } from "sequelize";
 
 export async function findUniqueLabeledAddresses(): Promise<string[]> {
   const labels = await Labels.findAll({
@@ -11,12 +11,10 @@ export async function findUniqueLabeledAddresses(): Promise<string[]> {
 
 export async function getLabelNameFromAddress(address: string): Promise<string | null> {
   try {
-    const labelRecord = await Labels.findOne({
-      where: {
-        address: {
-          [Op.iLike]: address,
-        },
-      },
+    const lowerCaseAddress = address.toLowerCase();
+
+    const labelRecord: Labels | null = await Labels.findOne({
+      where: Sequelize.where(Sequelize.fn("lower", Sequelize.col("address")), lowerCaseAddress),
     });
 
     if (labelRecord) {
