@@ -28,7 +28,7 @@ export async function initDatabase() {
 
 await initDatabase();
 
-// startAPI();
+startAPI();
 // await startTestClient();
 
 async function main() {
