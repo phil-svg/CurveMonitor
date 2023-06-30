@@ -1,7 +1,8 @@
 import { io, Socket } from "socket.io-client";
 
 // Replace with "wss://api.curvemonitor.com" for production
-const url = "http://localhost:443";
+// const url = "http://localhost:443";
+const url = "wss://api.curvemonitor.com";
 
 /**
  * List of Endpoints:
@@ -90,13 +91,19 @@ export function startAbsoluteLabelsRankingClient() {
     // request for absolute labels ranking
     labelsRankingSocket.emit("getAbsoluteLabelsRanking");
 
-    labelsRankingSocket.on("absoluteLabelsRanking", (labelsRanking) => {
+    labelsRankingSocket.on("absoluteLabelsRanking", (labelsRanking: LabelRankingShort[]) => {
       console.log("Received absolute labels ranking: ", labelsRanking);
       console.log("Number of labels:", labelsRanking.length);
     });
 
     handleErrors(labelsRankingSocket, "/absoluteLabelsRanking");
   });
+}
+
+export interface LabelRankingShort {
+  address: string;
+  label: string;
+  occurrences: number;
 }
 
 /**
@@ -118,13 +125,19 @@ export function startSandwichLabelOccurrencesClient() {
     // request for sandwich label occurrences
     labelsOccurrenceSocket.emit("getSandwichLabelOccurrences");
 
-    labelsOccurrenceSocket.on("sandwichLabelOccurrences", (labelsOccurrence) => {
+    labelsOccurrenceSocket.on("sandwichLabelOccurrences", (labelsOccurrence: LabelRankingExtended[]) => {
       console.log("Received sandwich label occurrences: ", labelsOccurrence);
       console.log("Number of labels:", labelsOccurrence.length);
     });
 
     handleErrors(labelsOccurrenceSocket, "/sandwichLabelOccurrences");
   });
+}
+export interface LabelRankingExtended {
+  address: string;
+  label: string;
+  occurrences: number;
+  numOfAllTx: number;
 }
 
 // This function takes care of any connection or generic errors

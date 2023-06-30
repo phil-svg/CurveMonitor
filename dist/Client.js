@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
 // Replace with "wss://api.curvemonitor.com" for production
-const url = "http://localhost:443";
+// const url = "http://localhost:443";
+const url = "wss://api.curvemonitor.com";
 /**
  * List of Endpoints:
  * wss://api.curvemonitor.com/ping

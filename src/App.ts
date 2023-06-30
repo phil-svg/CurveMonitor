@@ -28,30 +28,34 @@ export async function initDatabase() {
 
 await initDatabase();
 
-startAPI();
-//await startTestClient();
+// startAPI();
+// await startTestClient();
 
-await loadAddressProvider();
-await updatePools();
-await updateCoinTable();
-await updatePoolAbis();
-await subscribeToNewBlocks();
+async function main() {
+  await loadAddressProvider();
+  await updatePools();
+  await updateCoinTable();
+  await updatePoolAbis();
+  await subscribeToNewBlocks();
 
-// await updateInitialPoolParams(); // muted until useful
-// await updatePoolParamsEvents(); // muted until useful
+  // await updateInitialPoolParams(); // muted until useful
+  // await updatePoolParamsEvents(); // muted until useful
 
-await preparingLiveModeForRawEvents();
-await updateRawLogs();
-await updateBlockTimestamps();
-await parseEvents();
-await updateTransactionsCalls();
-await updateAddressCounts();
+  await preparingLiveModeForRawEvents();
+  await updateRawLogs();
+  await updateBlockTimestamps();
+  await parseEvents();
+  await updateTransactionsCalls();
+  await updateAddressCounts();
 
-// await updateTokenDollarValues(); // muted until useful
+  // await updateTokenDollarValues(); // muted until useful
 
-await updateMevDetection();
-await updateLabels();
+  await updateMevDetection();
+  await updateLabels();
 
-// todo
+  // todo
 
-// process.exit();
+  // process.exit();
+}
+
+await main();
