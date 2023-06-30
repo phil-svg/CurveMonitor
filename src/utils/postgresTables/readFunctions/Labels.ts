@@ -29,3 +29,20 @@ export async function getLabelNameFromAddress(address: string): Promise<string |
     return null;
   }
 }
+
+export async function findVyperContractAddresses(): Promise<string[]> {
+  try {
+    const labels = await Labels.findAll({
+      where: {
+        label: {
+          [Op.iLike]: "Vyper_contract",
+        },
+      },
+    });
+
+    return labels.map((label) => label.getDataValue("address"));
+  } catch (error) {
+    console.error(`Error in findVyperContractAddresses: ${error}`);
+    return [];
+  }
+}

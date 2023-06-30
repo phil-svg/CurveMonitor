@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client";
 // Replace with "wss://api.curvemonitor.com" for production
 // const url = "http://localhost:443";
 const url = "wss://api.curvemonitor.com";
@@ -100,8 +101,12 @@ export function startSandwichLabelOccurrencesClient() {
         // request for sandwich label occurrences
         labelsOccurrenceSocket.emit("getSandwichLabelOccurrences");
         labelsOccurrenceSocket.on("sandwichLabelOccurrences", (labelsOccurrence) => {
-            console.log("Received sandwich label occurrences: ", labelsOccurrence);
-            console.log("Number of labels:", labelsOccurrence.length);
+            // console.log("Received sandwich label occurrences: ", labelsOccurrence);
+            // console.log("Number of labels:", labelsOccurrence.length);
+            const bestPerforming = topBestPerformingLabels(labelsOccurrence);
+            //console.log("Best performing labels: ", bestPerforming);
+            const worstPerforming = topWorstPerformingLabels(labelsOccurrence);
+            //console.log("Worst performing labels: ", worstPerforming);
         });
         handleErrors(labelsOccurrenceSocket, "/sandwichLabelOccurrences");
     });
@@ -116,7 +121,7 @@ function handleErrors(socket, endpoint) {
     });
 }
 export async function startTestClient() {
-    startPingClient();
+    //startPingClient();
     startSandwichLabelOccurrencesClient();
 }
 //# sourceMappingURL=Client.js.map

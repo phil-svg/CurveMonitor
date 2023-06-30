@@ -28,4 +28,20 @@ export async function getLabelNameFromAddress(address) {
         return null;
     }
 }
+export async function findVyperContractAddresses() {
+    try {
+        const labels = await Labels.findAll({
+            where: {
+                label: {
+                    [Op.iLike]: "Vyper_contract",
+                },
+            },
+        });
+        return labels.map((label) => label.getDataValue("address"));
+    }
+    catch (error) {
+        console.error(`Error in findVyperContractAddresses: ${error}`);
+        return [];
+    }
+}
 //# sourceMappingURL=Labels.js.map

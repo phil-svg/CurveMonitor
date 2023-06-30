@@ -3,8 +3,12 @@ import _ from "lodash";
 import path from "path";
 import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { findUniqueSourceOfLossAddresses } from "./readFunctions/Sandwiches.js";
-import { findUniqueLabeledAddresses } from "./readFunctions/Labels.js";
+import { findUniqueLabeledAddresses, findVyperContractAddresses } from "./readFunctions/Labels.js";
 import { Labels } from "../../models/Labels.js";
+import { fetchAbiFromEtherscan } from "./Abi.js";
+import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
+import { web3Call } from "../web3Calls/generic.js";
+import { otherManualLaborLabels } from "../api/utils/PoolNamesManualLabor.js";
 /**
  * Function to retrieve addresses that are not yet labeled
  * @returns {Promise<Array<string>>} Array of unlabeled addresses
@@ -20,6 +24,37 @@ async function getUnlabeledAddresses() {
     // Get the difference between the two arrays to find unlabeled addresses
     const unlabeledAddresses = _.difference(uniqueSourceOfLossAddresses, uniqueLabeledAddresses);
     return unlabeledAddresses;
+}
+async function vyper_contract() {
+    let vyperContractAddresses = await findVyperContractAddresses();
+    const web3 = await getWeb3HttpProvider();
+    for (const address of vyperContractAddresses) {
+        // Delay each loop iteration by 200ms
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        const abi = await fetchAbiFromEtherscan(address);
+        let contract = new web3.eth.Contract(abi, address);
+        // Check if the ABI has a "name" function
+        const hasNameFunction = abi.some((item) => item.name === "name" && item.type === "function");
+        if (hasNameFunction) {
+            try {
+                let name = await web3Call(contract, "name", []);
+                console.log(name);
+                // Update label in the Labels table for the given address
+                await Labels.update({ label: name }, { where: { address: address } });
+            }
+            catch (err) {
+                console.log("err in vyper_contract", err);
+            }
+        }
+        else {
+            // Plan B: Use manual label if it exists
+            if (otherManualLaborLabels[address]) {
+                const label = otherManualLaborLabels[address];
+                // Update label in the Labels table for the given address
+                await Labels.update({ label: label }, { where: { address: address } });
+            }
+        }
+    }
 }
 /**
  * Function to update labels in the database
@@ -58,6 +93,7 @@ export async function updateLabels() {
             }
         }
     }
+    await vyper_contract();
     updateConsoleOutput(`[✓] Labels synced successfully.`);
 }
 //# sourceMappingURL=Labels.js.map
