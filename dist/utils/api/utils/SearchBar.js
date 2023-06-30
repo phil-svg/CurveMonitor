@@ -18,7 +18,7 @@ async function getPoolTransactionCount(poolId) {
     });
     return transactions.length;
 }
-async function getModifiedPoolName(poolAddress) {
+export async function getModifiedPoolName(poolAddress) {
     const lowercasedAddress = poolAddress.toLowerCase();
     if (manualLaborLabels.hasOwnProperty(lowercasedAddress)) {
         return manualLaborLabels[lowercasedAddress];

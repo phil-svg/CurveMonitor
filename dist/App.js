@@ -11,7 +11,7 @@ import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetec
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
-import { startAPI } from "./utils/api/Server.js";
+import { startTestClient } from "./Client.js";
 import { updateTransactionsCalls } from "./utils/postgresTables/TransactionsCalls.js";
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 export async function initDatabase() {
@@ -24,8 +24,8 @@ export async function initDatabase() {
     }
 }
 await initDatabase();
-startAPI();
-//await startTestClient();
+//startAPI();
+await startTestClient();
 async function main() {
     await loadAddressProvider();
     await updatePools();

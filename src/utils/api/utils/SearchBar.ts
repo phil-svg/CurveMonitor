@@ -22,7 +22,7 @@ async function getPoolTransactionCount(poolId: number | null): Promise<number> {
   return transactions.length;
 }
 
-async function getModifiedPoolName(poolAddress: string): Promise<string | null> {
+export async function getModifiedPoolName(poolAddress: string): Promise<string | null> {
   const lowercasedAddress = poolAddress.toLowerCase();
   if (manualLaborLabels.hasOwnProperty(lowercasedAddress)) {
     return manualLaborLabels[lowercasedAddress];

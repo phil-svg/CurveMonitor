@@ -28,8 +28,8 @@ export async function initDatabase() {
 
 await initDatabase();
 
-startAPI();
-//await startTestClient();
+//startAPI();
+await startTestClient();
 
 async function main() {
   await loadAddressProvider();
