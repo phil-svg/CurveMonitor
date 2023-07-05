@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, AllowNull, HasMany, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, AllowNull } from "sequelize-typescript";
 import { Transactions } from "./Transactions.js";
 
 export interface LossTransaction {
@@ -10,7 +10,9 @@ export interface LossTransaction {
 
 @Table({ tableName: "sandwiches" })
 export class Sandwiches extends Model {
-  @AllowNull(false)
+  @Column(DataType.INTEGER)
+  pool_id!: number;
+
   @ForeignKey(() => Transactions)
   @Column(DataType.INTEGER)
   frontrun!: number;
@@ -18,7 +20,6 @@ export class Sandwiches extends Model {
   @BelongsTo(() => Transactions)
   frontrunTransaction!: Transactions;
 
-  @AllowNull(false)
   @ForeignKey(() => Transactions)
   @Column(DataType.INTEGER)
   backrun!: number;
@@ -26,7 +27,6 @@ export class Sandwiches extends Model {
   @BelongsTo(() => Transactions)
   backrunTransaction!: Transactions;
 
-  @AllowNull(true)
   @Column(DataType.JSONB)
   loss_transactions?: LossTransaction[] | null;
 

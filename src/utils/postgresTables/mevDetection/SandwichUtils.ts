@@ -94,10 +94,11 @@ export async function requiresDepositParam(pool_id: number): Promise<boolean> {
   return requiresSecondParam;
 }
 
-export async function saveSandwich(frontrunId: number, backrunId: number, extractedFromCurve: boolean, lossTransactions?: LossTransaction[] | null) {
+export async function saveSandwich(poolId: number, frontrunId: number, backrunId: number, extractedFromCurve: boolean, lossTransactions?: LossTransaction[] | null) {
   await Sandwiches.findOrCreate({
     where: { frontrun: frontrunId, backrun: backrunId },
     defaults: {
+      pool_id: poolId,
       frontrun: frontrunId,
       backrun: backrunId,
       extracted_from_curve: extractedFromCurve,

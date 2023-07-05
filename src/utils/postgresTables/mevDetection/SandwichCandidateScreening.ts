@@ -1,6 +1,10 @@
 import { countReset } from "console";
 import { ExtendedTransactionData } from "../../Interfaces.js";
 import { calcTheLossOfCurveUserFromSandwich, saveSandwich } from "./SandwichUtils.js";
+import { Transactions } from "../../../models/Transactions.js";
+import { eventFlags } from "../../api/utils/EventFlags.js";
+import eventEmitter from "../../goingLive/EventEmitter.js";
+import { Sandwiches } from "../../../models/Sandwiches.js";
 
 /**
  * Function: getBotTransactions
@@ -104,8 +108,14 @@ async function findPotentialLossTransactions(botTransaction: ExtendedTransaction
 }
 
 async function processSingleSandwich(botTransaction: ExtendedTransactionData[], candidate: ExtendedTransactionData[]): Promise<void> {
+  const frontrunTxId = botTransaction[0].tx_id!;
+  const frontrunTransaction = await Transactions.findOne({ where: { tx_id: frontrunTxId } });
+
+  if (!frontrunTransaction) {
+    throw new Error(`Frontrun transaction with ID ${frontrunTxId} not found`);
+  }
+
   const potentialLossTransactions = await findPotentialLossTransactions(botTransaction, candidate);
-  // console.dir(potentialLossTransactions, { depth: null, colors: true });
   let extractedFromCurve = false;
   let lossTransactions: any = [];
 
@@ -122,11 +132,26 @@ async function processSingleSandwich(botTransaction: ExtendedTransactionData[], 
       extractedFromCurve = true;
     }
   }
+
   if (lossTransactions.length === 0) {
     lossTransactions = null;
   }
-  // console.log("saw new sandwich", lossTransactions);
-  await saveSandwich(botTransaction[0].tx_id!, botTransaction[1].tx_id!, extractedFromCurve, lossTransactions);
+
+  // Save sandwich with pool_id
+  await saveSandwich(frontrunTransaction.pool_id, botTransaction[0].tx_id!, botTransaction[1].tx_id!, extractedFromCurve, lossTransactions);
+
+  const latestSandwich = await Sandwiches.findOne({
+    order: [["id", "DESC"]],
+    attributes: ["id"],
+    raw: true,
+  });
+
+  const latestSandwichId = latestSandwich ? latestSandwich.id : null;
+
+  // If everything is up to date, we livestream new sandwiches to clients.
+  if (eventFlags.canEmitSandwich) {
+    eventEmitter.emit("New Sandwich for General-Sandwich-Livestream-Subscribers", latestSandwichId);
+  }
 }
 
 export async function screenCandidate(candidate: ExtendedTransactionData[]): Promise<void> {

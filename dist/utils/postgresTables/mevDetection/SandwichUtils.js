@@ -71,10 +71,11 @@ export async function requiresDepositParam(pool_id) {
     const requiresSecondParam = calcTokenAmountFunction.inputs.length === 2;
     return requiresSecondParam;
 }
-export async function saveSandwich(frontrunId, backrunId, extractedFromCurve, lossTransactions) {
+export async function saveSandwich(poolId, frontrunId, backrunId, extractedFromCurve, lossTransactions) {
     await Sandwiches.findOrCreate({
         where: { frontrun: frontrunId, backrun: backrunId },
         defaults: {
+            pool_id: poolId,
             frontrun: frontrunId,
             backrun: backrunId,
             extracted_from_curve: extractedFromCurve,

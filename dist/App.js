@@ -14,6 +14,7 @@ import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.j
 import { startAPI } from "./utils/api/Server.js";
 import { updateTransactionsCalls } from "./utils/postgresTables/TransactionsCalls.js";
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
+import { eventFlags } from "./utils/api/utils/EventFlags.js";
 export async function initDatabase() {
     try {
         await db.sync();
@@ -43,6 +44,7 @@ async function main() {
     // await updateTokenDollarValues(); // muted until useful
     await updateMevDetection();
     await updateLabels();
+    eventFlags.canEmitSandwich = true;
     // todo
     // process.exit();
 }

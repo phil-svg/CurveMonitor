@@ -37,8 +37,6 @@ async function updateAddressCountsInterval() {
         await instance.save();
       }
     }
-
-    console.log("AddressCounts table has been updated.");
   } catch (error) {
     console.error(`Error in updateAddressCounts: ${error}`);
   }

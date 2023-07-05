@@ -16,6 +16,7 @@ import { startAPI } from "./utils/api/Server.js";
 import { startTestClient } from "./Client.js";
 import { updateTransactionsCalls } from "./utils/postgresTables/TransactionsCalls.js";
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
+import { eventFlags } from "./utils/api/utils/EventFlags.js";
 
 export async function initDatabase() {
   try {
@@ -52,6 +53,8 @@ async function main() {
 
   await updateMevDetection();
   await updateLabels();
+
+  eventFlags.canEmitSandwich = true;
 
   // todo
 

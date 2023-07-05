@@ -1,6 +1,7 @@
 import { Sequelize } from "sequelize";
 import { Sandwiches } from "../../../models/Sandwiches.js";
 import { Transactions } from "../../../models/Transactions.js";
+import { getIdByAddress } from "./Pools.js";
 export async function readSandwichesInBatches(batchSize = 100) {
     let offset = 0;
     const batches = [];
@@ -69,4 +70,25 @@ export async function findUniqueSourceOfLossAddresses() {
     });
     return sandwiches.map((sandwich) => sandwich.getDataValue("source_of_loss_contract_address"));
 }
+export async function getAllRawTableEntriesForPoolByPoolAddress(poolAddress) {
+    let poolId = await getIdByAddress(poolAddress);
+    return await getAllRawSandwichTableEntriesForPoolByPoolId(poolId);
+}
+export async function getAllRawSandwichTableEntriesForPoolByPoolId(poolId) {
+    const poolRelatedSandwiches = await Sandwiches.findAll({ where: { pool_id: poolId } });
+    return poolRelatedSandwiches;
+}
+export async function getExtractedSandwichesByPoolId(poolId) {
+    const extractedSandwiches = await Sandwiches.findAll({
+        where: {
+            pool_id: poolId,
+            extracted_from_curve: true,
+        },
+    });
+    return extractedSandwiches;
+}
+export const isExtractedFromCurve = async (id) => {
+    const sandwich = await Sandwiches.findByPk(id);
+    return sandwich ? sandwich.extracted_from_curve : false;
+};
 //# sourceMappingURL=Sandwiches.js.map

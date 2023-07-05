@@ -1,3 +1,4 @@
+import { TransactionCalls } from "../../models/TransactionCalls.js";
 import { getCurrentTimeString } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
@@ -61,14 +62,33 @@ async function processBufferedEvents() {
   // console.log(`\n${timeStr} New Event(s) picked up`);
   // console.dir(EVENTS, { depth: null, colors: true });
 
+  // parsing and saving the tx
   await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
   eventBuffer = [];
+
   let parsedTx = await fetchTransactionsForBlock(eventBlockNumbers[0]);
+
+  try {
+    // solving called contract
+    let transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id): id is number => id !== undefined);
+    let calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
+    let calledContractAddresses = await Promise.all(calledContractPromises);
+
+    // Filter out null results
+    let validCalledContractAddresses = calledContractAddresses.filter((address): address is { txId: number; called_address: string } => address !== null);
+
+    // Save to the database
+    for (let data of validCalledContractAddresses) {
+      const existingTransaction = await TransactionCalls.findOne({ where: { tx_id: data.txId } });
+      if (!existingTransaction) {
+        await TransactionCalls.create(data);
+      }
+    }
+  } catch (err) {
+    console.log(`Failed to solve called contract in live-mode ${err}`);
+  }
+
+  // live-sandwich-detection
   await findCandidatesInBatch(parsedTx);
   await addAddressesForLabelingForBlock(eventBlockNumbers[0]);
-  for (let transaction of parsedTx) {
-    if (transaction.tx_id) {
-      await solveSingleTdId(transaction.tx_id);
-    }
-  }
 }

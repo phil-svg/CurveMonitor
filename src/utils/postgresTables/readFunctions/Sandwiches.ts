@@ -1,6 +1,7 @@
-import { Sequelize } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { Sandwiches } from "../../../models/Sandwiches.js";
 import { Transactions } from "../../../models/Transactions.js";
+import { getIdByAddress } from "./Pools.js";
 
 export async function readSandwichesInBatches(batchSize: number = 100): Promise<{ id: number; loss_transactions: any }[][]> {
   let offset = 0;
@@ -82,3 +83,28 @@ export async function findUniqueSourceOfLossAddresses(): Promise<string[]> {
   });
   return sandwiches.map((sandwich) => sandwich.getDataValue("source_of_loss_contract_address"));
 }
+
+export async function getAllRawTableEntriesForPoolByPoolAddress(poolAddress: string): Promise<Sandwiches[]> {
+  let poolId = await getIdByAddress(poolAddress);
+  return await getAllRawSandwichTableEntriesForPoolByPoolId(poolId!);
+}
+
+export async function getAllRawSandwichTableEntriesForPoolByPoolId(poolId: number): Promise<Sandwiches[]> {
+  const poolRelatedSandwiches = await Sandwiches.findAll({ where: { pool_id: poolId } });
+  return poolRelatedSandwiches;
+}
+
+export async function getExtractedSandwichesByPoolId(poolId: number): Promise<Sandwiches[]> {
+  const extractedSandwiches = await Sandwiches.findAll({
+    where: {
+      pool_id: poolId,
+      extracted_from_curve: true,
+    },
+  });
+  return extractedSandwiches;
+}
+
+export const isExtractedFromCurve = async (id: number): Promise<boolean> => {
+  const sandwich = await Sandwiches.findByPk(id);
+  return sandwich ? sandwich.extracted_from_curve : false;
+};

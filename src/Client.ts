@@ -1,51 +1,34 @@
 import { io, Socket } from "socket.io-client";
 import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
+import { LossTransaction } from "./models/Sandwiches.js";
+import { SandwichDetail } from "./utils/postgresTables/readFunctions/SandwichDetailEnrichments.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
 const url = "http://localhost:443";
 // const url = "wss://api.curvemonitor.com";
 
 /**
- * List of Endpoints:
- * wss://api.curvemonitor.com/ping
- * wss://api.curvemonitor.com/allTxDemoRoom // Does emit unformatted tx. For research purposes.
- * wss://api.curvemonitor.com/absoluteLabelsRanking
- * wss://api.curvemonitor.com/sandwichLabelOccurrences
+ *
+ * Possible Usages of /main
+ * emit("Ping")
+ * emit("getAbsoluteLabelsRanking")
+ * emit("getSandwichLabelOccurrences")
+ * emit("getUserSearchResult", userInput)
  *
  */
 
 // you say: Ping, I say: Pong. Ping? Pong!
-export function startPingClient() {
-  const pingSocket = io(`${url}/ping`);
+export function startPingClient(socket: Socket) {
+  // Ping the server every 500ms
+  setInterval(() => {
+    socket.emit("Ping");
+  }, 500);
 
-  pingSocket.on("connect", () => {
-    console.log("Connected to the ping server.");
-
-    // Ping the server every 500ms
-    setInterval(() => {
-      pingSocket.emit("Ping");
-    }, 500);
-
-    pingSocket.on("Pong", () => {
-      console.log("Received pong from the server.");
-    });
-
-    handleErrors(pingSocket, "/ping");
+  socket.on("Pong", () => {
+    console.log("Received pong from the server.");
   });
-}
 
-export function startAllTxDemoRoomClient() {
-  const demoRoomSocket = io(`${url}/allTxDemoRoom`);
-
-  demoRoomSocket.on("connect", () => {
-    console.log("Connected to the allTxDemoRoom server.");
-
-    demoRoomSocket.on("DemoNewTx", (demoTx) => {
-      console.log("Saw new Tx in Demo-Mode: ", demoTx);
-    });
-
-    handleErrors(demoRoomSocket, "/allTxDemoRoom");
-  });
+  handleErrors(socket, "/main");
 }
 
 /**
@@ -83,22 +66,16 @@ export function startAllTxDemoRoomClient() {
  *   ...
  * ]
  */
-export function startAbsoluteLabelsRankingClient() {
-  const labelsRankingSocket = io(`${url}/absoluteLabelsRanking`);
+export function startAbsoluteLabelsRankingClient(socket: Socket) {
+  // request for absolute labels ranking
+  socket.emit("getAbsoluteLabelsRanking");
 
-  labelsRankingSocket.on("connect", () => {
-    console.log("Connected to the absoluteLabelsRanking server.");
-
-    // request for absolute labels ranking
-    labelsRankingSocket.emit("getAbsoluteLabelsRanking");
-
-    labelsRankingSocket.on("absoluteLabelsRanking", (labelsRanking: LabelRankingShort[]) => {
-      console.log("Received absolute labels ranking: ", labelsRanking);
-      console.log("Number of labels:", labelsRanking.length);
-    });
-
-    handleErrors(labelsRankingSocket, "/absoluteLabelsRanking");
+  socket.on("labelsRanking", (labelsRanking: LabelRankingShort[]) => {
+    console.log("Received absolute labels ranking: ", labelsRanking);
+    console.log("Number of labels:", labelsRanking.length);
   });
+
+  handleErrors(socket, "/main");
 }
 
 export interface LabelRankingShort {
@@ -117,34 +94,162 @@ export interface LabelRankingShort {
     numOfAllTx: 1847
   }
  */
-export function startSandwichLabelOccurrencesClient() {
-  const labelsOccurrenceSocket = io(`${url}/sandwichLabelOccurrences`);
+export function startSandwichLabelOccurrencesClient(socket: Socket) {
+  // request for sandwich label occurrences
+  socket.emit("getSandwichLabelOccurrences");
 
-  labelsOccurrenceSocket.on("connect", () => {
-    console.log("Connected to the sandwichLabelOccurrences server.");
+  socket.on("sandwichLabelOccurrences", (labelsOccurrence: LabelRankingExtended[]) => {
+    // console.log("Received sandwich label occurrences: ", labelsOccurrence);
+    // console.log("Number of labels:", labelsOccurrence.length);
 
-    // request for sandwich label occurrences
-    labelsOccurrenceSocket.emit("getSandwichLabelOccurrences");
+    const bestPerforming = topBestPerformingLabels(labelsOccurrence);
+    console.log("Best performing labels: ", bestPerforming);
 
-    labelsOccurrenceSocket.on("sandwichLabelOccurrences", (labelsOccurrence: LabelRankingExtended[]) => {
-      // console.log("Received sandwich label occurrences: ", labelsOccurrence);
-      // console.log("Number of labels:", labelsOccurrence.length);
-
-      const bestPerforming = topBestPerformingLabels(labelsOccurrence);
-      console.log("Best performing labels: ", bestPerforming);
-
-      const worstPerforming = topWorstPerformingLabels(labelsOccurrence);
-      console.log("Worst performing labels: ", worstPerforming);
-    });
-
-    handleErrors(labelsOccurrenceSocket, "/sandwichLabelOccurrences");
+    const worstPerforming = topWorstPerformingLabels(labelsOccurrence);
+    console.log("Worst performing labels: ", worstPerforming);
   });
+
+  handleErrors(socket, "/main");
 }
 export interface LabelRankingExtended {
   address: string;
   label: string;
   occurrences: number;
   numOfAllTx: number;
+}
+
+// Convert user input into pool-suggestions, returns ranked pool suggestions (Pool-Name and Pool-Address)
+export function startUserSearchClient(socket: Socket, userInput: string) {
+  socket.emit("getUserSearchResult", userInput);
+
+  socket.on("userSearchResult", (userSearchResult: UserSearchResult[]) => {
+    console.log("Received user search result: ", userSearchResult);
+  });
+
+  handleErrors(socket, "/main");
+}
+
+export interface UserSearchResult {
+  address: string;
+  name: string | null;
+}
+
+/**
+ * Example for enrichedSandwich
+ * {
+  frontrun: {
+    tx_id: 101421,
+    pool_id: 28,
+    event_id: 142867,
+    tx_hash: '0x54082d12f8ab922607c42433ecff63dfb9f6c11a92e7b0160616bd8b917e20e5',
+    block_number: 17629377,
+    block_unixtime: '1688580647',
+    transaction_type: 'swap',
+    called_contract_by_user: '0xE8c060F8052E07423f71D445277c61AC5138A2e5',
+    trader: '0xE8c060F8052E07423f71D445277c61AC5138A2e5',
+    tx_position: 4,
+    coins_leaving_wallet: [
+      {
+        coin_id: 28,
+        amount: '718.733090248213600',
+        name: '3Crv',
+        address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490'
+      }
+    ],
+    coins_entering_wallet: [
+      {
+        coin_id: 259,
+        amount: '152984.553881940930000',
+        name: 'UST',
+        address: '0xa47c8bf37f92aBed4A126BDA807A7b7498661acD'
+      }
+    ]
+  },
+  center: [
+    {
+      tx_id: 101416,
+      pool_id: 28,
+      event_id: 142868,
+      tx_hash: '0x67e14a5ccde90aabc5f65349c325c7c61d76be79c3b190073f5ec8b421e1723a',
+      block_number: 17629377,
+      block_unixtime: '1688580647',
+      transaction_type: 'swap',
+      called_contract_by_user: '0xeCb456EA5365865EbAb8a2661B0c503410e9B347',
+      trader: '0x99a58482BD75cbab83b27EC03CA68fF489b5788f',
+      tx_position: 5,
+      coins_leaving_wallet: [
+        {
+          coin_id: 28,
+          amount: '9.656041053186470',
+          name: '3Crv',
+          address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490'
+        }
+      ],
+      coins_entering_wallet: [
+        {
+          coin_id: 259,
+          amount: '6099.199873959161000',
+          name: 'UST',
+          address: '0xa47c8bf37f92aBed4A126BDA807A7b7498661acD'
+        }
+      ]
+    }
+  ],
+  backrun: {
+    tx_id: 101423,
+    pool_id: 28,
+    event_id: 142869,
+    tx_hash: '0xbdab0526dd736cd1037b1a5bac66ae91ec8b462a04f6070835601ae7f34fca9e',
+    block_number: 17629377,
+    block_unixtime: '1688580647',
+    transaction_type: 'swap',
+    called_contract_by_user: '0xE8c060F8052E07423f71D445277c61AC5138A2e5',
+    trader: '0xE8c060F8052E07423f71D445277c61AC5138A2e5',
+    tx_position: 6,
+    coins_leaving_wallet: [
+      {
+        coin_id: 259,
+        amount: '158187.842888238640000',
+        name: 'UST',
+        address: '0xa47c8bf37f92aBed4A126BDA807A7b7498661acD'
+      }
+    ],
+    coins_entering_wallet: [
+      {
+        coin_id: 28,
+        amount: '718.733090248213600',
+        name: '3Crv',
+        address: '0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490'
+      }
+    ]
+  },
+  user_losses_details: [
+    {
+      unit: '3Crv',
+      amount: 63.505298732480725,
+      lossInPercentage: 86.80171647830026
+    }
+  ],
+  label: 'Curve.fi: Pool Owner'
+}
+ */
+export function startNewSandwichClient(socket: Socket) {
+  socket.on("NewSandwich", (enrichedSandwich: SandwichDetail) => {
+    console.log("Received new sandwich");
+    console.dir(enrichedSandwich, { depth: null, colors: true });
+  });
+
+  socket.on("connect", () => {
+    console.log("connected to General-Sandwich-Livestream");
+  });
+
+  socket.on("disconnect", () => {
+    console.log("disconnected from General-Sandwich-Livestream");
+  });
+
+  socket.emit("connectToGeneralSandwichLivestream");
+
+  handleErrors(socket, "/main");
 }
 
 // This function takes care of any connection or generic errors
@@ -159,6 +264,14 @@ function handleErrors(socket: Socket, endpoint: string) {
 }
 
 export async function startTestClient() {
-  //startPingClient();
-  startSandwichLabelOccurrencesClient();
+  const mainSocket = io(`${url}/main`);
+
+  mainSocket.on("connect", () => {
+    console.log("connected");
+    // startPingClient(mainSocket);
+    // startUserSearchClient(mainSocket, "crvu");
+    // startAbsoluteLabelsRankingClient(mainSocket);
+    // startSandwichLabelOccurrencesClient(mainSocket);
+    // startNewSandwichClient(mainSocket);
+  });
 }

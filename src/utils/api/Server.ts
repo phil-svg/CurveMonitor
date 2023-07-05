@@ -1,10 +1,5 @@
 import { Server } from "socket.io";
-import { startPingPongRoom } from "./endpoints/ping.js";
-import { startAllTxDemoRoom } from "./endpoints/allTxDemoRoom.js";
-import { startAbsolutLabelsRankingRoom } from "./endpoints/absolutLabelsRanking.js";
-import { startSandwichLabelOccurrencesRoom } from "./endpoints/relativeLabelsRaking.js";
-import { getContractByAddress } from "../helperFunctions/Web3.js";
-import { web3Call } from "../web3Calls/generic.js";
+import { startMainEndpoint } from "./handlers/main/Index.js";
 
 const port = 443;
 
@@ -16,10 +11,6 @@ export const startAPI = (): void => {
     },
   });
 
-  startPingPongRoom(io);
-  startAllTxDemoRoom(io);
-  startAbsolutLabelsRankingRoom(io);
-  startSandwichLabelOccurrencesRoom(io);
-
+  startMainEndpoint(io);
   console.log(`Server started on port ${port}`);
 };
