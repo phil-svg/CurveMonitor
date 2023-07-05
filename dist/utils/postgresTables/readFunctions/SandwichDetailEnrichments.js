@@ -1,5 +1,7 @@
 import { Sandwiches } from "../../../models/Sandwiches.js";
+import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
 import { getLabelNameFromAddress } from "./Labels.js";
+import { getAddressById } from "./Pools.js";
 import { txDetailEnrichment } from "./TxDetailEnrichment.js";
 export async function SandwichDetailEnrichment(id) {
     const sandwich = await Sandwiches.findOne({
@@ -31,12 +33,16 @@ export async function SandwichDetailEnrichment(id) {
     let label = await getLabelNameFromAddress(centerTransactions[0].called_contract_by_user);
     if (!label)
         label = "unknown";
+    let poolAddress = await getAddressById(frontrunTransaction.pool_id);
+    let poolName = await getModifiedPoolName(poolAddress);
     const sandwichDetail = {
         frontrun: frontrunTransaction,
         center: centerTransactions,
         backrun: backrunTransaction,
         user_losses_details: userLossesDetails,
         label: label,
+        poolAddress: poolAddress,
+        poolName: poolName,
     };
     return sandwichDetail;
 }

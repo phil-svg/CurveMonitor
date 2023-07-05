@@ -37,8 +37,8 @@ export async function parseTokenExchange(event: any, BLOCK_UNIXTIME: any, POOL_C
   let boughtCoinAmount = event.returnValues.tokens_bought / 10 ** BOUGHT_COIN_DECIMALS;
 
   const coinAmounts = [
-    { COIN_ID: SOLD_COIN_ID, amount: Number(soldCoinAmount.toFixed(15)), direction: "in" },
-    { COIN_ID: BOUGHT_COIN_ID, amount: Number(boughtCoinAmount.toFixed(15)), direction: "out" },
+    { COIN_ID: SOLD_COIN_ID, amount: Number(soldCoinAmount.toFixed(15)), direction: "out" },
+    { COIN_ID: BOUGHT_COIN_ID, amount: Number(boughtCoinAmount.toFixed(15)), direction: "in" },
   ];
 
   try {

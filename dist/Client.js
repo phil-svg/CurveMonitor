@@ -10,6 +10,7 @@ const url = "http://localhost:443";
  * emit("getAbsoluteLabelsRanking")
  * emit("getSandwichLabelOccurrences")
  * emit("getUserSearchResult", userInput)
+ * emit("connectToGeneralSandwichLivestream");
  *
  */
 // you say: Ping, I say: Pong. Ping? Pong!
@@ -202,12 +203,6 @@ export function startNewSandwichClient(socket) {
         console.log("Received new sandwich");
         console.dir(enrichedSandwich, { depth: null, colors: true });
     });
-    socket.on("connect", () => {
-        console.log("connected to General-Sandwich-Livestream");
-    });
-    socket.on("disconnect", () => {
-        console.log("disconnected from General-Sandwich-Livestream");
-    });
     socket.emit("connectToGeneralSandwichLivestream");
     handleErrors(socket, "/main");
 }
@@ -228,7 +223,7 @@ export async function startTestClient() {
         // startUserSearchClient(mainSocket, "crvu");
         // startAbsoluteLabelsRankingClient(mainSocket);
         // startSandwichLabelOccurrencesClient(mainSocket);
-        // startNewSandwichClient(mainSocket);
+        startNewSandwichClient(mainSocket);
     });
 }
 //# sourceMappingURL=Client.js.map
