@@ -94,6 +94,7 @@ export interface ExtendedTransactionData extends TransactionData {
 export interface SandwichLoss {
   amount: number;
   unit: string;
+  unitAddress: string;
   lossInPercentage: number;
 }
 

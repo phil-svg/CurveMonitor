@@ -2,7 +2,7 @@ import { ExtendedTransactionData, SandwichLoss } from "../../Interfaces.js";
 import { getContractByPoolID } from "../../helperFunctions/Web3.js";
 import { getTokenTransferEvents, web3Call } from "../../web3Calls/generic.js";
 import { getAbiBy } from "../Abi.js";
-import { findCoinDecimalsById, findCoinSymbolById, getLpTokenIdByPoolId } from "../readFunctions/Coins.js";
+import { findCoinAddressById, findCoinDecimalsById, findCoinSymbolById, getLpTokenIdByPoolId } from "../readFunctions/Coins.js";
 import { getCoinPositionInPoolByCoinId, getVersionBy } from "../readFunctions/Pools.js";
 import { getEventById, getReturnValuesByEventId } from "../readFunctions/RawLogs.js";
 import { findMatchingTokenTransferAmout, requiresDepositParam } from "./SandwichUtils.js";
@@ -42,9 +42,13 @@ export async function calculateLossForExchange(parsedTx: ExtendedTransactionData
 
     const LOSS_AMOUNT = amountHappyUser - amountUnhappyUser;
 
+    const unitAddress = await findCoinAddressById(coinID);
+    if (!unitAddress) return null;
+
     return {
       amount: LOSS_AMOUNT,
       unit: coinSymbol!,
+      unitAddress: unitAddress,
       lossInPercentage: (LOSS_AMOUNT / amountHappyUser) * 100,
     };
   } catch (err) {
@@ -86,9 +90,13 @@ export async function calculateLossForExchangeUnderlying(parsedTx: ExtendedTrans
 
     const LOSS_AMOUNT = amountHappyUser - amountUnhappyUser;
 
+    const unitAddress = await findCoinAddressById(coinID);
+    if (!unitAddress) return null;
+
     return {
       amount: LOSS_AMOUNT,
       unit: coinSymbol!,
+      unitAddress: unitAddress,
       lossInPercentage: (LOSS_AMOUNT / amountHappyUser) * 100,
     };
   } catch (err) {
@@ -128,9 +136,13 @@ export async function calculateLossForDeposit(parsedTx: ExtendedTransactionData)
 
     const LOSS_AMOUNT = amountHappyUser - amountUnhappyUser;
 
+    const unitAddress = await findCoinAddressById(coinID!);
+    if (!unitAddress) return null;
+
     return {
       amount: LOSS_AMOUNT,
       unit: coinSymbol!,
+      unitAddress: unitAddress,
       lossInPercentage: (LOSS_AMOUNT / amountHappyUser) * 100,
     };
   } catch (err) {
@@ -167,9 +179,13 @@ export async function calculateLossForWithdraw(parsedTx: ExtendedTransactionData
     let amountUnhappyUser = Number(outCoin.amount);
     const LOSS_AMOUNT = amountHappyUser - amountUnhappyUser;
 
+    const unitAddress = await findCoinAddressById(coinID!);
+    if (!unitAddress) return null;
+
     return {
       amount: LOSS_AMOUNT,
       unit: coinSymbol!,
+      unitAddress: unitAddress,
       lossInPercentage: (LOSS_AMOUNT / amountHappyUser) * 100,
     };
   } catch (err) {

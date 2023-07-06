@@ -109,6 +109,7 @@ async function processSingleSandwich(botTransaction, candidate) {
                 tx_id: potentialLossTransaction.tx_id,
                 amount: lossInfo.amount,
                 unit: lossInfo.unit,
+                unit_address: lossInfo.unitAddress,
                 lossInPercentage: lossInfo.lossInPercentage,
             });
             extractedFromCurve = true;

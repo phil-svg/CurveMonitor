@@ -1,6 +1,6 @@
 import { getContractByPoolID } from "../../helperFunctions/Web3.js";
 import { web3Call } from "../../web3Calls/generic.js";
-import { findCoinDecimalsById, findCoinSymbolById, getLpTokenIdByPoolId } from "../readFunctions/Coins.js";
+import { findCoinAddressById, findCoinDecimalsById, findCoinSymbolById, getLpTokenIdByPoolId } from "../readFunctions/Coins.js";
 import { getCoinPositionInPoolByCoinId } from "../readFunctions/Pools.js";
 import { getEventById, getReturnValuesByEventId } from "../readFunctions/RawLogs.js";
 import { findMatchingTokenTransferAmout, requiresDepositParam } from "./SandwichUtils.js";
@@ -34,9 +34,13 @@ export async function calculateLossForExchange(parsedTx) {
             return null;
         let amountHappyUser = amountHappyUserNotDecimalAdjusted / 10 ** COIN_DECIMALS;
         const LOSS_AMOUNT = amountHappyUser - amountUnhappyUser;
+        const unitAddress = await findCoinAddressById(coinID);
+        if (!unitAddress)
+            return null;
         return {
             amount: LOSS_AMOUNT,
             unit: coinSymbol,
+            unitAddress: unitAddress,
             lossInPercentage: (LOSS_AMOUNT / amountHappyUser) * 100,
         };
     }
@@ -71,9 +75,13 @@ export async function calculateLossForExchangeUnderlying(parsedTx) {
             return null;
         let amountHappyUser = amountHappyUserNotDecimalAdjusted / 10 ** COIN_DECIMALS;
         const LOSS_AMOUNT = amountHappyUser - amountUnhappyUser;
+        const unitAddress = await findCoinAddressById(coinID);
+        if (!unitAddress)
+            return null;
         return {
             amount: LOSS_AMOUNT,
             unit: coinSymbol,
+            unitAddress: unitAddress,
             lossInPercentage: (LOSS_AMOUNT / amountHappyUser) * 100,
         };
     }
@@ -108,9 +116,13 @@ export async function calculateLossForDeposit(parsedTx) {
         if (!amountUnhappyUser)
             return null;
         const LOSS_AMOUNT = amountHappyUser - amountUnhappyUser;
+        const unitAddress = await findCoinAddressById(coinID);
+        if (!unitAddress)
+            return null;
         return {
             amount: LOSS_AMOUNT,
             unit: coinSymbol,
+            unitAddress: unitAddress,
             lossInPercentage: (LOSS_AMOUNT / amountHappyUser) * 100,
         };
     }
@@ -140,9 +152,13 @@ export async function calculateLossForWithdraw(parsedTx) {
         let amountHappyUser = amountHappyUserNotDecimalAdjusted / 10 ** COIN_DECIMALS;
         let amountUnhappyUser = Number(outCoin.amount);
         const LOSS_AMOUNT = amountHappyUser - amountUnhappyUser;
+        const unitAddress = await findCoinAddressById(coinID);
+        if (!unitAddress)
+            return null;
         return {
             amount: LOSS_AMOUNT,
             unit: coinSymbol,
+            unitAddress: unitAddress,
             lossInPercentage: (LOSS_AMOUNT / amountHappyUser) * 100,
         };
     }
