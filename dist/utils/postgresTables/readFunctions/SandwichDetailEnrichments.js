@@ -19,12 +19,14 @@ export async function SandwichDetailEnrichment(id) {
     let userLossesDetails = [];
     if (sandwich.loss_transactions) {
         for (const lossTransaction of sandwich.loss_transactions) {
+            console.log("lossTransaction", lossTransaction);
             const centerTransaction = await txDetailEnrichment(lossTransaction.tx_id);
             if (centerTransaction) {
                 centerTransactions.push(centerTransaction);
             }
             userLossesDetails.push({
                 unit: lossTransaction.unit,
+                unitAddress: lossTransaction.unitAddress,
                 amount: lossTransaction.amount,
                 lossInPercentage: lossTransaction.lossInPercentage,
             });

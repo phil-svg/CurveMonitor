@@ -5,6 +5,7 @@ export interface LossTransaction {
   tx_id: number;
   amount: number;
   unit: string;
+  unitAddress: string;
   lossInPercentage: number;
 }
 
