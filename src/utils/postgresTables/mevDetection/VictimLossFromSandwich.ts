@@ -16,13 +16,13 @@ export async function calculateLossForSwap(parsedTx: ExtendedTransactionData): P
 }
 
 export async function calculateLossForExchange(parsedTx: ExtendedTransactionData): Promise<SandwichLoss | null> {
-  const outCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "out");
+  const inCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "in");
 
-  if (!outCoin) return null;
-  const coinID = outCoin.coin_id;
-  const coinSymbol = outCoin.coin_symbol;
+  if (!inCoin) return null;
+  const coinID = inCoin.coin_id;
+  const coinSymbol = inCoin.coin_symbol;
 
-  const amountUnhappyUser = Number(outCoin.amount);
+  const amountUnhappyUser = Number(inCoin.amount);
 
   const POOL_CONTRACT = await getContractByPoolID(parsedTx.pool_id);
   const RAW_EVENT_RETURN_VALUES = await getReturnValuesByEventId(parsedTx.event_id!);
@@ -54,18 +54,18 @@ export async function calculateLossForExchange(parsedTx: ExtendedTransactionData
 }
 
 export async function calculateLossForExchangeUnderlying(parsedTx: ExtendedTransactionData): Promise<SandwichLoss | null> {
-  const outCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "out");
-
-  if (!outCoin) return null;
-  const coinID = outCoin.coin_id;
-  const coinSymbol = outCoin.coin_symbol;
-
   const inCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "in");
-  if (!inCoin) return null;
-  const roundedAmount = inCoin.amount;
-  const coinInDecimals = await findCoinDecimalsById(inCoin.coin_id);
 
-  const amountUnhappyUser = Number(outCoin.amount);
+  if (!inCoin) return null;
+  const coinID = inCoin.coin_id;
+  const coinSymbol = inCoin.coin_symbol;
+
+  const outCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "in");
+  if (!outCoin) return null;
+  const roundedAmount = outCoin.amount;
+  const coinInDecimals = await findCoinDecimalsById(outCoin.coin_id);
+
+  const amountUnhappyUser = Number(inCoin.amount);
 
   const POOL_CONTRACT = await getContractByPoolID(parsedTx.pool_id);
   const RAW_EVENT_RETURN_VALUES = await getReturnValuesByEventId(parsedTx.event_id!);
