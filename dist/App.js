@@ -25,10 +25,8 @@ export async function initDatabase() {
     }
 }
 await initDatabase();
-// const detailedSandwich = await SandwichDetailEnrichment(697);
-// console.dir(detailedSandwich, { depth: null, colors: true });
 startAPI();
-//await startTestClient();
+// await startTestClient();
 async function main() {
     await loadAddressProvider();
     await updatePools();

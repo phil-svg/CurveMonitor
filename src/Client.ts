@@ -4,8 +4,8 @@ import { LossTransaction } from "./models/Sandwiches.js";
 import { SandwichDetail } from "./utils/postgresTables/readFunctions/SandwichDetailEnrichments.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
-const url = "http://localhost:443";
-// const url = "wss://api.curvemonitor.com";
+//const url = "http://localhost:443";
+const url = "wss://api.curvemonitor.com";
 
 /**
  *
@@ -254,6 +254,11 @@ function handleErrors(socket: Socket, endpoint: string) {
   socket.on("error", (err: Error) => {
     console.log(`Error on ${endpoint}: ${err}`);
   });
+}
+
+export interface UserSearchResult {
+  address: string;
+  name: string | null;
 }
 
 export async function startTestClient() {

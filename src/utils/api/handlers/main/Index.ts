@@ -4,6 +4,7 @@ import { handleUserSearch } from "./UserSearch.js";
 import { handleAbsolutLabelsRankingRoom } from "./AbsolutLabelsRanking.js";
 import { handleSandwichLabelOccurrencesRoom } from "./RelativeLabelsRaking.js";
 import { handleSandwichGeneralLivestream } from "./SandwichGeneralLivestream.js";
+import { SandwichDetailEnrichment } from "../../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
 
 export function startMainEndpoint(io: Server): void {
   const mainRoom = io.of("/main");

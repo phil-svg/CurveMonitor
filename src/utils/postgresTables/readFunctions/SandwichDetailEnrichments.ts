@@ -4,6 +4,10 @@ import { getLabelNameFromAddress } from "./Labels.js";
 import { getAddressById } from "./Pools.js";
 import { TransactionDetail, txDetailEnrichment } from "./TxDetailEnrichment.js";
 
+function shortenAddress(address: string): string {
+  return address.slice(0, 8) + ".." + address.slice(-6);
+}
+
 export interface UserLossDetail {
   unit: string;
   unitAddress: string;
@@ -38,7 +42,6 @@ export async function SandwichDetailEnrichment(id: number): Promise<SandwichDeta
   let userLossesDetails: UserLossDetail[] = [];
   if (sandwich.loss_transactions) {
     for (const lossTransaction of sandwich.loss_transactions) {
-      console.log("lossTransaction", lossTransaction);
       const centerTransaction = await txDetailEnrichment(lossTransaction.tx_id);
       if (centerTransaction) {
         centerTransactions.push(centerTransaction);
@@ -53,7 +56,9 @@ export async function SandwichDetailEnrichment(id: number): Promise<SandwichDeta
   }
 
   let label = await getLabelNameFromAddress(centerTransactions[0].called_contract_by_user);
-  if (!label) label = "unknown";
+  if (!label || label.startsWith("Contract Address")) {
+    label = centerTransactions[0].called_contract_by_user;
+  }
 
   let poolAddress = await getAddressById(frontrunTransaction.pool_id);
   let poolName = await getModifiedPoolName(poolAddress!);

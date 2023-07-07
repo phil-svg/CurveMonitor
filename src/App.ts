@@ -17,7 +17,6 @@ import { startTestClient } from "./Client.js";
 import { updateTransactionsCalls } from "./utils/postgresTables/TransactionsCalls.js";
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 import { eventFlags } from "./utils/api/utils/EventFlags.js";
-import { SandwichDetailEnrichment } from "./utils/postgresTables/readFunctions/SandwichDetailEnrichments.js";
 
 export async function initDatabase() {
   try {
@@ -30,11 +29,8 @@ export async function initDatabase() {
 
 await initDatabase();
 
-// const detailedSandwich = await SandwichDetailEnrichment(697);
-// console.dir(detailedSandwich, { depth: null, colors: true });
-
 startAPI();
-//await startTestClient();
+// await startTestClient();
 
 async function main() {
   await loadAddressProvider();

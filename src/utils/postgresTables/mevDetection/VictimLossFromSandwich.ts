@@ -64,7 +64,7 @@ export async function calculateLossForExchangeUnderlying(parsedTx: ExtendedTrans
   const coinID = inCoin.coin_id;
   const coinSymbol = inCoin.coin_symbol;
 
-  const outCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "in");
+  const outCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "out");
   if (!outCoin) return null;
   const roundedAmount = outCoin.amount;
   const coinInDecimals = await findCoinDecimalsById(outCoin.coin_id);
