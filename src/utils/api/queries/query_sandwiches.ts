@@ -85,13 +85,13 @@ export async function getSandwichLabelOccurrences(): Promise<{ address: string; 
   }
 }
 
-export async function getFullSandwichTable(duration: string): Promise<(SandwichDetail | null)[]> {
+export async function getFullSandwichTable(duration: string): Promise<SandwichDetail[]> {
   const sandwichIds = await getIdsForFullSandwichTable(duration);
   const enrichedSandwiches = await enrichSandwiches(sandwichIds);
   return enrichedSandwiches;
 }
 
-export async function getSandwichTableContentForPool(poolId: number, duration: string): Promise<(SandwichDetail | null)[]> {
+export async function getSandwichTableContentForPool(poolId: number, duration: string): Promise<SandwichDetail[]> {
   const sandwichIds = await getIdsForFullSandwichTableForPool(duration, poolId);
   const enrichedSandwiches = await enrichSandwiches(sandwichIds);
   return enrichedSandwiches;

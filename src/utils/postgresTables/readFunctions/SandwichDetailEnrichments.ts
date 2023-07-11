@@ -30,12 +30,15 @@ export async function SandwichDetailEnrichment(id: number): Promise<SandwichDeta
     where: { id },
   });
 
+  if (!sandwich) console.log("no sandwich");
   if (!sandwich) return null;
 
   const frontrunTransaction = await txDetailEnrichment(sandwich.frontrun);
+  if (!frontrunTransaction) console.log("no frontrunTransaction");
   if (!frontrunTransaction) return null;
 
   const backrunTransaction = await txDetailEnrichment(sandwich.backrun);
+  if (!backrunTransaction) console.log("no backrunTransaction");
   if (!backrunTransaction) return null;
 
   let centerTransactions: TransactionDetail[] = [];
@@ -76,17 +79,23 @@ export async function SandwichDetailEnrichment(id: number): Promise<SandwichDeta
   return sandwichDetail;
 }
 
-export async function enrichSandwiches(sandwichIds: number[]): Promise<(SandwichDetail | null)[]> {
+export async function enrichSandwiches(sandwichIds: number[]): Promise<SandwichDetail[]> {
   const enrichedSandwiches: (SandwichDetail | null)[] = await chunkedAsync(sandwichIds, 10, SandwichDetailEnrichment);
-  return enrichedSandwiches;
+  const validSandwiches: SandwichDetail[] = enrichedSandwiches.filter((sandwich) => sandwich !== null) as SandwichDetail[];
+  return validSandwiches;
 }
 
-async function chunkedAsync<T, U>(arr: T[], concurrency: number, worker: (item: T) => Promise<U>): Promise<U[]> {
-  const results: U[] = [];
+async function chunkedAsync<T, U>(arr: T[], concurrency: number, worker: (item: T) => Promise<U>): Promise<(U | null)[]> {
+  const results: (U | null)[] = [];
   const queue = arr.slice();
 
   while (queue.length > 0) {
-    const tasks = queue.splice(0, concurrency).map(worker);
+    const tasks = queue.splice(0, concurrency).map((item) =>
+      worker(item).catch((e: any) => {
+        console.error(`Error processing item ${item}: ${e}`);
+        return null as U | null;
+      })
+    );
     const newResults = await Promise.all(tasks);
     results.push(...newResults);
   }

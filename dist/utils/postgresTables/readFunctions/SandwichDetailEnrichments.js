@@ -11,11 +11,17 @@ export async function SandwichDetailEnrichment(id) {
         where: { id },
     });
     if (!sandwich)
+        console.log("no sandwich");
+    if (!sandwich)
         return null;
     const frontrunTransaction = await txDetailEnrichment(sandwich.frontrun);
     if (!frontrunTransaction)
+        console.log("no frontrunTransaction");
+    if (!frontrunTransaction)
         return null;
     const backrunTransaction = await txDetailEnrichment(sandwich.backrun);
+    if (!backrunTransaction)
+        console.log("no backrunTransaction");
     if (!backrunTransaction)
         return null;
     let centerTransactions = [];
@@ -53,13 +59,17 @@ export async function SandwichDetailEnrichment(id) {
 }
 export async function enrichSandwiches(sandwichIds) {
     const enrichedSandwiches = await chunkedAsync(sandwichIds, 10, SandwichDetailEnrichment);
-    return enrichedSandwiches;
+    const validSandwiches = enrichedSandwiches.filter((sandwich) => sandwich !== null);
+    return validSandwiches;
 }
 async function chunkedAsync(arr, concurrency, worker) {
     const results = [];
     const queue = arr.slice();
     while (queue.length > 0) {
-        const tasks = queue.splice(0, concurrency).map(worker);
+        const tasks = queue.splice(0, concurrency).map((item) => worker(item).catch((e) => {
+            console.error(`Error processing item ${item}: ${e}`);
+            return null;
+        }));
         const newResults = await Promise.all(tasks);
         results.push(...newResults);
     }

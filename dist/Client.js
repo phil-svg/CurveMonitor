@@ -12,6 +12,7 @@ const url = "http://localhost:443";
  * emit("getUserSearchResult", userInput)
  * emit("connectToGeneralSandwichLivestream");
  * emit("getFullSandwichTableContent", timeDuration);
+ * emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
  *
  */
 // you say: Ping, I say: Pong. Ping? Pong!

@@ -15,6 +15,7 @@ const url = "http://localhost:443";
  * emit("getUserSearchResult", userInput)
  * emit("connectToGeneralSandwichLivestream");
  * emit("getFullSandwichTableContent", timeDuration);
+ * emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
  *
  */
 
@@ -261,7 +262,7 @@ function handleErrors(socket: Socket, endpoint: string) {
 export function startFullSandwichTableClient(socket: Socket, timeDuration: string) {
   socket.emit("getFullSandwichTableContent", timeDuration);
 
-  socket.on("fullSandwichTableContent", (fullTableContent: (SandwichDetail | null)[]) => {
+  socket.on("fullSandwichTableContent", (fullTableContent: SandwichDetail[]) => {
     console.log("Received full Sandwich-Table Content: ", fullTableContent);
   });
 
@@ -273,7 +274,7 @@ export function startFullSandwichTableClient(socket: Socket, timeDuration: strin
 export function startPoolSpecificSandwichTable(socket: Socket, poolAddress: string, timeDuration: string) {
   socket.emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
 
-  socket.on("SandwichTableContentForPool", (fullTableContent: (SandwichDetail | null)[]) => {
+  socket.on("SandwichTableContentForPool", (fullTableContent: SandwichDetail[]) => {
     console.log("Received Pool specific Sandwich-Table: ", fullTableContent);
   });
 
