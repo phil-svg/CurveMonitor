@@ -5,6 +5,7 @@ import { handleSandwichLabelOccurrencesRoom } from "./RelativeLabelsRaking.js";
 import { handleSandwichGeneralLivestream } from "./SandwichGeneralLivestream.js";
 import { handleFullSandwichRoom } from "./SandwichTableFull.js";
 import { handlePoolSandwichRoom } from "./SandwichTablePoolSpecfic.js";
+import { handleGeneralTxLivestream } from "./GeneralTxLivestream.js";
 export function startMainEndpoint(io) {
     const mainRoom = io.of("/main");
     mainRoom.on("connection", (socket) => {
@@ -17,6 +18,7 @@ export function startMainEndpoint(io) {
         handleSandwichGeneralLivestream(mainRoom, socket);
         handleFullSandwichRoom(socket);
         handlePoolSandwichRoom(socket);
+        handleGeneralTxLivestream(mainRoom, socket);
     });
 }
 function handleErrors(socket) {

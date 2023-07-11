@@ -1,6 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
 import { SandwichDetail } from "./utils/postgresTables/readFunctions/SandwichDetailEnrichments.js";
+import { TransactionDetail } from "./utils/postgresTables/readFunctions/TxDetailEnrichment.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
 const url = "http://localhost:443";
@@ -16,6 +17,7 @@ const url = "http://localhost:443";
  * emit("connectToGeneralSandwichLivestream");
  * emit("getFullSandwichTableContent", timeDuration);
  * emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
+ * emit("connectToGeneralTxLivestream")
  *
  */
 
@@ -281,6 +283,51 @@ export function startPoolSpecificSandwichTable(socket: Socket, poolAddress: stri
   handleErrors(socket, "/main");
 }
 
+// streams all tx in real-time
+// mind the arrays for coins, since users can deposit multiple coins.
+// also don't confuse leaving with entering like I did.
+/*
+Example:
+{
+  tx_id: 112552,
+  pool_id: 360,
+  event_id: 299353,
+  tx_hash: '0x896f0f3f61fbce0c4192f0829d862b319710cea7fb417596b135b262161877bc',
+  block_number: 17670777,
+  block_unixtime: '1689083411',
+  transaction_type: 'swap',
+  called_contract_by_user: '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D',
+  trader: '0x1F409Ec6F395493AD39f5B27945f1A6658a23908',
+  tx_position: 175,
+  coins_leaving_wallet: [
+    {
+      coin_id: 56,
+      amount: '321.713436653425600',
+      name: 'FXS',
+      address: '0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0'
+    }
+  ],
+  coins_entering_wallet: [
+    {
+      coin_id: 292,
+      amount: '324.433500274665800',
+      name: 'cvxFXS',
+      address: '0xFEEf77d3f69374f66429C91d732A244f074bdf74'
+    }
+  ]
+}
+*/
+export function startNewGeneralTxClient(socket: Socket) {
+  socket.on("NewGeneralTx", (detailedTransaction: TransactionDetail) => {
+    console.log("Received new General Tx");
+    console.dir(detailedTransaction, { depth: null, colors: true });
+  });
+
+  socket.emit("connectToGeneralTxLivestream");
+
+  handleErrors(socket, "/main");
+}
+
 export async function startTestClient() {
   const mainSocket = io(`${url}/main`);
 
@@ -292,6 +339,7 @@ export async function startTestClient() {
     // startSandwichLabelOccurrencesClient(mainSocket);
     // startNewSandwichClient(mainSocket);
     // startFullSandwichTableClient(mainSocket, "1 day");
-    startPoolSpecificSandwichTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
+    // startPoolSpecificSandwichTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
+    startNewGeneralTxClient(mainSocket);
   });
 }

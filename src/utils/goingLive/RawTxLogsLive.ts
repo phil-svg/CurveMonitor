@@ -1,4 +1,5 @@
 import { TransactionCalls } from "../../models/TransactionCalls.js";
+import { eventFlags } from "../api/utils/EventFlags.js";
 import { getCurrentTimeString } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
@@ -77,11 +78,14 @@ async function processBufferedEvents() {
     // Filter out null results
     let validCalledContractAddresses = calledContractAddresses.filter((address): address is { txId: number; called_address: string } => address !== null);
 
-    // Save to the database
+    // Save to the database + Emit Event
     for (let data of validCalledContractAddresses) {
       const existingTransaction = await TransactionCalls.findOne({ where: { tx_id: data.txId } });
       if (!existingTransaction) {
         await TransactionCalls.create(data);
+        if (eventFlags.canEmitGeneralTx) {
+          eventEmitter.emit("New Transaction for General-Transaction-Livestream", data.txId);
+        }
       }
     }
   } catch (err) {

@@ -27,10 +27,10 @@ export async function initDatabase() {
   }
 }
 
-await initDatabase();
+// await initDatabase();
 
-startAPI();
-// await startTestClient();
+// startAPI();
+await startTestClient();
 
 async function main() {
   await loadAddressProvider();
@@ -55,10 +55,11 @@ async function main() {
   await updateLabels();
 
   eventFlags.canEmitSandwich = true;
+  eventFlags.canEmitGeneralTx = true;
 
   // todo
 
   // process.exit();
 }
 
-await main();
+// await main();
