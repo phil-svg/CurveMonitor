@@ -4,8 +4,8 @@ import { SandwichDetail } from "./utils/postgresTables/readFunctions/SandwichDet
 import { TransactionDetail } from "./utils/postgresTables/readFunctions/TxDetailEnrichment.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
-const url = "http://localhost:443";
-// const url = "wss://api.curvemonitor.com";
+// const url = "http://localhost:443";
+const url = "wss://api.curvemonitor.com";
 
 /**
  *

@@ -11,7 +11,7 @@ import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetec
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
-import { startTestClient } from "./Client.js";
+import { startAPI } from "./utils/api/Server.js";
 import { updateTransactionsCalls } from "./utils/postgresTables/TransactionsCalls.js";
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 import { eventFlags } from "./utils/api/utils/EventFlags.js";
@@ -24,9 +24,9 @@ export async function initDatabase() {
         console.error("Error syncing database:", err);
     }
 }
-// await initDatabase();
-// startAPI();
-await startTestClient();
+await initDatabase();
+startAPI();
+// await startTestClient();
 async function main() {
     await loadAddressProvider();
     await updatePools();
@@ -49,5 +49,5 @@ async function main() {
     // todo
     // process.exit();
 }
-// await main();
+await main();
 //# sourceMappingURL=App.js.map
