@@ -3,6 +3,8 @@ import { Sandwiches } from "../../../models/Sandwiches.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
 import { RawTxLogs } from "../../../models/RawTxLogs.js";
 import { AddressesCalledCounts } from "../../../models/AddressesCalledCount.js";
+import { getIdsForFullSandwichTable, getIdsForFullSandwichTableForPool } from "../../postgresTables/readFunctions/Sandwiches.js";
+import { SandwichDetail, enrichSandwiches } from "../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
 
 export async function getTotalAmountOfSandwichesInLocalDB(): Promise<number> {
   const count = await Sandwiches.count();
@@ -81,4 +83,16 @@ export async function getSandwichLabelOccurrences(): Promise<{ address: string; 
     console.error(`Error in getSandwichLabelOccurrences: ${error}`);
     return null;
   }
+}
+
+export async function getFullSandwichTable(duration: string): Promise<(SandwichDetail | null)[]> {
+  const sandwichIds = await getIdsForFullSandwichTable(duration);
+  const enrichedSandwiches = await enrichSandwiches(sandwichIds);
+  return enrichedSandwiches;
+}
+
+export async function getSandwichTableContentForPool(poolId: number, duration: string): Promise<(SandwichDetail | null)[]> {
+  const sandwichIds = await getIdsForFullSandwichTableForPool(duration, poolId);
+  const enrichedSandwiches = await enrichSandwiches(sandwichIds);
+  return enrichedSandwiches;
 }

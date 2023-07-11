@@ -75,3 +75,21 @@ export async function SandwichDetailEnrichment(id: number): Promise<SandwichDeta
 
   return sandwichDetail;
 }
+
+export async function enrichSandwiches(sandwichIds: number[]): Promise<(SandwichDetail | null)[]> {
+  const enrichedSandwiches: (SandwichDetail | null)[] = await chunkedAsync(sandwichIds, 10, SandwichDetailEnrichment);
+  return enrichedSandwiches;
+}
+
+async function chunkedAsync<T, U>(arr: T[], concurrency: number, worker: (item: T) => Promise<U>): Promise<U[]> {
+  const results: U[] = [];
+  const queue = arr.slice();
+
+  while (queue.length > 0) {
+    const tasks = queue.splice(0, concurrency).map(worker);
+    const newResults = await Promise.all(tasks);
+    results.push(...newResults);
+  }
+
+  return results;
+}

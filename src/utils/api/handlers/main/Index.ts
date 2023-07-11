@@ -4,6 +4,8 @@ import { handleUserSearch } from "./UserSearch.js";
 import { handleAbsolutLabelsRankingRoom } from "./AbsolutLabelsRanking.js";
 import { handleSandwichLabelOccurrencesRoom } from "./RelativeLabelsRaking.js";
 import { handleSandwichGeneralLivestream } from "./SandwichGeneralLivestream.js";
+import { handleFullSandwichRoom } from "./SandwichTableFull.js";
+import { handlePoolSandwichRoom } from "./SandwichTablePoolSpecfic.js";
 
 export function startMainEndpoint(io: Server): void {
   const mainRoom = io.of("/main");
@@ -16,6 +18,8 @@ export function startMainEndpoint(io: Server): void {
     handleAbsolutLabelsRankingRoom(socket);
     handleSandwichLabelOccurrencesRoom(socket);
     handleSandwichGeneralLivestream(mainRoom, socket);
+    handleFullSandwichRoom(socket);
+    handlePoolSandwichRoom(socket);
   });
 }
 

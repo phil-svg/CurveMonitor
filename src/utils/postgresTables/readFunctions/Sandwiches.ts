@@ -2,6 +2,7 @@ import { Op, Sequelize } from "sequelize";
 import { Sandwiches } from "../../../models/Sandwiches.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { getIdByAddress } from "./Pools.js";
+import { getTimeframeTimestamp } from "../../api/utils/Timeframes.js";
 
 export async function readSandwichesInBatches(batchSize: number = 100): Promise<{ id: number; loss_transactions: any }[][]> {
   let offset = 0;
@@ -108,3 +109,54 @@ export const isExtractedFromCurve = async (id: number): Promise<boolean> => {
   const sandwich = await Sandwiches.findByPk(id);
   return sandwich ? sandwich.extracted_from_curve : false;
 };
+
+export async function getIdsForFullSandwichTable(timeDuration: string): Promise<number[]> {
+  const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
+
+  const sandwiches = await Sandwiches.findAll({
+    include: [
+      {
+        model: Transactions,
+        as: "frontrunTransaction",
+        where: {
+          block_unixtime: {
+            [Op.gte]: timeframeStartUnix,
+          },
+        },
+        required: true,
+      },
+    ],
+    where: {
+      extracted_from_curve: true,
+    },
+  });
+
+  // Return an array of sandwich IDs
+  return sandwiches.map((sandwich) => sandwich.id);
+}
+
+export async function getIdsForFullSandwichTableForPool(timeDuration: string, poolId: number): Promise<number[]> {
+  const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
+
+  const sandwiches = await Sandwiches.findAll({
+    include: [
+      {
+        model: Transactions,
+        as: "frontrunTransaction",
+        where: {
+          block_unixtime: {
+            [Op.gte]: timeframeStartUnix,
+          },
+        },
+        required: true,
+      },
+    ],
+    where: {
+      pool_id: poolId,
+      extracted_from_curve: true,
+    },
+  });
+
+  // Return an array of sandwich IDs
+  return sandwiches.map((sandwich) => sandwich.id);
+}

@@ -51,4 +51,18 @@ export async function SandwichDetailEnrichment(id) {
     };
     return sandwichDetail;
 }
+export async function enrichSandwiches(sandwichIds) {
+    const enrichedSandwiches = await chunkedAsync(sandwichIds, 10, SandwichDetailEnrichment);
+    return enrichedSandwiches;
+}
+async function chunkedAsync(arr, concurrency, worker) {
+    const results = [];
+    const queue = arr.slice();
+    while (queue.length > 0) {
+        const tasks = queue.splice(0, concurrency).map(worker);
+        const newResults = await Promise.all(tasks);
+        results.push(...newResults);
+    }
+    return results;
+}
 //# sourceMappingURL=SandwichDetailEnrichments.js.map

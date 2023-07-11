@@ -1,11 +1,10 @@
 import { io, Socket } from "socket.io-client";
 import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
-import { LossTransaction } from "./models/Sandwiches.js";
 import { SandwichDetail } from "./utils/postgresTables/readFunctions/SandwichDetailEnrichments.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
-//const url = "http://localhost:443";
-const url = "wss://api.curvemonitor.com";
+const url = "http://localhost:443";
+// const url = "wss://api.curvemonitor.com";
 
 /**
  *
@@ -15,6 +14,7 @@ const url = "wss://api.curvemonitor.com";
  * emit("getSandwichLabelOccurrences")
  * emit("getUserSearchResult", userInput)
  * emit("connectToGeneralSandwichLivestream");
+ * emit("getFullSandwichTableContent", timeDuration);
  *
  */
 
@@ -256,9 +256,28 @@ function handleErrors(socket: Socket, endpoint: string) {
   });
 }
 
-export interface UserSearchResult {
-  address: string;
-  name: string | null;
+// returns a list/table, of all sandwiches, of all pools, for a given time period.
+// time periods: "1 day", "1 week", "1 month", "full". Full maybe needs to get killed in the future, and instead request "chunks/pages"
+export function startFullSandwichTableClient(socket: Socket, timeDuration: string) {
+  socket.emit("getFullSandwichTableContent", timeDuration);
+
+  socket.on("fullSandwichTableContent", (fullTableContent: (SandwichDetail | null)[]) => {
+    console.log("Received full Sandwich-Table Content: ", fullTableContent);
+  });
+
+  handleErrors(socket, "/main");
+}
+
+// returns a list/table, of sandwiches in a given pool, for a given time period.
+// time periods: "1 day", "1 week", "1 month", "full". Full maybe needs to get killed in the future, and instead request "chunks/pages"
+export function startPoolSpecificSandwichTable(socket: Socket, poolAddress: string, timeDuration: string) {
+  socket.emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
+
+  socket.on("SandwichTableContentForPool", (fullTableContent: (SandwichDetail | null)[]) => {
+    console.log("Received Pool specific Sandwich-Table: ", fullTableContent);
+  });
+
+  handleErrors(socket, "/main");
 }
 
 export async function startTestClient() {
@@ -270,6 +289,8 @@ export async function startTestClient() {
     // startUserSearchClient(mainSocket, "crvu");
     // startAbsoluteLabelsRankingClient(mainSocket);
     // startSandwichLabelOccurrencesClient(mainSocket);
-    startNewSandwichClient(mainSocket);
+    // startNewSandwichClient(mainSocket);
+    // startFullSandwichTableClient(mainSocket, "1 day");
+    startPoolSpecificSandwichTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
   });
 }

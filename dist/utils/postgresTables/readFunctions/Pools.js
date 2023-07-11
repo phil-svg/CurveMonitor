@@ -1,8 +1,14 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { Pool } from "../../../models/Pools.js";
 import { findCoinAddressById, findCoinAddressesByIds } from "./Coins.js";
 export const getIdByAddress = async (poolAddress) => {
     const pool = await Pool.findOne({ where: { address: poolAddress } });
+    return pool ? pool.id : null;
+};
+export const getIdByAddressCaseInsensitive = async (poolAddress) => {
+    const pool = await Pool.findOne({
+        where: Sequelize.where(Sequelize.fn("lower", Sequelize.col("address")), Sequelize.fn("lower", poolAddress)),
+    });
     return pool ? pool.id : null;
 };
 export const getPoolBy = async (options) => {
