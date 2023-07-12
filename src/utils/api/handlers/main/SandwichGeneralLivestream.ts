@@ -1,4 +1,4 @@
-import { Namespace, Server, Socket } from "socket.io";
+import { Namespace, Socket } from "socket.io";
 import eventEmitter from "../../../goingLive/EventEmitter.js";
 import { SandwichDetailEnrichment } from "../../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
 import { isExtractedFromCurve } from "../../../postgresTables/readFunctions/Sandwiches.js";

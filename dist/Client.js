@@ -1,8 +1,8 @@
 import { io } from "socket.io-client";
 import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
 // Replace with "wss://api.curvemonitor.com" for production
-// const url = "http://localhost:443";
-const url = "wss://api.curvemonitor.com";
+const url = "http://localhost:443";
+// const url = "wss://api.curvemonitor.com";
 /**
  *
  * Possible Usages of /main
@@ -242,38 +242,40 @@ export function startPoolSpecificSandwichTable(socket, poolAddress, timeDuration
 /*
 Example:
 {
-  tx_id: 112552,
-  pool_id: 360,
-  event_id: 299353,
-  tx_hash: '0x896f0f3f61fbce0c4192f0829d862b319710cea7fb417596b135b262161877bc',
-  block_number: 17670777,
-  block_unixtime: '1689083411',
+  tx_id: 114395,
+  pool_id: 15,
+  event_id: 301896,
+  tx_hash: '0x567ced0fd242f2aa048352f625461230205b2d864fada00a76a2ceeefdb9e01e',
+  block_number: 17677694,
+  block_unixtime: '1689167483',
   transaction_type: 'swap',
-  called_contract_by_user: '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D',
-  trader: '0x1F409Ec6F395493AD39f5B27945f1A6658a23908',
-  tx_position: 175,
+  called_contract_by_user: '0x99a58482BD75cbab83b27EC03CA68fF489b5788f',
+  trader: '0x99a58482BD75cbab83b27EC03CA68fF489b5788f',
+  tx_position: 121,
   coins_leaving_wallet: [
     {
-      coin_id: 56,
-      amount: '321.713436653425600',
-      name: 'FXS',
-      address: '0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0'
+      coin_id: 200,
+      amount: '55.000000000000000',
+      name: 'ETH',
+      address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
     }
   ],
   coins_entering_wallet: [
     {
-      coin_id: 292,
-      amount: '324.433500274665800',
-      name: 'cvxFXS',
-      address: '0xFEEf77d3f69374f66429C91d732A244f074bdf74'
+      coin_id: 96,
+      amount: '55.004610511990260',
+      name: 'stETH',
+      address: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84'
     }
-  ]
+  ],
+  poolAddress: '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022',
+  poolName: 'ETH/stETH'
 }
 */
 export function startNewGeneralTxClient(socket) {
-    socket.on("NewGeneralTx", (detailedTransaction) => {
+    socket.on("NewGeneralTx", (enrichedTransaction) => {
         console.log("Received new General Tx");
-        console.dir(detailedTransaction, { depth: null, colors: true });
+        console.dir(enrichedTransaction, { depth: null, colors: true });
     });
     socket.emit("connectToGeneralTxLivestream");
     handleErrors(socket, "/main");
