@@ -4,6 +4,7 @@ import { txDetailEnrichment } from "../../../postgresTables/readFunctions/TxDeta
 import { getAddressById } from "../../../postgresTables/readFunctions/Pools.js";
 import { getModifiedPoolName } from "../../utils/SearchBar.js";
 import { EnrichedTransactionDetail } from "../../../../Client.js";
+import { getLabelNameFromAddress } from "../../../postgresTables/readFunctions/Labels.js";
 
 export const handleGeneralTxLivestream = (mainRoom: Namespace, socket: Socket) => {
   const newTransactionStreamHandler = async (txId: number) => {
@@ -11,11 +12,16 @@ export const handleGeneralTxLivestream = (mainRoom: Namespace, socket: Socket) =
     if (detailedTransaction) {
       let poolAddress = await getAddressById(detailedTransaction.pool_id);
       let poolName = await getModifiedPoolName(poolAddress!);
+      let label = await getLabelNameFromAddress(detailedTransaction.called_contract_by_user);
+      if (!label || label.startsWith("Contract Address")) {
+        label = detailedTransaction.called_contract_by_user;
+      }
 
       const enrichedTransaction: EnrichedTransactionDetail = {
         ...detailedTransaction,
         poolAddress: poolAddress!,
         poolName: poolName!,
+        calledContractLabel: label,
       };
 
       mainRoom.in("GeneralTransactionLivestreamRoom").emit("NewGeneralTx", enrichedTransaction);

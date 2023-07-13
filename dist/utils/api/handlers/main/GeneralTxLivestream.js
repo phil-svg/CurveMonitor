@@ -2,13 +2,18 @@ import eventEmitter from "../../../goingLive/EventEmitter.js";
 import { txDetailEnrichment } from "../../../postgresTables/readFunctions/TxDetailEnrichment.js";
 import { getAddressById } from "../../../postgresTables/readFunctions/Pools.js";
 import { getModifiedPoolName } from "../../utils/SearchBar.js";
+import { getLabelNameFromAddress } from "../../../postgresTables/readFunctions/Labels.js";
 export const handleGeneralTxLivestream = (mainRoom, socket) => {
     const newTransactionStreamHandler = async (txId) => {
         const detailedTransaction = await txDetailEnrichment(txId);
         if (detailedTransaction) {
             let poolAddress = await getAddressById(detailedTransaction.pool_id);
             let poolName = await getModifiedPoolName(poolAddress);
-            const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { poolAddress: poolAddress, poolName: poolName });
+            let label = await getLabelNameFromAddress(detailedTransaction.called_contract_by_user);
+            if (!label || label.startsWith("Contract Address")) {
+                label = detailedTransaction.called_contract_by_user;
+            }
+            const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { poolAddress: poolAddress, poolName: poolName, calledContractLabel: label });
             mainRoom.in("GeneralTransactionLivestreamRoom").emit("NewGeneralTx", enrichedTransaction);
         }
     };
