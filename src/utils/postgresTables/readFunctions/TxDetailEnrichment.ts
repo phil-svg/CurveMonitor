@@ -64,7 +64,7 @@ export async function txDetailEnrichment(txId: number): Promise<TransactionDetai
     block_unixtime: transaction.block_unixtime,
     transaction_type: transaction.transaction_type,
     called_contract_by_user: transactionDetails.to,
-    trader: transaction.trader,
+    trader: transactionDetails.from,
     tx_position: transaction.tx_position,
     coins_leaving_wallet: coinsLeavingWallet,
     coins_entering_wallet: coinsEnteringWallet,
