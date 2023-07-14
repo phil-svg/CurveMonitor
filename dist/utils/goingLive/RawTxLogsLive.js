@@ -1,9 +1,9 @@
-import { TransactionCalls } from "../../models/TransactionCalls.js";
+import { TransactionDetails } from "../../models/TransactionDetails.js";
 import { eventFlags } from "../api/utils/EventFlags.js";
 import { getCurrentTimeString } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
-import { solveSingleTdId } from "../postgresTables/TransactionsCalls.js";
+import { solveSingleTdId } from "../postgresTables/TransactionsDetails.js";
 import { findCandidatesInBatch } from "../postgresTables/mevDetection/SandwichDetection.js";
 import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/SandwichUtils.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
@@ -58,16 +58,16 @@ async function processBufferedEvents() {
     let parsedTx = await fetchTransactionsForBlock(eventBlockNumbers[0]);
     try {
         // solving called contract
-        let transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id) => id !== undefined);
-        let calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
-        let calledContractAddresses = await Promise.all(calledContractPromises);
+        const transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id) => id !== undefined);
+        const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
+        const calledContractAddresses = await Promise.all(calledContractPromises);
         // Filter out null results
-        let validCalledContractAddresses = calledContractAddresses.filter((address) => address !== null);
+        const validCalledContractAddresses = calledContractAddresses.filter((address) => address !== null);
         // Save to the database + Emit Event
-        for (let data of validCalledContractAddresses) {
-            const existingTransaction = await TransactionCalls.findOne({ where: { tx_id: data.txId } });
+        for (const data of validCalledContractAddresses) {
+            const existingTransaction = await TransactionDetails.findOne({ where: { txId: data.txId } });
             if (!existingTransaction) {
-                await TransactionCalls.create(data);
+                await TransactionDetails.create(data);
                 if (eventFlags.canEmitGeneralTx) {
                     eventEmitter.emit("New Transaction for General-Transaction-Livestream", data.txId);
                 }

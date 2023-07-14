@@ -38,7 +38,7 @@ __decorate([
     Column(DataType.STRING)
 ], TransactionDetails.prototype, "gasPrice", void 0);
 __decorate([
-    Column(DataType.TEXT) // DataType.TEXT if 'input' can be quite large
+    Column(DataType.TEXT)
 ], TransactionDetails.prototype, "input", void 0);
 __decorate([
     Column(DataType.INTEGER)
@@ -73,4 +73,4 @@ TransactionDetails = __decorate([
     })
 ], TransactionDetails);
 export { TransactionDetails };
-//# sourceMappingURL=TransactionCalls.js.map
+//# sourceMappingURL=TransactionDetails.js.map

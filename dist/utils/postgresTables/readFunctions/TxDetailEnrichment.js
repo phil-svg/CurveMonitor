@@ -1,7 +1,7 @@
 import { TransactionCoins } from "../../../models/TransactionCoins.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { Coins } from "../../../models/Coins.js";
-import { TransactionCalls } from "../../../models/TransactionCalls.js";
+import { TransactionDetails } from "../../../models/TransactionDetails.js";
 export async function txDetailEnrichment(txId) {
     const transaction = await Transactions.findOne({
         where: { tx_id: txId },
@@ -12,10 +12,10 @@ export async function txDetailEnrichment(txId) {
             },
         ],
     });
-    const transactionCall = await TransactionCalls.findOne({
+    const transactionDetails = await TransactionDetails.findOne({
         where: { txId: txId },
     });
-    if (!transaction || !transactionCall)
+    if (!transaction || !transactionDetails)
         return null;
     const coinsLeavingWallet = [];
     const coinsEnteringWallet = [];
@@ -36,7 +36,7 @@ export async function txDetailEnrichment(txId) {
         block_number: transaction.block_number,
         block_unixtime: transaction.block_unixtime,
         transaction_type: transaction.transaction_type,
-        called_contract_by_user: transactionCall.called_address,
+        called_contract_by_user: transactionDetails.to,
         trader: transaction.trader,
         tx_position: transaction.tx_position,
         coins_leaving_wallet: coinsLeavingWallet,

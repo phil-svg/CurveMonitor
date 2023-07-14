@@ -56,4 +56,4 @@ export async function updateTransactionsDetails() {
         console.error(`Error in updateTransactionsCalls: ${error}`);
     }
 }
-//# sourceMappingURL=TransactionsCalls.js.map
+//# sourceMappingURL=TransactionsDetails.js.map

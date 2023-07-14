@@ -12,7 +12,7 @@ import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
 import { startAPI } from "./utils/api/Server.js";
-import { updateTransactionsCalls } from "./utils/postgresTables/TransactionsCalls.js";
+import { updateTransactionsDetails } from "./utils/postgresTables/TransactionsDetails.js";
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 import { eventFlags } from "./utils/api/utils/EventFlags.js";
 export async function initDatabase() {
@@ -39,7 +39,7 @@ async function main() {
     await updateRawLogs();
     await updateBlockTimestamps();
     await parseEvents();
-    await updateTransactionsCalls();
+    await updateTransactionsDetails();
     await updateAddressCounts();
     // await updateTokenDollarValues(); // muted until useful
     await updateMevDetection();

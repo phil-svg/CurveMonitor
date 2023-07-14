@@ -1,23 +1,23 @@
 import { AddressesCalledCounts } from "../../models/AddressesCalledCount.js";
-import { TransactionCalls } from "../../models/TransactionCalls.js";
+import { TransactionDetails } from "../../models/TransactionDetails.js";
 
 async function updateAddressCountsInterval() {
   try {
-    // Fetch all called addresses from the TransactionCalls table
-    const transactionCalls = await TransactionCalls.findAll({
-      attributes: ["called_address"],
+    // Fetch all called addresses from the TransactionDetails table
+    const transactionCalls = await TransactionDetails.findAll({
+      attributes: ["to"],
       raw: true,
     });
 
     // Calculate the counts for each address
     const addressCounts: { [key: string]: number } = {}; // Explicitly define the type of addressCounts
     for (let call of transactionCalls) {
-      if (call.called_address) {
+      if (call.to) {
         // Check if the address is not null or undefined
-        if (addressCounts[call.called_address]) {
-          addressCounts[call.called_address]++;
+        if (addressCounts[call.to]) {
+          addressCounts[call.to]++;
         } else {
-          addressCounts[call.called_address] = 1;
+          addressCounts[call.to] = 1;
         }
       }
     }
