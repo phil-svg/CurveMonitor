@@ -18,6 +18,7 @@ const url = "wss://api.curvemonitor.com";
  * emit("getFullSandwichTableContent", timeDuration);
  * emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
  * emit("connectToGeneralTxLivestream")
+ * emit("getPoolSpecificTransactionTable", poolAddress, timeDuration)
  *
  */
 
