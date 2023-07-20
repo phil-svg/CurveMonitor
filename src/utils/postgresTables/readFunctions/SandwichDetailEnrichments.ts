@@ -85,7 +85,7 @@ export async function enrichSandwiches(sandwichIds: number[]): Promise<SandwichD
   return validSandwiches;
 }
 
-async function chunkedAsync<T, U>(arr: T[], concurrency: number, worker: (item: T) => Promise<U>): Promise<(U | null)[]> {
+export async function chunkedAsync<T, U>(arr: T[], concurrency: number, worker: (item: T) => Promise<U>): Promise<(U | null)[]> {
   const results: (U | null)[] = [];
   const queue = arr.slice();
 

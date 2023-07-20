@@ -62,7 +62,7 @@ export async function enrichSandwiches(sandwichIds) {
     const validSandwiches = enrichedSandwiches.filter((sandwich) => sandwich !== null);
     return validSandwiches;
 }
-async function chunkedAsync(arr, concurrency, worker) {
+export async function chunkedAsync(arr, concurrency, worker) {
     const results = [];
     const queue = arr.slice();
     while (queue.length > 0) {

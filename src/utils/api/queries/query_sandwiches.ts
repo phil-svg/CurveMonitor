@@ -1,10 +1,10 @@
 import { Sequelize } from "sequelize";
 import { Sandwiches } from "../../../models/Sandwiches.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
-import { RawTxLogs } from "../../../models/RawTxLogs.js";
 import { AddressesCalledCounts } from "../../../models/AddressesCalledCount.js";
-import { getIdsForFullSandwichTable, getIdsForFullSandwichTableForPool } from "../../postgresTables/readFunctions/Sandwiches.js";
+import { getIdsForFullSandwichTable } from "../../postgresTables/readFunctions/Sandwiches.js";
 import { SandwichDetail, enrichSandwiches } from "../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
+import { getTransactionIdsForPool } from "./query_transactions.js";
 
 export async function getTotalAmountOfSandwichesInLocalDB(): Promise<number> {
   const count = await Sandwiches.count();
@@ -92,7 +92,7 @@ export async function getFullSandwichTable(duration: string): Promise<SandwichDe
 }
 
 export async function getSandwichTableContentForPool(poolId: number, duration: string): Promise<SandwichDetail[]> {
-  const sandwichIds = await getIdsForFullSandwichTableForPool(duration, poolId);
+  const sandwichIds = await getTransactionIdsForPool(duration, poolId);
   const enrichedSandwiches = await enrichSandwiches(sandwichIds);
   return enrichedSandwiches;
 }

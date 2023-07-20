@@ -53,7 +53,7 @@ export async function updateTransactionsDetails() {
         }
     }
     catch (error) {
-        console.error(`Error in updateTransactionsCalls: ${error}`);
+        console.error(`Error in updateTransactionsDetails: ${error}`);
     }
 }
 //# sourceMappingURL=TransactionsDetails.js.map

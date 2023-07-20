@@ -336,6 +336,18 @@ export interface EnrichedTransactionDetail extends TransactionDetail {
   calledContractLabel: string;
 }
 
+// returns a list/table, of swaps/deposits/withdrawals in a given pool, for a given time period.
+// time periods: "1 day", "1 week", "1 month", "full". Full maybe needs to get killed in the future, and instead request "chunks/pages"
+export function startPoolSpecificTransactionTable(socket: Socket, poolAddress: string, timeDuration: string) {
+  socket.emit("getPoolSpecificTransactionTable", poolAddress, timeDuration);
+
+  socket.on("TransactionTableContentForPool", (transactionTableContentForPool: EnrichedTransactionDetail[]) => {
+    console.log("Received Pool specific Transaction-Table: ", transactionTableContentForPool);
+  });
+
+  handleErrors(socket, "/main");
+}
+
 export async function startTestClient() {
   const mainSocket = io(`${url}/main`);
 
@@ -348,6 +360,7 @@ export async function startTestClient() {
     // startNewSandwichClient(mainSocket);
     // startFullSandwichTableClient(mainSocket, "1 day");
     // startPoolSpecificSandwichTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
-    startNewGeneralTxClient(mainSocket);
+    // startNewGeneralTxClient(mainSocket);
+    startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
   });
 }

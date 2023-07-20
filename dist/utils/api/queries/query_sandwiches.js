@@ -2,8 +2,9 @@ import { Sequelize } from "sequelize";
 import { Sandwiches } from "../../../models/Sandwiches.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
 import { AddressesCalledCounts } from "../../../models/AddressesCalledCount.js";
-import { getIdsForFullSandwichTable, getIdsForFullSandwichTableForPool } from "../../postgresTables/readFunctions/Sandwiches.js";
+import { getIdsForFullSandwichTable } from "../../postgresTables/readFunctions/Sandwiches.js";
 import { enrichSandwiches } from "../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
+import { getTransactionIdsForPool } from "./query_transactions.js";
 export async function getTotalAmountOfSandwichesInLocalDB() {
     const count = await Sandwiches.count();
     return count;
@@ -80,7 +81,7 @@ export async function getFullSandwichTable(duration) {
     return enrichedSandwiches;
 }
 export async function getSandwichTableContentForPool(poolId, duration) {
-    const sandwichIds = await getIdsForFullSandwichTableForPool(duration, poolId);
+    const sandwichIds = await getTransactionIdsForPool(duration, poolId);
     const enrichedSandwiches = await enrichSandwiches(sandwichIds);
     return enrichedSandwiches;
 }

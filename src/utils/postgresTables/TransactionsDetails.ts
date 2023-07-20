@@ -83,6 +83,6 @@ export async function updateTransactionsDetails() {
       console.log(`Completed ${i + 1} out of ${transactionChunks.length} chunks for TransactionCalls(${(((i + 1) / transactionChunks.length) * 100).toFixed(2)}%)`);
     }
   } catch (error) {
-    console.error(`Error in updateTransactionsCalls: ${error}`);
+    console.error(`Error in updateTransactionsDetails: ${error}`);
   }
 }

@@ -44,7 +44,7 @@ async function processPastEvents(pastEvents, poolId, poolAddress, fromBlock, toB
         newToBlock: toBlock,
     };
 }
-async function processAddress(poolAddress, fromBlock, toBlock) {
+export async function processAddress(poolAddress, fromBlock, toBlock) {
     const POOL_ID = await getIdByAddress(poolAddress);
     if (!POOL_ID)
         return;

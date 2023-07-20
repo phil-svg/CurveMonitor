@@ -57,7 +57,7 @@ async function processPastEvents(
   };
 }
 
-async function processAddress(poolAddress: string, fromBlock: number, toBlock: number): Promise<void> {
+export async function processAddress(poolAddress: string, fromBlock: number, toBlock: number): Promise<void> {
   const POOL_ID = await getIdByAddress(poolAddress);
   if (!POOL_ID) return;
 
