@@ -1,10 +1,10 @@
-import { countReset } from "console";
 import { ExtendedTransactionData } from "../../Interfaces.js";
 import { calcTheLossOfCurveUserFromSandwich, saveSandwich } from "./SandwichUtils.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { eventFlags } from "../../api/utils/EventFlags.js";
 import eventEmitter from "../../goingLive/EventEmitter.js";
 import { Sandwiches } from "../../../models/Sandwiches.js";
+import { priceTransaction } from "./txValue/PriceTransaction.js";
 
 /**
  * Function: getBotTransactions
@@ -123,12 +123,15 @@ async function processSingleSandwich(botTransaction: ExtendedTransactionData[], 
     let lossInfo = await calcTheLossOfCurveUserFromSandwich(potentialLossTransaction);
     if (!lossInfo) continue;
     if (lossInfo.amount > 0) {
+      const pricedTransaction = await priceTransaction(potentialLossTransaction);
+      const lossInUsd = pricedTransaction ? (pricedTransaction * lossInfo.lossInPercentage) / 100 : null;
       lossTransactions.push({
         tx_id: potentialLossTransaction.tx_id,
         amount: lossInfo.amount,
         unit: lossInfo.unit,
         unitAddress: lossInfo.unitAddress,
         lossInPercentage: lossInfo.lossInPercentage,
+        lossInUsd: lossInUsd,
       });
       extractedFromCurve = true;
     }

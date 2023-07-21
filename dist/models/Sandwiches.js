@@ -35,6 +35,9 @@ __decorate([
     AllowNull(true),
     Column(DataType.STRING)
 ], Sandwiches.prototype, "source_of_loss_contract_address", void 0);
+__decorate([
+    Column(DataType.DECIMAL(30, 15))
+], Sandwiches.prototype, "loss_in_usd", void 0);
 Sandwiches = __decorate([
     Table({ tableName: "sandwiches" })
 ], Sandwiches);

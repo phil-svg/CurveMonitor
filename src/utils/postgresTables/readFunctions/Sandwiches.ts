@@ -160,3 +160,18 @@ export async function getIdsForFullSandwichTableForPool(timeDuration: string, po
   // Return an array of sandwich IDs
   return sandwiches.map((sandwich) => sandwich.id);
 }
+
+export async function getLossInUsdForSandwich(sandwichId: number): Promise<number | null> {
+  try {
+    const sandwich = await Sandwiches.findByPk(sandwichId);
+    if (sandwich && typeof sandwich.loss_in_usd !== "undefined") {
+      return sandwich.loss_in_usd;
+    } else {
+      console.log(`No sandwich found with id: ${sandwichId}`);
+      return null;
+    }
+  } catch (err) {
+    console.error(`Failed to get loss in USD for sandwich with id: ${sandwichId}, error: ${err}`);
+    return null;
+  }
+}

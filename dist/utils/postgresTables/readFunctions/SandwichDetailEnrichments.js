@@ -2,6 +2,7 @@ import { Sandwiches } from "../../../models/Sandwiches.js";
 import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
 import { getLabelNameFromAddress } from "./Labels.js";
 import { getAddressById } from "./Pools.js";
+import { getLossInUsdForSandwich } from "./Sandwiches.js";
 import { txDetailEnrichment } from "./TxDetailEnrichment.js";
 function shortenAddress(address) {
     return address.slice(0, 8) + ".." + address.slice(-6);
@@ -46,6 +47,7 @@ export async function SandwichDetailEnrichment(id) {
     }
     let poolAddress = await getAddressById(frontrunTransaction.pool_id);
     let poolName = await getModifiedPoolName(poolAddress);
+    const lossInUsd = await getLossInUsdForSandwich(id);
     const sandwichDetail = {
         frontrun: frontrunTransaction,
         center: centerTransactions,
@@ -54,6 +56,7 @@ export async function SandwichDetailEnrichment(id) {
         label: label,
         poolAddress: poolAddress,
         poolName: poolName,
+        lossInUsd: lossInUsd,
     };
     return sandwichDetail;
 }

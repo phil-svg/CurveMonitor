@@ -72,6 +72,10 @@ export async function requiresDepositParam(pool_id) {
     return requiresSecondParam;
 }
 export async function saveSandwich(poolId, frontrunId, backrunId, extractedFromCurve, lossTransactions) {
+    let lossInUsd = null;
+    if (lossTransactions && lossTransactions.length > 0) {
+        lossInUsd = lossTransactions.reduce((total, transaction) => total + (transaction.lossInUsd || 0), 0);
+    }
     await Sandwiches.findOrCreate({
         where: { frontrun: frontrunId, backrun: backrunId },
         defaults: {
@@ -80,6 +84,7 @@ export async function saveSandwich(poolId, frontrunId, backrunId, extractedFromC
             backrun: backrunId,
             extracted_from_curve: extractedFromCurve,
             loss_transactions: lossTransactions,
+            loss_in_usd: lossInUsd,
         },
     });
 }

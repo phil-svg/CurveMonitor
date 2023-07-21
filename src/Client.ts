@@ -235,13 +235,14 @@ export interface UserSearchResult {
       lossInPercentage: 86.80171647830026
     }
   ],
-  label: 'Curve.fi: Pool Owner'
+  label: 'Curve.fi: Pool Owner',
+  lossInUsd: 53.505298732480725
 }
  */
 export function startNewSandwichClient(socket: Socket) {
-  socket.on("NewSandwich", (enrichedSandwich: SandwichDetail) => {
+  socket.on("NewSandwich", (sandwichDetails: SandwichDetail) => {
     console.log("Received new sandwich");
-    console.dir(enrichedSandwich, { depth: null, colors: true });
+    console.dir(sandwichDetails, { depth: null, colors: true });
   });
 
   socket.emit("connectToGeneralSandwichLivestream");
@@ -358,10 +359,10 @@ export async function startTestClient() {
     // startUserSearchClient(mainSocket, "crvu");
     // startAbsoluteLabelsRankingClient(mainSocket);
     // startSandwichLabelOccurrencesClient(mainSocket);
-    // startNewSandwichClient(mainSocket);
+    startNewSandwichClient(mainSocket);
     // startFullSandwichTableClient(mainSocket, "1 day");
     // startPoolSpecificSandwichTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
     // startNewGeneralTxClient(mainSocket);
-    startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
+    // startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
   });
 }

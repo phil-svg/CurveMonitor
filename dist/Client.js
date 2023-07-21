@@ -14,6 +14,7 @@ const url = "wss://api.curvemonitor.com";
  * emit("getFullSandwichTableContent", timeDuration);
  * emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
  * emit("connectToGeneralTxLivestream")
+ * emit("getPoolSpecificTransactionTable", poolAddress, timeDuration)
  *
  */
 // you say: Ping, I say: Pong. Ping? Pong!
@@ -198,13 +199,14 @@ export function startUserSearchClient(socket, userInput) {
       lossInPercentage: 86.80171647830026
     }
   ],
-  label: 'Curve.fi: Pool Owner'
+  label: 'Curve.fi: Pool Owner',
+  lossInUsd: 53.505298732480725
 }
  */
 export function startNewSandwichClient(socket) {
-    socket.on("NewSandwich", (enrichedSandwich) => {
+    socket.on("NewSandwich", (sandwichDetails) => {
         console.log("Received new sandwich");
-        console.dir(enrichedSandwich, { depth: null, colors: true });
+        console.dir(sandwichDetails, { depth: null, colors: true });
     });
     socket.emit("connectToGeneralSandwichLivestream");
     handleErrors(socket, "/main");
@@ -297,11 +299,11 @@ export async function startTestClient() {
         // startUserSearchClient(mainSocket, "crvu");
         // startAbsoluteLabelsRankingClient(mainSocket);
         // startSandwichLabelOccurrencesClient(mainSocket);
-        // startNewSandwichClient(mainSocket);
+        startNewSandwichClient(mainSocket);
         // startFullSandwichTableClient(mainSocket, "1 day");
         // startPoolSpecificSandwichTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
         // startNewGeneralTxClient(mainSocket);
-        startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
+        // startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
     });
 }
 //# sourceMappingURL=Client.js.map
