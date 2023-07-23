@@ -161,13 +161,23 @@ export async function getIdsForFullSandwichTableForPool(timeDuration: string, po
   return sandwiches.map((sandwich) => sandwich.id);
 }
 
+export interface TransactionLossDetail {
+  unit: string;
+  tx_id: number;
+  amount: number;
+  lossInUsd: number;
+  unitAddress: string;
+  lossInPercentage: number;
+}
+
 export async function getLossInUsdForSandwich(sandwichId: number): Promise<number | null> {
   try {
     const sandwich = await Sandwiches.findByPk(sandwichId);
-    if (sandwich && typeof sandwich.loss_in_usd !== "undefined") {
-      return sandwich.loss_in_usd;
+    if (sandwich && sandwich.loss_transactions && Array.isArray(sandwich.loss_transactions) && sandwich.loss_transactions.length > 0) {
+      const lossTransactionDetail: TransactionLossDetail = sandwich.loss_transactions[0];
+      return lossTransactionDetail.lossInUsd;
     } else {
-      console.log(`No sandwich found with id: ${sandwichId}`);
+      console.log(`No sandwich or loss transactions found with id: ${sandwichId}`);
       return null;
     }
   } catch (err) {

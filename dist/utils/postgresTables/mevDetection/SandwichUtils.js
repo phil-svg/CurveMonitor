@@ -84,7 +84,6 @@ export async function saveSandwich(poolId, frontrunId, backrunId, extractedFromC
             backrun: backrunId,
             extracted_from_curve: extractedFromCurve,
             loss_transactions: lossTransactions,
-            loss_in_usd: lossInUsd,
         },
     });
 }

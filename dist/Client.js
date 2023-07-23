@@ -1,8 +1,8 @@
 import { io } from "socket.io-client";
 import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
 // Replace with "wss://api.curvemonitor.com" for production
-// const url = "http://localhost:443";
-const url = "wss://api.curvemonitor.com";
+const url = "http://localhost:443";
+// const url = "wss://api.curvemonitor.com";
 /**
  *
  * Possible Usages of /main
@@ -299,9 +299,9 @@ export async function startTestClient() {
         // startUserSearchClient(mainSocket, "crvu");
         // startAbsoluteLabelsRankingClient(mainSocket);
         // startSandwichLabelOccurrencesClient(mainSocket);
-        startNewSandwichClient(mainSocket);
-        // startFullSandwichTableClient(mainSocket, "1 day");
-        // startPoolSpecificSandwichTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
+        // startNewSandwichClient(mainSocket);
+        startFullSandwichTableClient(mainSocket, "1 day");
+        // startPoolSpecificSandwichTable(mainSocket, "0x5a6A4D54456819380173272A5E8E9B9904BdF41B", "1 day");
         // startNewGeneralTxClient(mainSocket);
         // startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
     });

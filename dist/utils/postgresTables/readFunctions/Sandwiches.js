@@ -140,11 +140,12 @@ export async function getIdsForFullSandwichTableForPool(timeDuration, poolId) {
 export async function getLossInUsdForSandwich(sandwichId) {
     try {
         const sandwich = await Sandwiches.findByPk(sandwichId);
-        if (sandwich && typeof sandwich.loss_in_usd !== "undefined") {
-            return sandwich.loss_in_usd;
+        if (sandwich && sandwich.loss_transactions && Array.isArray(sandwich.loss_transactions) && sandwich.loss_transactions.length > 0) {
+            const lossTransactionDetail = sandwich.loss_transactions[0];
+            return lossTransactionDetail.lossInUsd;
         }
         else {
-            console.log(`No sandwich found with id: ${sandwichId}`);
+            console.log(`No sandwich or loss transactions found with id: ${sandwichId}`);
             return null;
         }
     }

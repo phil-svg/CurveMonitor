@@ -38,7 +38,4 @@ export class Sandwiches extends Model {
   @AllowNull(true)
   @Column(DataType.STRING)
   source_of_loss_contract_address?: string | null;
-
-  @Column(DataType.DECIMAL(30, 15))
-  loss_in_usd?: number | null;
 }
