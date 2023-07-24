@@ -1,11 +1,11 @@
 import { getSandwichTableContentForPool } from "../../queries/query_sandwiches.js";
 import { getIdByAddressCaseInsensitive } from "../../../postgresTables/readFunctions/Pools.js";
 export const handlePoolSandwichRoom = (socket) => {
-    socket.on("getPoolSpecificSandwichTable", async (poolAddress, duration) => {
+    socket.on("getPoolSpecificSandwichTable", async (poolAddress, duration, page) => {
         try {
             const poolId = await getIdByAddressCaseInsensitive(poolAddress);
-            const SandwichTableContentForPool = await getSandwichTableContentForPool(poolId, duration);
-            socket.emit("SandwichTableContentForPool", SandwichTableContentForPool);
+            const { sandwiches, totalPages } = await getSandwichTableContentForPool(poolId, duration, page);
+            socket.emit("SandwichTableContentForPool", { sandwiches, totalPages });
         }
         catch (error) {
             console.error(error);

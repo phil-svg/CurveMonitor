@@ -6,10 +6,13 @@ import { chunkedAsync } from "../../postgresTables/readFunctions/SandwichDetailE
 import { txDetailEnrichment } from "../../postgresTables/readFunctions/TxDetailEnrichment.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
 
-export async function getTransactionIdsForPool(timeDuration: string, poolId: number): Promise<number[]> {
+export async function getTransactionIdsForPool(timeDuration: string, poolId: number, page: number = 1): Promise<{ ids: number[]; totalPages: number }> {
+  const recordsPerPage = 10;
+  const offset = (page - 1) * recordsPerPage;
+
   const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
 
-  const transactions = await Transactions.findAll({
+  const totalRecords = await Transactions.count({
     where: {
       pool_id: poolId,
       block_unixtime: {
@@ -18,8 +21,21 @@ export async function getTransactionIdsForPool(timeDuration: string, poolId: num
     },
   });
 
-  // Return an array of transaction IDs
-  return transactions.map((transaction) => transaction.tx_id);
+  const transactions = await Transactions.findAll({
+    where: {
+      pool_id: poolId,
+      block_unixtime: {
+        [Op.gte]: timeframeStartUnix,
+      },
+    },
+    limit: recordsPerPage,
+    offset: offset,
+    order: [["block_unixtime", "DESC"]],
+  });
+
+  const totalPages = Math.ceil(totalRecords / recordsPerPage);
+
+  return { ids: transactions.map((transaction) => transaction.tx_id), totalPages };
 }
 
 export async function enrichTransactions(transactionIds: number[], poolAddress: string, poolName: string): Promise<EnrichedTransactionDetail[]> {

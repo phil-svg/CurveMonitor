@@ -2,9 +2,8 @@ import { Sequelize } from "sequelize";
 import { Sandwiches } from "../../../models/Sandwiches.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
 import { AddressesCalledCounts } from "../../../models/AddressesCalledCount.js";
-import { getIdsForFullSandwichTable } from "../../postgresTables/readFunctions/Sandwiches.js";
+import { getIdsForFullSandwichTable, getIdsForFullSandwichTableForPool } from "../../postgresTables/readFunctions/Sandwiches.js";
 import { enrichSandwiches } from "../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
-import { getTransactionIdsForPool } from "./query_transactions.js";
 export async function getTotalAmountOfSandwichesInLocalDB() {
     const count = await Sandwiches.count();
     return count;
@@ -75,14 +74,14 @@ export async function getSandwichLabelOccurrences() {
         return null;
     }
 }
-export async function getFullSandwichTable(duration) {
-    const sandwichIds = await getIdsForFullSandwichTable(duration);
-    const enrichedSandwiches = await enrichSandwiches(sandwichIds);
-    return enrichedSandwiches;
+export async function getFullSandwichTable(duration, page) {
+    const { ids, totalPages } = await getIdsForFullSandwichTable(duration, page);
+    const enrichedSandwiches = await enrichSandwiches(ids);
+    return { sandwiches: enrichedSandwiches, totalPages };
 }
-export async function getSandwichTableContentForPool(poolId, duration) {
-    const sandwichIds = await getTransactionIdsForPool(duration, poolId);
-    const enrichedSandwiches = await enrichSandwiches(sandwichIds);
-    return enrichedSandwiches;
+export async function getSandwichTableContentForPool(poolId, duration, page) {
+    const { ids, totalPages } = await getIdsForFullSandwichTableForPool(duration, poolId, page);
+    const enrichedSandwiches = await enrichSandwiches(ids);
+    return { sandwiches: enrichedSandwiches, totalPages };
 }
 //# sourceMappingURL=query_sandwiches.js.map

@@ -2,13 +2,13 @@ import { getIdByAddressCaseInsensitive } from "../../../postgresTables/readFunct
 import { enrichTransactions, getTransactionIdsForPool } from "../../queries/query_transactions.js";
 import { getModifiedPoolName } from "../../utils/SearchBar.js";
 export const handlePoolTxLivestream = (socket) => {
-    socket.on("getPoolSpecificTransactionTable", async (poolAddress, duration) => {
+    socket.on("getPoolSpecificTransactionTable", async (poolAddress, duration, page) => {
         try {
             const poolId = await getIdByAddressCaseInsensitive(poolAddress);
             const poolName = await getModifiedPoolName(poolAddress);
-            const transactionIds = await getTransactionIdsForPool(duration, poolId);
-            const transactionTableContentForPool = await enrichTransactions(transactionIds, poolAddress, poolName);
-            socket.emit("TransactionTableContentForPool", transactionTableContentForPool);
+            const { ids, totalPages } = await getTransactionIdsForPool(duration, poolId, page);
+            const transactionTableContentForPool = await enrichTransactions(ids, poolAddress, poolName);
+            socket.emit("TransactionTableContentForPool", { transactionTableContentForPool, totalPages });
         }
         catch (error) {
             console.error(error);

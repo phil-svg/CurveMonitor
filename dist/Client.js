@@ -11,10 +11,10 @@ const url = "http://localhost:443";
  * emit("getSandwichLabelOccurrences")
  * emit("getUserSearchResult", userInput)
  * emit("connectToGeneralSandwichLivestream");
- * emit("getFullSandwichTableContent", timeDuration);
- * emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
+ * emit("getFullSandwichTableContent", timeDuration, page);
+ * emit("getPoolSpecificSandwichTable", poolAddress, timeDuration, page);
  * emit("connectToGeneralTxLivestream")
- * emit("getPoolSpecificTransactionTable", poolAddress, timeDuration)
+ * emit("getPoolSpecificTransactionTable", poolAddress, timeDuration, page)
  *
  */
 // you say: Ping, I say: Pong. Ping? Pong!
@@ -221,18 +221,20 @@ function handleErrors(socket, endpoint) {
     });
 }
 // returns a list/table, of all sandwiches, of all pools, for a given time period.
-// time periods: "1 day", "1 week", "1 month", "full". Full maybe needs to get killed in the future, and instead request "chunks/pages"
-export function startFullSandwichTableClient(socket, timeDuration) {
-    socket.emit("getFullSandwichTableContent", timeDuration);
+// time periods: "1 day", "1 week", "1 month", "full"
+// 10 resuts per page
+export function startFullSandwichTableClient(socket, timeDuration, page) {
+    socket.emit("getFullSandwichTableContent", timeDuration, page);
     socket.on("fullSandwichTableContent", (fullTableContent) => {
         console.log("Received full Sandwich-Table Content: ", fullTableContent);
     });
     handleErrors(socket, "/main");
 }
 // returns a list/table, of sandwiches in a given pool, for a given time period.
-// time periods: "1 day", "1 week", "1 month", "full". Full maybe needs to get killed in the future, and instead request "chunks/pages"
-export function startPoolSpecificSandwichTable(socket, poolAddress, timeDuration) {
-    socket.emit("getPoolSpecificSandwichTable", poolAddress, timeDuration);
+// time periods: "1 day", "1 week", "1 month", "full"
+// 10 resuts per page
+export function startPoolSpecificSandwichTable(socket, poolAddress, timeDuration, page) {
+    socket.emit("getPoolSpecificSandwichTable", poolAddress, timeDuration, page);
     socket.on("SandwichTableContentForPool", (fullTableContent) => {
         console.log("Received Pool specific Sandwich-Table: ", fullTableContent);
     });
@@ -283,9 +285,10 @@ export function startNewGeneralTxClient(socket) {
     handleErrors(socket, "/main");
 }
 // returns a list/table, of swaps/deposits/withdrawals in a given pool, for a given time period.
-// time periods: "1 day", "1 week", "1 month", "full". Full maybe needs to get killed in the future, and instead request "chunks/pages"
-export function startPoolSpecificTransactionTable(socket, poolAddress, timeDuration) {
-    socket.emit("getPoolSpecificTransactionTable", poolAddress, timeDuration);
+// time periods: "1 day", "1 week", "1 month", "full"
+// 10 resuts per page
+export function startPoolSpecificTransactionTable(socket, poolAddress, timeDuration, page) {
+    socket.emit("getPoolSpecificTransactionTable", poolAddress, timeDuration, page);
     socket.on("TransactionTableContentForPool", (transactionTableContentForPool) => {
         console.log("Received Pool specific Transaction-Table: ", transactionTableContentForPool);
     });
@@ -300,10 +303,10 @@ export async function startTestClient() {
         // startAbsoluteLabelsRankingClient(mainSocket);
         // startSandwichLabelOccurrencesClient(mainSocket);
         // startNewSandwichClient(mainSocket);
-        startFullSandwichTableClient(mainSocket, "1 day");
-        // startPoolSpecificSandwichTable(mainSocket, "0x5a6A4D54456819380173272A5E8E9B9904BdF41B", "1 day");
+        // startFullSandwichTableClient(mainSocket, "1 week", 1);
+        // startPoolSpecificSandwichTable(mainSocket, "0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B", "1 month", 1);
         // startNewGeneralTxClient(mainSocket);
-        // startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week");
+        startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week", 2);
     });
 }
 //# sourceMappingURL=Client.js.map
