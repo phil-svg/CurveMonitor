@@ -77,11 +77,11 @@ export async function getSandwichLabelOccurrences() {
 export async function getFullSandwichTable(duration, page) {
     const { ids, totalPages } = await getIdsForFullSandwichTable(duration, page);
     const enrichedSandwiches = await enrichSandwiches(ids);
-    return { sandwiches: enrichedSandwiches, totalPages };
+    return { data: enrichedSandwiches, totalPages };
 }
 export async function getSandwichTableContentForPool(poolId, duration, page) {
     const { ids, totalPages } = await getIdsForFullSandwichTableForPool(duration, poolId, page);
     const enrichedSandwiches = await enrichSandwiches(ids);
-    return { sandwiches: enrichedSandwiches, totalPages };
+    return { data: enrichedSandwiches, totalPages };
 }
 //# sourceMappingURL=query_sandwiches.js.map

@@ -2,8 +2,8 @@ import { getFullSandwichTable } from "../../queries/query_sandwiches.js";
 export const handleFullSandwichRoom = (socket) => {
     socket.on("getFullSandwichTableContent", async (timeDuration, page) => {
         try {
-            const { sandwiches, totalPages } = await getFullSandwichTable(timeDuration, page);
-            socket.emit("fullSandwichTableContent", { sandwiches, totalPages });
+            const { data, totalPages } = await getFullSandwichTable(timeDuration, page);
+            socket.emit("fullSandwichTableContent", { data, totalPages });
         }
         catch (error) {
             console.error(error);
