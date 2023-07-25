@@ -200,4 +200,26 @@ export async function getLossInUsdForSandwich(sandwichId) {
         return null;
     }
 }
+export async function fetchSandwichIdsByBlockNumber(blockNumber) {
+    const sandwiches = await Sandwiches.findAll({
+        attributes: ["id"],
+        where: {
+            [Op.or]: [{ "$frontrunTransaction.block_number$": blockNumber }, { "$backrunTransaction.block_number$": blockNumber }],
+        },
+        include: [
+            {
+                model: Transactions,
+                as: "frontrunTransaction",
+                attributes: [],
+            },
+            {
+                model: Transactions,
+                as: "backrunTransaction",
+                attributes: [],
+            },
+        ],
+        raw: true,
+    });
+    return sandwiches.map((sandwich) => sandwich.id);
+}
 //# sourceMappingURL=Sandwiches.js.map

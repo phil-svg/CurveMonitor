@@ -2,6 +2,9 @@ import { TransactionCoins } from "../../../models/TransactionCoins.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { Coins } from "../../../models/Coins.js";
 import { TransactionDetails } from "../../../models/TransactionDetails.js";
+import { getAddressById } from "./Pools.js";
+import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
+import { getLabelNameFromAddress } from "./Labels.js";
 export async function txDetailEnrichment(txId) {
     const transaction = await Transactions.findOne({
         where: { tx_id: txId },
@@ -43,5 +46,29 @@ export async function txDetailEnrichment(txId) {
         coins_entering_wallet: coinsEnteringWallet,
     };
     return txDetail;
+}
+export async function enrichTransactionDetail(txId) {
+    const detailedTransaction = await txDetailEnrichment(txId);
+    if (detailedTransaction) {
+        let poolAddress = await getAddressById(detailedTransaction.pool_id);
+        let poolName = await getModifiedPoolName(poolAddress);
+        let label = await getLabelNameFromAddress(detailedTransaction.called_contract_by_user);
+        if (!label || label.startsWith("Contract Address")) {
+            label = detailedTransaction.called_contract_by_user;
+        }
+        const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { poolAddress: poolAddress, poolName: poolName, calledContractLabel: label });
+        return enrichedTransaction;
+    }
+    else {
+        return null;
+    }
+}
+export async function enrichTransactionDetailByTxHash(txHash) {
+    const transaction = await Transactions.findOne({ where: { tx_hash: txHash } });
+    if (!transaction) {
+        throw new Error(`No transaction found with hash: ${txHash}`);
+    }
+    const txId = transaction.tx_id;
+    return await enrichTransactionDetail(txId);
 }
 //# sourceMappingURL=TxDetailEnrichment.js.map

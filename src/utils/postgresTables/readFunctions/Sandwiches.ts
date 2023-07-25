@@ -237,3 +237,27 @@ export async function getLossInUsdForSandwich(sandwichId: number): Promise<numbe
     return null;
   }
 }
+
+export async function fetchSandwichIdsByBlockNumber(blockNumber: number): Promise<number[]> {
+  const sandwiches = await Sandwiches.findAll({
+    attributes: ["id"],
+    where: {
+      [Op.or]: [{ "$frontrunTransaction.block_number$": blockNumber }, { "$backrunTransaction.block_number$": blockNumber }],
+    },
+    include: [
+      {
+        model: Transactions,
+        as: "frontrunTransaction",
+        attributes: [],
+      },
+      {
+        model: Transactions,
+        as: "backrunTransaction",
+        attributes: [],
+      },
+    ],
+    raw: true,
+  });
+
+  return sandwiches.map((sandwich) => sandwich.id);
+}

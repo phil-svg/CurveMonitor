@@ -40,12 +40,7 @@ async function getBotTransactions(candidate: ExtendedTransactionData[]): Promise
       const tx2 = candidate[j];
 
       // Check if the transactions have the same trader and are both swaps
-      if (
-        tx1.trader === tx2.trader &&
-        tx1.transaction_type === "swap" &&
-        tx2.transaction_type === "swap" &&
-        Math.abs(tx1.tx_position - tx2.tx_position) === 2 // check for exactly one gap in tx_position
-      ) {
+      if (tx1.trader === tx2.trader && tx1.transaction_type === "swap" && tx2.transaction_type === "swap") {
         const tx1InCoin = tx1.transactionCoins.find((coin) => coin.direction === "in");
         const tx1OutCoin = tx1.transactionCoins.find((coin) => coin.direction === "out");
         const tx2InCoin = tx2.transactionCoins.find((coin) => coin.direction === "in");
