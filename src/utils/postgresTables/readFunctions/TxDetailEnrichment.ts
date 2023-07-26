@@ -6,6 +6,7 @@ import { EnrichedTransactionDetail } from "../../../Client.js";
 import { getAddressById } from "./Pools.js";
 import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
 import { getLabelNameFromAddress } from "./Labels.js";
+import { getFromAddress } from "./TransactionDetails.js";
 
 export interface TransactionDetail {
   tx_id: number;
@@ -88,11 +89,14 @@ export async function enrichTransactionDetail(txId: number): Promise<EnrichedTra
       label = detailedTransaction.called_contract_by_user;
     }
 
+    let from = await getFromAddress(txId);
+
     const enrichedTransaction: EnrichedTransactionDetail = {
       ...detailedTransaction,
       poolAddress: poolAddress!,
       poolName: poolName!,
       calledContractLabel: label,
+      from: from!,
     };
 
     return enrichedTransaction;

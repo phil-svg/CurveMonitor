@@ -338,6 +338,7 @@ export interface EnrichedTransactionDetail extends TransactionDetail {
   poolAddress: string;
   poolName: string;
   calledContractLabel: string;
+  from: string;
 }
 
 // returns a list/table, of swaps/deposits/withdrawals in a given pool, for a given time period.

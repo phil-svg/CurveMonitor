@@ -5,6 +5,7 @@ import { EnrichedTransactionDetail } from "../../../Client.js";
 import { chunkedAsync } from "../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
 import { txDetailEnrichment } from "../../postgresTables/readFunctions/TxDetailEnrichment.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
+import { getFromAddress } from "../../postgresTables/readFunctions/TransactionDetails.js";
 
 export async function getTransactionIdsForPool(timeDuration: string, poolId: number, page: number = 1): Promise<{ ids: number[]; totalPages: number }> {
   const recordsPerPage = 10;
@@ -53,11 +54,14 @@ export async function TransactionDetailEnrichment(txId: number, poolAddress: str
     label = detailedTransaction.called_contract_by_user;
   }
 
+  let from = await getFromAddress(txId);
+
   const enrichedTransaction: EnrichedTransactionDetail = {
     ...detailedTransaction,
     calledContractLabel: label,
     poolAddress: poolAddress,
     poolName: poolName,
+    from: from!,
   };
 
   return enrichedTransaction;
