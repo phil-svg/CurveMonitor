@@ -5,7 +5,6 @@ import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { findUniqueSourceOfLossAddresses } from "./readFunctions/Sandwiches.js";
 import { findUniqueLabeledAddresses, findVyperContractAddresses } from "./readFunctions/Labels.js";
 import { Labels } from "../../models/Labels.js";
-import { getModifiedPoolName } from "../api/utils/SearchBar.js";
 import { fetchAbiFromEtherscan } from "./Abi.js";
 import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { web3Call } from "../web3Calls/generic.js";

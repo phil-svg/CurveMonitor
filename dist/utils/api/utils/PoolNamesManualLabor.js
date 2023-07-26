@@ -15,5 +15,7 @@ export const manualLaborLabels = {
     "0xb576491f1e6e5e62f1d8f26062ee822b40b0e0d4": "CVX/ETH",
     "0x08780fb7E580e492c1935bEe4fA5920b94AA95Da": "Zap Depositer for permissionless factory metapools",
     "0x7fb53345f1B21aB5d9510ADB38F7d3590BE6364b": "ETH+/ETH",
+    "0x92F3f71CeF740ED5784874B8C70Ff87ECdF33588": "1inch",
+    "0x9008D19f58AAbD9eD0D60971565AA8510560ab41": "CoW Swap",
 };
 //# sourceMappingURL=PoolNamesManualLabor.js.map
