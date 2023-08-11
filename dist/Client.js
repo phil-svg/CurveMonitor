@@ -296,6 +296,7 @@ export function startPoolSpecificTransactionTable(socket, poolAddress, timeDurat
 }
 export async function startTestClient() {
     const mainSocket = io(`${url}/main`);
+    console.log(`connecting to ${url}/main`);
     mainSocket.on("connect", () => {
         console.log("connected");
         // startPingClient(mainSocket);

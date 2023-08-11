@@ -61,14 +61,14 @@ async function main() {
 
   await updateSandwichDetection();
   // await updateAtomicArbDetection();
-  await updateLabels();
+  // await updateLabels();
 
   eventFlags.canEmitSandwich = true;
   eventFlags.canEmitGeneralTx = true;
 
   // todo
 
-  updateConsoleOutput(`[✓] Everything finished syncing successfully.`);
+  console.log(`[✓] Everything finished syncing successfully.`);
 
   // process.exit();
 }
