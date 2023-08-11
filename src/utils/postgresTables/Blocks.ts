@@ -21,7 +21,6 @@ export async function writeBlocks(blocks: { block_number: number; timestamp: num
 }
 
 async function main() {
-  const NUM_OF_BLOCKS = (await fetchDistinctBlockNumbers()).length;
   const storedBlockNumbers = await fetchBlockNumbers();
 
   const allBlockNumbers = await fetchAllDistinctBlockNumbers();

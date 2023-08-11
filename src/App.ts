@@ -74,7 +74,3 @@ async function main() {
 }
 
 await main();
-
-await updateContractCreations();
-await updateReceipts();
-await updateTxTraces();

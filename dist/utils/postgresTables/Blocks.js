@@ -1,5 +1,5 @@
 import { Blocks } from "../../models/Blocks.js";
-import { fetchAllDistinctBlockNumbers, fetchDistinctBlockNumbers } from "../postgresTables/readFunctions/RawLogs.js";
+import { fetchAllDistinctBlockNumbers } from "../postgresTables/readFunctions/RawLogs.js";
 import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { fetchBlockNumbers } from "../postgresTables/readFunctions/Blocks.js";
 import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
@@ -18,7 +18,6 @@ export async function writeBlocks(blocks) {
     });
 }
 async function main() {
-    const NUM_OF_BLOCKS = (await fetchDistinctBlockNumbers()).length;
     const storedBlockNumbers = await fetchBlockNumbers();
     const allBlockNumbers = await fetchAllDistinctBlockNumbers();
     const BLOCK_NUMBERS = allBlockNumbers.filter((blockNumber) => !storedBlockNumbers.includes(blockNumber));
