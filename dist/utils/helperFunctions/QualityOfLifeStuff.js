@@ -1,3 +1,4 @@
+import { addMinutes, differenceInMinutes, format } from "date-fns";
 import * as readline from "readline";
 export function updateConsoleOutput(message, yOffset = 0) {
     readline.moveCursor(process.stdout, 0, yOffset);
@@ -22,5 +23,18 @@ export function getCurrentTimeString() {
     hours %= 12;
     hours = hours || 12;
     return `${hours}:${minutes < 10 ? "0" : ""}${minutes}${ampm}`;
+}
+// Log after every 50 fetches
+export function logProgress(fetchCount, totalTimeTaken, totalToBeFetched) {
+    if (fetchCount % 50 === 0) {
+        const averageTimePerFetch = totalTimeTaken / fetchCount / 1000 / 60;
+        const estimatedFinishTime = addMinutes(new Date(), averageTimePerFetch * (totalToBeFetched - fetchCount));
+        const percentComplete = (fetchCount / totalToBeFetched) * 100;
+        const finishTimeFormatted = format(estimatedFinishTime, "EEE hh:mma");
+        const timeToCompletion = differenceInMinutes(estimatedFinishTime, new Date());
+        const hoursToCompletion = Math.floor(timeToCompletion / 60);
+        const minutesToCompletion = timeToCompletion % 60;
+        console.log(`${percentComplete.toFixed(2)}% | ${fetchCount}/${totalToBeFetched} | ${finishTimeFormatted} | ${hoursToCompletion}h:${minutesToCompletion}min`);
+    }
 }
 //# sourceMappingURL=QualityOfLifeStuff.js.map

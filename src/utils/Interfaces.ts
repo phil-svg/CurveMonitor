@@ -101,3 +101,87 @@ export interface SandwichLoss {
 export interface BlockNumber {
   block: string | number;
 }
+
+export interface Action {
+  callType: string;
+  from: string;
+  gas: string;
+  input: string;
+  to: string;
+  value: string;
+}
+
+export interface Result {
+  gasUsed: string;
+  output: string;
+}
+
+export interface ITransactionTrace {
+  action: Action;
+  blockHash: string;
+  blockNumber: number;
+  result: Result;
+  subtraces: number;
+  traceAddress: number[];
+  transactionHash: string;
+  type: string;
+}
+
+export interface TraceResponse {
+  jsonrpc: string;
+  result: ITransactionTrace[];
+  id: number;
+}
+
+export type CallTrace = Array<{
+  action: {
+    from: string;
+    to: string;
+    value: string;
+    callType: string;
+  };
+}>;
+
+export interface BalanceChange {
+  token: string;
+  balanceChange: string;
+  tokenSymbol?: string;
+}
+
+export interface TransferEvent {
+  from: string;
+  to: string;
+  value: string;
+  token: string;
+}
+
+export type CoinProperty = "address" | "symbol" | "decimals";
+
+export interface FormattedArbitrageResult {
+  extractedValue: Array<{
+    address: string;
+    symbol: string;
+    amount: number;
+  }>;
+  bribe: {
+    address: string;
+    symbol: string;
+    amount: number;
+  };
+  netWin: Array<{
+    address: string;
+    symbol: string;
+    amount: number;
+  }>;
+  txGas: {
+    gasUsed: number;
+    gasPrice: number;
+    gasCostETH: number;
+  };
+}
+
+export interface ContractDetail {
+  contractAddress: string;
+  contractCreator: string;
+  txHash: string;
+}

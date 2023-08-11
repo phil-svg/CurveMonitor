@@ -5,6 +5,7 @@ import { chunkedAsync } from "../../postgresTables/readFunctions/SandwichDetailE
 import { txDetailEnrichment } from "../../postgresTables/readFunctions/TxDetailEnrichment.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
 import { getFromAddress } from "../../postgresTables/readFunctions/TransactionDetails.js";
+import { getContractInceptionTimestamp } from "../../postgresTables/readFunctions/Contracts.js";
 export async function getTransactionIdsForPool(timeDuration, poolId, page = 1) {
     const recordsPerPage = 10;
     const offset = (page - 1) * recordsPerPage;
@@ -45,7 +46,8 @@ export async function TransactionDetailEnrichment(txId, poolAddress, poolName) {
         label = detailedTransaction.called_contract_by_user;
     }
     let from = await getFromAddress(txId);
-    const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { calledContractLabel: label, poolAddress: poolAddress, poolName: poolName, from: from });
+    let calledContractInceptionTimestamp = await getContractInceptionTimestamp(detailedTransaction.called_contract_by_user);
+    const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { calledContractLabel: label, poolAddress: poolAddress, poolName: poolName, from: from, calledContractInceptionTimestamp: calledContractInceptionTimestamp });
     return enrichedTransaction;
 }
 //# sourceMappingURL=query_transactions.js.map

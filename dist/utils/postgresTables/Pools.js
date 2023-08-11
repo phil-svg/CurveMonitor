@@ -311,7 +311,7 @@ async function updateNCoins() {
     }
 }
 /** *********************** Adding Inception Block *********************** */
-async function getInceptionBlock(highestBlock, poolAddress) {
+export async function getInceptionBlock(highestBlock, poolAddress) {
     let lowestBlock = 0;
     while (lowestBlock <= highestBlock) {
         let searchBlock = Math.round((lowestBlock + highestBlock) / 2);

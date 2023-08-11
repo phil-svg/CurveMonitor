@@ -7,6 +7,7 @@ import { getAddressById } from "./Pools.js";
 import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
 import { getLabelNameFromAddress } from "./Labels.js";
 import { getFromAddress } from "./TransactionDetails.js";
+import { getContractInceptionTimestamp } from "./Contracts.js";
 
 export interface TransactionDetail {
   tx_id: number;
@@ -84,6 +85,7 @@ export async function enrichTransactionDetail(txId: number): Promise<EnrichedTra
     let poolAddress = await getAddressById(detailedTransaction.pool_id);
     let poolName = await getModifiedPoolName(poolAddress!);
     let label = await getLabelNameFromAddress(detailedTransaction.called_contract_by_user);
+    let calledContractInceptionTimestamp = await getContractInceptionTimestamp(detailedTransaction.called_contract_by_user);
 
     if (!label || label.startsWith("Contract Address")) {
       label = detailedTransaction.called_contract_by_user;
@@ -97,6 +99,7 @@ export async function enrichTransactionDetail(txId: number): Promise<EnrichedTra
       poolName: poolName!,
       calledContractLabel: label,
       from: from!,
+      calledContractInceptionTimestamp: calledContractInceptionTimestamp!,
     };
 
     return enrichedTransaction;

@@ -6,6 +6,7 @@ import { getAddressById } from "./Pools.js";
 import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
 import { getLabelNameFromAddress } from "./Labels.js";
 import { getFromAddress } from "./TransactionDetails.js";
+import { getContractInceptionTimestamp } from "./Contracts.js";
 export async function txDetailEnrichment(txId) {
     const transaction = await Transactions.findOne({
         where: { tx_id: txId },
@@ -54,11 +55,12 @@ export async function enrichTransactionDetail(txId) {
         let poolAddress = await getAddressById(detailedTransaction.pool_id);
         let poolName = await getModifiedPoolName(poolAddress);
         let label = await getLabelNameFromAddress(detailedTransaction.called_contract_by_user);
+        let calledContractInceptionTimestamp = await getContractInceptionTimestamp(detailedTransaction.called_contract_by_user);
         if (!label || label.startsWith("Contract Address")) {
             label = detailedTransaction.called_contract_by_user;
         }
         let from = await getFromAddress(txId);
-        const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { poolAddress: poolAddress, poolName: poolName, calledContractLabel: label, from: from });
+        const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { poolAddress: poolAddress, poolName: poolName, calledContractLabel: label, from: from, calledContractInceptionTimestamp: calledContractInceptionTimestamp });
         return enrichedTransaction;
     }
     else {

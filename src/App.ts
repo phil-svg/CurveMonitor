@@ -8,7 +8,6 @@ import { updatePoolAbis } from "./utils/postgresTables/Abi.js";
 import { updateBlockTimestamps } from "./utils/postgresTables/Blocks.js";
 import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
 import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
-import { updateMevDetection } from "./utils/postgresTables/mevDetection/MevDetection.js";
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
@@ -17,6 +16,12 @@ import { startTestClient } from "./Client.js";
 import { updateTransactionsDetails } from "./utils/postgresTables/TransactionsDetails.js";
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 import { eventFlags } from "./utils/api/utils/EventFlags.js";
+import { updateSandwichDetection } from "./utils/postgresTables/mevDetection/Sandwich/SandwichDetection.js";
+import { updateAtomicArbDetection } from "./utils/postgresTables/mevDetection/Atomic/atomicArb.js";
+import { updateTxTraces } from "./utils/postgresTables/TransactionTraces.js";
+import { updateConsoleOutput } from "./utils/helperFunctions/QualityOfLifeStuff.js";
+import { updateReceipts } from "./utils/postgresTables/Receipts.js";
+import { updateContractCreations } from "./utils/postgresTables/ContractCreations.js";
 
 export async function initDatabase() {
   try {
@@ -45,13 +50,17 @@ async function main() {
   await preparingLiveModeForRawEvents();
   await updateRawLogs();
   await updateBlockTimestamps();
+  // await updateContractCreations();
   await parseEvents();
+  // await updateReceipts();
   await updateTransactionsDetails();
+  // await updateTxTraces();
   await updateAddressCounts();
 
   // await updateTokenDollarValues(); // muted until useful
 
-  await updateMevDetection();
+  await updateSandwichDetection();
+  // await updateAtomicArbDetection();
   await updateLabels();
 
   eventFlags.canEmitSandwich = true;
@@ -59,7 +68,13 @@ async function main() {
 
   // todo
 
+  updateConsoleOutput(`[✓] Everything finished syncing successfully.`);
+
   // process.exit();
 }
 
 await main();
+
+await updateContractCreations();
+await updateReceipts();
+await updateTxTraces();

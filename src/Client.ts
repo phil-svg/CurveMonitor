@@ -4,8 +4,8 @@ import { SandwichDetail } from "./utils/postgresTables/readFunctions/SandwichDet
 import { TransactionDetail } from "./utils/postgresTables/readFunctions/TxDetailEnrichment.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
-const url = "http://localhost:443";
-// const url = "wss://api.curvemonitor.com";
+// const url = "http://localhost:443";
+const url = "wss://api.curvemonitor.com";
 
 /**
  *
@@ -339,6 +339,7 @@ export interface EnrichedTransactionDetail extends TransactionDetail {
   poolName: string;
   calledContractLabel: string;
   from: string;
+  calledContractInceptionTimestamp: number;
 }
 
 // returns a list/table, of swaps/deposits/withdrawals in a given pool, for a given time period.
@@ -363,10 +364,10 @@ export async function startTestClient() {
     // startUserSearchClient(mainSocket, "crvu");
     // startAbsoluteLabelsRankingClient(mainSocket);
     // startSandwichLabelOccurrencesClient(mainSocket);
-    startNewSandwichClient(mainSocket);
+    // startNewSandwichClient(mainSocket);
     // startFullSandwichTableClient(mainSocket, "1 week", 1);
     // startPoolSpecificSandwichTable(mainSocket, "0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B", "1 week", 1);
-    // startNewGeneralTxClient(mainSocket);
+    startNewGeneralTxClient(mainSocket);
     // startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week", 2);
   });
 }

@@ -91,7 +91,7 @@ async function updateAddresses(): Promise<void> {
     try {
       const exists = await isCoinAddressInTable(UNIQUE_ADDRESSE);
       if (exists) continue;
-      await Coins.create({ address: UNIQUE_ADDRESSE }); // Fix here: Use 'address' instead of 'UNIQUE_ADDRESSE'
+      await Coins.create({ address: UNIQUE_ADDRESSE });
       console.log(`Coin address ${UNIQUE_ADDRESSE} added to table.`);
     } catch (error) {
       console.error("Error adding coin address to table:", error);
@@ -101,7 +101,7 @@ async function updateAddresses(): Promise<void> {
 
 /** *********************** Adding Symbol *********************** */
 
-async function fetchSymbolFromChain(coinAddress: string): Promise<string> {
+export async function fetchSymbolFromChain(coinAddress: string): Promise<string> {
   if (coinAddress === ADDRESS_ETH) return "ETH";
   if (coinAddress === ADDRESS_MKR) return "MKR";
   if (coinAddress === ADDRESS_REUSD) return "REUSD";
@@ -140,7 +140,7 @@ async function updateSymbols(): Promise<void> {
 
 /** *********************** Adding Decimals *********************** */
 
-async function fetchDecimalsFromChain(coinAddress: string): Promise<number> {
+export async function fetchDecimalsFromChain(coinAddress: string): Promise<number> {
   if (coinAddress === ADDRESS_ETH) return 18;
   const CONTRACT = new WEB3.eth.Contract(ABI_DECIMALS, coinAddress);
   return CONTRACT.methods.decimals().call();

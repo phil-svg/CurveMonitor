@@ -3,7 +3,7 @@ import { web3Call } from "../../web3Calls/generic.js";
 import { findCoinAddressById, findCoinDecimalsById, findCoinSymbolById, getLpTokenIdByPoolId } from "../readFunctions/Coins.js";
 import { getCoinPositionInPoolByCoinId } from "../readFunctions/Pools.js";
 import { getEventById, getReturnValuesByEventId } from "../readFunctions/RawLogs.js";
-import { findMatchingTokenTransferAmout, requiresDepositParam } from "./SandwichUtils.js";
+import { findMatchingTokenTransferAmout, requiresDepositParam } from "./Sandwich/SandwichUtils.js";
 export async function calculateLossForSwap(parsedTx) {
     if (!parsedTx.event_id)
         return null;

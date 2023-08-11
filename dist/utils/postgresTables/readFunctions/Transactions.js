@@ -81,4 +81,24 @@ export async function getTxHashByTxId(tx_id) {
         return null;
     }
 }
+export async function getTxIdByTxHash(tx_hash) {
+    try {
+        const transaction = await Transactions.findOne({
+            where: {
+                tx_hash: tx_hash,
+            },
+        });
+        if (transaction) {
+            return transaction.tx_id;
+        }
+        else {
+            console.log(`Transaction with tx_hash ${tx_hash} not found.`);
+            return null;
+        }
+    }
+    catch (error) {
+        console.error(`Error while fetching transaction with tx_hash ${tx_hash}: ${error}`);
+        return null;
+    }
+}
 //# sourceMappingURL=Transactions.js.map

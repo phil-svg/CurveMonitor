@@ -1,8 +1,8 @@
-import { TransactionData } from "../../../models/Transactions.js";
-import { fetchTransactionsBatch, getTotalTransactionsCount } from "../readFunctions/Transactions.js";
+import { TransactionData } from "../../../../models/Transactions.js";
+import { fetchTransactionsBatch, getTotalTransactionsCount } from "../../readFunctions/Transactions.js";
 import { addAddressesForLabeling, enrichCandidateWithCoinInfo, removeProcessedTransactions } from "./SandwichUtils.js";
 import { screenCandidate } from "./SandwichCandidateScreening.js";
-import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
+import { displayProgressBar, updateConsoleOutput } from "../../../helperFunctions/QualityOfLifeStuff.js";
 
 /**
  * Explanation for the term "Candidate":

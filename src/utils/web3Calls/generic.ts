@@ -3,7 +3,7 @@ import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.
 import { TransactionReceipt } from "web3-core";
 import axios, { AxiosError } from "axios";
 import Bottleneck from "bottleneck";
-import { BlockNumber } from "../Interfaces.js";
+import { BlockNumber, TraceResponse, ITransactionTrace } from "../Interfaces.js";
 import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
 import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
 import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js";
@@ -333,4 +333,61 @@ export async function getTxWithLimiter(txHash: string): Promise<any | null> {
     console.log(`Failed to get transaction by hash ${txHash} after several attempts. Please check your connection and the status of the Ethereum node.`);
     return null;
   });
+}
+
+export async function retryGetTransactionTraceViaAlchemy(txHash: string, maxRetries: number = 5): Promise<any[] | null> {
+  let delay = 2000; // Starting delay of 2 seconds
+
+  for (let i = 0; i < maxRetries; i++) {
+    const transactionTrace = await getTransactionTraceViaAlchemy(txHash);
+    if (transactionTrace) {
+      return transactionTrace;
+    }
+
+    // Wait for delay before retrying
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    delay *= 2; // Double the delay for the next retry
+  }
+
+  // If we've retried the specified number of times and still have no trace, return null.
+  return null;
+}
+
+export async function getTransactionTraceViaAlchemy(txHash: string, attempt = 0): Promise<ITransactionTrace[] | null> {
+  const API_KEY = process.env.ALCHEMY;
+  const url = `https://eth-mainnet.g.alchemy.com/v2/${API_KEY}`;
+
+  const maxAttempts = 3;
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        method: "trace_transaction",
+        params: [txHash],
+        id: 1,
+        jsonrpc: "2.0",
+      }),
+    });
+
+    if (response.status !== 200) {
+      return null; // request failed
+    }
+
+    const data = (await response.json()) as TraceResponse;
+    return data.result;
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === "ECONNRESET" && attempt < maxAttempts) {
+      console.log(`Retry attempt ${attempt + 1} for ${txHash}`);
+      // Wait for a second before retrying
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return getTransactionTraceViaAlchemy(txHash, attempt + 1);
+    } else {
+      throw error;
+    }
+  }
 }

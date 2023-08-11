@@ -1,9 +1,9 @@
-import { ExtendedTransactionData, SandwichLoss } from "../../Interfaces.js";
-import { getContractByPoolID } from "../../helperFunctions/Web3.js";
-import { web3Call } from "../../web3Calls/generic.js";
-import { findCoinAddressById, findCoinDecimalsById, findCoinSymbolById, getLpTokenIdByPoolId } from "../readFunctions/Coins.js";
-import { getCoinPositionInPoolByCoinId, getVersionBy } from "../readFunctions/Pools.js";
-import { getEventById, getReturnValuesByEventId } from "../readFunctions/RawLogs.js";
+import { ExtendedTransactionData, SandwichLoss } from "../../../Interfaces.js";
+import { getContractByPoolID } from "../../../helperFunctions/Web3.js";
+import { web3Call } from "../../../web3Calls/generic.js";
+import { findCoinAddressById, findCoinDecimalsById, findCoinSymbolById, getLpTokenIdByPoolId } from "../../readFunctions/Coins.js";
+import { getCoinPositionInPoolByCoinId, getVersionBy } from "../../readFunctions/Pools.js";
+import { getEventById, getReturnValuesByEventId } from "../../readFunctions/RawLogs.js";
 import { findMatchingTokenTransferAmout, requiresDepositParam } from "./SandwichUtils.js";
 
 export async function calculateLossForSwap(parsedTx: ExtendedTransactionData): Promise<SandwichLoss | null> {

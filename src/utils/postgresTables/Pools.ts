@@ -333,7 +333,7 @@ async function updateNCoins(): Promise<void> {
 
 /** *********************** Adding Inception Block *********************** */
 
-async function getInceptionBlock(highestBlock: number, poolAddress: string): Promise<number | null> {
+export async function getInceptionBlock(highestBlock: number, poolAddress: string): Promise<number | null> {
   let lowestBlock = 0;
 
   while (lowestBlock <= highestBlock) {

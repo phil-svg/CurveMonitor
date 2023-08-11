@@ -1,16 +1,18 @@
 import { TransactionDetails } from "../../models/TransactionDetails.js";
 import { eventFlags } from "../api/utils/EventFlags.js";
-import { getCurrentTimeString } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
+import { fetchContractAgeInRealtime } from "../postgresTables/ContractCreations.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
+import { saveTransactionTrace } from "../postgresTables/TransactionTraces.js";
 import { solveSingleTdId } from "../postgresTables/TransactionsDetails.js";
-import { findCandidatesInBatch } from "../postgresTables/mevDetection/SandwichDetection.js";
-import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/SandwichUtils.js";
+import { findCandidatesInBatch } from "../postgresTables/mevDetection/Sandwich/SandwichDetection.js";
+import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/Sandwich/SandwichUtils.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
 import { getCoinsInBatchesByPools, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
 import { fetchEventsForBlockNumberRange } from "../postgresTables/readFunctions/RawLogs.js";
 import { fetchTransactionsForBlock } from "../postgresTables/readFunctions/Transactions.js";
 import { sortAndProcess } from "../postgresTables/txParsing/ParseTx.js";
+import { retryGetTransactionTraceViaAlchemy } from "../web3Calls/generic.js";
 import eventEmitter from "./EventEmitter.js";
 // when histo-parsing is finished, subscribe to new events.
 export async function preparingLiveModeForRawEvents() {
@@ -49,9 +51,6 @@ async function processBufferedEvents() {
     const validPoolIds = poolIds.filter((id) => id !== null);
     const POOL_COINS = await getCoinsInBatchesByPools(validPoolIds);
     const EVENTS = await fetchEventsForBlockNumberRange(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
-    const timeStr = getCurrentTimeString();
-    // console.log(`\n${timeStr} New Event(s) picked up`);
-    // console.dir(EVENTS, { depth: null, colors: true });
     // parsing and saving the tx
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
     eventBuffer = [];
@@ -65,6 +64,7 @@ async function processBufferedEvents() {
         const validCalledContractAddresses = calledContractAddresses.filter((address) => address !== null);
         // Save to the database + Emit Event
         for (const data of validCalledContractAddresses) {
+            await fetchContractAgeInRealtime(data.hash, data.to);
             const existingTransaction = await TransactionDetails.findOne({ where: { txId: data.txId } });
             if (!existingTransaction) {
                 await TransactionDetails.create(data);
@@ -80,5 +80,10 @@ async function processBufferedEvents() {
     // live-sandwich-detection
     await findCandidatesInBatch(parsedTx);
     await addAddressesForLabelingForBlock(eventBlockNumbers[0]);
+    // fetching and saving of the transaction-trace
+    for (const tx of parsedTx) {
+        const transactionTrace = await retryGetTransactionTraceViaAlchemy(tx.tx_hash);
+        await saveTransactionTrace(tx.tx_hash, transactionTrace);
+    }
 }
 //# sourceMappingURL=RawTxLogsLive.js.map
