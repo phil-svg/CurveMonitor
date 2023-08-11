@@ -4,6 +4,7 @@ import { startMainEndpoint } from "./handlers/main/Index.js";
 const port = 443;
 
 export const startAPI = (): void => {
+  console.log(`API booting..`);
   const io = new Server(port, {
     cors: {
       origin: "*",
