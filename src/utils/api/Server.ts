@@ -11,6 +11,10 @@ export const startAPI = (): void => {
     },
   });
 
+  io.on("error", (error) => {
+    console.error(`Error at the server level: ${error}`);
+  });
+
   startMainEndpoint(io);
   console.log(`Server started on port ${port}`);
 };
