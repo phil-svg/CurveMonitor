@@ -14,9 +14,6 @@ import { updateTransactionsDetails } from "./utils/postgresTables/TransactionsDe
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 import { eventFlags } from "./utils/api/utils/EventFlags.js";
 import { updateSandwichDetection } from "./utils/postgresTables/mevDetection/Sandwich/SandwichDetection.js";
-import { updateTxTraces } from "./utils/postgresTables/TransactionTraces.js";
-import { updateReceipts } from "./utils/postgresTables/Receipts.js";
-import { updateContractCreations } from "./utils/postgresTables/ContractCreations.js";
 export async function initDatabase() {
     try {
         await db.sync();
@@ -57,7 +54,7 @@ async function main() {
     // process.exit();
 }
 await main();
-await updateContractCreations();
-await updateReceipts();
-await updateTxTraces();
+// await updateContractCreations();
+// await updateReceipts();
+// await updateTxTraces();
 //# sourceMappingURL=App.js.map

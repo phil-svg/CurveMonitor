@@ -75,6 +75,6 @@ async function main() {
 
 await main();
 
-await updateContractCreations();
-await updateReceipts();
-await updateTxTraces();
+// await updateContractCreations();
+// await updateReceipts();
+// await updateTxTraces();

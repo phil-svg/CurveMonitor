@@ -17,12 +17,12 @@ fi
 # Check if the postgres container already exists
 existing_postgres_container=$(docker ps -a -q -f name=some-postgres)
 if [ -z "$existing_postgres_container" ]; then
-    # Run the postgres container only if it doesn't exist, with a volume attached
+    # If the container doesn't exist, run a new postgres container with a volume attached
     docker run -d --restart on-failure --network some-network --name some-postgres \
         -v 22b2c8f92e81601cd70a2610c88134e95b260c6506c445d1c94a17ebc9e555a0:/var/lib/postgresql/data \
         postgres:latest
 else
-    # Otherwise, just start the existing postgres container
+    # If the container exists, ensure it's running. This will start it if it's stopped for any reason.
     docker start some-postgres
 fi
 
