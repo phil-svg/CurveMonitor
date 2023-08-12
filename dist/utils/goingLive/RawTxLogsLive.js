@@ -68,7 +68,7 @@ async function processBufferedEvents() {
                 await fetchContractAgeInRealtime(data.hash, data.to);
                 const existingTransaction = await TransactionDetails.findOne({ where: { txId: data.txId } });
                 if (!existingTransaction) {
-                    await TransactionDetails.create(data);
+                    await TransactionDetails.upsert(data);
                     if (eventFlags.canEmitGeneralTx) {
                         eventEmitter.emit("New Transaction for General-Transaction-Livestream", data.txId);
                     }

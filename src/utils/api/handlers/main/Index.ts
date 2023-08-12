@@ -10,7 +10,6 @@ import { handleGeneralTxLivestream } from "./GeneralTxLivestream.js";
 import { handlePoolTxLivestream } from "./TxTablePoolSpecific.js";
 
 export function startMainEndpoint(io: Server): void {
-  console.log(`main channel booting..`);
   const mainRoom = io.of("/main");
 
   mainRoom.on("connection", (socket: Socket) => {
