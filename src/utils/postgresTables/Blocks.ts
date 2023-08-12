@@ -21,12 +21,17 @@ export async function writeBlocks(blocks: { block_number: number; timestamp: num
 }
 
 async function main() {
+  console.log(`fetching stored blocknumbers for BlockTimestamps`);
   const storedBlockNumbers = await fetchBlockNumbers();
+  console.log(`Found ${storedBlockNumbers.length} stored Blocks`);
 
+  console.log(`fetching allBlockNumbers for BlockTimestamps`);
   const allBlockNumbers = await fetchAllDistinctBlockNumbers();
+  console.log(`done collecting allBlockNumbers for BlockTimestamps`);
   const BLOCK_NUMBERS = allBlockNumbers.filter((blockNumber) => !storedBlockNumbers.includes(blockNumber));
 
   // Fetch the block timestamps from The Graph
+  console.log(`Fetching blockTimestamps from the Graph`);
   const blocks = await getBlockTimestamps(BLOCK_NUMBERS);
 
   // Prepare the data for bulk insertion

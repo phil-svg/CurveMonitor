@@ -37,8 +37,6 @@ await initDatabase();
 startAPI();
 // await startTestClient();
 
-await updateBlockTimestamps();
-
 async function main() {
   await loadAddressProvider();
   await updatePools();
