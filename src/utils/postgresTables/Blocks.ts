@@ -15,7 +15,8 @@ export async function writeBlock(block_number: number, timestamp: number): Promi
 }
 
 export async function writeBlocks(blocks: { block_number: number; timestamp: number }[]): Promise<void> {
-  await Blocks.bulkCreate(blocks, {
+  const uniqueBlocks = Array.from(new Map(blocks.map((item) => [item["block_number"], item])).values());
+  await Blocks.bulkCreate(uniqueBlocks, {
     updateOnDuplicate: ["timestamp"],
   });
 }
@@ -28,7 +29,8 @@ async function main() {
   console.log(`fetching allBlockNumbers for BlockTimestamps`);
   const allBlockNumbers = await fetchAllDistinctBlockNumbers();
   console.log(`done collecting allBlockNumbers for BlockTimestamps`);
-  const BLOCK_NUMBERS = allBlockNumbers.filter((blockNumber) => !storedBlockNumbers.includes(blockNumber));
+  const storedBlockNumbersSet = new Set(storedBlockNumbers);
+  const BLOCK_NUMBERS = allBlockNumbers.filter((blockNumber) => !storedBlockNumbersSet.has(blockNumber));
 
   // Fetch the block timestamps from The Graph
   console.log(`Fetching blockTimestamps from the Graph`);
