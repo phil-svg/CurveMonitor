@@ -64,18 +64,24 @@ async function processBufferedEvents() {
         const validCalledContractAddresses = calledContractAddresses.filter((address) => address !== null);
         // Save to the database + Emit Event
         for (const data of validCalledContractAddresses) {
-            await fetchContractAgeInRealtime(data.hash, data.to);
-            const existingTransaction = await TransactionDetails.findOne({ where: { txId: data.txId } });
-            if (!existingTransaction) {
-                await TransactionDetails.create(data);
-                if (eventFlags.canEmitGeneralTx) {
-                    eventEmitter.emit("New Transaction for General-Transaction-Livestream", data.txId);
+            try {
+                await fetchContractAgeInRealtime(data.hash, data.to);
+                const existingTransaction = await TransactionDetails.findOne({ where: { txId: data.txId } });
+                if (!existingTransaction) {
+                    await TransactionDetails.create(data);
+                    if (eventFlags.canEmitGeneralTx) {
+                        eventEmitter.emit("New Transaction for General-Transaction-Livestream", data.txId);
+                    }
                 }
+            }
+            catch (err) {
+                console.log(`Failed to solve called contract in live-mode for txId: ${data.txId}`, err);
+                console.log(`Data causing error:`, JSON.stringify(data, null, 2));
             }
         }
     }
     catch (err) {
-        console.log(`Failed to solve called contract in live-mode ${err}`);
+        console.log(`Err in live-mode ${err}`);
     }
     // live-sandwich-detection
     await findCandidatesInBatch(parsedTx);

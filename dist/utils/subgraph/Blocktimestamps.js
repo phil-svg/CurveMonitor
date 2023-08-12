@@ -2,9 +2,16 @@ import axios from "axios";
 import { default as PQueue } from "p-queue";
 // Function to perform the GraphQL query
 async function fetchGraphQLData(query) {
-    const url = "https://api.thegraph.com/subgraphs/name/rebase-agency/ethereum-blocks"; // Replace with the correct subgraph URL
-    const response = await axios.post(url, { query });
-    return response.data;
+    const url = "https://api.thegraph.com/subgraphs/name/rebase-agency/ethereum-blocks";
+    try {
+        const response = await axios.post(url, { query });
+        return response.data;
+    }
+    catch (error) {
+        if (error instanceof Error)
+            console.log("Error message:", error.message);
+        throw error;
+    }
 }
 // Function to get the result using the specified query
 export async function getBlockTimestamps(blockNumbers) {
@@ -26,6 +33,7 @@ export async function getBlockTimestamps(blockNumbers) {
         queue.add(async () => {
             const result = await fetchGraphQLData(query);
             blocks = blocks.concat(result.data.blocks);
+            console.log(`Processed batch ${i + 1}/${Math.ceil(blockNumbers.length / BATCH_SIZE)} for BlockTimestamps`);
         });
     }
     await queue.onIdle();
