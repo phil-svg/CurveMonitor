@@ -68,9 +68,13 @@ async function main() {
 
   // todo
 
-  console.log(`[✓] Everything finished syncing successfully.`);
+  console.log(`\n[✓] Everything finished syncing successfully.`);
 
   // process.exit();
 }
 
 await main();
+
+await updateContractCreations();
+await updateReceipts();
+await updateTxTraces();
