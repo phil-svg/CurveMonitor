@@ -19,7 +19,6 @@ import { eventFlags } from "./utils/api/utils/EventFlags.js";
 import { updateSandwichDetection } from "./utils/postgresTables/mevDetection/Sandwich/SandwichDetection.js";
 import { updateAtomicArbDetection } from "./utils/postgresTables/mevDetection/Atomic/atomicArb.js";
 import { updateTxTraces } from "./utils/postgresTables/TransactionTraces.js";
-import { updateConsoleOutput } from "./utils/helperFunctions/QualityOfLifeStuff.js";
 import { updateReceipts } from "./utils/postgresTables/Receipts.js";
 import { updateContractCreations } from "./utils/postgresTables/ContractCreations.js";
 
@@ -57,8 +56,8 @@ async function main() {
   eventFlags.canEmitSandwich = true;
   eventFlags.canEmitGeneralTx = true;
 
-  await updateReceipts();
-  await updateTxTraces();
+  // await updateReceipts();
+  // await updateTxTraces();
   await updateAddressCounts();
 
   // await updateTokenDollarValues(); // muted until useful
