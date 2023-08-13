@@ -7,6 +7,7 @@ import { updatePoolAbis } from "./utils/postgresTables/Abi.js";
 import { updateBlockTimestamps } from "./utils/postgresTables/Blocks.js";
 import { updateRawLogs } from "./utils/postgresTables/RawLogs.js";
 import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
+import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
 import { startAPI } from "./utils/api/Server.js";
@@ -14,6 +15,10 @@ import { updateTransactionsDetails } from "./utils/postgresTables/TransactionsDe
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 import { eventFlags } from "./utils/api/utils/EventFlags.js";
 import { updateSandwichDetection } from "./utils/postgresTables/mevDetection/Sandwich/SandwichDetection.js";
+import { updateAtomicArbDetection } from "./utils/postgresTables/mevDetection/Atomic/atomicArb.js";
+import { updateTxTraces } from "./utils/postgresTables/TransactionTraces.js";
+import { updateReceipts } from "./utils/postgresTables/Receipts.js";
+import { updateContractCreations } from "./utils/postgresTables/ContractCreations.js";
 export async function initDatabase() {
     try {
         await db.sync();
@@ -37,16 +42,16 @@ async function main() {
     await preparingLiveModeForRawEvents();
     await updateRawLogs();
     await updateBlockTimestamps();
-    // await updateContractCreations();
+    await updateContractCreations();
     await parseEvents();
-    // await updateReceipts();
+    await updateReceipts();
     await updateTransactionsDetails();
-    // await updateTxTraces();
+    await updateTxTraces();
     await updateAddressCounts();
     // await updateTokenDollarValues(); // muted until useful
     await updateSandwichDetection();
-    // await updateAtomicArbDetection();
-    // await updateLabels();
+    await updateAtomicArbDetection();
+    await updateLabels();
     eventFlags.canEmitSandwich = true;
     eventFlags.canEmitGeneralTx = true;
     // todo
@@ -54,7 +59,4 @@ async function main() {
     // process.exit();
 }
 await main();
-// await updateContractCreations();
-// await updateReceipts();
-// await updateTxTraces();
 //# sourceMappingURL=App.js.map

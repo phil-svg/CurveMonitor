@@ -50,18 +50,18 @@ async function main() {
   await preparingLiveModeForRawEvents();
   await updateRawLogs();
   await updateBlockTimestamps();
-  // await updateContractCreations();
+  await updateContractCreations();
   await parseEvents();
-  // await updateReceipts();
+  await updateReceipts();
   await updateTransactionsDetails();
-  // await updateTxTraces();
+  await updateTxTraces();
   await updateAddressCounts();
 
   // await updateTokenDollarValues(); // muted until useful
 
   await updateSandwichDetection();
-  // await updateAtomicArbDetection();
-  // await updateLabels();
+  await updateAtomicArbDetection();
+  await updateLabels();
 
   eventFlags.canEmitSandwich = true;
   eventFlags.canEmitGeneralTx = true;
@@ -74,7 +74,3 @@ async function main() {
 }
 
 await main();
-
-// await updateContractCreations();
-// await updateReceipts();
-// await updateTxTraces();
