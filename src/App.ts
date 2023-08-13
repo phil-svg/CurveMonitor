@@ -52,8 +52,12 @@ async function main() {
   await updateBlockTimestamps();
   await updateContractCreations();
   await parseEvents();
-  await updateReceipts();
   await updateTransactionsDetails();
+
+  eventFlags.canEmitSandwich = true;
+  eventFlags.canEmitGeneralTx = true;
+
+  await updateReceipts();
   await updateTxTraces();
   await updateAddressCounts();
 
@@ -62,9 +66,6 @@ async function main() {
   await updateSandwichDetection();
   await updateAtomicArbDetection();
   await updateLabels();
-
-  eventFlags.canEmitSandwich = true;
-  eventFlags.canEmitGeneralTx = true;
 
   // todo
 
