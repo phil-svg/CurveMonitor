@@ -56,8 +56,8 @@ async function main() {
   eventFlags.canEmitSandwich = true;
   eventFlags.canEmitGeneralTx = true;
 
-  // await updateReceipts();
-  // await updateTxTraces();
+  await updateReceipts();
+  await updateTxTraces();
   await updateAddressCounts();
 
   // await updateTokenDollarValues(); // muted until useful
