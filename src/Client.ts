@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
 import { SandwichDetail } from "./utils/postgresTables/readFunctions/SandwichDetailEnrichments.js";
-import { TransactionDetail } from "./utils/postgresTables/readFunctions/TxDetailEnrichment.js";
+import { EnrichedTransactionDetail, TransactionDetail } from "./utils/Interfaces.js";
 
 // Replace with "wss://api.curvemonitor.com" for production
 // const url = "http://localhost:443";
@@ -332,14 +332,6 @@ export function startNewGeneralTxClient(socket: Socket) {
   socket.emit("connectToGeneralTxLivestream");
 
   handleErrors(socket, "/main");
-}
-
-export interface EnrichedTransactionDetail extends TransactionDetail {
-  poolAddress: string;
-  poolName: string;
-  calledContractLabel: string;
-  from: string;
-  calledContractInceptionTimestamp: number;
 }
 
 // returns a list/table, of swaps/deposits/withdrawals in a given pool, for a given time period.

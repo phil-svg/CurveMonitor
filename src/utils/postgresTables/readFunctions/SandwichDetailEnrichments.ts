@@ -1,9 +1,10 @@
 import { Sandwiches } from "../../../models/Sandwiches.js";
+import { TransactionDetail } from "../../Interfaces.js";
 import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
 import { getLabelNameFromAddress } from "./Labels.js";
 import { getAddressById } from "./Pools.js";
 import { getLossInUsdForSandwich } from "./Sandwiches.js";
-import { TransactionDetail, txDetailEnrichment } from "./TxDetailEnrichment.js";
+import { txDetailEnrichment } from "./TxDetailEnrichment.js";
 
 function shortenAddress(address: string): string {
   return address.slice(0, 8) + ".." + address.slice(-6);

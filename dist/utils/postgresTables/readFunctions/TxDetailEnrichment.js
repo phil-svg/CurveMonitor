@@ -2,11 +2,17 @@ import { TransactionCoins } from "../../../models/TransactionCoins.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { Coins } from "../../../models/Coins.js";
 import { TransactionDetails } from "../../../models/TransactionDetails.js";
-import { getAddressById } from "./Pools.js";
+import { getAddressById, getAllPoolAddresses } from "./Pools.js";
 import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
 import { getLabelNameFromAddress } from "./Labels.js";
 import { getFromAddress } from "./TransactionDetails.js";
 import { getContractInceptionTimestamp } from "./Contracts.js";
+export async function isCalledContractFromCurve_(detailedTransaction) {
+    // Fetch all pool addresses.
+    const allPoolAddresses = await getAllPoolAddresses();
+    // Check if the called_contract_by_user address exists in allPoolAddresses (case-insensitive).
+    return allPoolAddresses.some((address) => address.toLowerCase() === detailedTransaction.called_contract_by_user.toLowerCase());
+}
 export async function txDetailEnrichment(txId) {
     const transaction = await Transactions.findOne({
         where: { tx_id: txId },
@@ -56,11 +62,12 @@ export async function enrichTransactionDetail(txId) {
         let poolName = await getModifiedPoolName(poolAddress);
         let label = await getLabelNameFromAddress(detailedTransaction.called_contract_by_user);
         let calledContractInceptionTimestamp = await getContractInceptionTimestamp(detailedTransaction.called_contract_by_user);
+        let isCalledContractFromCurve = await isCalledContractFromCurve_(detailedTransaction);
         if (!label || label.startsWith("Contract Address")) {
             label = detailedTransaction.called_contract_by_user;
         }
         let from = await getFromAddress(txId);
-        const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { poolAddress: poolAddress, poolName: poolName, calledContractLabel: label, from: from, calledContractInceptionTimestamp: calledContractInceptionTimestamp });
+        const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { poolAddress: poolAddress, poolName: poolName, calledContractLabel: label, from: from, calledContractInceptionTimestamp: calledContractInceptionTimestamp, isCalledContractFromCurve: isCalledContractFromCurve });
         return enrichedTransaction;
     }
     else {

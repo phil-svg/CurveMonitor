@@ -2,7 +2,7 @@ import { Op } from "sequelize";
 import { Transactions } from "../../../models/Transactions.js";
 import { getTimeframeTimestamp } from "../utils/Timeframes.js";
 import { chunkedAsync } from "../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
-import { txDetailEnrichment } from "../../postgresTables/readFunctions/TxDetailEnrichment.js";
+import { isCalledContractFromCurve_, txDetailEnrichment } from "../../postgresTables/readFunctions/TxDetailEnrichment.js";
 import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
 import { getFromAddress } from "../../postgresTables/readFunctions/TransactionDetails.js";
 import { getContractInceptionTimestamp } from "../../postgresTables/readFunctions/Contracts.js";
@@ -47,7 +47,8 @@ export async function TransactionDetailEnrichment(txId, poolAddress, poolName) {
     }
     let from = await getFromAddress(txId);
     let calledContractInceptionTimestamp = await getContractInceptionTimestamp(detailedTransaction.called_contract_by_user);
-    const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { calledContractLabel: label, poolAddress: poolAddress, poolName: poolName, from: from, calledContractInceptionTimestamp: calledContractInceptionTimestamp });
+    let isCalledContractFromCurve = await isCalledContractFromCurve_(detailedTransaction);
+    const enrichedTransaction = Object.assign(Object.assign({}, detailedTransaction), { calledContractLabel: label, poolAddress: poolAddress, poolName: poolName, from: from, calledContractInceptionTimestamp: calledContractInceptionTimestamp, isCalledContractFromCurve: isCalledContractFromCurve });
     return enrichedTransaction;
 }
 //# sourceMappingURL=query_transactions.js.map

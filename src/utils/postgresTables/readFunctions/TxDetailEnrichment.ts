@@ -1,34 +1,20 @@
 import { TransactionCoins } from "../../../models/TransactionCoins.js";
-import { TransactionType, Transactions } from "../../../models/Transactions.js";
+import { Transactions } from "../../../models/Transactions.js";
 import { Coins } from "../../../models/Coins.js";
 import { TransactionDetails } from "../../../models/TransactionDetails.js";
-import { EnrichedTransactionDetail } from "../../../Client.js";
-import { getAddressById } from "./Pools.js";
+import { getAddressById, getAllPoolAddresses } from "./Pools.js";
 import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
 import { getLabelNameFromAddress } from "./Labels.js";
 import { getFromAddress } from "./TransactionDetails.js";
 import { getContractInceptionTimestamp } from "./Contracts.js";
+import { CoinDetail, EnrichedTransactionDetail, TransactionDetail } from "../../Interfaces.js";
 
-export interface TransactionDetail {
-  tx_id: number;
-  pool_id: number;
-  event_id?: number;
-  tx_hash: string;
-  block_number: number;
-  block_unixtime: number;
-  transaction_type: TransactionType;
-  called_contract_by_user: string;
-  trader: string;
-  tx_position: number;
-  coins_leaving_wallet: CoinDetail[];
-  coins_entering_wallet: CoinDetail[];
-}
+export async function isCalledContractFromCurve_(detailedTransaction: TransactionDetail): Promise<boolean> {
+  // Fetch all pool addresses.
+  const allPoolAddresses: string[] = await getAllPoolAddresses();
 
-export interface CoinDetail {
-  coin_id: number;
-  amount: number;
-  name: string;
-  address: string;
+  // Check if the called_contract_by_user address exists in allPoolAddresses (case-insensitive).
+  return allPoolAddresses.some((address) => address.toLowerCase() === detailedTransaction.called_contract_by_user.toLowerCase());
 }
 
 export async function txDetailEnrichment(txId: number): Promise<TransactionDetail | null> {
@@ -86,6 +72,7 @@ export async function enrichTransactionDetail(txId: number): Promise<EnrichedTra
     let poolName = await getModifiedPoolName(poolAddress!);
     let label = await getLabelNameFromAddress(detailedTransaction.called_contract_by_user);
     let calledContractInceptionTimestamp = await getContractInceptionTimestamp(detailedTransaction.called_contract_by_user);
+    let isCalledContractFromCurve = await isCalledContractFromCurve_(detailedTransaction);
 
     if (!label || label.startsWith("Contract Address")) {
       label = detailedTransaction.called_contract_by_user;
@@ -100,6 +87,7 @@ export async function enrichTransactionDetail(txId: number): Promise<EnrichedTra
       calledContractLabel: label,
       from: from!,
       calledContractInceptionTimestamp: calledContractInceptionTimestamp!,
+      isCalledContractFromCurve: isCalledContractFromCurve,
     };
 
     return enrichedTransaction;
