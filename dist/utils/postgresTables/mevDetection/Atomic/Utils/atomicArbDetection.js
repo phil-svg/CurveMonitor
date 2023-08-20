@@ -1,7 +1,7 @@
 import { getGasUsedFromReceipt } from "../../../readFunctions/Receipts.js";
 import { extractGasPrice, extractTransactionAddresses, getTransactionDetailsByTxHash } from "../../../readFunctions/TransactionDetails.js";
 import { getTransactionTraceFromDb } from "../../../readFunctions/TransactionTrace.js";
-import { ETH_ADDRESS, WETH_ADDRESS, categorizeTransfers, getTokenTransfersFromTransactionTrace, makeTransfersReadable, } from "./tokenMovementSolver.js";
+import { ETH_ADDRESS, WETH_ADDRESS, getCategorizedTransfersFromTxTrace, } from "./tokenMovementSolver.js";
 const mergeBalanceChanges = (balanceChange1, balanceChange2) => {
     const merged = Object.assign({}, balanceChange1);
     for (const address in balanceChange2) {
@@ -177,11 +177,7 @@ export async function solveAtomicArbForTxHash(txHash) {
         console.log(`no transaction-trace found for ${txHash}`);
         return;
     }
-    const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
-    // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
-    const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
-    // console.log("readableTransfers", readableTransfers);
-    const transfersCategorized = categorizeTransfers(readableTransfers);
+    const transfersCategorized = await getCategorizedTransfersFromTxTrace(transactionTraces);
     // console.dir(transfersCategorized, { depth: null, colors: true });
     const transactionDetails = await getTransactionDetailsByTxHash(txHash);
     const { from: fromAddress, to: calledContractAddress } = extractTransactionAddresses(transactionDetails);

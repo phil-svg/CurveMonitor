@@ -114,3 +114,12 @@ export async function getTxIdByTxHash(tx_hash: string): Promise<number | null> {
     return null;
   }
 }
+
+export async function getAllUniqueTransactionHashes(): Promise<string[]> {
+  const transactions = await Transactions.findAll({
+    attributes: ["tx_hash"],
+    group: ["tx_hash"],
+  });
+
+  return transactions.map((transaction) => transaction.tx_hash);
+}

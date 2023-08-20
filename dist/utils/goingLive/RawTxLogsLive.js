@@ -5,8 +5,8 @@ import { fetchContractAgeInRealtime } from "../postgresTables/ContractCreations.
 import { storeEvent } from "../postgresTables/RawLogs.js";
 import { saveTransactionTrace } from "../postgresTables/TransactionTraces.js";
 import { solveSingleTdId } from "../postgresTables/TransactionsDetails.js";
-import { findCandidatesInBatch } from "../postgresTables/mevDetection/Sandwich/SandwichDetection.js";
-import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/Sandwich/SandwichUtils.js";
+import { findCandidatesInBatch } from "../postgresTables/mevDetection/sandwich/SandwichDetection.js";
+import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/sandwich/SandwichUtils.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
 import { getCoinsInBatchesByPools, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
 import { fetchEventsForBlockNumberRange } from "../postgresTables/readFunctions/RawLogs.js";

@@ -101,4 +101,11 @@ export async function getTxIdByTxHash(tx_hash) {
         return null;
     }
 }
+export async function getAllUniqueTransactionHashes() {
+    const transactions = await Transactions.findAll({
+        attributes: ["tx_hash"],
+        group: ["tx_hash"],
+    });
+    return transactions.map((transaction) => transaction.tx_hash);
+}
 //# sourceMappingURL=Transactions.js.map

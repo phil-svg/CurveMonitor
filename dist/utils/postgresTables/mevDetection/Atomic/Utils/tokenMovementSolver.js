@@ -442,4 +442,20 @@ export function categorizeTransfers(transfers) {
         remainder,
     };
 }
+export async function getReadableTransfersFromTransactionTrace(transactionTraces) {
+    const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+    // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
+    const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
+    // console.log("readableTransfers", readableTransfers);
+    return readableTransfers;
+}
+export async function getCategorizedTransfersFromTxTrace(transactionTraces) {
+    const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+    // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
+    const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
+    // console.log("readableTransfers", readableTransfers);
+    const transfersCategorized = categorizeTransfers(readableTransfers);
+    // console.dir(transfersCategorized, { depth: null, colors: true });
+    return transfersCategorized;
+}
 //# sourceMappingURL=tokenMovementSolver.js.map

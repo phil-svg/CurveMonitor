@@ -9,6 +9,7 @@ import {
   ReadableTokenTransfer,
   WETH_ADDRESS,
   categorizeTransfers,
+  getCategorizedTransfersFromTxTrace,
   getTokenTransfersFromTransactionTrace,
   makeTransfersReadable,
 } from "./tokenMovementSolver.js";
@@ -234,13 +235,7 @@ export async function solveAtomicArbForTxHash(txHash: string): Promise<void> {
     return;
   }
 
-  const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
-  // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
-
-  const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
-  // console.log("readableTransfers", readableTransfers);
-
-  const transfersCategorized = categorizeTransfers(readableTransfers);
+  const transfersCategorized = await getCategorizedTransfersFromTxTrace(transactionTraces);
   // console.dir(transfersCategorized, { depth: null, colors: true });
 
   const transactionDetails = await getTransactionDetailsByTxHash(txHash);

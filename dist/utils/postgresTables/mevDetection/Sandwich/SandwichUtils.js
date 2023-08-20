@@ -1,11 +1,11 @@
 import { Op } from "sequelize";
 import { TransactionCoins } from "../../../../models/TransactionCoins.js";
 import { findCoinSymbolById } from "../../readFunctions/Coins.js";
-import { calculateLossForDeposit, calculateLossForSwap, calculateLossForWithdraw } from "./VictimLossFromSandwich.js";
 import { getTokenTransferEvents, getTxFromTxId } from "../../../web3Calls/generic.js";
 import { getAbiBy } from "../../Abi.js";
 import { Sandwiches } from "../../../../models/Sandwiches.js";
 import { readSandwichesInBatches, readSandwichesInBatchesForBlock } from "../../readFunctions/Sandwiches.js";
+import { calculateLossForDeposit, calculateLossForSwap, calculateLossForWithdraw } from "./VictimLossFromSandwich.js";
 export async function enrichCandidateWithCoinInfo(candidate) {
     // Extract tx_ids from candidate array
     const txIds = candidate.map((transaction) => transaction.tx_id);

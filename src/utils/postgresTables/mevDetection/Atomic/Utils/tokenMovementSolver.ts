@@ -555,3 +555,26 @@ export function categorizeTransfers(transfers: ReadableTokenTransfer[]): Categor
     remainder,
   };
 }
+
+export async function getReadableTransfersFromTransactionTrace(transactionTraces: ITransactionTrace[]): Promise<ReadableTokenTransfer[]> {
+  const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+  // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
+
+  const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
+  // console.log("readableTransfers", readableTransfers);
+
+  return readableTransfers;
+}
+
+export async function getCategorizedTransfersFromTxTrace(transactionTraces: ITransactionTrace[]): Promise<CategorizedTransfers> {
+  const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+  // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
+
+  const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
+  // console.log("readableTransfers", readableTransfers);
+
+  const transfersCategorized = categorizeTransfers(readableTransfers);
+  // console.dir(transfersCategorized, { depth: null, colors: true });
+
+  return transfersCategorized;
+}

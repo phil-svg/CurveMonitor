@@ -3,11 +3,11 @@ import { TransactionCoins } from "../../../../models/TransactionCoins.js";
 import { TransactionData } from "../../../../models/Transactions.js";
 import { ExtendedTransactionData, SandwichLoss, TransactionCoin, TransactionCoinRecord } from "../../../Interfaces.js";
 import { findCoinSymbolById } from "../../readFunctions/Coins.js";
-import { calculateLossForDeposit, calculateLossForSwap, calculateLossForWithdraw } from "./VictimLossFromSandwich.js";
 import { getTokenTransferEvents, getTxFromTxId } from "../../../web3Calls/generic.js";
 import { getAbiBy } from "../../Abi.js";
 import { LossTransaction, Sandwiches } from "../../../../models/Sandwiches.js";
 import { readSandwichesInBatches, readSandwichesInBatchesForBlock } from "../../readFunctions/Sandwiches.js";
+import { calculateLossForDeposit, calculateLossForSwap, calculateLossForWithdraw } from "./VictimLossFromSandwich.js";
 
 export async function enrichCandidateWithCoinInfo(candidate: TransactionData[]): Promise<ExtendedTransactionData[] | null> {
   // Extract tx_ids from candidate array

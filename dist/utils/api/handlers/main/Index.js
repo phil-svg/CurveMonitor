@@ -7,6 +7,7 @@ import { handleFullSandwichRoom } from "./SandwichTableFull.js";
 import { handlePoolSandwichRoom } from "./SandwichTablePoolSpecfic.js";
 import { handleGeneralTxLivestream } from "./GeneralTxLivestream.js";
 import { handlePoolTxLivestream } from "./TxTablePoolSpecific.js";
+import { handlePoolLabel } from "./PoolLabels.js";
 export function startMainEndpoint(io) {
     const mainRoom = io.of("/main");
     mainRoom.on("connection", (socket) => {
@@ -21,6 +22,7 @@ export function startMainEndpoint(io) {
         handlePoolSandwichRoom(socket);
         handleGeneralTxLivestream(mainRoom, socket);
         handlePoolTxLivestream(socket);
+        handlePoolLabel(socket);
     });
 }
 function handleErrors(socket) {

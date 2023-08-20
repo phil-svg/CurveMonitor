@@ -55,34 +55,34 @@ export async function solveSingleTdId(txId: number): Promise<TransactionDetailsC
 }
 
 export async function updateTransactionsDetails() {
-  try {
-    const existingCalls = await TransactionDetails.findAll({
-      attributes: ["txId"],
-      raw: true,
-    });
+  const existingCalls = await TransactionDetails.findAll({
+    attributes: ["txId"],
+    raw: true,
+  });
 
-    const existingTxIds = existingCalls.map((call) => call.txId);
+  const existingTxIds = existingCalls.map((call) => call.txId);
 
-    const unsolvedTransactions = await Transactions.findAll({
-      where: {
-        tx_id: { [Op.notIn]: existingTxIds },
-      },
-      attributes: ["tx_id"],
-      raw: true,
-    });
+  const unsolvedTransactions = await Transactions.findAll({
+    where: {
+      tx_id: { [Op.notIn]: existingTxIds },
+    },
+    attributes: ["tx_id"],
+    raw: true,
+  });
 
-    const chunkSize = 5;
-    const transactionChunks = _.chunk(unsolvedTransactions, chunkSize);
+  const chunkSize = 5;
+  const transactionChunks = _.chunk(unsolvedTransactions, chunkSize);
 
-    for (const [i, transactionChunk] of transactionChunks.entries()) {
+  for (const [i, transactionChunk] of transactionChunks.entries()) {
+    try {
       const results = await Promise.all(transactionChunk.map((transaction) => solveSingleTdId(transaction.tx_id)));
 
       const validResults = results.filter((result): result is NonNullable<typeof result> => result !== null);
       await TransactionDetails.bulkCreate(validResults);
 
       console.log(`Completed ${i + 1} out of ${transactionChunks.length} chunks for TransactionCalls(${(((i + 1) / transactionChunks.length) * 100).toFixed(2)}%)`);
+    } catch (error) {
+      console.error(`Error in chunk ${i + 1} of updateTransactionsDetails: ${error}`);
     }
-  } catch (error) {
-    console.error(`Error in updateTransactionsDetails: ${error}`);
   }
 }
