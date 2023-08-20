@@ -3,7 +3,7 @@ export const handlePoolLabel = (socket) => {
     socket.on("getPoolLabel", async (poolAddress) => {
         try {
             const poolLabel = await getModifiedPoolName(poolAddress);
-            socket.emit("getPoolLabel", poolLabel);
+            socket.emit("poolLabel", poolLabel);
         }
         catch (error) {
             console.error(error);

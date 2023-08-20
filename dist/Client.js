@@ -294,20 +294,28 @@ export function startPoolSpecificTransactionTable(socket, poolAddress, timeDurat
     });
     handleErrors(socket, "/main");
 }
+export function startPoolLabel(socket, poolAddress) {
+    socket.emit("getPoolLabel", poolAddress);
+    socket.on("poolLabel", (poolLabel) => {
+        console.log(`Do something with ${poolLabel}`);
+    });
+    handleErrors(socket, "/main");
+}
 export async function startTestClient() {
     const mainSocket = io(`${url}/main`);
     console.log(`connecting to ${url}/main`);
     mainSocket.on("connect", () => {
         console.log("connected");
         // startPingClient(mainSocket);
-        // startUserSearchClient(mainSocket, "crvu");
+        startUserSearchClient(mainSocket, "crvu");
         // startAbsoluteLabelsRankingClient(mainSocket);
         // startSandwichLabelOccurrencesClient(mainSocket);
         // startNewSandwichClient(mainSocket);
         // startFullSandwichTableClient(mainSocket, "1 week", 1);
         // startPoolSpecificSandwichTable(mainSocket, "0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B", "1 week", 1);
-        startNewGeneralTxClient(mainSocket);
+        // startNewGeneralTxClient(mainSocket);
         // startPoolSpecificTransactionTable(mainSocket, "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46", "1 week", 2);
+        startPoolLabel(mainSocket, "0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2");
     });
 }
 //# sourceMappingURL=Client.js.map
