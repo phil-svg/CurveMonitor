@@ -63,7 +63,7 @@ async function main() {
   // await updateTokenDollarValues(); // muted until useful
 
   await updateSandwichDetection();
-  await updateAtomicArbDetection();
+  // await updateAtomicArbDetection();
   await updateLabels();
 
   // todo

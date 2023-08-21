@@ -2,7 +2,7 @@ import { getAllPoolAddresses, getIdByAddress } from "./readFunctions/Pools.js";
 import { getContractByAddress } from "../helperFunctions/Web3.js";
 import { getPastEvents } from "../web3Calls/generic.js";
 import { RawTxLogs } from "../../models/RawTxLogs.js";
-import { updateConsoleOutput, displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
+import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { EventObject } from "../Interfaces.js";
 import { getRawLogsFromBlock, getRawLogsToBlock, updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
 import { getCurrentBlockNumberFromLocalDB } from "./CurrentBlock.js";

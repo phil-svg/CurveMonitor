@@ -42,7 +42,9 @@ async function subscribeToAddress(address: string) {
 let eventBuffer: any[] = [];
 
 function bufferEvent(address: string, event: any) {
-  eventBuffer.push({ address, event });
+  if (!eventBuffer.some((e) => e.address === address && JSON.stringify(e.event) === JSON.stringify(event))) {
+    eventBuffer.push({ address, event });
+  }
 }
 
 // when the next block appears, we parse the prev block.
