@@ -39,7 +39,7 @@ async function getCoinAddressFromTxReceipt(event: any, POOL_COINS: string[]): Pr
 }
 
 export async function parseRemoveLiquidityOne(event: any, BLOCK_UNIXTIME: any, POOL_COINS: any): Promise<void> {
-  if (await transactionExists(event.eventId)) return;
+  // if (await transactionExists(event.eventId)) return;
 
   if (!POOL_COINS) return;
 

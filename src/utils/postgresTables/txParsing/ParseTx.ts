@@ -6,7 +6,7 @@ import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.j
 import { parseRemoveLiquidityOne } from "./ParseRemoveLiquidityOne.js";
 import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
-import { displayProgressBar, updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
+import { updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../readFunctions/Blocks.js";
 import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
 import Bottleneck from "bottleneck";

@@ -3,7 +3,7 @@ import { TransactionType } from "../../../models/Transactions.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 
 export async function parseTokenExchange(event: any, BLOCK_UNIXTIME: any, POOL_COINS: any): Promise<void> {
-  if (await transactionExists(event.eventId)) return;
+  // if (await transactionExists(event.eventId)) return;
 
   if (!POOL_COINS) return;
 

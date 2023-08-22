@@ -1,9 +1,8 @@
-import { saveCoins, saveTransaction, transactionExists } from "./ParsingHelper.js";
+import { saveCoins, saveTransaction } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 export async function parseTokenExchange(event, BLOCK_UNIXTIME, POOL_COINS) {
-    if (await transactionExists(event.eventId))
-        return;
+    // if (await transactionExists(event.eventId)) return;
     if (!POOL_COINS)
         return;
     const transactionData = {

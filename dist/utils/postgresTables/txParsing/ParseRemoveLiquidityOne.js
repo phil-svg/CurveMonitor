@@ -1,4 +1,4 @@
-import { saveTransaction, saveCoins, transactionExists } from "./ParsingHelper.js";
+import { saveTransaction, saveCoins } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
 import { getTxReceipt } from "../../web3Calls/generic.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
@@ -33,8 +33,7 @@ async function getCoinAddressFromTxReceipt(event, POOL_COINS) {
     return null;
 }
 export async function parseRemoveLiquidityOne(event, BLOCK_UNIXTIME, POOL_COINS) {
-    if (await transactionExists(event.eventId))
-        return;
+    // if (await transactionExists(event.eventId)) return;
     if (!POOL_COINS)
         return;
     let coinAddress = await retry(async () => {

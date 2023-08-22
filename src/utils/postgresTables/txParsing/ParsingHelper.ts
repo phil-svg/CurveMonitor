@@ -4,7 +4,6 @@ import eventEmitter from "../../goingLive/EventEmitter.js";
 
 export async function saveTransaction(transactionData: TransactionData): Promise<Transactions> {
   try {
-    eventEmitter.emit("new tx for demo room", transactionData);
     const transaction = await Transactions.create(transactionData);
     return transaction;
   } catch (error) {
