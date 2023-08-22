@@ -66,7 +66,7 @@ export async function calculateLossForExchangeUnderlying(parsedTx: ExtendedTrans
   const outCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "out");
   if (!outCoin) return null;
   const roundedAmount = outCoin.amount;
-  if (!roundedAmount) return null;
+  if (!roundedAmount || isNaN(Number(roundedAmount))) return null;
   const coinInDecimals = await findCoinDecimalsById(outCoin.coin_id);
 
   const amountUnhappyUser = Number(inCoin.amount);
@@ -75,8 +75,6 @@ export async function calculateLossForExchangeUnderlying(parsedTx: ExtendedTrans
   const RAW_EVENT_RETURN_VALUES = await getReturnValuesByEventId(parsedTx.event_id!);
 
   if (!POOL_CONTRACT || !RAW_EVENT_RETURN_VALUES) return null;
-
-  console.log("outCoin", outCoin, "coinInDecimals", coinInDecimals);
 
   const { sold_id: FROM, bought_id: TO } = RAW_EVENT_RETURN_VALUES;
   const AMOUNT_IN = BigInt(roundedAmount.split(".")[0] + roundedAmount.split(".")[1].slice(0, coinInDecimals!)).toString();
