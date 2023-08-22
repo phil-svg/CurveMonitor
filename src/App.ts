@@ -54,6 +54,7 @@ async function main() {
   await updateContractCreations();
   await parseEvents();
   await updateTransactionsDetails();
+  await updateSandwichDetection();
 
   eventFlags.canEmitSandwich = true;
   eventFlags.canEmitGeneralTx = true;
@@ -64,7 +65,6 @@ async function main() {
 
   // await updateTokenDollarValues(); // muted until useful
 
-  await updateSandwichDetection();
   // await updateAtomicArbDetection();
   await updateLabels();
 
