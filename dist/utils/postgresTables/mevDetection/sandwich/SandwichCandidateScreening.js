@@ -49,6 +49,30 @@ async function getBotTransactions(candidate) {
             }
         }
     }
+    // sorting out the case in which the same address (bot) backrunned twice! (one time from within the sandwich, one time from external dex)
+    if (potentialBotTx.length > 1) {
+        // Create a map to group the pairs by the frontrun transaction's tx_position
+        const groupedByFrontrun = {};
+        for (const pair of potentialBotTx) {
+            const frontrunTxPosition = pair[0].tx_position;
+            if (!groupedByFrontrun[frontrunTxPosition]) {
+                groupedByFrontrun[frontrunTxPosition] = [];
+            }
+            groupedByFrontrun[frontrunTxPosition].push(pair);
+        }
+        // Refine the pairs by keeping only the one with the smallest backrun tx_position for each group
+        potentialBotTx = [];
+        for (const key in groupedByFrontrun) {
+            const group = groupedByFrontrun[key];
+            if (group.length > 1) {
+                group.sort((a, b) => a[1].tx_position - b[1].tx_position); // Sort by backrun tx_position
+                potentialBotTx.push(group[0]); // Keep the pair with the smallest backrun tx_position
+            }
+            else {
+                potentialBotTx.push(group[0]);
+            }
+        }
+    }
     return potentialBotTx;
 }
 /**
