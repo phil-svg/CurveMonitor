@@ -59,6 +59,8 @@ export async function calculateLossForExchangeUnderlying(parsedTx) {
     if (!outCoin)
         return null;
     const roundedAmount = outCoin.amount;
+    if (!roundedAmount)
+        return null;
     const coinInDecimals = await findCoinDecimalsById(outCoin.coin_id);
     const amountUnhappyUser = Number(inCoin.amount);
     const POOL_CONTRACT = await getContractByPoolID(parsedTx.pool_id);

@@ -66,6 +66,7 @@ export async function calculateLossForExchangeUnderlying(parsedTx: ExtendedTrans
   const outCoin = parsedTx.transactionCoins.find((coin) => coin.direction === "out");
   if (!outCoin) return null;
   const roundedAmount = outCoin.amount;
+  if (!roundedAmount) return null;
   const coinInDecimals = await findCoinDecimalsById(outCoin.coin_id);
 
   const amountUnhappyUser = Number(inCoin.amount);
