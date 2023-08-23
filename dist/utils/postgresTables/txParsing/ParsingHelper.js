@@ -23,7 +23,7 @@ export async function saveCoins(coins) {
                 amount: coin.coinAmount,
                 direction: coin.direction,
             };
-            await TransactionCoins.create(transactionCoinData);
+            await TransactionCoins.upsert(transactionCoinData);
         }
     }
     catch (error) {

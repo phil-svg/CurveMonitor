@@ -33,7 +33,7 @@ export async function saveCoins(coins: { tx_id: number; COIN_ID: number; coinAmo
         amount: coin.coinAmount,
         direction: coin.direction,
       };
-      await TransactionCoins.create(transactionCoinData);
+      await TransactionCoins.upsert(transactionCoinData);
     }
   } catch (error) {
     console.error("Error saving coin data:", error);
