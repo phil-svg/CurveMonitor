@@ -2,7 +2,7 @@ import { Transactions } from "../../../models/Transactions.js";
 import { TransactionCoins } from "../../../models/TransactionCoins.js";
 export async function saveTransaction(transactionData) {
     try {
-        const transaction = await Transactions.create(transactionData);
+        const [transaction, created] = await Transactions.upsert(transactionData);
         return transaction;
     }
     catch (error) {
