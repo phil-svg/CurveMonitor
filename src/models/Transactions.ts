@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany, Index } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany, Index, Unique } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 import { RawTxLogs } from "./RawTxLogs.js";
 import { TransactionCoins } from "./TransactionCoins.js";
@@ -25,6 +25,7 @@ export class Transactions extends Model {
   pool!: Pool;
 
   @AllowNull(true)
+  @Unique
   @ForeignKey(() => RawTxLogs)
   @Column(DataType.INTEGER)
   event_id?: number;

@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany, Index } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany, Index, Unique } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 import { RawTxLogs } from "./RawTxLogs.js";
 import { TransactionCoins } from "./TransactionCoins.js";
@@ -30,6 +30,7 @@ __decorate([
 ], Transactions.prototype, "pool", void 0);
 __decorate([
     AllowNull(true),
+    Unique,
     ForeignKey(() => RawTxLogs),
     Column(DataType.INTEGER)
 ], Transactions.prototype, "event_id", void 0);
