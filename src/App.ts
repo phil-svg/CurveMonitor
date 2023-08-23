@@ -36,8 +36,6 @@ await initDatabase();
 startAPI();
 // await startTestClient();
 
-await main();
-
 async function main() {
   await loadAddressProvider();
   await updatePools();
@@ -74,3 +72,5 @@ async function main() {
 
   // process.exit();
 }
+
+await main();

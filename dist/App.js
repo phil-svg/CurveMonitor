@@ -30,7 +30,6 @@ export async function initDatabase() {
 await initDatabase();
 startAPI();
 // await startTestClient();
-await main();
 async function main() {
     await loadAddressProvider();
     await updatePools();
@@ -58,4 +57,5 @@ async function main() {
     console.log(`\n[✓] Everything finished syncing successfully.`);
     // process.exit();
 }
+await main();
 //# sourceMappingURL=App.js.map

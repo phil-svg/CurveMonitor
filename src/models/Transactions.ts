@@ -1,6 +1,5 @@
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany, Index } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
-import { Coins } from "./Coins.js";
 import { RawTxLogs } from "./RawTxLogs.js";
 import { TransactionCoins } from "./TransactionCoins.js";
 
@@ -10,6 +9,7 @@ export enum TransactionType {
   Remove = "remove",
 }
 
+@Index(["event_id"])
 @Table({ tableName: "transactions" })
 export class Transactions extends Model {
   @AutoIncrement
