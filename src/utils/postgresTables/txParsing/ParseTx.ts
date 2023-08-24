@@ -106,6 +106,7 @@ async function parseEventsMain() {
 
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
     counter += EVENTS.length;
+    await updateEventParsingFromBlock(startBlock);
     // displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
     console.log("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
   }
