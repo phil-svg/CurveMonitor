@@ -1,6 +1,6 @@
 import { saveTransaction, saveCoins } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
-import { getTxReceipt } from "../../web3Calls/generic.js";
+import { getTxReceiptClassic } from "../../web3Calls/generic.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
 import { retry } from "../../helperFunctions/Web3Retry.js";
@@ -18,7 +18,7 @@ const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
  * returns the address of the token.
  */
 async function getCoinAddressFromTxReceipt(event, POOL_COINS) {
-    const RECEIPT = await getTxReceipt(event.transactionHash);
+    const RECEIPT = await getTxReceiptClassic(event.transactionHash);
     if (!RECEIPT)
         return null;
     const TOKEN_TRANSFER_EVENTS = RECEIPT.logs.filter((log) => POOL_COINS.map((addr) => addr.toLowerCase()).includes(log.address.toLowerCase()));

@@ -72,26 +72,11 @@ export async function fetchAllDistinctBlockNumbers() {
 }
 
 export async function fetchEventsForChunkParsing(startBlock: number, endBlock: number): Promise<Partial<RawTxLogs>[]> {
-  // fetching the list of event_ids that are already in the transactions table.
-  const existingEventIds = (
-    await Transactions.findAll({
-      attributes: ["event_id"],
-      where: {
-        event_id: { [Op.not]: null },
-      },
-      raw: true, // This will make sure the output is just an array of objects, making it easier to process.
-    })
-  ).map((t) => t.event_id); // map() will just extract the event_id from each row.
-
-  // fetching the events from RawTxLogs that are NOT in the above list.
   const events = await RawTxLogs.findAll({
     where: {
       block_number: {
         [Op.gte]: startBlock,
         [Op.lte]: endBlock,
-      },
-      eventId: {
-        [Op.notIn]: existingEventIds,
       },
     },
     order: [["block_number", "ASC"]],

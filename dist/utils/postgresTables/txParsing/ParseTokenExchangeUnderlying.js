@@ -1,4 +1,4 @@
-import { saveCoins, saveTransaction, transactionExists } from "./ParsingHelper.js";
+import { saveCoins, saveTransaction } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
 import { getCoinsBy, getIdByAddress, getBasePoolBy } from "../readFunctions/Pools.js";
 import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
@@ -22,8 +22,7 @@ function findNearestCoinMovementAmount(LP_TRANSFER_AMOUNT, COIN_MOVEMENTS_IN_BAS
     return (_a = soldCoinMovements[0]) === null || _a === void 0 ? void 0 : _a.amount;
 }
 export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_COINS) {
-    if (await transactionExists(event.eventId))
-        return;
+    // if (await transactionExists(event.eventId)) return;
     let soldCoinEventID = parseInt(event.returnValues.sold_id);
     let soldCoinAmount = event.returnValues.tokens_sold;
     let boughtCoinEventID = parseInt(event.returnValues.bought_id);

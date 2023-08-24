@@ -28,7 +28,7 @@ function findNearestCoinMovementAmount(LP_TRANSFER_AMOUNT: string, COIN_MOVEMENT
 }
 
 export async function parseTokenExchangeUnderlying(event: any, BLOCK_UNIXTIME: any, POOL_COINS: any): Promise<void> {
-  if (await transactionExists(event.eventId)) return;
+  // if (await transactionExists(event.eventId)) return;
 
   let soldCoinEventID = parseInt(event.returnValues.sold_id);
   let soldCoinAmount = event.returnValues.tokens_sold;

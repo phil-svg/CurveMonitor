@@ -1,5 +1,5 @@
 import { Contract } from "web3-eth-contract";
-import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.js";
+import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { TransactionReceipt } from "web3-core";
 import axios, { AxiosError } from "axios";
 import Bottleneck from "bottleneck";
@@ -9,7 +9,6 @@ import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
 import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js";
 import axiosRetry from "axios-retry";
 
-const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
 
 function isCupsErr(err: Error): boolean {
@@ -213,6 +212,7 @@ export async function getTxReceiptClassic(txHash: string): Promise<TransactionRe
   }
 }
 
+// buggy
 export async function getTxReceipt(txHash: string): Promise<any> {
   const limiter = new Bottleneck({
     maxConcurrent: 100,

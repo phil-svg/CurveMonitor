@@ -8,9 +8,10 @@ import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
 import { updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../readFunctions/Blocks.js";
-import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
+import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
 import Bottleneck from "bottleneck";
 import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from "../../../config/Alchemy.js";
+import { getCurrentBlockNumber } from "../../web3Calls/generic.js";
 import { getTotalTransactionsCount } from "../readFunctions/Transactions.js";
 export async function sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS) {
     const functions = {
@@ -50,7 +51,7 @@ export async function sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS) {
     }
     /** then parses RemoveLiquidityOne, can require web3 calls, therefore, solving uniquely for best speed */
     const limiter = new Bottleneck({
-        maxConcurrent: 10,
+        maxConcurrent: 1,
         minTime: 1000 / MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND,
     });
     // limiter is sensitive, right now stable.
@@ -75,14 +76,19 @@ export async function sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS) {
     }
 }
 async function parseEventsMain() {
-    let eventParsingFromBlock = await getEventParsingFromBlock();
-    let eventParsingToBlock = await getEventParsingToBlock();
-    const BATCH_SIZE = 10000;
+    const BATCH_SIZE = 1000;
     const blockNumbers = await fetchDistinctBlockNumbers();
+    let eventParsingFromBlock = await getEventParsingFromBlock();
     let counter = 0;
     for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
-        const startBlock = blockNumbers[i];
-        const endBlock = blockNumbers[Math.min(i + BATCH_SIZE, blockNumbers.length - 1)];
+        if (eventParsingFromBlock === null)
+            eventParsingFromBlock = blockNumbers[0];
+        let eventParsingToBlock = await getEventParsingToBlock();
+        if (eventParsingToBlock === null)
+            eventParsingToBlock = blockNumbers[Math.max(i, BATCH_SIZE)];
+        let nowBlock = await getCurrentBlockNumber();
+        const startBlock = eventParsingToBlock + 1;
+        const endBlock = Math.min(startBlock + BATCH_SIZE, nowBlock);
         // If we have parsing bounds, and the current batch of blocks is fully within these bounds, skip this batch.
         if (eventParsingFromBlock && eventParsingToBlock && startBlock >= eventParsingFromBlock && endBlock <= eventParsingToBlock)
             continue;
@@ -93,12 +99,10 @@ async function parseEventsMain() {
         // Get pool coins
         const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
         await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
-        counter += BATCH_SIZE;
-        let alreadyParsedAmount = await getTotalTransactionsCount();
-        console.log("Parsing in progress", counter, alreadyParsedAmount);
+        await updateEventParsingToBlock(endBlock);
+        counter += EVENTS.length;
+        console.log("Parsing in progress", nowBlock - endBlock, "blocks left, thats", Number((((nowBlock - endBlock) * 12) / (60 * 60 * 24)).toFixed(2)), "days in blockchain-time,", await getTotalTransactionsCount(), "parsed Tx stored.");
     }
-    await updateEventParsingFromBlock(blockNumbers[0]);
-    await updateEventParsingToBlock(blockNumbers[blockNumbers.length - 1]);
 }
 export async function parseEvents() {
     await parseEventsMain();

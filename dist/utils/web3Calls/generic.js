@@ -1,11 +1,10 @@
-import { getWeb3WsProvider, getWeb3HttpProvider } from "../helperFunctions/Web3.js";
+import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import axios from "axios";
 import Bottleneck from "bottleneck";
 import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
 import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
 import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js";
 import axiosRetry from "axios-retry";
-const WEB3_WS_PROVIDER = getWeb3WsProvider();
 const WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
 function isCupsErr(err) {
     return err.message.includes("compute units per second capacity");
@@ -194,6 +193,7 @@ export async function getTxReceiptClassic(txHash) {
         return null;
     }
 }
+// buggy
 export async function getTxReceipt(txHash) {
     const limiter = new Bottleneck({
         maxConcurrent: 100,
