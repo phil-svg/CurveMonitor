@@ -1,5 +1,5 @@
 import { getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
-import { fetchEventsForBlockNumberRange, fetchDistinctBlockNumbers, countRawTxLogs } from "../readFunctions/RawLogs.js";
+import { fetchEventsForChunkParsing, fetchDistinctBlockNumbers, countRawTxLogs } from "../readFunctions/RawLogs.js";
 import { parseAddLiquidity } from "./ParseAddLiquidity.js";
 import { parseRemoveLiquidity } from "./ParseRemoveLiquidity.js";
 import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.js";
@@ -97,7 +97,8 @@ async function parseEventsMain() {
     // If we have parsing bounds, and the current batch of blocks is fully within these bounds, skip this batch.
     if (eventParsingFromBlock && eventParsingToBlock && startBlock >= eventParsingFromBlock && endBlock <= eventParsingToBlock) continue;
 
-    const EVENTS = await fetchEventsForBlockNumberRange(startBlock, endBlock);
+    const EVENTS = await fetchEventsForChunkParsing(startBlock, endBlock);
+    counter += EVENTS.length;
 
     // Get block timestamps
     const eventBlockNumbers = EVENTS.flatMap((event) => (event.blockNumber !== undefined ? [event.blockNumber] : []));
@@ -107,9 +108,7 @@ async function parseEventsMain() {
     const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
 
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
-    counter += EVENTS.length;
-    await updateEventParsingFromBlock(startBlock);
-    await updateEventParsingToBlock(endBlock);
+
     // displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
     console.log("Parsing in progress", counter + 1, alreadyParsedAmount);
   }

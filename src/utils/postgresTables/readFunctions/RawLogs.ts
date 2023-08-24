@@ -1,6 +1,7 @@
 import { Op, fn, col, literal } from "sequelize";
 import { RawTxLogs } from "../../../models/RawTxLogs.js";
 import pkg from "lodash";
+import { Transactions } from "../../../models/Transactions.js";
 const { pick, isNaN } = pkg;
 
 export async function getHighestStoredBlockForPoolId(poolId: number): Promise<number> {
@@ -70,12 +71,27 @@ export async function fetchAllDistinctBlockNumbers() {
   return distinctBlockNumbers.map((row) => row.getDataValue("block_number"));
 }
 
-export async function fetchEventsForBlockNumberRange(startBlock: number, endBlock: number): Promise<Partial<RawTxLogs>[]> {
+export async function fetchEventsForChunkParsing(startBlock: number, endBlock: number): Promise<Partial<RawTxLogs>[]> {
+  // fetching the list of event_ids that are already in the transactions table.
+  const existingEventIds = (
+    await Transactions.findAll({
+      attributes: ["event_id"],
+      where: {
+        event_id: { [Op.not]: null },
+      },
+      raw: true, // This will make sure the output is just an array of objects, making it easier to process.
+    })
+  ).map((t) => t.event_id); // map() will just extract the event_id from each row.
+
+  // fetching the events from RawTxLogs that are NOT in the above list.
   const events = await RawTxLogs.findAll({
     where: {
       block_number: {
         [Op.gte]: startBlock,
         [Op.lte]: endBlock,
+      },
+      eventId: {
+        [Op.notIn]: existingEventIds,
       },
     },
     order: [["block_number", "ASC"]],
