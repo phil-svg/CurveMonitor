@@ -96,7 +96,8 @@ async function parseEventsMain() {
         const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
         await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
         counter += EVENTS.length;
-        await updateEventParsingToBlock(startBlock);
+        await updateEventParsingFromBlock(startBlock);
+        await updateEventParsingToBlock(endBlock);
         // displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
         console.log("Parsing in progress", counter + 1, alreadyParsedAmount);
     }
