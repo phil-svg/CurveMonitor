@@ -1,5 +1,5 @@
 import { getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
-import { fetchEventsForChunkParsing, fetchDistinctBlockNumbers, countRawTxLogs } from "../readFunctions/RawLogs.js";
+import { fetchEventsForChunkParsing, fetchDistinctBlockNumbers } from "../readFunctions/RawLogs.js";
 import { parseAddLiquidity } from "./ParseAddLiquidity.js";
 import { parseRemoveLiquidity } from "./ParseRemoveLiquidity.js";
 import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.js";
@@ -77,10 +77,8 @@ export async function sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS) {
 async function parseEventsMain() {
     let eventParsingFromBlock = await getEventParsingFromBlock();
     let eventParsingToBlock = await getEventParsingToBlock();
-    const BATCH_SIZE = 1000;
+    const BATCH_SIZE = 10000;
     const blockNumbers = await fetchDistinctBlockNumbers();
-    const AMOUNT_OF_EVENTS_STORED = await countRawTxLogs();
-    const alreadyParsedAmount = await getTotalTransactionsCount();
     let counter = 0;
     for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
         const startBlock = blockNumbers[i];
@@ -89,15 +87,15 @@ async function parseEventsMain() {
         if (eventParsingFromBlock && eventParsingToBlock && startBlock >= eventParsingFromBlock && endBlock <= eventParsingToBlock)
             continue;
         const EVENTS = await fetchEventsForChunkParsing(startBlock, endBlock);
-        counter += EVENTS.length;
         // Get block timestamps
         const eventBlockNumbers = EVENTS.flatMap((event) => (event.blockNumber !== undefined ? [event.blockNumber] : []));
         const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
         // Get pool coins
         const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
         await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
-        // displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
-        console.log("Parsing in progress", counter + 1, alreadyParsedAmount);
+        counter += BATCH_SIZE;
+        let alreadyParsedAmount = await getTotalTransactionsCount();
+        console.log("Parsing in progress", counter, alreadyParsedAmount);
     }
     await updateEventParsingFromBlock(blockNumbers[0]);
     await updateEventParsingToBlock(blockNumbers[blockNumbers.length - 1]);
