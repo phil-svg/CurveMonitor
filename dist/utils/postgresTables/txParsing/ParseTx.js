@@ -8,7 +8,7 @@ import { parseTokenExchange } from "./ParseTokenExchange.js";
 import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
 import { updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../readFunctions/Blocks.js";
-import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
+import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
 import Bottleneck from "bottleneck";
 import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from "../../../config/Alchemy.js";
 import { getCurrentBlockNumber } from "../../web3Calls/generic.js";
@@ -79,10 +79,11 @@ async function parseEventsMain() {
     const BATCH_SIZE = 1000;
     const blockNumbers = await fetchDistinctBlockNumbers();
     let eventParsingFromBlock = await getEventParsingFromBlock();
+    if (eventParsingFromBlock === null)
+        eventParsingFromBlock = blockNumbers[0];
+    await updateEventParsingFromBlock(eventParsingFromBlock);
     let counter = 0;
     for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
-        if (eventParsingFromBlock === null)
-            eventParsingFromBlock = blockNumbers[0];
         let eventParsingToBlock = await getEventParsingToBlock();
         if (eventParsingToBlock === null)
             eventParsingToBlock = blockNumbers[Math.max(i, BATCH_SIZE)];

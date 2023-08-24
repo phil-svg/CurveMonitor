@@ -85,10 +85,12 @@ async function parseEventsMain() {
   const BATCH_SIZE = 1000;
   const blockNumbers = await fetchDistinctBlockNumbers();
   let eventParsingFromBlock = await getEventParsingFromBlock();
+  if (eventParsingFromBlock === null) eventParsingFromBlock = blockNumbers[0];
+  await updateEventParsingFromBlock(eventParsingFromBlock!);
+
   let counter = 0;
 
   for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
-    if (eventParsingFromBlock === null) eventParsingFromBlock = blockNumbers[0];
     let eventParsingToBlock = await getEventParsingToBlock();
     if (eventParsingToBlock === null) eventParsingToBlock = blockNumbers[Math.max(i, BATCH_SIZE)];
 

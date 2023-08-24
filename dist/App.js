@@ -28,6 +28,7 @@ export async function initDatabase() {
     }
 }
 await initDatabase();
+await parseEvents();
 startAPI();
 // await startTestClient();
 async function main() {
@@ -40,13 +41,13 @@ async function main() {
     // await updatePoolParamsEvents(); // muted until useful
     await preparingLiveModeForRawEvents();
     await updateRawLogs();
-    eventFlags.canEmitSandwich = true;
     eventFlags.canEmitGeneralTx = true;
     await updateBlockTimestamps();
     await updateContractCreations();
     await parseEvents();
     await updateTransactionsDetails();
     await updateSandwichDetection();
+    eventFlags.canEmitSandwich = true;
     await updateReceipts();
     await updateTxTraces();
     await updateAddressCounts();
