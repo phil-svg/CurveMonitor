@@ -9,7 +9,7 @@ import { findCandidatesInBatch } from "../postgresTables/mevDetection/sandwich/S
 import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/sandwich/SandwichUtils.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
 import { getCoinsInBatchesByPools, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
-import { fetchEventsForBlockNumberRange } from "../postgresTables/readFunctions/RawLogs.js";
+import { fetchEventsForChunkParsing } from "../postgresTables/readFunctions/RawLogs.js";
 import { fetchTransactionsForBlock } from "../postgresTables/readFunctions/Transactions.js";
 import { sortAndProcess } from "../postgresTables/txParsing/ParseTx.js";
 import { retryGetTransactionTraceViaAlchemy } from "../web3Calls/generic.js";
@@ -52,7 +52,7 @@ async function processBufferedEvents() {
     const poolIds = await Promise.all(poolIdsPromises); // Await all promises to get an array of ids
     const validPoolIds = poolIds.filter((id) => id !== null);
     const POOL_COINS = await getCoinsInBatchesByPools(validPoolIds);
-    const EVENTS = await fetchEventsForBlockNumberRange(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
+    const EVENTS = await fetchEventsForChunkParsing(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
     // parsing and saving the tx
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
     eventBuffer = [];
