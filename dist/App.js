@@ -46,8 +46,6 @@ async function main() {
     await updateContractCreations();
     await parseEvents();
     await updateTransactionsDetails();
-    // eventFlags.canEmitSandwich = true;
-    // eventFlags.canEmitGeneralTx = true;
     await updateSandwichDetection();
     await updateReceipts();
     await updateTxTraces();

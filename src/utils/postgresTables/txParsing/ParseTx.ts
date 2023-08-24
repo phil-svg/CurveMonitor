@@ -11,6 +11,7 @@ import { getTimestampsByBlockNumbersFromLocalDatabase } from "../readFunctions/B
 import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
 import Bottleneck from "bottleneck";
 import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from "../../../config/Alchemy.js";
+import { getTotalTransactionsCount } from "../readFunctions/Transactions.js";
 
 export async function sortAndProcess(EVENTS: any, BLOCK_UNIXTIMES: any, POOL_COINS: any): Promise<void> {
   const functions = {
@@ -86,6 +87,7 @@ async function parseEventsMain() {
   const BATCH_SIZE = 1000;
   const blockNumbers = await fetchDistinctBlockNumbers();
   const AMOUNT_OF_EVENTS_STORED = await countRawTxLogs();
+  const alreadyParsedAmount = await getTotalTransactionsCount();
   let counter = 0;
 
   for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
@@ -108,7 +110,7 @@ async function parseEventsMain() {
     counter += EVENTS.length;
     await updateEventParsingToBlock(startBlock);
     // displayProgressBar("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
-    console.log("Parsing in progress", counter + 1, AMOUNT_OF_EVENTS_STORED);
+    console.log("Parsing in progress", counter + 1, alreadyParsedAmount);
   }
 
   await updateEventParsingFromBlock(blockNumbers[0]);

@@ -48,16 +48,14 @@ async function main() {
 
   await preparingLiveModeForRawEvents();
   await updateRawLogs();
+
   eventFlags.canEmitSandwich = true;
   eventFlags.canEmitGeneralTx = true;
+
   await updateBlockTimestamps();
   await updateContractCreations();
   await parseEvents();
   await updateTransactionsDetails();
-
-  // eventFlags.canEmitSandwich = true;
-  // eventFlags.canEmitGeneralTx = true;
-
   await updateSandwichDetection();
   await updateReceipts();
   await updateTxTraces();
