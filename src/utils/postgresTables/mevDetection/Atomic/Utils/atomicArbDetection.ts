@@ -1,31 +1,35 @@
 import { TransactionDetails } from "../../../../../models/TransactionDetails.js";
-import { FormattedArbitrageResult, ITransactionTrace } from "../../../../Interfaces.js";
+import { FormattedArbitrageResult } from "../../../../Interfaces.js";
 import { getGasUsedFromReceipt } from "../../../readFunctions/Receipts.js";
 import { extractGasPrice, extractTransactionAddresses, getTransactionDetailsByTxHash } from "../../../readFunctions/TransactionDetails.js";
 import { getTransactionTraceFromDb } from "../../../readFunctions/TransactionTrace.js";
-import {
-  CategorizedTransfers,
-  ETH_ADDRESS,
-  ReadableTokenTransfer,
-  WETH_ADDRESS,
-  categorizeTransfers,
-  getCategorizedTransfersFromTxTrace,
-  getTokenTransfersFromTransactionTrace,
-  makeTransfersReadable,
-} from "./tokenMovementSolver.js";
+import { CategorizedTransfers, ETH_ADDRESS, ReadableTokenTransfer, WETH_ADDRESS, getCategorizedTransfersFromTxTrace } from "./tokenMovementSolver.js";
+
+const CoWProtocolGPv2Settlement = "0x9008D19f58AAbD9eD0D60971565AA8510560ab41";
 
 type BalanceChanges = { [address: string]: { symbol: string; amount: number } };
 
-const mergeBalanceChanges = (balanceChange1: BalanceChanges, balanceChange2: BalanceChanges): BalanceChanges => {
-  const merged: BalanceChanges = { ...balanceChange1 };
+/**
+ * Merges multiple BalanceChanges objects into a single BalanceChanges.
+ *
+ * @param ...balanceChanges - The BalanceChanges objects to be merged.
+ * @returns A merged BalanceChanges.
+ */
+function mergeBalanceChanges(...balanceChanges: BalanceChanges[]): BalanceChanges {
+  const merged: BalanceChanges = {};
 
-  for (const address in balanceChange2) {
-    if (merged.hasOwnProperty(address)) {
-      merged[address].amount += balanceChange2[address].amount;
-    } else {
-      merged[address] = balanceChange2[address];
+  // Iterate over each BalanceChanges
+  balanceChanges.forEach((bc) => {
+    // Iterate over each address in the BalanceChanges
+    for (const address in bc) {
+      // If the address is already in the merged result
+      if (merged.hasOwnProperty(address)) {
+        merged[address].amount += bc[address].amount;
+      } else {
+        merged[address] = { ...bc[address] };
+      }
     }
-  }
+  });
 
   // Remove entries with 0 amount
   for (const address in merged) {
@@ -35,6 +39,32 @@ const mergeBalanceChanges = (balanceChange1: BalanceChanges, balanceChange2: Bal
   }
 
   return merged;
+}
+
+const calculateBalanceChangesForMints = (mintPairs: ReadableTokenTransfer[][], calledContractAddress: string): BalanceChanges => {
+  let balanceChange: BalanceChanges = {};
+  const calledAddressLower = calledContractAddress.toLowerCase();
+
+  mintPairs.forEach((pair) => {
+    pair.forEach((mint, index) => {
+      const address = mint.tokenAddress;
+      const symbol = mint.tokenSymbol || "Unknown Token";
+
+      if (!balanceChange[address]) {
+        balanceChange[address] = { symbol: symbol, amount: 0 };
+      }
+
+      if (index === 0 && mint.from.toLowerCase() === calledAddressLower) {
+        // Deduct the token used for minting
+        balanceChange[address].amount -= mint.parsedAmount;
+      } else if (index === 1 && mint.to.toLowerCase() === calledAddressLower) {
+        // Add the minted token to the balance
+        balanceChange[address].amount += mint.parsedAmount;
+      }
+    });
+  });
+
+  return balanceChange;
 };
 
 export function marketArbitrageSection(readableTransfers: CategorizedTransfers, fromAddress: string, calledContractAddress: string): BalanceChanges {
@@ -67,9 +97,11 @@ export function marketArbitrageSection(readableTransfers: CategorizedTransfers, 
 
   const balanceChangeSwaps = calculateBalanceChangesForSwaps(readableTransfers.swaps, calledContractAddress);
   const balanceChangeMultiStepSwaps = calculateBalanceChangesForSwaps(readableTransfers.multiStepSwaps, calledContractAddress);
+  const balanceChangeMints = calculateBalanceChangesForMints(readableTransfers.mintPairs, calledContractAddress);
 
   // Combine balance changes
-  const combinedBalanceChanges = mergeBalanceChanges(balanceChangeSwaps, balanceChangeMultiStepSwaps);
+  const combinedBalanceChanges = mergeBalanceChanges(balanceChangeSwaps, balanceChangeMultiStepSwaps, balanceChangeMints);
+
   return combinedBalanceChanges;
 }
 
@@ -185,11 +217,13 @@ export async function formatArbitrage(
  * @returns True if an atomic arbitrage is detected, otherwise false.
  */
 export async function wasTxAtomicArb(transfersCategorized: CategorizedTransfers, fromAddress: string, calledContractAddress: string): Promise<boolean> {
+  if (calledContractAddress.toLowerCase() === CoWProtocolGPv2Settlement.toLowerCase()) return false;
+
   const normalizedCalledContractAddress = calledContractAddress.toLowerCase();
   const normalizedFromAddress = fromAddress.toLowerCase();
 
   // Merge and sort swaps and multiStepSwaps based on the first transfer's position in each group
-  const allSwaps = transfersCategorized.swaps.concat(transfersCategorized.multiStepSwaps).sort((a, b) => (a[0]?.position || 0) - (b[0]?.position || 0));
+  let allSwaps = transfersCategorized.swaps.concat(transfersCategorized.multiStepSwaps).sort((a, b) => (a[0]?.position || 0) - (b[0]?.position || 0));
 
   let initialTokenSold: string | null = null;
   let involvedSwaps: any[] = [];
@@ -246,7 +280,7 @@ export async function solveAtomicArbForTxHash(txHash: string): Promise<void> {
     console.log("\ntxHash", txHash);
     if (txWasAtomicArb) {
       const formattedArbitrage = await formatArbitrage(transfersCategorized, txHash, transactionDetails, fromAddress, calledContractAddress);
-      console.log(formattedArbitrage.netWin);
+      console.log("formattedArbitrage.extractedValue:", formattedArbitrage.extractedValue);
     } else {
       console.log("Not Atomic Arbitrage!");
     }

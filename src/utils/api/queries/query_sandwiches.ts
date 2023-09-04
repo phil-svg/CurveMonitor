@@ -84,14 +84,14 @@ export async function getSandwichLabelOccurrences(): Promise<{ address: string; 
   }
 }
 
-export async function getFullSandwichTable(duration: string, page: number): Promise<{ data: SandwichDetail[]; totalPages: number }> {
-  const { ids, totalPages } = await getIdsForFullSandwichTable(duration, page);
+export async function getFullSandwichTable(duration: string, page: number): Promise<{ data: SandwichDetail[]; totalSandwiches: number }> {
+  const { ids, totalSandwiches } = await getIdsForFullSandwichTable(duration, page);
   const enrichedSandwiches = await enrichSandwiches(ids);
-  return { data: enrichedSandwiches, totalPages };
+  return { data: enrichedSandwiches, totalSandwiches };
 }
 
-export async function getSandwichTableContentForPool(poolId: number, duration: string, page: number): Promise<{ data: SandwichDetail[]; totalPages: number }> {
-  const { ids, totalPages } = await getIdsForFullSandwichTableForPool(duration, poolId, page);
+export async function getSandwichTableContentForPool(poolId: number, duration: string, page: number): Promise<{ data: SandwichDetail[]; totalSandwiches: number }> {
+  const { ids, totalSandwiches } = await getIdsForFullSandwichTableForPool(duration, poolId, page);
   const enrichedSandwiches = await enrichSandwiches(ids);
-  return { data: enrichedSandwiches, totalPages };
+  return { data: enrichedSandwiches, totalSandwiches };
 }

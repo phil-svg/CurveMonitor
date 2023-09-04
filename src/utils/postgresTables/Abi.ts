@@ -174,9 +174,13 @@ export async function fetchMissingPoolAbisFromEtherscan(): Promise<void> {
         return;
       }
 
-      const abi = await fetchAbiFromEtherscan(address);
-      if (abi) {
-        await storeAbiForPools(poolId, abi);
+      try {
+        const abi = await fetchAbiFromEtherscan(address);
+        if (abi) {
+          await storeAbiForPools(poolId, abi);
+        }
+      } catch (err) {
+        console.log("err fetching abi for ", address, err);
       }
     });
 

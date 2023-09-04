@@ -10,6 +10,7 @@ const transferFromMethodId = "0x23b872dd";
 const withdrawMethodId = "0x2e1a7d4d";
 const customBurnMethodId = "0xba087652";
 const burnFromMethodId = "0x79cc6790";
+const mintMethodId = "0x40c10f19";
 export function getTokenBalanceChangesForUser(transferEvents, userAddress) {
     let balanceChangesMap = {};
     for (const event of transferEvents) {
@@ -188,13 +189,6 @@ function handleUnwrapWethMethod(sender, receiver, amountHex, tokenTransfers) {
         token: WETH_ADDRESS,
         value: value.toString(),
     });
-    // Add ETH incoming transfer
-    // tokenTransfers.push({
-    //   from: WETH_ADDRESS,
-    //   to: sender,
-    //   token: ETH_ADDRESS,
-    //   value: value.toString(),
-    // });
 }
 function handleWrapEthMethod(sender, receiver, amountHex, tokenTransfers) {
     const value = BigInt("0x" + amountHex);
@@ -211,6 +205,16 @@ function handleWrapEthMethod(sender, receiver, amountHex, tokenTransfers) {
         to: sender,
         token: WETH_ADDRESS,
         value: value.toString(),
+    });
+}
+function handleMintMethod(input, tokenAddress, tokenTransfers) {
+    const receiver = "0x" + input.slice(34, 74);
+    const amountHex = "0x" + input.slice(-64);
+    tokenTransfers.push({
+        from: NULL_ADDRESS,
+        to: receiver,
+        value: BigInt(amountHex).toString(),
+        token: tokenAddress,
     });
 }
 function extractTransferDetails(input, from) {
@@ -264,6 +268,10 @@ function extractTokenTransfers(trace, tokenTransfers) {
                 handleTransferMethod(sender, receiver, amountHex, action.to, tokenTransfers);
             }
         }
+    }
+    // Checking for Token Mints
+    if (action.input && action.input.toLowerCase().startsWith(mintMethodId)) {
+        handleMintMethod(action.input, action.to, tokenTransfers);
     }
     // Checking for Ether (ETH) transfers
     if (action.value && parseInt(action.value, 16) > 0) {
@@ -365,6 +373,23 @@ function categorizeEthFlows(transfers, addressesCount) {
     });
     return { inflowingETH, outflowingETH, remainingTransfers };
 }
+function identifyMintPairs(transfers) {
+    const mintPairs = [];
+    const mintTxAddress = "0x0000000000000000000000000000000000000000";
+    transfers.forEach((transfer, idx) => {
+        if (transfer.from === mintTxAddress) {
+            const depositTxPosition = transfer.position - 1;
+            const depositTx = transfers.find((tx) => tx.position === depositTxPosition);
+            if (depositTx) {
+                mintPairs.push([depositTx, transfer]);
+            }
+        }
+    });
+    const remainingTransfers = transfers.filter((transfer) => {
+        return !mintPairs.flat().includes(transfer);
+    });
+    return { mintPairs, remainingTransfers };
+}
 // Helper function to identify isolated transfers
 function identifyIsolatedTransfers(transfers) {
     const isolatedTransfers = [];
@@ -406,13 +431,33 @@ function identifyMultiStepSwaps(transfers) {
 function removeMultiStepSwaps(transfers, swaps) {
     return transfers.filter((transfer) => !swaps.flat().includes(transfer));
 }
+function identifyEtherWrapsAndUnwraps(transfers) {
+    const potentialWrapsAndUnwraps = transfers.filter((transfer) => transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase() || transfer.from.toLowerCase() === WETH_ADDRESS.toLowerCase());
+    const etherWrapsAndUnwraps = [];
+    let remainingTransfers = [...transfers];
+    for (let i = 0; i < potentialWrapsAndUnwraps.length - 1; i++) {
+        for (let j = i + 1; j < potentialWrapsAndUnwraps.length; j++) {
+            const currentTransfer = potentialWrapsAndUnwraps[i];
+            const potentialPairTransfer = potentialWrapsAndUnwraps[j];
+            if (currentTransfer.from === potentialPairTransfer.to &&
+                currentTransfer.to === potentialPairTransfer.from &&
+                currentTransfer.parsedAmount === potentialPairTransfer.parsedAmount) {
+                etherWrapsAndUnwraps.push([currentTransfer, potentialPairTransfer]);
+                remainingTransfers = remainingTransfers.filter((transfer) => transfer !== currentTransfer && transfer !== potentialPairTransfer);
+                break;
+            }
+        }
+    }
+    return { etherWrapsAndUnwraps, remainingTransfers };
+}
 function identifyLiquidityEvents(transfers) {
     let remainingTransfers = [...transfers];
     const liquidityEvents = [];
     for (let i = 0; i < remainingTransfers.length - 1; i++) {
         const currentTransfer = remainingTransfers[i];
-        const returnTransfers = remainingTransfers.filter((transfer) => transfer.from === currentTransfer.to && transfer.to === currentTransfer.from);
-        if (returnTransfers.length > 1) {
+        const returnTransfers = remainingTransfers.filter((transfer) => transfer.from === currentTransfer.to && transfer.to === currentTransfer.from && transfer.tokenAddress !== currentTransfer.tokenAddress);
+        const uniqueTokens = new Set(returnTransfers.map((t) => t.tokenAddress));
+        if (returnTransfers.length > 1 && uniqueTokens.size === returnTransfers.length) {
             liquidityEvents.push([currentTransfer, returnTransfers]);
             remainingTransfers = remainingTransfers.filter((transfer) => transfer !== currentTransfer && !returnTransfers.includes(transfer));
             i--;
@@ -426,19 +471,24 @@ export function categorizeTransfers(transfers) {
         addressesThatAppearMultipleTimes[transfer.from] = (addressesThatAppearMultipleTimes[transfer.from] || 0) + 1;
         addressesThatAppearMultipleTimes[transfer.to] = (addressesThatAppearMultipleTimes[transfer.to] || 0) + 1;
     });
-    const { liquidityEvents, remainingTransfers: postLiquidityEventTransfers } = identifyLiquidityEvents(transfers);
+    // Identify Wraps and Unwraps first
+    const { etherWrapsAndUnwraps, remainingTransfers: postWrapAndUnwrapTransfers } = identifyEtherWrapsAndUnwraps(transfers);
+    const { liquidityEvents, remainingTransfers: postLiquidityEventTransfers } = identifyLiquidityEvents(postWrapAndUnwrapTransfers);
     const { swapPairs, remainingTransfers: postSwapTransfers } = identifySwapPairs(postLiquidityEventTransfers);
     const { inflowingETH, outflowingETH, remainingTransfers: postEthFlowTransfers } = categorizeEthFlows(postSwapTransfers, addressesThatAppearMultipleTimes);
-    const { isolatedTransfers, remainingTransfers: postIsolatedTransfers } = identifyIsolatedTransfers(postEthFlowTransfers);
+    const { mintPairs, remainingTransfers: postMintPairsTransfers } = identifyMintPairs(postEthFlowTransfers);
+    const { isolatedTransfers, remainingTransfers: postIsolatedTransfers } = identifyIsolatedTransfers(postMintPairsTransfers);
     const { multiStepSwaps, remainingTransfers: postMultiStepTransfers } = identifyMultiStepSwaps(postIsolatedTransfers);
     const remainder = removeMultiStepSwaps(postMultiStepTransfers, multiStepSwaps);
     return {
+        etherWrapsAndUnwraps,
         liquidityEvents,
         swaps: swapPairs,
         inflowingETH,
         outflowingETH,
         multiStepSwaps,
         isolatedTransfers,
+        mintPairs,
         remainder,
     };
 }

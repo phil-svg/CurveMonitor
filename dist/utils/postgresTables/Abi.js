@@ -162,9 +162,14 @@ export async function fetchMissingPoolAbisFromEtherscan() {
                 console.error(`Error: Address for poolId ${poolId} is null.`);
                 return;
             }
-            const abi = await fetchAbiFromEtherscan(address);
-            if (abi) {
-                await storeAbiForPools(poolId, abi);
+            try {
+                const abi = await fetchAbiFromEtherscan(address);
+                if (abi) {
+                    await storeAbiForPools(poolId, abi);
+                }
+            }
+            catch (err) {
+                console.log("err fetching abi for ", address, err);
             }
         });
         await Promise.all(promises);

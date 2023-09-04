@@ -92,11 +92,34 @@ export const isExtractedFromCurve = async (id) => {
     const sandwich = await Sandwiches.findByPk(id);
     return sandwich ? sandwich.extracted_from_curve : false;
 };
+export async function getAllIdsForFullSandwichTable(timeDuration) {
+    const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
+    const sandwiches = await Sandwiches.findAll({
+        include: [
+            {
+                model: Transactions,
+                as: "frontrunTransaction",
+                where: {
+                    block_unixtime: {
+                        [Op.gte]: timeframeStartUnix,
+                    },
+                },
+                required: true,
+            },
+        ],
+        where: {
+            extracted_from_curve: true,
+        },
+        order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+    });
+    const ids = sandwiches.map((sandwich) => sandwich.id);
+    return ids;
+}
 export async function getIdsForFullSandwichTable(timeDuration, page) {
     const recordsPerPage = 10;
     const offset = (page - 1) * recordsPerPage;
     const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
-    const totalSandwichCount = await Sandwiches.count({
+    const totalSandwiches = await Sandwiches.count({
         include: [
             {
                 model: Transactions,
@@ -112,7 +135,6 @@ export async function getIdsForFullSandwichTable(timeDuration, page) {
             extracted_from_curve: true,
         },
     });
-    const totalPages = Math.ceil(totalSandwichCount / recordsPerPage);
     const sandwiches = await Sandwiches.findAll({
         include: [
             {
@@ -134,13 +156,13 @@ export async function getIdsForFullSandwichTable(timeDuration, page) {
         order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
     });
     const ids = sandwiches.map((sandwich) => sandwich.id);
-    return { ids, totalPages };
+    return { ids, totalSandwiches };
 }
 export async function getIdsForFullSandwichTableForPool(timeDuration, poolId, page = 1) {
     const recordsPerPage = 10;
     const offset = (page - 1) * recordsPerPage;
     const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
-    const totalSandwichCount = await Sandwiches.count({
+    const totalSandwiches = await Sandwiches.count({
         include: [
             {
                 model: Transactions,
@@ -158,7 +180,6 @@ export async function getIdsForFullSandwichTableForPool(timeDuration, poolId, pa
             extracted_from_curve: true,
         },
     });
-    const totalPages = Math.ceil(totalSandwichCount / recordsPerPage);
     const sandwiches = await Sandwiches.findAll({
         include: [
             {
@@ -181,7 +202,7 @@ export async function getIdsForFullSandwichTableForPool(timeDuration, poolId, pa
         order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
     });
     const ids = sandwiches.map((sandwich) => sandwich.id);
-    return { ids, totalPages };
+    return { ids, totalSandwiches };
 }
 export async function getLossInUsdForSandwich(sandwichId) {
     try {

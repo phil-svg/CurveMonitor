@@ -6,8 +6,8 @@ export const handlePoolSandwichRoom = (socket: Socket) => {
   socket.on("getPoolSpecificSandwichTable", async (poolAddress: string, duration: string, page: number) => {
     try {
       const poolId = await getIdByAddressCaseInsensitive(poolAddress);
-      const { data, totalPages } = await getSandwichTableContentForPool(poolId!, duration, page);
-      socket.emit("SandwichTableContentForPool", { data, totalPages });
+      const { data, totalSandwiches } = await getSandwichTableContentForPool(poolId!, duration, page);
+      socket.emit("SandwichTableContentForPool", { data, totalSandwiches });
     } catch (error) {
       console.error(error);
       socket.emit("error", "Internal Server Error");

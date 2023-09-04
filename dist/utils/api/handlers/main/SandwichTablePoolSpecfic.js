@@ -4,8 +4,8 @@ export const handlePoolSandwichRoom = (socket) => {
     socket.on("getPoolSpecificSandwichTable", async (poolAddress, duration, page) => {
         try {
             const poolId = await getIdByAddressCaseInsensitive(poolAddress);
-            const { data, totalPages } = await getSandwichTableContentForPool(poolId, duration, page);
-            socket.emit("SandwichTableContentForPool", { data, totalPages });
+            const { data, totalSandwiches } = await getSandwichTableContentForPool(poolId, duration, page);
+            socket.emit("SandwichTableContentForPool", { data, totalSandwiches });
         }
         catch (error) {
             console.error(error);

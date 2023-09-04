@@ -28,7 +28,6 @@ export async function initDatabase() {
     }
 }
 await initDatabase();
-await parseEvents();
 startAPI();
 // await startTestClient();
 async function main() {
