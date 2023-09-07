@@ -1,9 +1,8 @@
 import { TransactionDetails } from "../../../../../models/TransactionDetails.js";
-import { FormattedArbitrageResult } from "../../../../Interfaces.js";
+import { CategorizedTransfers, FormattedArbitrageResult, ReadableTokenTransfer } from "../../../../Interfaces.js";
+import { ETH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
 import { getGasUsedFromReceipt } from "../../../readFunctions/Receipts.js";
-import { extractGasPrice, extractTransactionAddresses, getTransactionDetailsByTxHash } from "../../../readFunctions/TransactionDetails.js";
-import { getTransactionTraceFromDb } from "../../../readFunctions/TransactionTrace.js";
-import { CategorizedTransfers, ETH_ADDRESS, ReadableTokenTransfer, WETH_ADDRESS, getCategorizedTransfersFromTxTrace } from "./tokenMovementSolver.js";
+import { extractGasPrice, extractTransactionAddresses } from "../../../readFunctions/TransactionDetails.js";
 
 const CoWProtocolGPv2Settlement = "0x9008D19f58AAbD9eD0D60971565AA8510560ab41";
 
@@ -41,11 +40,11 @@ function mergeBalanceChanges(...balanceChanges: BalanceChanges[]): BalanceChange
   return merged;
 }
 
-const calculateBalanceChangesForMints = (mintPairs: ReadableTokenTransfer[][], calledContractAddress: string): BalanceChanges => {
+const calculateBalanceChangesForMints = (liquidityPairs: ReadableTokenTransfer[][], calledContractAddress: string): BalanceChanges => {
   let balanceChange: BalanceChanges = {};
   const calledAddressLower = calledContractAddress.toLowerCase();
 
-  mintPairs.forEach((pair) => {
+  liquidityPairs.forEach((pair) => {
     pair.forEach((mint, index) => {
       const address = mint.tokenAddress;
       const symbol = mint.tokenSymbol || "Unknown Token";
@@ -97,7 +96,7 @@ export function marketArbitrageSection(readableTransfers: CategorizedTransfers, 
 
   const balanceChangeSwaps = calculateBalanceChangesForSwaps(readableTransfers.swaps, calledContractAddress);
   const balanceChangeMultiStepSwaps = calculateBalanceChangesForSwaps(readableTransfers.multiStepSwaps, calledContractAddress);
-  const balanceChangeMints = calculateBalanceChangesForMints(readableTransfers.mintPairs, calledContractAddress);
+  const balanceChangeMints = calculateBalanceChangesForMints(readableTransfers.liquidityPairs, calledContractAddress);
 
   // Combine balance changes
   const combinedBalanceChanges = mergeBalanceChanges(balanceChangeSwaps, balanceChangeMultiStepSwaps, balanceChangeMints);
@@ -261,30 +260,20 @@ export async function wasTxAtomicArb(transfersCategorized: CategorizedTransfers,
   return false;
 }
 
-export async function solveAtomicArbForTxHash(txHash: string): Promise<void> {
-  const transactionTraces = await getTransactionTraceFromDb(txHash);
-  // console.log("transactionTraces", transactionTraces);
-  if (!transactionTraces || transactionTraces.length === 0) {
-    console.log(`no transaction-trace found for ${txHash}`);
+export async function solveAtomicArb(txHash: string, transactionDetails: TransactionDetails, transfersCategorized: CategorizedTransfers): Promise<void> {
+  const { from: fromAddress, to: calledContractAddress } = extractTransactionAddresses(transactionDetails);
+  if (!fromAddress || !calledContractAddress) {
+    console.log(`Failed to fetch transactionDetails during arb detection for ${txHash} with ${transactionDetails},${fromAddress},${calledContractAddress}`);
     return;
   }
 
-  const transfersCategorized = await getCategorizedTransfersFromTxTrace(transactionTraces);
-  // console.dir(transfersCategorized, { depth: null, colors: true });
+  const txWasAtomicArb = await wasTxAtomicArb(transfersCategorized, fromAddress, calledContractAddress);
 
-  const transactionDetails = await getTransactionDetailsByTxHash(txHash);
-  const { from: fromAddress, to: calledContractAddress } = extractTransactionAddresses(transactionDetails);
-
-  if (transactionDetails && fromAddress && calledContractAddress) {
-    const txWasAtomicArb = await wasTxAtomicArb(transfersCategorized, fromAddress, calledContractAddress);
-    console.log("\ntxHash", txHash);
-    if (txWasAtomicArb) {
-      const formattedArbitrage = await formatArbitrage(transfersCategorized, txHash, transactionDetails, fromAddress, calledContractAddress);
-      console.log("formattedArbitrage.extractedValue:", formattedArbitrage.extractedValue);
-    } else {
-      console.log("Not Atomic Arbitrage!");
-    }
+  if (txWasAtomicArb) {
+    const formattedArbitrage = await formatArbitrage(transfersCategorized, txHash, transactionDetails, fromAddress, calledContractAddress);
+    // console.log("formattedArbitrage.extractedValue:", formattedArbitrage.extractedValue);
   } else {
-    console.log(`Failed to fetch transactionDetails for ${txHash}, txDetails: ${transactionDetails}, fromAddress: ${fromAddress}, calledContractAddress: ${calledContractAddress}`);
+    console.log("Not Atomic Arbitrage!");
   }
+  console.log("txHash", txHash);
 }

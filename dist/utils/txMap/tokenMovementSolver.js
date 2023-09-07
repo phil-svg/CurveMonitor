@@ -1,7 +1,7 @@
-import { addNewTokenToDbFromCoinAddress } from "../../../Coins.js";
-import { findCoinIdByAddress } from "../../../readFunctions/Coins.js";
-import { NULL_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
-import { addMissingWethTransfers, getTokenTransfersFromTransactionTrace, makeTransfersReadable, removeDuplicatesAndUpdatePositions } from "../../../../txMap/TransferOverview.js";
+import { addNewTokenToDbFromCoinAddress } from "../postgresTables/Coins.js";
+import { findCoinIdByAddress } from "../postgresTables/readFunctions/Coins.js";
+import { NULL_ADDRESS, WETH_ADDRESS } from "../helperFunctions/Constants.js";
+import { addMissingWethTransfers, getTokenTransfersFromTransactionTrace, makeTransfersReadable, removeDuplicatesAndUpdatePositions } from "./TransferOverview.js";
 // checking if a token, transferred in the tx, is stored in the db, if not, adding it.
 export async function checkTokensInDatabase(tokenTransfers) {
     for (let transfer of tokenTransfers) {

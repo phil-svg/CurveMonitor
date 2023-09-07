@@ -1,5 +1,18 @@
+import { updateAbisFromTrace } from "../../../helperFunctions/MethodID.js";
+import { getCategorizedTransfersFromTxTrace } from "../../../txMap/TransferCategories.js";
+import { getTransactionDetailsByTxHash } from "../../readFunctions/TransactionDetails.js";
+import { getTransactionTraceFromDb } from "../../readFunctions/TransactionTrace.js";
 import { getTxHashByTxId } from "../../readFunctions/Transactions.js";
-import { solveAtomicArbForTxHash } from "./utils/atomicArbDetection.js";
+import { solveAtomicArb } from "./utils/atomicArbDetection.js";
+async function fetchDataThenDetectArb(txHash) {
+    const transactionTraces = await getTransactionTraceFromDb(txHash);
+    // making sure we have all ABIs which are relevant in this tx.
+    await updateAbisFromTrace(transactionTraces);
+    const transactionDetails = await getTransactionDetailsByTxHash(txHash);
+    const transfersCategorized = await getCategorizedTransfersFromTxTrace(transactionTraces);
+    // console.dir(transfersCategorized, { depth: null, colors: true });
+    await solveAtomicArb(txHash, transactionDetails, transfersCategorized);
+}
 export async function updateAtomicArbDetection() {
     // const txHash = "0x66a519ad66d33e5e343ac81d4246173e1ac0ec819c1d6b243b32522ee5a2fd12"; // guy withdrawing from pool, receives 3 Token.
     // const txHash = "0x1c7e8861744c00a063295987b69bbb82e1bab9c1afd438219cfa5a8d3f98dbdf"; // Balancer, Uni v2, Uni v3, Curve
@@ -9,11 +22,14 @@ export async function updateAtomicArbDetection() {
     // const txId = 10;
     // const txHash = await getTxHashByTxId(txId);
     // await solveAtomicArbForTxHash(txHash!);
-    for (let txId = 0; txId < 100; txId++) {
-        console.log(txId);
-        const txHash = await getTxHashByTxId(txId);
-        await solveAtomicArbForTxHash(txHash);
-    }
+    const txHash = await getTxHashByTxId(116);
+    // for (let txId = 100; txId < 200; txId++) {
+    //   const txHash = await getTxHashByTxId(txId);
+    //   console.log("\n", txId, txHash);
+    //   await solveAtomicArbForTxHash(txHash!);
+    // }
+    await fetchDataThenDetectArb(txHash);
     //process.exit();
 }
+// WETH mint missing in extractTokenTransfers() in tokenMovementSolver
 //# sourceMappingURL=atomicArb.js.map

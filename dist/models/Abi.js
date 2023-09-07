@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { Table, Column, Model, PrimaryKey, CreatedAt, UpdatedAt, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
-import { Pool } from './Pools.js';
+import { Pool } from "./Pools.js";
 // Define a base model for AbisRelatedToAddressProvider with common properties
 class AbiModelRelatedToAddressProvider extends Model {
 }
@@ -28,7 +28,7 @@ __decorate([
 let AbisRelatedToAddressProvider = class AbisRelatedToAddressProvider extends AbiModelRelatedToAddressProvider {
 };
 AbisRelatedToAddressProvider = __decorate([
-    Table({ tableName: 'abis_related_to_address_provider' })
+    Table({ tableName: "abis_related_to_address_provider" })
 ], AbisRelatedToAddressProvider);
 export { AbisRelatedToAddressProvider };
 // Define a base model for AbisPools with common properties without address and abi columns
@@ -65,8 +65,33 @@ __decorate([
     Column(DataType.DATE)
 ], AbisPools.prototype, "updatedAt", void 0);
 AbisPools = __decorate([
-    Table({ tableName: 'abis_pools' })
+    Table({ tableName: "abis_pools" })
 ], AbisPools);
 export { AbisPools };
-export const AbiModels = [AbisPools, AbisRelatedToAddressProvider];
+// Define a base model for AbisEthereum with common properties
+class AbiModelEthereum extends Model {
+}
+__decorate([
+    CreatedAt,
+    Column(DataType.DATE)
+], AbiModelEthereum.prototype, "createdAt", void 0);
+__decorate([
+    UpdatedAt,
+    Column(DataType.DATE)
+], AbiModelEthereum.prototype, "updatedAt", void 0);
+// Extend the base model for AbisEthereum
+let AbisEthereum = class AbisEthereum extends AbiModelEthereum {
+};
+__decorate([
+    PrimaryKey,
+    Column({ type: DataType.STRING, unique: true }) // Ensure the contract_address is indexed
+], AbisEthereum.prototype, "contract_address", void 0);
+__decorate([
+    Column(DataType.JSON)
+], AbisEthereum.prototype, "abi", void 0);
+AbisEthereum = __decorate([
+    Table({ tableName: "abis_ethereum" })
+], AbisEthereum);
+export { AbisEthereum };
+export const AbiModels = [AbisPools, AbisRelatedToAddressProvider, AbisEthereum];
 //# sourceMappingURL=Abi.js.map

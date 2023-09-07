@@ -215,3 +215,43 @@ export interface EnrichedTransactionDetail extends TransactionDetail {
   calledContractInceptionTimestamp: number;
   isCalledContractFromCurve: boolean;
 }
+
+export interface ReadableTokenTransfer {
+  from: string;
+  to: string;
+  tokenAddress: string;
+  tokenSymbol: string | null;
+  parsedAmount: number;
+  position?: number;
+}
+
+export type TokenTransfer = {
+  from: string;
+  to: string;
+  token: string;
+  value: string;
+};
+
+export type LiquidityEvent = [ReadableTokenTransfer, ReadableTokenTransfer[]];
+
+export type SwapGroup = ReadableTokenTransfer[];
+
+export interface ExtendedReadableTokenTransfer extends ReadableTokenTransfer {
+  position?: number;
+}
+
+export type SwapPair = [ExtendedReadableTokenTransfer, ExtendedReadableTokenTransfer];
+
+export type EtherWrapUnwrapPair = [ReadableTokenTransfer, ReadableTokenTransfer];
+
+export interface CategorizedTransfers {
+  etherWrapsAndUnwraps: EtherWrapUnwrapPair[];
+  liquidityEvents: LiquidityEvent[];
+  swaps: SwapGroup[];
+  inflowingETH: ReadableTokenTransfer[];
+  outflowingETH: ReadableTokenTransfer[];
+  multiStepSwaps: SwapGroup[];
+  liquidityPairs: SwapPair[];
+  isolatedTransfers: ReadableTokenTransfer[];
+  remainder: ReadableTokenTransfer[];
+}

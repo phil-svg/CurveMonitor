@@ -1,6 +1,7 @@
+import { ReadableTokenTransfer } from "../../../Interfaces.js";
 import { getTransactionTraceFromDb } from "../../readFunctions/TransactionTrace.js";
 import { getAllUniqueTransactionHashes } from "../../readFunctions/Transactions.js";
-import { ReadableTokenTransfer, getReadableTransfersFromTransactionTrace } from "../atomic/utils/tokenMovementSolver.js";
+import { getReadableTransfersFromTransactionTrace } from "../../../txMap/TransferCategories.js";
 import fs from "fs";
 
 function removeFalsePositiveFlashLoans(detectedFlashLoans: any[], readableTransfers: ReadableTokenTransfer[]): any[] {

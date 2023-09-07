@@ -67,7 +67,6 @@ export async function updateReceipts() {
         // Find the set of transaction hashes for which we need to fetch receipts.
         const toBeFetchedSet = [...transactionsSet].filter((txHash) => !existingReceiptsSet.has(txHash));
         const totalToBeFetched = toBeFetchedSet.length;
-        console.log("totalToBeFetched", totalToBeFetched);
         let count = 0;
         // For each transaction hash in toBeFetchedSet.
         for (const txHash of toBeFetchedSet) {

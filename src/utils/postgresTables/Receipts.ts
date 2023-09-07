@@ -151,7 +151,6 @@ export async function updateReceipts() {
     const toBeFetchedSet = [...transactionsSet].filter((txHash) => !existingReceiptsSet.has(txHash));
 
     const totalToBeFetched = toBeFetchedSet.length;
-    console.log("totalToBeFetched", totalToBeFetched);
 
     let count = 0;
 

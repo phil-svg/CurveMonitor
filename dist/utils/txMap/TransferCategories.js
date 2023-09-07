@@ -1,7 +1,7 @@
-import { addNewTokenToDbFromCoinAddress } from "../../../Coins.js";
-import { findCoinIdByAddress } from "../../../readFunctions/Coins.js";
-import { NULL_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
-import { addMissingWethTransfers, getTokenTransfersFromTransactionTrace, makeTransfersReadable, removeDuplicatesAndUpdatePositions } from "../../../../txMap/TransferOverview.js";
+import { addNewTokenToDbFromCoinAddress } from "../postgresTables/Coins.js";
+import { findCoinIdByAddress } from "../postgresTables/readFunctions/Coins.js";
+import { NULL_ADDRESS, WETH_ADDRESS } from "../helperFunctions/Constants.js";
+import { addMissingWethTransfers, getTokenTransfersFromTransactionTrace, makeTransfersReadable, removeDuplicatesAndUpdatePositions } from "./TransferOverview.js";
 // checking if a token, transferred in the tx, is stored in the db, if not, adding it.
 export async function checkTokensInDatabase(tokenTransfers) {
     for (let transfer of tokenTransfers) {
@@ -194,7 +194,7 @@ export async function getCategorizedTransfersFromTxTrace(transactionTraces) {
     const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
     // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
     const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
-    // console.log("readableTransfers", readableTransfers);
+    console.log("readableTransfers", readableTransfers);
     const updatedReadableTransfers = addMissingWethTransfers(readableTransfers);
     // console.log("updatedReadableTransfers", updatedReadableTransfers);
     const cleanedTransfers = removeDuplicatesAndUpdatePositions(updatedReadableTransfers);
@@ -203,4 +203,4 @@ export async function getCategorizedTransfersFromTxTrace(transactionTraces) {
     // console.dir(transfersCategorized, { depth: null, colors: true });
     return transfersCategorized;
 }
-//# sourceMappingURL=tokenMovementSolver.js.map
+//# sourceMappingURL=TransferCategories.js.map
