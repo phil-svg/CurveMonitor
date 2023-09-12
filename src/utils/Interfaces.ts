@@ -255,3 +255,9 @@ export interface CategorizedTransfers {
   isolatedTransfers: ReadableTokenTransfer[];
   remainder: ReadableTokenTransfer[];
 }
+
+export type ParsedEvent = {
+  contractAddress: string;
+  eventName: string;
+  [key: string]: string;
+};

@@ -1,17 +1,28 @@
 import { updateAbisFromTrace } from "../../../helperFunctions/MethodID.js";
+import { parseEventsFromReceiptForEntireTx } from "../../../txMap/Events.js";
 import { getCategorizedTransfersFromTxTrace } from "../../../txMap/TransferCategories.js";
-import { getTransactionDetailsByTxHash } from "../../readFunctions/TransactionDetails.js";
+import { addMissingWethTransfers, getTokenTransfersFromTransactionTrace, makeTransfersReadable, mergeAndFilterTransfers, removeDuplicatesAndUpdatePositions, } from "../../../txMap/TransferOverview.js";
 import { getTransactionTraceFromDb } from "../../readFunctions/TransactionTrace.js";
 import { getTxHashByTxId } from "../../readFunctions/Transactions.js";
-import { solveAtomicArb } from "./utils/atomicArbDetection.js";
 async function fetchDataThenDetectArb(txHash) {
     const transactionTraces = await getTransactionTraceFromDb(txHash);
     // making sure we have all ABIs which are relevant in this tx.
     await updateAbisFromTrace(transactionTraces);
-    const transactionDetails = await getTransactionDetailsByTxHash(txHash);
-    const transfersCategorized = await getCategorizedTransfersFromTxTrace(transactionTraces);
+    const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+    // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
+    const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash);
+    //console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
+    const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
+    // console.log("mergedTransfers", mergedTransfers);
+    const readableTransfers = await makeTransfersReadable(mergedTransfers);
+    // console.log("readableTransfers", readableTransfers);
+    const updatedReadableTransfers = addMissingWethTransfers(readableTransfers);
+    // console.log("updatedReadableTransfers", updatedReadableTransfers);
+    const cleanedTransfers = removeDuplicatesAndUpdatePositions(updatedReadableTransfers);
+    console.log("cleanedTransfers", cleanedTransfers);
+    const transfersCategorized = await getCategorizedTransfersFromTxTrace(cleanedTransfers);
     // console.dir(transfersCategorized, { depth: null, colors: true });
-    await solveAtomicArb(txHash, transactionDetails, transfersCategorized);
+    // await solveAtomicArb(txHash!, transfersCategorized);
 }
 export async function updateAtomicArbDetection() {
     // const txHash = "0x66a519ad66d33e5e343ac81d4246173e1ac0ec819c1d6b243b32522ee5a2fd12"; // guy withdrawing from pool, receives 3 Token.
@@ -29,6 +40,7 @@ export async function updateAtomicArbDetection() {
     //   await solveAtomicArbForTxHash(txHash!);
     // }
     await fetchDataThenDetectArb(txHash);
+    console.log("txHash", txHash);
     //process.exit();
 }
 // WETH mint missing in extractTokenTransfers() in tokenMovementSolver

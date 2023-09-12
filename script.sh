@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Pull the latest changes from your repository
+git checkout -- package-lock.json
 git pull
 
 # Build the Docker image
@@ -23,6 +24,7 @@ if [ -z "$existing_postgres_container" ]; then
         postgres:latest
 else
     # If the container exists, ensure it's running. This will start it if it's stopped for any reason.
+    docker stop some-postgres
     docker start some-postgres
 fi
 

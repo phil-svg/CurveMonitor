@@ -244,21 +244,7 @@ export async function getReadableTransfersFromTransactionTrace(transactionTraces
   return readableTransfers;
 }
 
-export async function getCategorizedTransfersFromTxTrace(transactionTraces: ITransactionTrace[]): Promise<CategorizedTransfers> {
-  const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
-  // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
-
-  const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
-  console.log("readableTransfers", readableTransfers);
-
-  const updatedReadableTransfers = addMissingWethTransfers(readableTransfers);
-  // console.log("updatedReadableTransfers", updatedReadableTransfers);
-
-  const cleanedTransfers = removeDuplicatesAndUpdatePositions(updatedReadableTransfers);
-  // console.log("cleanedTransfers", cleanedTransfers);
-
+export async function getCategorizedTransfersFromTxTrace(cleanedTransfers: ReadableTokenTransfer[]): Promise<CategorizedTransfers> {
   const transfersCategorized = categorizeTransfers(cleanedTransfers);
-  // console.dir(transfersCategorized, { depth: null, colors: true });
-
   return transfersCategorized;
 }

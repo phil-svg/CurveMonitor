@@ -5,7 +5,7 @@ import { fetchAbiFromEtherscan } from "../postgresTables/Abi.js";
 import { AbisEthereum } from "../../models/Abi.js";
 const { keccak256 } = pkg;
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function updateAbisFromTrace(transactionTraces: ITransactionTrace[]): Promise<void> {
   for (const trace of transactionTraces) {

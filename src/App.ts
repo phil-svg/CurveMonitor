@@ -33,7 +33,9 @@ export async function initDatabase() {
 
 await initDatabase();
 
-startAPI();
+// await updateAtomicArbDetection();
+
+// startAPI();
 // await startTestClient();
 
 async function main() {

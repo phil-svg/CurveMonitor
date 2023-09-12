@@ -1,6 +1,6 @@
 import { ETH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
 import { getGasUsedFromReceipt } from "../../../readFunctions/Receipts.js";
-import { extractGasPrice, extractTransactionAddresses } from "../../../readFunctions/TransactionDetails.js";
+import { extractGasPrice, extractTransactionAddresses, getTransactionDetailsByTxHash } from "../../../readFunctions/TransactionDetails.js";
 const CoWProtocolGPv2Settlement = "0x9008D19f58AAbD9eD0D60971565AA8510560ab41";
 /**
  * Merges multiple BalanceChanges objects into a single BalanceChanges.
@@ -206,7 +206,10 @@ export async function wasTxAtomicArb(transfersCategorized, fromAddress, calledCo
     }
     return false;
 }
-export async function solveAtomicArb(txHash, transactionDetails, transfersCategorized) {
+export async function solveAtomicArb(txHash, transfersCategorized) {
+    const transactionDetails = await getTransactionDetailsByTxHash(txHash);
+    if (!transactionDetails)
+        return;
     const { from: fromAddress, to: calledContractAddress } = extractTransactionAddresses(transactionDetails);
     if (!fromAddress || !calledContractAddress) {
         console.log(`Failed to fetch transactionDetails during arb detection for ${txHash} with ${transactionDetails},${fromAddress},${calledContractAddress}`);

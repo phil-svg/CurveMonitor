@@ -119,8 +119,12 @@ export async function makeTransfersReadable(tokenTransfers) {
     readableTransfers = filterNullSymbols(readableTransfers);
     return addPositionField(readableTransfers);
 }
-function handleTransferMethod(sender, receiver, amountHex, tokenAddress, tokenTransfers) {
-    const value = BigInt("0x" + amountHex);
+function handleTransferMethod(action, tokenTransfers) {
+    const sender = action.from;
+    const tokenAddress = action.to;
+    const receiver = "0x" + action.input.slice(34, 74);
+    const amountHex = "0x" + action.input.slice(74, 138);
+    const value = BigInt(amountHex);
     tokenTransfers.push({
         from: sender,
         to: receiver,
@@ -128,50 +132,90 @@ function handleTransferMethod(sender, receiver, amountHex, tokenAddress, tokenTr
         value: value.toString(),
     });
 }
-function handleUnwrapWethMethod(sender, receiver, amountHex, tokenTransfers) {
-    const value = BigInt("0x" + amountHex);
-    // Add WETH outgoing transfer
+function handleTransferFromMethod(action, tokenTransfers, trace) {
+    const tokenAddress = action.to;
+    const sender = "0x" + action.input.slice(34, 74);
+    const receiver = "0x" + action.input.slice(98, 138);
+    const amountHex = "0x" + action.input.slice(162, 202);
+    const value = BigInt(amountHex);
     tokenTransfers.push({
         from: sender,
+        to: receiver,
+        token: tokenAddress,
+        value: value.toString(),
+    });
+}
+function handleUnwrapWethMethod(action, tokenTransfers) {
+    const from = action.from;
+    const amountHex = "0x" + action.input.slice(10, 74);
+    const value = BigInt(amountHex);
+    tokenTransfers.push({
+        from: from,
         to: WETH_ADDRESS,
         token: WETH_ADDRESS,
         value: value.toString(),
     });
 }
-function handleWrapEthMethod(sender, receiver, amountHex, tokenTransfers) {
-    const value = BigInt("0x" + amountHex);
-    // Add ETH outgoing transfer
+function handleWrapEthMethod(action, tokenTransfers) {
+    const from = action.from;
+    const amountHex = action.input;
+    const value = BigInt(amountHex);
     tokenTransfers.push({
-        from: sender,
+        from: from,
         to: ETH_ADDRESS,
         token: ETH_ADDRESS,
         value: value.toString(),
     });
-    // Add WETH incoming transfer
     tokenTransfers.push({
         from: ETH_ADDRESS,
-        to: sender,
+        to: from,
         token: WETH_ADDRESS,
         value: value.toString(),
     });
 }
-function handleMintMethod(input, tokenAddress, tokenTransfers) {
-    const receiver = "0x" + input.slice(34, 74);
-    const amountHex = "0x" + input.slice(-64);
+function handleMintMethod(action, tokenTransfers) {
+    const tokenAddress = action.to;
+    const receiver = "0x" + action.input.slice(34, 74);
+    const amountHex = "0x" + action.input.slice(-64);
     tokenTransfers.push({
         from: NULL_ADDRESS,
         to: receiver,
-        value: BigInt(amountHex).toString(),
         token: tokenAddress,
+        value: BigInt(amountHex).toString(),
     });
 }
-function handleBurnMethod(action, input, tokenAddress, tokenTransfers) {
-    const amountHex = "0x" + input.slice(-64);
+function handleBurnMethod(action, tokenTransfers) {
+    const tokenAddress = action.to;
+    const amountHex = "0x" + action.input.slice(-64);
     tokenTransfers.push({
         from: action.from,
         to: NULL_ADDRESS,
-        value: BigInt(amountHex).toString(),
         token: tokenAddress,
+        value: BigInt(amountHex).toString(),
+    });
+}
+function handleAddLiquidityMethod(action, trace, tokenTransfers) {
+    const tokenAddress = action.to;
+    const amountHex = trace.result.output;
+    const receiver = trace.action.from;
+    const value = BigInt(amountHex);
+    tokenTransfers.push({
+        from: NULL_ADDRESS,
+        to: receiver,
+        token: tokenAddress,
+        value: value.toString(),
+    });
+}
+function handleDepositMethod(action, trace, tokenTransfers) {
+    const tokenAddress = action.to;
+    const amountHex = trace.result.output;
+    const receiver = trace.action.from;
+    const value = BigInt(amountHex);
+    tokenTransfers.push({
+        from: NULL_ADDRESS,
+        to: receiver,
+        token: tokenAddress,
+        value: value.toString(),
     });
 }
 export async function getTokenTransfersFromTransactionTrace(txTraces) {
@@ -188,7 +232,7 @@ async function extractTokenTransfers(trace, tokenTransfers) {
         const methodId = action.input.slice(0, 10).toLowerCase();
         const methodInfo = methodIds.find((m) => m.methodId === methodId);
         if (methodInfo) {
-            handleDynamicMethod(methodInfo.name, action, tokenTransfers);
+            handleDynamicMethod(methodInfo.name, action, tokenTransfers, trace);
         }
     }
     // Checking for Ether (ETH) transfers
@@ -207,72 +251,53 @@ async function extractTokenTransfers(trace, tokenTransfers) {
         }
     }
 }
-function extractTransferDetails(input, from, methodName) {
-    let sender = "";
-    let receiver = "";
-    let amountHex = "";
+function handleDynamicMethod(methodName, action, tokenTransfers, trace) {
     switch (methodName) {
         case "transfer":
-            sender = from;
-            receiver = "0x" + input.slice(34, 74);
-            amountHex = input.slice(74, 138);
+            handleTransferMethod(action, tokenTransfers);
             break;
         case "transferFrom":
-            sender = "0x" + input.slice(34, 74);
-            receiver = "0x" + input.slice(98, 138);
-            amountHex = input.slice(162, 202);
+            handleTransferFromMethod(action, tokenTransfers, trace);
             break;
         case "withdraw":
-            sender = from;
-            receiver = from;
-            amountHex = input.slice(10, 74);
+            handleUnwrapWethMethod(action, tokenTransfers);
             break;
-        case "customBurn":
-            sender = from;
-            receiver = NULL_ADDRESS;
-            amountHex = input.slice(10, 74);
+        case "wrap":
+            handleWrapEthMethod(action, tokenTransfers);
             break;
-        case "burnFrom":
-            sender = "0x" + input.slice(34, 74);
-            receiver = NULL_ADDRESS;
-            amountHex = input.slice(74, 138);
+        case "mint":
+            handleMintMethod(action, tokenTransfers);
             break;
         case "burn":
-            sender = from;
-            receiver = NULL_ADDRESS;
-            amountHex = input.slice(10, 74);
+        case "customBurn":
+        case "burnFrom":
+            handleBurnMethod(action, tokenTransfers);
+            break;
+        case "add_liquidity":
+            handleAddLiquidityMethod(action, trace, tokenTransfers);
+            break;
+        case "deposit":
+            // console.log("deposit", trace);
             break;
         // space for more cases
     }
-    return { sender, receiver, amountHex };
 }
-function handleDynamicMethod(methodName, action, tokenTransfers) {
-    const { input, from, to } = action;
-    const { sender, receiver, amountHex } = extractTransferDetails(input, from, methodName);
-    if (sender && receiver && amountHex) {
-        switch (methodName) {
-            case "transfer":
-            case "transferFrom":
-                handleTransferMethod(sender, receiver, amountHex, to, tokenTransfers);
-                break;
-            case "withdraw":
-                handleUnwrapWethMethod(sender, receiver, amountHex, tokenTransfers);
-                break;
-            case "wrap":
-                handleWrapEthMethod(sender, receiver, amountHex, tokenTransfers);
-                break;
-            case "mint":
-                handleMintMethod(input, to, tokenTransfers);
-                break;
-            case "customBurn":
-            case "burnFrom":
-                // TODO: handle burn method
-                break;
-            case "burn":
-                handleBurnMethod(action, input, action.to, tokenTransfers);
-                break;
-            // room for other cases if needed
+export function mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt) {
+    const filteredEvents = parsedEventsFromReceipt.filter((event) => (event === null || event === void 0 ? void 0 : event.eventName) === "Transfer");
+    for (const event of filteredEvents) {
+        if (event) {
+            const keys = Object.keys(event);
+            const matchingTransfer = tokenTransfersFromTransactionTraces.find((transfer) => transfer.from === event[keys[0]] && transfer.to === event[keys[1]] && transfer.token === event.contractAddress);
+            if (!matchingTransfer) {
+                tokenTransfersFromTransactionTraces.push({
+                    from: event[keys[0]],
+                    to: event[keys[1]],
+                    token: event[keys[3]],
+                    value: event[keys[2]],
+                });
+            }
         }
     }
+    return tokenTransfersFromTransactionTraces;
 }
 //# sourceMappingURL=TransferOverview.js.map

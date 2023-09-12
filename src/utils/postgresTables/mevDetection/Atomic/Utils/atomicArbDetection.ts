@@ -2,7 +2,7 @@ import { TransactionDetails } from "../../../../../models/TransactionDetails.js"
 import { CategorizedTransfers, FormattedArbitrageResult, ReadableTokenTransfer } from "../../../../Interfaces.js";
 import { ETH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
 import { getGasUsedFromReceipt } from "../../../readFunctions/Receipts.js";
-import { extractGasPrice, extractTransactionAddresses } from "../../../readFunctions/TransactionDetails.js";
+import { extractGasPrice, extractTransactionAddresses, getTransactionDetailsByTxHash } from "../../../readFunctions/TransactionDetails.js";
 
 const CoWProtocolGPv2Settlement = "0x9008D19f58AAbD9eD0D60971565AA8510560ab41";
 
@@ -260,7 +260,10 @@ export async function wasTxAtomicArb(transfersCategorized: CategorizedTransfers,
   return false;
 }
 
-export async function solveAtomicArb(txHash: string, transactionDetails: TransactionDetails, transfersCategorized: CategorizedTransfers): Promise<void> {
+export async function solveAtomicArb(txHash: string, transfersCategorized: CategorizedTransfers): Promise<void> {
+  const transactionDetails = await getTransactionDetailsByTxHash(txHash!);
+  if (!transactionDetails) return;
+
   const { from: fromAddress, to: calledContractAddress } = extractTransactionAddresses(transactionDetails);
   if (!fromAddress || !calledContractAddress) {
     console.log(`Failed to fetch transactionDetails during arb detection for ${txHash} with ${transactionDetails},${fromAddress},${calledContractAddress}`);

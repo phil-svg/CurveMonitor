@@ -1,4 +1,30 @@
 import { Receipts } from "../../../models/Receipts.js";
+export async function getShortenReceiptByTxHash(txHash) {
+    const records = await Receipts.findAll({
+        where: { transactionHash: txHash },
+        attributes: ["transactionIndex", "type", "logsBloom", "address", "data", "logIndex", "removed", "topics", "from", "to"],
+        order: [["logIndex", "ASC"]],
+    });
+    if (records.length === 0) {
+        return null; // No receipts found for this transaction hash
+    }
+    // Construct the Receipt object
+    const receipt = {
+        transactionIndex: records[0].transactionIndex,
+        type: records[0].type,
+        logsBloom: records[0].logsBloom,
+        logs: records.map((record) => ({
+            address: record.address,
+            data: record.data,
+            logIndex: record.logIndex,
+            removed: record.removed,
+            topics: record.topics,
+            from: record.from,
+            to: record.to,
+        })),
+    };
+    return receipt;
+}
 export async function getReceiptByTxHash(txHash) {
     const records = await Receipts.findAll({
         where: { transactionHash: txHash },

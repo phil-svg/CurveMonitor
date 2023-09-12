@@ -28,6 +28,54 @@ interface Receipt {
   logs: Log[];
 }
 
+interface ShortenedReceipt {
+  transactionIndex: string;
+  type: string;
+  logsBloom?: string;
+  logs: ShortenedLog[];
+}
+
+interface ShortenedLog {
+  address: string;
+  data: string;
+  logIndex: number;
+  removed: boolean;
+  topics: string[];
+  contractAddress?: string | null;
+  from: string;
+  to: string;
+}
+
+export async function getShortenReceiptByTxHash(txHash: string): Promise<ShortenedReceipt | null> {
+  const records = await Receipts.findAll({
+    where: { transactionHash: txHash },
+    attributes: ["transactionIndex", "type", "logsBloom", "address", "data", "logIndex", "removed", "topics", "from", "to"],
+    order: [["logIndex", "ASC"]],
+  });
+
+  if (records.length === 0) {
+    return null; // No receipts found for this transaction hash
+  }
+
+  // Construct the Receipt object
+  const receipt: ShortenedReceipt = {
+    transactionIndex: records[0].transactionIndex,
+    type: records[0].type,
+    logsBloom: records[0].logsBloom,
+    logs: records.map((record) => ({
+      address: record.address,
+      data: record.data,
+      logIndex: record.logIndex,
+      removed: record.removed,
+      topics: record.topics,
+      from: record.from,
+      to: record.to,
+    })),
+  };
+
+  return receipt;
+}
+
 export async function getReceiptByTxHash(txHash: string): Promise<Receipt | null> {
   const records = await Receipts.findAll({
     where: { transactionHash: txHash },
