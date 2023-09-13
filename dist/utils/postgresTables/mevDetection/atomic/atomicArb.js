@@ -11,7 +11,7 @@ async function fetchDataThenDetectArb(txHash) {
     const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
     // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
     const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash);
-    //console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
+    // console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
     const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
     // console.log("mergedTransfers", mergedTransfers);
     const readableTransfers = await makeTransfersReadable(mergedTransfers);

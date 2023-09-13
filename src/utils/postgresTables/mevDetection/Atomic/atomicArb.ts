@@ -1,3 +1,4 @@
+import { constrainedMemory } from "process";
 import { updateAbisFromTrace } from "../../../helperFunctions/MethodID.js";
 import { parseEventsFromReceiptForEntireTx } from "../../../txMap/Events.js";
 import { getCategorizedTransfersFromTxTrace } from "../../../txMap/TransferCategories.js";
@@ -22,7 +23,7 @@ async function fetchDataThenDetectArb(txHash: string) {
   // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
 
   const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash!);
-  //console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
+  // console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
 
   const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
   // console.log("mergedTransfers", mergedTransfers);

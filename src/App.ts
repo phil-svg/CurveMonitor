@@ -25,7 +25,7 @@ import { updateContractCreations } from "./utils/postgresTables/ContractCreation
 export async function initDatabase() {
   try {
     await db.sync();
-    console.log("[✓] Database synced successfully.");
+    console.log("[✓] Database synced successfully.\n");
   } catch (err) {
     console.error("Error syncing database:", err);
   }

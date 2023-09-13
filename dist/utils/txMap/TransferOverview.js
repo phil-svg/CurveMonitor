@@ -287,7 +287,9 @@ export function mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, par
     for (const event of filteredEvents) {
         if (event) {
             const keys = Object.keys(event);
-            const matchingTransfer = tokenTransfersFromTransactionTraces.find((transfer) => transfer.from === event[keys[0]] && transfer.to === event[keys[1]] && transfer.token === event.contractAddress);
+            const matchingTransfer = tokenTransfersFromTransactionTraces.find((transfer) => transfer.from.toLowerCase() === event[keys[0]].toLowerCase() &&
+                transfer.to.toLowerCase() === event[keys[1]].toLowerCase() &&
+                transfer.token.toLowerCase() === event.contractAddress.toLowerCase());
             if (!matchingTransfer) {
                 tokenTransfersFromTransactionTraces.push({
                     from: event[keys[0]],

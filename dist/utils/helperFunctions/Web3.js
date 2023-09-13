@@ -1,6 +1,7 @@
 import Web3 from "web3";
 import { getAbiBy } from "../postgresTables/Abi.js";
 import { getAddressById, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
+import { readAbiFromAbisEthereumTable } from "../postgresTables/readFunctions/Abi.js";
 let web3WsProvider = null;
 export function getWeb3WsProvider() {
     if (!web3WsProvider) {
@@ -111,6 +112,13 @@ export async function getContractByPoolID(poolId) {
         console.log(`Err fetching ABI for pool ${poolId}`);
         return;
     }
+}
+export async function getContractGlobalByAddress(address) {
+    const WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
+    const abi = await readAbiFromAbisEthereumTable(address);
+    if (!abi)
+        return;
+    return new WEB3_HTTP_PROVIDER.eth.Contract(abi, address);
 }
 export async function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS) {
     const WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();

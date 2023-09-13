@@ -21,6 +21,7 @@ import { AddressesCalledCounts } from "../models/AddressesCalledCount.js";
 import { Receipts } from "../models/Receipts.js";
 import { TransactionTrace } from "../models/TransactionTrace.js";
 import { Contracts } from "../models/Contracts.js";
+import { ProxyCheck } from "../models/ProxyCheck.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 config({ path: resolve(__dirname, "..", "..", ".env") });
@@ -51,6 +52,7 @@ const sequelize = new Sequelize({
         Receipts,
         TransactionTrace,
         Contracts,
+        ProxyCheck,
     ],
     logging: false,
 });
