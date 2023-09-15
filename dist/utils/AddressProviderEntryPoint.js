@@ -35,6 +35,8 @@ async function storeAbisForProvidedAddresses(ADDRESS_ARR) {
         if (!(await isAbiStored(TABLE_NAME, ADDRESS))) {
             await new Promise((resolve) => setTimeout(resolve, 200)); // ethersans' rate limit is 5 calls / second
             const ABI = await fetchAbiFromEtherscan(ADDRESS);
+            if (!ABI)
+                continue;
             await storeAbiForAddressProvider(ADDRESS, ABI);
         }
     }

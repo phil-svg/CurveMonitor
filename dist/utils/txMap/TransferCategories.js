@@ -54,9 +54,10 @@ function identifyLiquidityPairs(transfers) {
         if (transfer.from === NULL_ADDRESS) {
             // Looking for LP minting
             const possibleDepositPositions = [transfer.position - 1, transfer.position + 1];
-            for (const possibleDepositTxPosition of possibleDepositPositions) {
-                const depositTx = transfers.find((tx) => tx.position === possibleDepositTxPosition && tx.from === transfer.to // Ensuring the depositor is also the LP mint's recipient
-                );
+            for (const possiblePosition of possibleDepositPositions) {
+                const depositTx = transfers.find((possibleDeposit) => {
+                    return possibleDeposit.position === possiblePosition && possibleDeposit.from === transfer.to; // Ensuring the depositor is also the LP mint's recipient
+                });
                 if (depositTx) {
                     liquidityPairs.push([depositTx, transfer]);
                     break;
@@ -66,8 +67,8 @@ function identifyLiquidityPairs(transfers) {
         else if (transfer.to === NULL_ADDRESS) {
             // Looking for LP burning
             const possibleWithdrawPositions = [transfer.position - 1, transfer.position + 1];
-            for (const possibleWithdrawTxPosition of possibleWithdrawPositions) {
-                const withdrawTx = transfers.find((tx) => tx.position === possibleWithdrawTxPosition && tx.to === transfer.from // Ensuring the burner is also the recipient of the assets
+            for (const possiblePosition of possibleWithdrawPositions) {
+                const withdrawTx = transfers.find((possibleWithdraw) => possibleWithdraw.position === possiblePosition && possibleWithdraw.to === transfer.from // Ensuring the burner is also the recipient of the assets
                 );
                 if (withdrawTx) {
                     liquidityPairs.push([transfer, withdrawTx]);
@@ -165,10 +166,10 @@ export function categorizeTransfers(transfers) {
     // Identify Wraps and Unwraps first
     const { etherWrapsAndUnwraps, remainingTransfers: postWrapAndUnwrapTransfers } = identifyEtherWrapsAndUnwraps(transfers);
     const { liquidityEvents, remainingTransfers: postLiquidityEventTransfers } = identifyLiquidityEvents(postWrapAndUnwrapTransfers);
-    const { swapPairs, remainingTransfers: postSwapTransfers } = identifySwapPairs(postLiquidityEventTransfers);
-    const { inflowingETH, outflowingETH, remainingTransfers: postEthFlowTransfers } = categorizeEthFlows(postSwapTransfers, addressesThatAppearMultipleTimes);
+    const { inflowingETH, outflowingETH, remainingTransfers: postEthFlowTransfers } = categorizeEthFlows(postLiquidityEventTransfers, addressesThatAppearMultipleTimes);
     const { liquidityPairs, remainingTransfers: postliquidityPairsTransfers } = identifyLiquidityPairs(postEthFlowTransfers);
-    const { isolatedTransfers, remainingTransfers: postIsolatedTransfers } = identifyIsolatedTransfers(postliquidityPairsTransfers);
+    const { swapPairs, remainingTransfers: postSwapTransfers } = identifySwapPairs(postliquidityPairsTransfers);
+    const { isolatedTransfers, remainingTransfers: postIsolatedTransfers } = identifyIsolatedTransfers(postSwapTransfers);
     const { multiStepSwaps, remainingTransfers: postMultiStepTransfers } = identifyMultiStepSwaps(postIsolatedTransfers);
     const remainder = removeMultiStepSwaps(postMultiStepTransfers, multiStepSwaps);
     return {
@@ -185,9 +186,7 @@ export function categorizeTransfers(transfers) {
 }
 export async function getReadableTransfersFromTransactionTrace(transactionTraces) {
     const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
-    // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
     const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
-    // console.log("readableTransfers", readableTransfers);
     return readableTransfers;
 }
 export async function getCategorizedTransfersFromTxTrace(cleanedTransfers) {

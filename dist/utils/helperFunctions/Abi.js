@@ -1,9 +1,10 @@
+import { Op } from "sequelize";
 import { AbisEthereum } from "../../models/Abi.js";
 import { ProxyCheck } from "../../models/ProxyCheck.js";
 import { fetchAbiFromEtherscan } from "../postgresTables/Abi.js";
 import { readAbiFromAbisEthereumTable } from "../postgresTables/readFunctions/Abi.js";
 import { NULL_ADDRESS } from "./Constants.js";
-import { getImplementationContractAddress } from "./ProxyCheck.js";
+import { getImplementationContractAddressErc1967, getImplementationContractAddressErc897 } from "./ProxyCheck.js";
 class RateLimiter {
     constructor(maxCallsPerInterval, interval) {
         this.maxCallsPerInterval = maxCallsPerInterval;
@@ -35,10 +36,16 @@ const rateLimiter = new RateLimiter(5, 1000);
  * @param contractAddress - The contract address for which the ABI is required.
  * @returns The ABI as a JSON array.
  */
-export async function updateAbiFromContractAddress(contractAddress, JsonRpcProvider) {
+export async function updateAbiFromContractAddress(contractAddress, JsonRpcProvider, web3HttpProvider) {
     return rateLimiter.call(async () => {
         // Checking if the contract address exists in the new table
-        const contractRecord = await ProxyCheck.findOne({ where: { contractAddress } });
+        const contractRecord = await ProxyCheck.findOne({
+            where: {
+                contractAddress: {
+                    [Op.iLike]: contractAddress,
+                },
+            },
+        });
         // If the contract exists and is a proxy
         if (contractRecord && contractRecord.is_proxy_contract) {
             const implementationAddress = contractRecord.implementation_address;
@@ -52,23 +59,20 @@ export async function updateAbiFromContractAddress(contractAddress, JsonRpcProvi
         }
         // If the contract is not a proxy or doesn't exist in the new table
         if (!contractRecord) {
-            const implementationAddress = await getImplementationContractAddress(contractAddress, JsonRpcProvider);
-            if (implementationAddress !== NULL_ADDRESS) {
-                // If an implementation address is found, saving it as a proxy in the new table
-                await ProxyCheck.upsert({
-                    contractAddress,
-                    is_proxy_contract: true,
-                    implementation_address: implementationAddress,
-                });
-                // Fetching ABI from Etherscan using the implementation address
-                return fetchAbiFromEtherscan(implementationAddress);
+            const implementationAddressErc1967 = await getImplementationContractAddressErc1967(contractAddress, JsonRpcProvider);
+            if (implementationAddressErc1967 !== NULL_ADDRESS) {
+                await handleUpsertProxyCheck(contractAddress, true, implementationAddressErc1967, ["EIP_1967"]);
+                return fetchAbiFromEtherscan(implementationAddressErc1967);
             }
             else {
-                // If not a proxy, adding it to the new table
-                await ProxyCheck.upsert({
-                    contractAddress,
-                    is_proxy_contract: false,
-                });
+                const implementationAddressErc897 = await getImplementationContractAddressErc897(contractAddress, web3HttpProvider);
+                if (implementationAddressErc897) {
+                    await handleUpsertProxyCheck(contractAddress, true, implementationAddressErc897, ["EIP_1967", "EIP_897"]);
+                    return fetchAbiFromEtherscan(implementationAddressErc897);
+                }
+                else {
+                    await handleUpsertProxyCheck(contractAddress, false, null, ["EIP_1967", "EIP_897"]);
+                }
             }
         }
         // Fetching ABI either from the DB or Etherscan
@@ -93,5 +97,31 @@ export async function updateAbiFromContractAddress(contractAddress, JsonRpcProvi
         }
         return null;
     });
+}
+async function handleUpsertProxyCheck(contractAddress, isProxy, implementationAddress, standards) {
+    // Find the record first
+    const existingRecord = await ProxyCheck.findOne({ where: { contractAddress } });
+    if (existingRecord) {
+        // Ensure checked_standards is not null
+        if (!existingRecord.checked_standards) {
+            existingRecord.checked_standards = [];
+        }
+        // If record exists, append the standards if they're not present
+        for (const standard of standards) {
+            if (!existingRecord.checked_standards.includes(standard)) {
+                existingRecord.checked_standards.push(standard);
+            }
+        }
+        await existingRecord.save();
+    }
+    else {
+        // If record doesn't exist, create it with the standards
+        await ProxyCheck.create({
+            contractAddress,
+            is_proxy_contract: isProxy,
+            implementation_address: implementationAddress,
+            checked_standards: standards,
+        });
+    }
 }
 //# sourceMappingURL=Abi.js.map

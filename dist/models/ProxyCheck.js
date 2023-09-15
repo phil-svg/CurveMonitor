@@ -16,6 +16,9 @@ __decorate([
 __decorate([
     Column({ type: DataType.STRING, allowNull: true })
 ], ProxyCheck.prototype, "implementation_address", void 0);
+__decorate([
+    Column({ type: DataType.ARRAY(DataType.STRING), allowNull: true })
+], ProxyCheck.prototype, "checked_standards", void 0);
 ProxyCheck = __decorate([
     Table({ tableName: "proxy_checks" })
 ], ProxyCheck);

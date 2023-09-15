@@ -32,6 +32,13 @@ async function vyper_contract() {
         // Delay each loop iteration by 200ms
         await new Promise((resolve) => setTimeout(resolve, 200));
         const abi = await fetchAbiFromEtherscan(address);
+        if (!abi) {
+            if (manualLaborLabels[address]) {
+                const label = manualLaborLabels[address];
+                await Labels.update({ label: label }, { where: { address: address } });
+            }
+            continue;
+        }
         let contract = new web3.eth.Contract(abi, address);
         // Check if the ABI has a "name" function
         const hasNameFunction = abi.some((item) => item.name === "name" && item.type === "function");

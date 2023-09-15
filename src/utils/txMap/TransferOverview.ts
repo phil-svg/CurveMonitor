@@ -124,6 +124,8 @@ export async function makeTransfersReadable(tokenTransfers: TokenTransfer[]): Pr
     let tokenDecimals: number | null = null;
     let parsedAmount = 0;
 
+    console.log("transfer.token", transfer.token, "coinId", coinId);
+
     if (coinId === null) continue;
 
     tokenSymbol = await findCoinSymbolById(coinId);

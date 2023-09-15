@@ -274,9 +274,8 @@ export async function solveAtomicArb(txHash: string, transfersCategorized: Categ
 
   if (txWasAtomicArb) {
     const formattedArbitrage = await formatArbitrage(transfersCategorized, txHash, transactionDetails, fromAddress, calledContractAddress);
-    // console.log("formattedArbitrage.extractedValue:", formattedArbitrage.extractedValue);
+    console.log("formattedArbitrage.extractedValue:", formattedArbitrage.extractedValue);
   } else {
     console.log("Not Atomic Arbitrage!");
   }
-  console.log("txHash", txHash);
 }

@@ -41,13 +41,14 @@ async function delay(ms: number) {
 }
 
 // Fetches ABI from Etherscan
-export async function fetchAbiFromEtherscan(address: string): Promise<any[]> {
+export async function fetchAbiFromEtherscan(address: string): Promise<any[] | null> {
   const URL = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${process.env.ETHERSCAN_KEY}`;
 
   const MAX_RETRIES = 12;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const ABI = (await axios.get(URL)).data.result;
+      if (ABI === "Contract source code not verified") return null;
       return JSON.parse(ABI);
     } catch (error) {
       if (error instanceof AxiosError && error.response && error.response.status === 429) {
@@ -130,7 +131,7 @@ export async function getAbiBy(tableName: string, options: { address?: string; i
 
     if (!abi) {
       abi = await fetchAbiFromEtherscan(address);
-      if (options.id) {
+      if (options.id && abi) {
         await storeAbiForPools(options.id, abi);
       } else {
         console.error("Error: Missing pool_id to store the ABI in AbisPools table");

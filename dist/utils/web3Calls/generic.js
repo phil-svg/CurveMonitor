@@ -117,6 +117,27 @@ export async function web3Call(CONTRACT, method, params, blockNumber = { block: 
         }
     }
 }
+export async function web3CallLogFree(CONTRACT, method, params, blockNumber = { block: "latest" }) {
+    let shouldContinue = true;
+    let retries = 0;
+    while (shouldContinue && retries < 12) {
+        try {
+            return await CONTRACT.methods[method](...params).call(blockNumber);
+        }
+        catch (error) {
+            if (isError(error) && !isCupsErr(error)) {
+                shouldContinue = false;
+            }
+            else {
+                await randomDelay();
+            }
+        }
+        retries++;
+        if (shouldContinue) {
+            await delay();
+        }
+    }
+}
 export async function getBlockTimeStamp(blockNumber) {
     const MAX_RETRIES = 5; // Maximum number of retries
     const RETRY_DELAY = 600; // Delay between retries in milliseconds
@@ -193,7 +214,6 @@ export async function getTxReceiptClassic(txHash) {
         return null;
     }
 }
-// buggy
 export async function getTxReceipt(txHash) {
     const limiter = new Bottleneck({
         maxConcurrent: 100,

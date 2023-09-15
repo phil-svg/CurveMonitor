@@ -44,6 +44,8 @@ export async function fetchAbiFromEtherscan(address) {
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
             const ABI = (await axios.get(URL)).data.result;
+            if (ABI === "Contract source code not verified")
+                return null;
             return JSON.parse(ABI);
         }
         catch (error) {
@@ -123,7 +125,7 @@ export async function getAbiBy(tableName, options) {
         }
         if (!abi) {
             abi = await fetchAbiFromEtherscan(address);
-            if (options.id) {
+            if (options.id && abi) {
                 await storeAbiForPools(options.id, abi);
             }
             else {

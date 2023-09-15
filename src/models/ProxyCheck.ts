@@ -10,4 +10,7 @@ export class ProxyCheck extends Model {
 
   @Column({ type: DataType.STRING, allowNull: true })
   implementation_address!: string | null;
+
+  @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: true })
+  checked_standards!: string[] | null;
 }

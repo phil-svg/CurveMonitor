@@ -84,11 +84,14 @@ let AbisEthereum = class AbisEthereum extends AbiModelEthereum {
 };
 __decorate([
     PrimaryKey,
-    Column({ type: DataType.STRING, unique: true }) // Ensure the contract_address is indexed
+    Column({ type: DataType.STRING, unique: true })
 ], AbisEthereum.prototype, "contract_address", void 0);
 __decorate([
-    Column(DataType.JSON)
+    Column({ type: DataType.JSON, allowNull: true })
 ], AbisEthereum.prototype, "abi", void 0);
+__decorate([
+    Column({ type: DataType.BOOLEAN })
+], AbisEthereum.prototype, "is_verified", void 0);
 AbisEthereum = __decorate([
     Table({ tableName: "abis_ethereum" })
 ], AbisEthereum);

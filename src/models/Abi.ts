@@ -72,11 +72,14 @@ abstract class AbiModelEthereum extends Model {
 @Table({ tableName: "abis_ethereum" })
 export class AbisEthereum extends AbiModelEthereum {
   @PrimaryKey
-  @Column({ type: DataType.STRING, unique: true }) // Ensure the contract_address is indexed
+  @Column({ type: DataType.STRING, unique: true })
   declare contract_address: string;
 
-  @Column(DataType.JSON)
-  declare abi: any[];
+  @Column({ type: DataType.JSON, allowNull: true })
+  declare abi: any[] | null;
+
+  @Column({ type: DataType.BOOLEAN })
+  declare is_verified: boolean | null;
 }
 
 export const AbiModels = [AbisPools, AbisRelatedToAddressProvider, AbisEthereum];
