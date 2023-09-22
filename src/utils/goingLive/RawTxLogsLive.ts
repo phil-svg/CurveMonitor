@@ -1,6 +1,5 @@
 import { TransactionDetails } from "../../models/TransactionDetails.js";
 import { eventFlags } from "../api/utils/EventFlags.js";
-import { getCurrentTimeString } from "../helperFunctions/QualityOfLifeStuff.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
 import { fetchContractAgeInRealtime } from "../postgresTables/ContractCreations.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
@@ -33,6 +32,7 @@ async function subscribeToAddress(address: string) {
   contract.events
     .allEvents({ fromBlock: "latest" })
     .on("data", async (event: any) => {
+      console.log("\n picked up new event:", event);
       await storeEvent(event, poolId); // saving raw log in db
       bufferEvent(address, event); // temp storing event for parsing
     })

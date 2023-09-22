@@ -1,8 +1,8 @@
 import { ParsedEvent } from "../Interfaces.js";
-import { updateAbiFromContractAddress } from "../helperFunctions/Abi.js";
+import { updateAbiIWithProxyCheck } from "../helperFunctions/ProxyCheck.js";
 import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { isContractVerified } from "../postgresTables/readFunctions/Abi.js";
-import { getProxyImplementationAddress } from "../postgresTables/readFunctions/ProxyCheck.js";
+import { getImplementationAddressFromTable } from "../postgresTables/readFunctions/ProxyCheck.js";
 import { getShortenReceiptByTxHash } from "../postgresTables/readFunctions/Receipts.js";
 import { ethers } from "ethers";
 
@@ -16,20 +16,20 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
     let contractAddress = log.address;
 
     // checking if the contract is a proxy
-    const implementationAddress = await getProxyImplementationAddress(contractAddress);
+    const implementationAddress = await getImplementationAddressFromTable(contractAddress);
     if (implementationAddress) {
       contractAddress = implementationAddress; // using implementation address if it's a proxy
     }
 
-    const contractAbi = await updateAbiFromContractAddress(contractAddress, JsonRpcProvider, web3HttpProvider);
+    const contractAbi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
 
     if (!contractAbi) {
-      console.error(`No ABI found for contract address: ${contractAddress}`);
+      // console.error(`No ABI found for contract address: ${contractAddress}`);
       return null;
     }
 
     if (!(await isContractVerified(contractAddress))) {
-      console.log(`Contract at address: ${contractAddress} is not verified.`);
+      // console.log(`Contract at address: ${contractAddress} is not verified.`);
       return null;
     }
 
@@ -37,7 +37,7 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
       const eventAbi = contractAbi.find((abiItem: any) => abiItem.type === "event" && log.topics[0] === web3HttpProvider.eth.abi.encodeEventSignature(abiItem));
 
       if (!eventAbi) {
-        console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
+        // console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
         return null;
       }
 

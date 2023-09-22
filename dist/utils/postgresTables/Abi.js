@@ -38,12 +38,22 @@ async function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 // Fetches ABI from Etherscan
+let lastRequestTime = 0;
 export async function fetchAbiFromEtherscan(address) {
     const URL = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${process.env.ETHERSCAN_KEY}`;
+    const REQUEST_INTERVAL = 200; // etherscan rate limit
     const MAX_RETRIES = 12;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
+            // Calculate the time since the last request
+            const now = Date.now();
+            const timeSinceLastRequest = now - lastRequestTime;
+            // If the interval is shorter than the allowed interval, wait for the difference
+            if (timeSinceLastRequest < REQUEST_INTERVAL) {
+                await delay(REQUEST_INTERVAL - timeSinceLastRequest);
+            }
             const ABI = (await axios.get(URL)).data.result;
+            lastRequestTime = Date.now(); // Update the last request time
             if (ABI === "Contract source code not verified")
                 return null;
             return JSON.parse(ABI);
@@ -51,7 +61,7 @@ export async function fetchAbiFromEtherscan(address) {
         catch (error) {
             if (error instanceof AxiosError && error.response && error.response.status === 429) {
                 // HTTP 429 Too Many Requests
-                console.log(`Attempt ${attempt} failed, retrying in ${attempt * 2} seconds...`);
+                console.log(`Attempt ${attempt} failed due to rate limit, retrying in ${attempt * 2} seconds...`);
                 await delay(attempt * 2000);
             }
             else {

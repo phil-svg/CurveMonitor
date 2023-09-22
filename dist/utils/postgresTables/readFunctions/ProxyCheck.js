@@ -1,5 +1,6 @@
+import { Op } from "sequelize";
 import { ProxyCheck } from "../../../models/ProxyCheck.js";
-export async function getProxyImplementationAddress(contractAddress) {
+export async function getImplementationAddressFromTable(contractAddress) {
     const record = await ProxyCheck.findOne({
         where: {
             contractAddress: contractAddress,
@@ -9,5 +10,23 @@ export async function getProxyImplementationAddress(contractAddress) {
         return record.implementation_address;
     }
     return null;
+}
+export async function findContractInProxyCheck(contractAddress) {
+    const contractRecord = await ProxyCheck.findOne({
+        where: {
+            contractAddress: {
+                [Op.iLike]: contractAddress,
+            },
+        },
+    });
+    return contractRecord;
+}
+export async function createProxyCheckRecord(contractAddress, isProxy, implementationAddress, standards) {
+    await ProxyCheck.create({
+        contractAddress,
+        is_proxy_contract: isProxy,
+        implementation_address: implementationAddress,
+        checked_standards: standards,
+    });
 }
 //# sourceMappingURL=ProxyCheck.js.map

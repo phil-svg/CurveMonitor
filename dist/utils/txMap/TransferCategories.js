@@ -19,7 +19,7 @@ function identifySwapPairs(transfers) {
         for (let j = i + 1; j < remainingTransfers.length; j++) {
             const currentTransfer = remainingTransfers[i];
             const potentialPairTransfer = remainingTransfers[j];
-            if (currentTransfer.from === potentialPairTransfer.to && currentTransfer.to === potentialPairTransfer.from) {
+            if (currentTransfer.from.toLowerCase() === potentialPairTransfer.to.toLowerCase() && currentTransfer.to.toLowerCase() === potentialPairTransfer.from.toLowerCase()) {
                 swapPairs.push([currentTransfer, potentialPairTransfer]);
                 remainingTransfers = remainingTransfers.filter((_, index) => index !== i && index !== j);
                 i--;
@@ -30,20 +30,27 @@ function identifySwapPairs(transfers) {
     return { swapPairs, remainingTransfers };
 }
 // Helper function to categorize ETH inflow and outflow
-function categorizeEthFlows(transfers, addressesCount) {
+function categorizeEthFlows(transfers, from, to) {
+    const addressesCount = {};
+    transfers.forEach((transfer) => {
+        addressesCount[transfer.from] = (addressesCount[transfer.from] || 0) + 1;
+        addressesCount[transfer.to] = (addressesCount[transfer.to] || 0) + 1;
+    });
     const inflowingETH = [];
     const outflowingETH = [];
     const remainingTransfers = transfers.filter((transfer) => {
         const isETHTransfer = transfer.tokenSymbol === "ETH";
-        if (isETHTransfer && addressesCount[transfer.to] > 1) {
+        // For inflowing ETH
+        if (isETHTransfer && (transfer.to.toLowerCase() === from.toLowerCase() || transfer.to.toLowerCase() === to.toLowerCase()) && addressesCount[transfer.from] === 1) {
             inflowingETH.push(transfer);
             return false;
         }
-        else if (isETHTransfer && addressesCount[transfer.from] > 1) {
+        // For outflowing ETH
+        if (isETHTransfer && (transfer.from.toLowerCase() === from.toLowerCase() || transfer.from.toLowerCase() === to.toLowerCase()) && addressesCount[transfer.to] === 1) {
             outflowingETH.push(transfer);
             return false;
         }
-        return true;
+        return true; // For remaining transfers
     });
     return { inflowingETH, outflowingETH, remainingTransfers };
 }
@@ -157,16 +164,11 @@ function identifyLiquidityEvents(transfers) {
     }
     return { liquidityEvents, remainingTransfers };
 }
-export function categorizeTransfers(transfers) {
-    const addressesThatAppearMultipleTimes = {};
-    transfers.forEach((transfer) => {
-        addressesThatAppearMultipleTimes[transfer.from] = (addressesThatAppearMultipleTimes[transfer.from] || 0) + 1;
-        addressesThatAppearMultipleTimes[transfer.to] = (addressesThatAppearMultipleTimes[transfer.to] || 0) + 1;
-    });
+export function categorizeTransfers(transfers, from, to) {
     // Identify Wraps and Unwraps first
     const { etherWrapsAndUnwraps, remainingTransfers: postWrapAndUnwrapTransfers } = identifyEtherWrapsAndUnwraps(transfers);
     const { liquidityEvents, remainingTransfers: postLiquidityEventTransfers } = identifyLiquidityEvents(postWrapAndUnwrapTransfers);
-    const { inflowingETH, outflowingETH, remainingTransfers: postEthFlowTransfers } = categorizeEthFlows(postLiquidityEventTransfers, addressesThatAppearMultipleTimes);
+    const { inflowingETH, outflowingETH, remainingTransfers: postEthFlowTransfers } = categorizeEthFlows(postLiquidityEventTransfers, from, to);
     const { liquidityPairs, remainingTransfers: postliquidityPairsTransfers } = identifyLiquidityPairs(postEthFlowTransfers);
     const { swapPairs, remainingTransfers: postSwapTransfers } = identifySwapPairs(postliquidityPairsTransfers);
     const { isolatedTransfers, remainingTransfers: postIsolatedTransfers } = identifyIsolatedTransfers(postSwapTransfers);
@@ -189,8 +191,8 @@ export async function getReadableTransfersFromTransactionTrace(transactionTraces
     const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
     return readableTransfers;
 }
-export async function getCategorizedTransfersFromTxTrace(cleanedTransfers) {
-    const transfersCategorized = categorizeTransfers(cleanedTransfers);
+export async function getCategorizedTransfersFromTxTrace(cleanedTransfers, from, to) {
+    const transfersCategorized = categorizeTransfers(cleanedTransfers, from, to);
     return transfersCategorized;
 }
 //# sourceMappingURL=TransferCategories.js.map

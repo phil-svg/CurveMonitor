@@ -30,6 +30,7 @@ async function subscribeToAddress(address) {
     contract.events
         .allEvents({ fromBlock: "latest" })
         .on("data", async (event) => {
+        console.log("\n picked up new event:", event);
         await storeEvent(event, poolId); // saving raw log in db
         bufferEvent(address, event); // temp storing event for parsing
     })

@@ -1,7 +1,34 @@
-import { ETH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
+import { CoWProtocolGPv2Settlement, ETH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
 import { getGasUsedFromReceipt } from "../../../readFunctions/Receipts.js";
-import { extractGasPrice, extractTransactionAddresses, getTransactionDetailsByTxHash } from "../../../readFunctions/TransactionDetails.js";
-const CoWProtocolGPv2Settlement = "0x9008D19f58AAbD9eD0D60971565AA8510560ab41";
+import { extractGasPrice, getTransactionDetailsByTxHash } from "../../../readFunctions/TransactionDetails.js";
+export async function getBalanceChangeForAddressFromTransfers(walletAddress, cleanedTransfers) {
+    const balances = {};
+    cleanedTransfers.forEach((transfer) => {
+        // If the address is involved in the transaction
+        if (transfer.from.toLowerCase() === walletAddress.toLowerCase() || transfer.to.toLowerCase() === walletAddress.toLowerCase()) {
+            const address = transfer.tokenAddress;
+            const symbol = transfer.tokenSymbol || "Unknown Token";
+            if (!balances[address]) {
+                balances[address] = { symbol: symbol, amount: 0 };
+            }
+            if (transfer.from.toLowerCase() === walletAddress.toLowerCase()) {
+                balances[address].amount -= transfer.parsedAmount;
+            }
+            if (transfer.to.toLowerCase() === walletAddress.toLowerCase()) {
+                balances[address].amount += transfer.parsedAmount;
+            }
+        }
+    });
+    // Filter out values smaller than 1e-7 in magnitude
+    const filteredBalances = Object.keys(balances)
+        .filter((token) => Math.abs(balances[token].amount) >= 1e-7)
+        .map((token) => ({
+        address: token,
+        symbol: balances[token].symbol,
+        amount: balances[token].amount,
+    }));
+    return filteredBalances;
+}
 /**
  * Merges multiple BalanceChanges objects into a single BalanceChanges.
  *
@@ -53,7 +80,21 @@ const calculateBalanceChangesForMints = (liquidityPairs, calledContractAddress) 
     });
     return balanceChange;
 };
-export function marketArbitrageSection(readableTransfers, fromAddress, calledContractAddress) {
+function convertWETHtoETHforBalanceChanges(balanceChanges) {
+    const updatedBalances = Object.assign({}, balanceChanges);
+    if (updatedBalances[WETH_ADDRESS]) {
+        const wethAmount = updatedBalances[WETH_ADDRESS].amount;
+        if (updatedBalances[ETH_ADDRESS]) {
+            updatedBalances[ETH_ADDRESS].amount += wethAmount;
+        }
+        else {
+            updatedBalances[ETH_ADDRESS] = { symbol: "ETH", amount: wethAmount };
+        }
+        delete updatedBalances[WETH_ADDRESS];
+    }
+    return updatedBalances;
+}
+export function marketArbitrageSection(readableTransfers, calledContractAddress) {
     const calculateBalanceChangesForSwaps = (swaps, calledContractAddress) => {
         let balanceChange = {};
         const calledAddressLower = calledContractAddress.toLowerCase();
@@ -80,11 +121,15 @@ export function marketArbitrageSection(readableTransfers, fromAddress, calledCon
     const balanceChangeMints = calculateBalanceChangesForMints(readableTransfers.liquidityPairs, calledContractAddress);
     // Combine balance changes
     const combinedBalanceChanges = mergeBalanceChanges(balanceChangeSwaps, balanceChangeMultiStepSwaps, balanceChangeMints);
-    return combinedBalanceChanges;
+    // sum WETH against ETH
+    const finalBalanceChanges = convertWETHtoETHforBalanceChanges(combinedBalanceChanges);
+    return finalBalanceChanges;
 }
-export function bribe(readableTransfers) {
+export function bribe(readableTransfers, from) {
     let totalOutflowingETH = 0;
     for (const transfer of readableTransfers.outflowingETH) {
+        if (transfer.to.toLowerCase() === from.toLowerCase())
+            continue; // excluding eth being send from bot to bot owner from bribe amount
         totalOutflowingETH += transfer.parsedAmount;
     }
     return {
@@ -142,8 +187,8 @@ export async function formatArbitrage(transfersCategorized, txHash, transactionD
         throw new Error("Failed to retrieve gasUsed from receipt");
     }
     const gasPrice = parseInt(gasPriceResult, 10);
-    const combinedBalanceChanges = marketArbitrageSection(transfersCategorized, fromAddress, calledContractAddress);
-    const bribeAmount = bribe(transfersCategorized);
+    const combinedBalanceChanges = marketArbitrageSection(transfersCategorized, calledContractAddress);
+    const bribeAmount = bribe(transfersCategorized, fromAddress);
     const gasCostETH = (gasUsed * gasPrice) / 1e18;
     const netWin = calculateNetWin(combinedBalanceChanges, bribeAmount, gasCostETH);
     const formattedResult = {
@@ -206,19 +251,18 @@ export async function wasTxAtomicArb(transfersCategorized, fromAddress, calledCo
     }
     return false;
 }
-export async function solveAtomicArb(txHash, transfersCategorized) {
+export async function solveAtomicArb(txHash, transfersCategorized, cleanedTransfers, from, to) {
     const transactionDetails = await getTransactionDetailsByTxHash(txHash);
     if (!transactionDetails)
         return;
-    const { from: fromAddress, to: calledContractAddress } = extractTransactionAddresses(transactionDetails);
-    if (!fromAddress || !calledContractAddress) {
-        console.log(`Failed to fetch transactionDetails during arb detection for ${txHash} with ${transactionDetails},${fromAddress},${calledContractAddress}`);
-        return;
-    }
-    const txWasAtomicArb = await wasTxAtomicArb(transfersCategorized, fromAddress, calledContractAddress);
+    // const balanceChangeFrom = await getBalanceChangeForAddressFromTransfers(from, cleanedTransfers);
+    // console.log("balanceChangeFrom", balanceChangeFrom);
+    // const balanceChangeTo = await getBalanceChangeForAddressFromTransfers(to, cleanedTransfers);
+    // console.log("balanceChangeTo", balanceChangeTo);
+    const txWasAtomicArb = await wasTxAtomicArb(transfersCategorized, from, to);
     if (txWasAtomicArb) {
-        const formattedArbitrage = await formatArbitrage(transfersCategorized, txHash, transactionDetails, fromAddress, calledContractAddress);
-        console.log("formattedArbitrage.extractedValue:", formattedArbitrage.extractedValue);
+        const formattedArbitrage = await formatArbitrage(transfersCategorized, txHash, transactionDetails, from, to);
+        console.log("\nformattedArbitrage:", formattedArbitrage);
     }
     else {
         console.log("Not Atomic Arbitrage!");

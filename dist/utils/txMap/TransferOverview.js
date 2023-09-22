@@ -2,6 +2,8 @@ import { ETH_ADDRESS, NULL_ADDRESS, WETH_ADDRESS } from "../helperFunctions/Cons
 import { getMethodId } from "../helperFunctions/MethodID.js";
 import { checkTokensInDatabase } from "./TransferCategories.js";
 import { findCoinDecimalsById, findCoinIdByAddress, findCoinSymbolById } from "../postgresTables/readFunctions/Coins.js";
+import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
+import { ethers } from "ethers";
 // adds a phantom weth transfer upon eth-deposit to fix balance-accounting
 export function addMissingWethTransfers(transfers) {
     const WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
@@ -99,7 +101,6 @@ export async function makeTransfersReadable(tokenTransfers) {
         let tokenSymbol = null;
         let tokenDecimals = null;
         let parsedAmount = 0;
-        console.log("transfer.token", transfer.token, "coinId", coinId);
         if (coinId === null)
             continue;
         tokenSymbol = await findCoinSymbolById(coinId);
@@ -221,34 +222,35 @@ function handleDepositMethod(action, trace, tokenTransfers) {
 }
 export async function getTokenTransfersFromTransactionTrace(txTraces) {
     const tokenTransfers = [];
+    const web3HttpProvider = await getWeb3HttpProvider();
+    const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);
     for (const txTrace of txTraces) {
-        await extractTokenTransfers(txTrace, tokenTransfers);
+        await extractTokenTransfers(txTrace, tokenTransfers, JsonRpcProvider, web3HttpProvider);
     }
     return tokenTransfers;
 }
-async function extractTokenTransfers(trace, tokenTransfers) {
-    const action = trace.action;
-    const methodIds = await getMethodId(action.to);
-    if (action.input && methodIds) {
-        const methodId = action.input.slice(0, 10).toLowerCase();
+async function extractTokenTransfers(trace, tokenTransfers, JsonRpcProvider, web3HttpProvider) {
+    const methodIds = await getMethodId(trace.action.to, JsonRpcProvider, web3HttpProvider);
+    if (trace.action.input && methodIds) {
+        const methodId = trace.action.input.slice(0, 10).toLowerCase();
         const methodInfo = methodIds.find((m) => m.methodId === methodId);
         if (methodInfo) {
-            handleDynamicMethod(methodInfo.name, action, tokenTransfers, trace);
+            handleDynamicMethod(methodInfo.name, trace.action, tokenTransfers, trace);
         }
     }
     // Checking for Ether (ETH) transfers
-    if (action.value && parseInt(action.value, 16) > 0) {
+    if (trace.action.value && parseInt(trace.action.value, 16) > 0) {
         tokenTransfers.push({
-            from: action.from,
-            to: action.to,
-            value: BigInt(action.value).toString(),
+            from: trace.action.from,
+            to: trace.action.to,
+            value: BigInt(trace.action.value).toString(),
             token: ETH_ADDRESS,
         });
     }
     // Recursively extract token transfers from subtraces
     if (trace.subtraces && Array.isArray(trace.subtraces)) {
         for (const subtrace of trace.subtraces) {
-            await extractTokenTransfers(subtrace, tokenTransfers);
+            await extractTokenTransfers(subtrace, tokenTransfers, JsonRpcProvider, web3HttpProvider);
         }
     }
 }

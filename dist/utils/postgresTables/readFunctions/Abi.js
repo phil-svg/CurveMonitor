@@ -11,7 +11,7 @@ export async function readAbiFromAbisEthereumTable(contractAddress) {
     // Return the ABI if found, otherwise return null
     return record ? record.abi : null;
 }
-export async function getAbiFromAbisEthereum(contractAddress) {
+export async function getAbiFromAbisEthereumTable(contractAddress) {
     return await AbisEthereum.findOne({
         where: {
             contract_address: {
@@ -29,5 +29,16 @@ export async function isContractVerified(contractAddress) {
         },
     });
     return record ? record.is_verified === true : false;
+}
+export async function storeAbiInDb(contractAddress, abi) {
+    try {
+        await AbisEthereum.create({
+            contract_address: contractAddress,
+            abi,
+        });
+    }
+    catch (err) {
+        console.log(`Error storing Abi in AbisEthereum ${err}`);
+    }
 }
 //# sourceMappingURL=Abi.js.map

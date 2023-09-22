@@ -131,7 +131,6 @@ async function fetchAndSaveReceipt(txHash: string, txId: number) {
 }
 
 export async function updateReceipts() {
-  console.log(`updating Receipts started...`);
   try {
     // Fetch all unique transaction hashes from Transactions.
     const transactions = await Transactions.findAll({

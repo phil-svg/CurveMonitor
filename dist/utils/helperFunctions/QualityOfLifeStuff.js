@@ -37,4 +37,28 @@ export function logProgress(fetchCount, totalTimeTaken, totalToBeFetched) {
         console.log(`${percentComplete.toFixed(2)}% | ${fetchCount}/${totalToBeFetched} | ${finishTimeFormatted} | ${hoursToCompletion}h:${minutesToCompletion}min`);
     }
 }
+export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export class RateLimiter {
+    constructor(maxCallsPerInterval, interval) {
+        this.maxCallsPerInterval = maxCallsPerInterval;
+        this.interval = interval;
+        this.callsThisInterval = 0;
+        this.currentIntervalStartedAt = Date.now();
+    }
+    resetInterval() {
+        this.callsThisInterval = 0;
+        this.currentIntervalStartedAt = Date.now();
+    }
+    async call(fn) {
+        if (Date.now() - this.currentIntervalStartedAt > this.interval) {
+            this.resetInterval();
+        }
+        if (this.callsThisInterval >= this.maxCallsPerInterval) {
+            await new Promise((resolve) => setTimeout(resolve, this.interval - (Date.now() - this.currentIntervalStartedAt)));
+            this.resetInterval();
+        }
+        this.callsThisInterval++;
+        return await fn();
+    }
+}
 //# sourceMappingURL=QualityOfLifeStuff.js.map

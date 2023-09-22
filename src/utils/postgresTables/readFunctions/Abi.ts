@@ -14,7 +14,7 @@ export async function readAbiFromAbisEthereumTable(contractAddress: string): Pro
   return record ? record.abi : null;
 }
 
-export async function getAbiFromAbisEthereum(contractAddress: string): Promise<AbisEthereum | null> {
+export async function getAbiFromAbisEthereumTable(contractAddress: string): Promise<AbisEthereum | null> {
   return await AbisEthereum.findOne({
     where: {
       contract_address: {
@@ -34,4 +34,15 @@ export async function isContractVerified(contractAddress: string): Promise<boole
   });
 
   return record ? record.is_verified === true : false;
+}
+
+export async function storeAbiInDb(contractAddress: string, abi: any): Promise<void> {
+  try {
+    await AbisEthereum.create({
+      contract_address: contractAddress,
+      abi,
+    });
+  } catch (err) {
+    console.log(`Error storing Abi in AbisEthereum ${err}`);
+  }
 }
