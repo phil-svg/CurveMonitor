@@ -8,12 +8,12 @@ export const handleGeneralTxLivestream = (mainRoom, socket) => {
     };
     eventEmitter.on("New Transaction for General-Transaction-Livestream", newTransactionStreamHandler);
     socket.on("connectToGeneralTxLivestream", async () => {
-        console.log("Client connected to General-Transaction-Livestream.");
+        console.log(`[${Math.floor(Date.now() / 1000)}] Client connected to General-Transaction-Livestream.`);
         socket.join("GeneralTransactionLivestreamRoom");
     });
     socket.on("disconnect", () => {
         eventEmitter.off("New Transaction for General-Transaction-Livestream", newTransactionStreamHandler);
-        console.log("Client disconnected.");
+        console.log(`[${Math.floor(Date.now() / 1000)}] Client disconnected.`);
     });
 };
 //# sourceMappingURL=GeneralTxLivestream.js.map

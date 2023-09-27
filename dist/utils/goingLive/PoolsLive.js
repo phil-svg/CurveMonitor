@@ -30,7 +30,7 @@ async function subscribe(ADDRESS) {
         .on("data", async () => {
         handleProviderEvent;
     })
-        .on("error", console.error);
+        .on("error", (err) => console.log("err in subscribe with address", ADDRESS, err));
 }
 async function handleProviderEvent() {
     const allPoolAddressesBefore = await getAllPoolAddresses();

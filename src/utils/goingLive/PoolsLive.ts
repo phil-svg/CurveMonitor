@@ -32,7 +32,7 @@ async function subscribe(ADDRESS: string): Promise<void> {
     .on("data", async () => {
       handleProviderEvent;
     })
-    .on("error", console.error);
+    .on("error", (err: any) => console.log("err in subscribe with address", ADDRESS, err));
 }
 
 async function handleProviderEvent(): Promise<void> {
