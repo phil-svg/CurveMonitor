@@ -1,6 +1,5 @@
 import { updateAbiIWithProxyCheck } from "../helperFunctions/ProxyCheck.js";
 import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
-import { isContractVerified } from "../postgresTables/readFunctions/Abi.js";
 import { getImplementationAddressFromTable } from "../postgresTables/readFunctions/ProxyCheck.js";
 import { getShortenReceiptByTxHash } from "../postgresTables/readFunctions/Receipts.js";
 import { ethers } from "ethers";
@@ -17,17 +16,13 @@ export async function parseEventsFromReceiptForEntireTx(txHash) {
         }
         const contractAbi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
         if (!contractAbi) {
-            // console.error(`No ABI found for contract address: ${contractAddress}`);
-            return null;
-        }
-        if (!(await isContractVerified(contractAddress))) {
-            // console.log(`Contract at address: ${contractAddress} is not verified.`);
+            console.error(`No ABI found for contract address: ${contractAddress}`);
             return null;
         }
         try {
             const eventAbi = contractAbi.find((abiItem) => abiItem.type === "event" && log.topics[0] === web3HttpProvider.eth.abi.encodeEventSignature(abiItem));
             if (!eventAbi) {
-                // console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
+                console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
                 return null;
             }
             const decodedLog = web3HttpProvider.eth.abi.decodeLog(eventAbi.inputs, log.data, log.topics.slice(1));

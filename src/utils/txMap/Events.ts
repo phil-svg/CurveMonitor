@@ -24,12 +24,7 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
     const contractAbi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
 
     if (!contractAbi) {
-      // console.error(`No ABI found for contract address: ${contractAddress}`);
-      return null;
-    }
-
-    if (!(await isContractVerified(contractAddress))) {
-      // console.log(`Contract at address: ${contractAddress} is not verified.`);
+      console.error(`No ABI found for contract address: ${contractAddress}`);
       return null;
     }
 
@@ -37,7 +32,7 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
       const eventAbi = contractAbi.find((abiItem: any) => abiItem.type === "event" && log.topics[0] === web3HttpProvider.eth.abi.encodeEventSignature(abiItem));
 
       if (!eventAbi) {
-        // console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
+        console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
         return null;
       }
 

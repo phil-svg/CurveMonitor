@@ -200,7 +200,7 @@ function handleAddLiquidityMethod(action, trace, tokenTransfers) {
     const tokenAddress = action.to;
     const amountHex = trace.result.output;
     const receiver = trace.action.from;
-    const value = BigInt(amountHex);
+    const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
     tokenTransfers.push({
         from: NULL_ADDRESS,
         to: receiver,

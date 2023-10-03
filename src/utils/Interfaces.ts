@@ -142,8 +142,8 @@ export type CallTrace = Array<{
 }>;
 
 export interface BalanceChange {
-  token: string;
-  balanceChange: string;
+  tokenAddress: string;
+  balanceChange: number;
   tokenSymbol?: string;
 }
 
@@ -162,16 +162,20 @@ export interface FormattedArbitrageResult {
     symbol: string;
     amount: number;
   }>;
-  bribe: {
-    address: string;
-    symbol: string;
-    amount: number;
-  };
-  netWin: Array<{
-    address: string;
-    symbol: string;
-    amount: number;
-  }>;
+  bribe:
+    | {
+        address: string;
+        symbol: string;
+        amount: number;
+      }
+    | "unknown";
+  netWin:
+    | Array<{
+        address: string;
+        symbol: string;
+        amount: number;
+      }>
+    | "unknown";
   txGas: {
     gasUsed: number;
     gasPrice: number;
@@ -261,3 +265,26 @@ export type ParsedEvent = {
   eventName: string;
   [key: string]: string;
 };
+
+export interface USDValuedArbitrageResult {
+  bribeInETH: number | "unknown";
+  bribeInUSD: number | "unknown";
+  fullCostETH: number | "unknown";
+  fullCostUSD: number | "unknown";
+  extractedValue: Array<{ address: string; symbol: string; amount: number; amountInUSD: number }> | "unknown";
+  netWin: Array<{ address: string; symbol: string; amount: number; amountInUSD: number }> | "unknown";
+  txGas: {
+    gasUsed: number;
+    gasPrice: number;
+    gasCostETH: number;
+    gasCostUSD: number;
+  };
+}
+
+export interface ProfitDetails {
+  netWin: number | "unknown";
+  revenue: number | "unknown";
+  bribe: number | "unknown";
+  gas: number;
+  totalCost: number | "unknown";
+}

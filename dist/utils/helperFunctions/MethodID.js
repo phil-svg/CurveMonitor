@@ -4,15 +4,22 @@ import { updateAbiIWithProxyCheck } from "./ProxyCheck.js";
 const { keccak256 } = pkg;
 const methodIdCache = {};
 export async function getMethodId(contractAddress, JsonRpcProvider, web3HttpProvider) {
+    if (!contractAddress)
+        return null;
     if (!methodIdCache[contractAddress]) {
         // checking if the contract is a proxy
         const implementationAddress = await getImplementationAddressFromTable(contractAddress);
-        const methodIds = await getMethodIdsByContractAddress(implementationAddress || contractAddress, JsonRpcProvider, web3HttpProvider);
-        if (methodIds) {
-            methodIdCache[contractAddress] = methodIds;
+        try {
+            const methodIds = await getMethodIdsByContractAddress(implementationAddress || contractAddress, JsonRpcProvider, web3HttpProvider);
+            if (methodIds) {
+                methodIdCache[contractAddress] = methodIds;
+            }
+            else {
+                return null;
+            }
         }
-        else {
-            return null;
+        catch (err) {
+            console.log(err, "err getting methodIds for contract", implementationAddress || contractAddress, "implementationAddress", implementationAddress, "contractAddress", contractAddress);
         }
     }
     return methodIdCache[contractAddress];

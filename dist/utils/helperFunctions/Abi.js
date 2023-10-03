@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 export async function updateAbisFromTrace(transactionTraces) {
     await updateProxiesFromManualList();
     const processedAddresses = new Set();
-    let fetchPromises = [];
     const web3HttpProvider = await getWeb3HttpProvider();
     const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);
     for (const trace of transactionTraces) {
@@ -12,9 +11,6 @@ export async function updateAbisFromTrace(transactionTraces) {
             continue;
         await updateAbiIWithProxyCheck(trace.action.to, JsonRpcProvider, web3HttpProvider);
         processedAddresses.add(trace.action.to);
-    }
-    if (fetchPromises.length > 0) {
-        await Promise.all(fetchPromises);
     }
 }
 //# sourceMappingURL=Abi.js.map

@@ -44,6 +44,7 @@ async function delay(ms: number) {
 let lastRequestTime = 0;
 
 export async function fetchAbiFromEtherscan(address: string): Promise<any[] | null> {
+  if (!address) return null;
   const URL = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${process.env.ETHERSCAN_KEY}`;
   const REQUEST_INTERVAL = 200; // etherscan rate limit
   const MAX_RETRIES = 12;

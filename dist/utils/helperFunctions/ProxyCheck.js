@@ -3,15 +3,19 @@ import { ProxyCheck } from "../../models/ProxyCheck.js";
 import { web3Call, web3CallLogFree } from "../web3Calls/generic.js";
 import { fetchAbiFromEtherscan } from "../postgresTables/Abi.js";
 import { manualLaborProxyContracts } from "./ProxyContracts.js";
-import { RateLimiter } from "./QualityOfLifeStuff.js";
 import { getAbiFromAbisEthereumTable, readAbiFromAbisEthereumTable, storeAbiInDb } from "../postgresTables/readFunctions/Abi.js";
 import { NULL_ADDRESS } from "./Constants.js";
 import { createProxyCheckRecord, findContractInProxyCheck } from "../postgresTables/readFunctions/ProxyCheck.js";
 export async function getImplementationContractAddressErc1967(proxyAddress, JsonRpcProvider) {
     const storagePosition = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
-    const implementationContractSlot = await JsonRpcProvider.getStorage(proxyAddress, storagePosition);
-    const implementationContractAddress = "0x" + implementationContractSlot.slice(26);
-    return implementationContractAddress;
+    try {
+        const implementationContractSlot = await JsonRpcProvider.getStorage(proxyAddress, storagePosition);
+        const implementationContractAddress = "0x" + implementationContractSlot.slice(26);
+        return implementationContractAddress;
+    }
+    catch (err) {
+        return NULL_ADDRESS;
+    }
 }
 export async function getImplementationContractAddressErc897(proxyAddress, web3) {
     const ERCProxyABI = [
@@ -185,8 +189,6 @@ export async function fetchAbiFromEtherscanOnly(contractAddress) {
     }
     return null;
 }
-// Initializing the rate limiter to allow up to 5 calls per sec
-const rateLimiter = new RateLimiter(5, 1000);
 /**
  * Fetches the ABI for the given contract address.
  *
@@ -194,26 +196,24 @@ const rateLimiter = new RateLimiter(5, 1000);
  * @returns The ABI as a JSON array.
  */
 export async function updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider) {
-    return rateLimiter.call(async () => {
-        const contractRecord = await findContractInProxyCheck(contractAddress);
-        // If the contract exists and is a proxy
-        if (contractRecord && contractRecord.is_proxy_contract) {
-            return handleExistingProxyContract(contractRecord);
-        }
-        // If the contract is not a proxy, or if it doesn't exist in the new table
-        if (!contractRecord) {
-            return handleNewProxyScan(contractAddress, JsonRpcProvider, web3HttpProvider);
-        }
-        const existingAbi = await readAbiFromDb(contractAddress);
-        if (existingAbi) {
-            return existingAbi;
-        }
-        const fetchedAbi = await fetchAbiFromEtherscanOnly(contractAddress);
-        if (fetchedAbi) {
-            await storeAbiInDb(contractAddress, fetchedAbi);
-            return fetchedAbi;
-        }
-        return null;
-    });
+    const contractRecord = await findContractInProxyCheck(contractAddress);
+    // If the contract exists and is a proxy
+    if (contractRecord && contractRecord.is_proxy_contract) {
+        return handleExistingProxyContract(contractRecord);
+    }
+    // If the contract is not a proxy, or if it doesn't exist in the new table
+    if (!contractRecord) {
+        return handleNewProxyScan(contractAddress, JsonRpcProvider, web3HttpProvider);
+    }
+    const existingAbi = await readAbiFromDb(contractAddress);
+    if (existingAbi) {
+        return existingAbi;
+    }
+    const fetchedAbi = await fetchAbiFromEtherscanOnly(contractAddress);
+    if (fetchedAbi) {
+        await storeAbiInDb(contractAddress, fetchedAbi);
+        return fetchedAbi;
+    }
+    return null;
 }
 //# sourceMappingURL=ProxyCheck.js.map

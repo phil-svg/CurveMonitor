@@ -100,7 +100,7 @@ async function fetchAndSaveReceipt(txHash: string, txId: number) {
   let hexTxReceipt: HexTxReceipt = await getTxReceipt(txHash);
 
   if (!hexTxReceipt) {
-    console.warn(`No transaction receipt found for hash: ${txHash}`);
+    console.warn(`No receipt found for hash: ${txHash}`);
     return;
   }
 
