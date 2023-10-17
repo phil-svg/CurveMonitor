@@ -13,6 +13,9 @@ RUN npm install
 # Copy the Labels.json file into the Docker image.
 COPY Labels.json ./
 
+# Copy the config directory into the Docker image.
+COPY config ./config
+
 # Bundle app source inside the docker image (copy dist directory)
 COPY dist ./dist
 
