@@ -123,26 +123,20 @@ export async function updateSymbols() {
                     continue; // Continue if 'symbol' already exists
                 if (!coin.address)
                     continue;
-                if (coin.address.toLowerCase() === "0x29b41fE7d754B8b43D4060BB43734E436B0b9a33".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0x29b41fE7d754B8b43D4060BB43734E436B0b9a33".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0x12df0c95d2c549bbbc96cf8fba02ca4bc541afd9".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0x380371cb985a3ec68377b280e46b665f280c4066".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0xc5cfada84e902ad92dd40194f0883ad49639b023".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0xa90996896660decc6e997655e065b23788857849".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0xdcb6a51ea3ca5d3fd898fd6564757c7aaec3ca92".toLowerCase())
-                    continue;
                 const SYMBOL = await fetchSymbolFromChain(coin.address);
                 coin.symbol = SYMBOL;
                 await coin.save();
             }
             catch (error) {
-                console.warn("Warning: No Symbol for", coin.address);
+                const notSetMessage = "Returned values aren't valid, did it run Out of Gas?";
+                const revertMessage = "execution reverted";
+                if (error instanceof Error && (error.message.includes(notSetMessage) || error.message.includes(revertMessage))) {
+                    coin.symbol = "Unknown";
+                    await coin.save();
+                }
+                else {
+                    console.warn("Warning: No Symbol for", coin.address);
+                }
             }
         }
     }
@@ -175,24 +169,20 @@ export async function updateDecimals() {
                     continue; // Continue if 'decimals' already exists
                 if (!coin.address)
                     continue;
-                if (coin.address.toLowerCase() === "0x29b41fE7d754B8b43D4060BB43734E436B0b9a33".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0x12df0c95d2c549bbbc96cf8fba02ca4bc541afd9".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0x380371cb985a3ec68377b280e46b665f280c4066".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0xc5cfada84e902ad92dd40194f0883ad49639b023".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0xa90996896660decc6e997655e065b23788857849".toLowerCase())
-                    continue;
-                if (coin.address.toLowerCase() === "0xdcb6a51ea3ca5d3fd898fd6564757c7aaec3ca92".toLowerCase())
-                    continue;
                 const DECIMALS = await fetchDecimalsFromChain(coin.address);
                 coin.decimals = DECIMALS;
                 await coin.save();
             }
             catch (error) {
-                console.warn("Warning: No Decimals for", coin.address);
+                const notSetMessage = "Returned values aren't valid, did it run Out of Gas?";
+                const revertMessage = "execution reverted";
+                if (error instanceof Error && (error.message.includes(notSetMessage) || error.message.includes(revertMessage))) {
+                    coin.decimals = 420; // will render mock coins to practically 0 when parsing
+                    await coin.save();
+                }
+                else {
+                    console.warn("Warning: No Decimal for", coin.address);
+                }
             }
         }
     }

@@ -28,7 +28,7 @@ export async function initDatabase() {
     }
 }
 await initDatabase();
-// await updateAtomicArbDetection();
+// await updateAtomicArbDetection(); it finally works!
 startAPI();
 // await startTestClient();
 async function main() {
@@ -59,4 +59,5 @@ async function main() {
     // process.exit();
 }
 await main();
+//* note to future me: run: npx sequelize-cli db:migrate
 //# sourceMappingURL=App.js.map

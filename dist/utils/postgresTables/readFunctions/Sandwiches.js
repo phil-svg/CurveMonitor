@@ -243,4 +243,15 @@ export async function fetchSandwichIdsByBlockNumber(blockNumber) {
     });
     return sandwiches.map((sandwich) => sandwich.id);
 }
+export async function isActuallyBackrun(txId) {
+    const sandwich = await Sandwiches.findOne({
+        where: {
+            backrun: txId,
+        },
+    });
+    if (sandwich) {
+        return true;
+    }
+    return null;
+}
 //# sourceMappingURL=Sandwiches.js.map

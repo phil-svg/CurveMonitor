@@ -79,6 +79,15 @@ __decorate([
     BelongsTo(() => Transactions)
 ], Receipts.prototype, "transaction", void 0);
 Receipts = __decorate([
+    Table({
+        tableName: "receipts",
+        indexes: [
+            {
+                fields: ["transactionHash"],
+                name: "transactionHash_idx",
+            },
+        ],
+    }),
     Table({ tableName: "receipts" })
 ], Receipts);
 export { Receipts };

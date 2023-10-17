@@ -1,5 +1,6 @@
 import { addMinutes, differenceInMinutes, format } from "date-fns";
 import * as readline from "readline";
+import { abiCache, methodIdCache } from "./MethodID.js";
 export function updateConsoleOutput(message, yOffset = 0) {
     readline.moveCursor(process.stdout, 0, yOffset);
     readline.clearLine(process.stdout, 0);
@@ -60,5 +61,19 @@ export class RateLimiter {
         this.callsThisInterval++;
         return await fn();
     }
+}
+function clearMethodIdCache() {
+    Object.keys(methodIdCache).forEach((key) => {
+        delete methodIdCache[key];
+    });
+}
+function clearAbiCache() {
+    Object.keys(abiCache).forEach((key) => {
+        delete abiCache[key];
+    });
+}
+export function clearCaches() {
+    clearMethodIdCache();
+    clearAbiCache();
 }
 //# sourceMappingURL=QualityOfLifeStuff.js.map

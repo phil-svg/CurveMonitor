@@ -28,6 +28,7 @@ export async function getTransactionDetailsByTxHash(txHash: string): Promise<Tra
     console.log(`no txId for txHash ${txHash}`);
     return null;
   }
+
   const transactionDetails = await TransactionDetails.findByPk(txId);
   return transactionDetails || null;
 }

@@ -3,7 +3,7 @@ import { getImplementationAddressFromTable } from "../postgresTables/readFunctio
 import { updateAbiIWithProxyCheck } from "./ProxyCheck.js";
 const { keccak256 } = pkg;
 
-const methodIdCache: { [address: string]: any[] } = {};
+export const methodIdCache: { [address: string]: any[] } = {};
 
 export async function getMethodId(contractAddress: string, JsonRpcProvider: any, web3HttpProvider: any): Promise<any[] | null> {
   if (!contractAddress) return null;
@@ -38,16 +38,23 @@ function getMethodIdFromAbi(abiFunctionSignature: string): string {
   return "0x" + hash.slice(0, 8); // Get the first 4 bytes (8 characters)
 }
 
+export const abiCache: { [contractAddress: string]: any[] } = {};
+
 export async function getMethodIdsByContractAddress(
   contractAddress: string,
   JsonRpcProvider: any,
   web3HttpProvider: any
 ): Promise<Array<{ name: string; signature: string; methodId: string }> | null> {
   // Fetch ABI for given contract address
-  const abi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
-
-  // If no ABI is found, return null
-  if (abi === null) return null;
+  let abi = abiCache[contractAddress];
+  if (!abi) {
+    abi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
+    if (abi !== null && Array.isArray(abi)) {
+      abiCache[contractAddress] = abi;
+    } else {
+      return null;
+    }
+  }
 
   let methodIds: Array<{ name: string; signature: string; methodId: string }> = [];
 

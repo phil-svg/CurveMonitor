@@ -1,6 +1,15 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey, AutoIncrement, AllowNull } from "sequelize-typescript";
 import { Transactions } from "./Transactions.js";
 
+@Table({
+  tableName: "receipts",
+  indexes: [
+    {
+      fields: ["transactionHash"],
+      name: "transactionHash_idx",
+    },
+  ],
+})
 @Table({ tableName: "receipts" })
 export class Receipts extends Model {
   @AutoIncrement

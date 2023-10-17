@@ -284,3 +284,17 @@ export async function fetchSandwichIdsByBlockNumber(blockNumber: number): Promis
 
   return sandwiches.map((sandwich) => sandwich.id);
 }
+
+export async function isActuallyBackrun(txId: number): Promise<true | null> {
+  const sandwich = await Sandwiches.findOne({
+    where: {
+      backrun: txId,
+    },
+  });
+
+  if (sandwich) {
+    return true;
+  }
+
+  return null;
+}

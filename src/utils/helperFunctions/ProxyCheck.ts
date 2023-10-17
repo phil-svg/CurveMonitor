@@ -7,6 +7,8 @@ import { manualLaborProxyContracts } from "./ProxyContracts.js";
 import { getAbiFromAbisEthereumTable, readAbiFromAbisEthereumTable, storeAbiInDb } from "../postgresTables/readFunctions/Abi.js";
 import { NULL_ADDRESS } from "./Constants.js";
 import { createProxyCheckRecord, findContractInProxyCheck } from "../postgresTables/readFunctions/ProxyCheck.js";
+import { copyFileSync } from "fs";
+import { UnverifiedContracts } from "../../models/UnverifiedContracts.js";
 
 export async function getImplementationContractAddressErc1967(proxyAddress: string, JsonRpcProvider: any): Promise<string> {
   const storagePosition = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
@@ -223,27 +225,48 @@ export async function fetchAbiFromEtherscanOnly(contractAddress: string): Promis
  * @returns The ABI as a JSON array.
  */
 export async function updateAbiIWithProxyCheck(contractAddress: string, JsonRpcProvider: any, web3HttpProvider: any): Promise<any> {
-  const contractRecord = await findContractInProxyCheck(contractAddress);
+  const contractAddressLower = contractAddress.toLowerCase(); // Convert contract address to lowercase
 
-  // If the contract exists and is a proxy
-  if (contractRecord && contractRecord.is_proxy_contract) {
-    return handleExistingProxyContract(contractRecord);
+  // Check if contractAddress exists in the UnverifiedContracts table, case insensitively
+  const unverifiedContract = await UnverifiedContracts.findOne({
+    where: {
+      contract_address: {
+        [Op.iLike]: contractAddressLower,
+      },
+    },
+  });
+
+  if (unverifiedContract) {
+    return null; // Return null if contract is in unverified contracts list
   }
 
-  // If the contract is not a proxy, or if it doesn't exist in the new table
-  if (!contractRecord) {
-    return handleNewProxyScan(contractAddress, JsonRpcProvider, web3HttpProvider);
-  }
-
-  const existingAbi = await readAbiFromDb(contractAddress);
+  const existingAbi = await readAbiFromDb(contractAddressLower);
   if (existingAbi) {
     return existingAbi;
   }
 
-  const fetchedAbi = await fetchAbiFromEtherscanOnly(contractAddress);
-  if (fetchedAbi) {
-    await storeAbiInDb(contractAddress, fetchedAbi);
-    return fetchedAbi;
+  const contractRecord = await findContractInProxyCheck(contractAddressLower);
+
+  // If the contract exists and is a proxy
+  if (contractRecord && contractRecord.is_proxy_contract) {
+    let abi = await handleExistingProxyContract(contractRecord);
+    return abi;
   }
+
+  // If the contract is not a proxy, or if it doesn't exist in the new table
+  if (!contractRecord) {
+    let abi = await handleNewProxyScan(contractAddressLower, JsonRpcProvider, web3HttpProvider);
+    return abi;
+  }
+
+  const fetchedAbi = await fetchAbiFromEtherscanOnly(contractAddressLower);
+  if (fetchedAbi) {
+    await storeAbiInDb(contractAddressLower, fetchedAbi);
+    return fetchedAbi;
+  } else {
+    // Contract not verified; add to the UnverifiedContracts table
+    await UnverifiedContracts.create({ contract_address: contractAddressLower });
+  }
+
   return null;
 }

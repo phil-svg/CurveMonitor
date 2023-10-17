@@ -2,7 +2,7 @@ import pkg from "js-sha3";
 import { getImplementationAddressFromTable } from "../postgresTables/readFunctions/ProxyCheck.js";
 import { updateAbiIWithProxyCheck } from "./ProxyCheck.js";
 const { keccak256 } = pkg;
-const methodIdCache = {};
+export const methodIdCache = {};
 export async function getMethodId(contractAddress, JsonRpcProvider, web3HttpProvider) {
     if (!contractAddress)
         return null;
@@ -28,12 +28,19 @@ function getMethodIdFromAbi(abiFunctionSignature) {
     const hash = keccak256(abiFunctionSignature);
     return "0x" + hash.slice(0, 8); // Get the first 4 bytes (8 characters)
 }
+export const abiCache = {};
 export async function getMethodIdsByContractAddress(contractAddress, JsonRpcProvider, web3HttpProvider) {
     // Fetch ABI for given contract address
-    const abi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
-    // If no ABI is found, return null
-    if (abi === null)
-        return null;
+    let abi = abiCache[contractAddress];
+    if (!abi) {
+        abi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
+        if (abi !== null && Array.isArray(abi)) {
+            abiCache[contractAddress] = abi;
+        }
+        else {
+            return null;
+        }
+    }
     let methodIds = [];
     for (let entry of abi) {
         if (entry.type === "function") {

@@ -1,20 +1,26 @@
 import { updateAbisFromTrace } from "../../../helperFunctions/Abi.js";
 import { parseEventsFromReceiptForEntireTx } from "../../../txMap/Events.js";
-import { getCategorizedTransfersFromTxTrace } from "../../../txMap/TransferCategories.js";
 import {
-  addMissingWethTransfers,
   getTokenTransfersFromTransactionTrace,
   makeTransfersReadable,
   mergeAndFilterTransfers,
   removeDuplicatesAndUpdatePositions,
+  updateTransferList,
 } from "../../../txMap/TransferOverview.js";
-import { extractTransactionAddresses, getTransactionDetailsByTxHash } from "../../readFunctions/TransactionDetails.js";
+import { extractTransactionAddresses, getTransactionDetails } from "../../readFunctions/TransactionDetails.js";
 import { getTransactionTraceFromDb } from "../../readFunctions/TransactionTrace.js";
-import { getTxHashByTxId } from "../../readFunctions/Transactions.js";
+import { getTxHashByTxId, getTxIdByTxHash } from "../../readFunctions/Transactions.js";
 import { solveAtomicArb } from "./utils/atomicArbDetection.js";
+import { clearCaches } from "../../../helperFunctions/QualityOfLifeStuff.js";
 
-async function fetchDataThenDetectArb(txHash: string) {
-  const transactionDetails = await getTransactionDetailsByTxHash(txHash!);
+async function fetchDataThenDetectArb(txId: number) {
+  const txHash = await getTxHashByTxId(txId);
+  if (!txHash) {
+    console.log("failed to fetch txHash for txId", txId);
+    return;
+  }
+
+  const transactionDetails = await getTransactionDetails(txId);
   if (!transactionDetails) return;
 
   const { from: from, to: to } = extractTransactionAddresses(transactionDetails);
@@ -40,13 +46,15 @@ async function fetchDataThenDetectArb(txHash: string) {
   const readableTransfers = await makeTransfersReadable(mergedTransfers);
   // console.log("readableTransfers", readableTransfers);
 
-  const updatedReadableTransfers = addMissingWethTransfers(readableTransfers);
+  const updatedReadableTransfers = updateTransferList(readableTransfers, to);
   // console.log("updatedReadableTransfers", updatedReadableTransfers);
 
   const cleanedTransfers = removeDuplicatesAndUpdatePositions(updatedReadableTransfers);
   // console.log("cleanedTransfers", cleanedTransfers);
 
-  await solveAtomicArb(txHash!, cleanedTransfers, from, to);
+  await solveAtomicArb(txId, txHash!, cleanedTransfers, from, to);
+
+  clearCaches();
 }
 
 export async function updateAtomicArbDetection() {
@@ -54,25 +62,22 @@ export async function updateAtomicArbDetection() {
   // const txHash = "0x1c7e8861744c00a063295987b69bbb82e1bab9c1afd438219cfa5a8d3f98dbdf"; // Balancer, Uni v2, Uni v3, Curve, solved
   // const txHash = "0xf0607901716acb0086a58e52464d4b481b386e348214bf8fae300c3fc3a6e423"; // arb, solved
   // const txHash = "0xd602f90c5e9e60a1f55b7399a3226448a8b9c09f2d2a347bc88570827c7e157e"; // solved
-  // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // todo
-  // const txHash = "0x315f986874fd44b23c5c7a61638a915f5763c0b79c259aa808b1b769cc21c870"; // todo
+  const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // solved!
 
-  const txId = 33;
-  const txHash = await getTxHashByTxId(txId);
-  // await solveAtomicArbForTxHash(txHash!);
+  const txId = await getTxIdByTxHash(txHash);
 
-  // const txHash = await getTxHashByTxId(116);
+  // console.time();
+  // const txId = 930;
+  await fetchDataThenDetectArb(txId!);
+  // console.timeEnd();
+  // console.log("\ntxHash", txHash);
 
-  // for (let txId = 100; txId < 200; txId++) {
-  //   const txHash = await getTxHashByTxId(txId);
-  //   console.log("\n", txId, txHash);
-  //   await solveAtomicArbForTxHash(txHash!);
+  // console.time();
+  // for (let txId = 1; txId <= 1000; txId++) {
+  //   console.log("txId", txId);
+  //   await fetchDataThenDetectArb(txId);
   // }
-
-  await fetchDataThenDetectArb(txHash!);
-  console.log("\ntxHash", txHash);
+  // console.timeEnd();
 
   process.exit();
 }
-
-// WETH mint missing in extractTokenTransfers() in tokenMovementSolver

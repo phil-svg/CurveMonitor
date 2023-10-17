@@ -39,6 +39,7 @@ async function delay(ms) {
 }
 // Fetches ABI from Etherscan
 let lastRequestTime = 0;
+// this function returning null means sc not verified
 export async function fetchAbiFromEtherscan(address) {
     if (!address)
         return null;

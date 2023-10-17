@@ -43,6 +43,7 @@ async function delay(ms: number) {
 // Fetches ABI from Etherscan
 let lastRequestTime = 0;
 
+// this function returning null means sc not verified
 export async function fetchAbiFromEtherscan(address: string): Promise<any[] | null> {
   if (!address) return null;
   const URL = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${process.env.ETHERSCAN_KEY}`;

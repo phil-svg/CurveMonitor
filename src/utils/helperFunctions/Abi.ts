@@ -11,9 +11,11 @@ export async function updateAbisFromTrace(transactionTraces: ITransactionTrace[]
   const web3HttpProvider = await getWeb3HttpProvider();
   const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);
 
-  for (const trace of transactionTraces) {
-    if (!trace.action.to || processedAddresses.has(trace.action.to)) continue;
-    await updateAbiIWithProxyCheck(trace.action.to, JsonRpcProvider, web3HttpProvider);
-    processedAddresses.add(trace.action.to);
+  const uniqueAddresses = new Set(transactionTraces.map((trace) => trace.action.to));
+
+  for (const contractAddress of uniqueAddresses) {
+    if (!contractAddress || processedAddresses.has(contractAddress)) continue;
+    await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
+    processedAddresses.add(contractAddress);
   }
 }

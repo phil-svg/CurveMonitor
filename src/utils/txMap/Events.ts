@@ -1,7 +1,6 @@
 import { ParsedEvent } from "../Interfaces.js";
 import { updateAbiIWithProxyCheck } from "../helperFunctions/ProxyCheck.js";
 import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
-import { isContractVerified } from "../postgresTables/readFunctions/Abi.js";
 import { getImplementationAddressFromTable } from "../postgresTables/readFunctions/ProxyCheck.js";
 import { getShortenReceiptByTxHash } from "../postgresTables/readFunctions/Receipts.js";
 import { ethers } from "ethers";
@@ -12,8 +11,19 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
   const web3HttpProvider = await getWeb3HttpProvider();
   const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);
 
+  // This set will store topics we've already processed
+  const processedTopics = new Set<string>();
+
   const parsedEventsPromises = receipt!.logs.map(async (log) => {
     let contractAddress = log.address;
+
+    // If this topic has already been processed, skip processing it again
+    if (processedTopics.has(log.topics[0])) {
+      return null;
+    }
+
+    // Add the topic to the set of processed topics
+    processedTopics.add(log.topics[0]);
 
     // checking if the contract is a proxy
     const implementationAddress = await getImplementationAddressFromTable(contractAddress);
@@ -24,7 +34,7 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
     const contractAbi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
 
     if (!contractAbi) {
-      console.error(`No ABI found for contract address: ${contractAddress}`);
+      // console.error(`No ABI found for contract address: ${contractAddress}`);
       return null;
     }
 
@@ -32,7 +42,7 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
       const eventAbi = contractAbi.find((abiItem: any) => abiItem.type === "event" && log.topics[0] === web3HttpProvider.eth.abi.encodeEventSignature(abiItem));
 
       if (!eventAbi) {
-        console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
+        // console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
         return null;
       }
 
@@ -51,8 +61,9 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
       };
       return parsedEvent;
     } catch (err) {
-      console.error(`Error in parseEventsForEntireTx ${err}`);
-      console.log("Failed log data:", log);
+      // console.error(`Error in parseEventsForEntireTx ${err}`);
+      // console.log("Failed log data:", log);
+      return null;
     }
   });
 
