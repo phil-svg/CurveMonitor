@@ -16,6 +16,9 @@ COPY Labels.json ./
 # Copy the config directory into the Docker image.
 COPY config ./config
 
+# Copy the migrations directory into the Docker image.
+COPY migrations ./migrations
+
 # Bundle app source inside the docker image (copy dist directory)
 COPY dist ./dist
 
