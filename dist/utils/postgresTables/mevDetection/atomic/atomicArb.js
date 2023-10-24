@@ -3,7 +3,7 @@ import { parseEventsFromReceiptForEntireTx } from "../../../txMap/Events.js";
 import { getTokenTransfersFromTransactionTrace, makeTransfersReadable, mergeAndFilterTransfers, removeDuplicatesAndUpdatePositions, updateTransferList, } from "../../../txMap/TransferOverview.js";
 import { extractTransactionAddresses, getTransactionDetails } from "../../readFunctions/TransactionDetails.js";
 import { getTransactionTraceFromDb } from "../../readFunctions/TransactionTrace.js";
-import { getTxHashByTxId } from "../../readFunctions/Transactions.js";
+import { getTxHashByTxId, getTxIdByTxHash } from "../../readFunctions/Transactions.js";
 import { solveAtomicArb } from "./utils/atomicArbDetection.js";
 import { clearCaches } from "../../../helperFunctions/QualityOfLifeStuff.js";
 export async function fetchDataThenDetectArb(txId) {
@@ -52,11 +52,11 @@ export async function updateAtomicArbDetection() {
     // const txHash = "0xd602f90c5e9e60a1f55b7399a3226448a8b9c09f2d2a347bc88570827c7e157e"; // solved
     // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // solved!
     // const txHash = "0x76f2b5ccaa420ce744b5bfa015b3ba47b4ee0d6b89a0a1a5483c8576b90ba7ba"; // solved!
-    // const txHash = "";
-    // const txId = await getTxIdByTxHash(txHash);
+    const txHash = "0x432eed35a24bf60b8d2ff62141eb2adf5270e6e0b3d886e20f1cf3f51de318be";
+    const txId = await getTxIdByTxHash(txHash);
     // console.time();
     // const txId = 930;
-    // await fetchDataThenDetectArb(txId!);
+    await fetchDataThenDetectArb(txId);
     // console.timeEnd();
     // console.log("\ntxHash", txHash);
     // console.time();

@@ -91,6 +91,8 @@ async function processBufferedEvents() {
     await findCandidatesInBatch(parsedTx);
     await addAddressesForLabelingForBlock(eventBlockNumbers[0]);
     const processedTxHashes = new Set();
+    // waiting for traces to be available for pinging.
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     // building out live-arb-detection
     for (const tx of parsedTx) {
         // *********************************************
