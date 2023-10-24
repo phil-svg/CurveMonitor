@@ -7,11 +7,13 @@ import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { ethers } from "ethers";
 
 export function updateTransferList(readableTransfers: ReadableTokenTransfer[], to: string): ReadableTokenTransfer[] {
+  // console.log("readableTransfers", readableTransfers);
+
   const transfersWithEthWETH = addMissingETHWETHTransfers(readableTransfers);
-  // console.log('transfersWithEthWETH', transfersWithEthWETH);
+  // console.log("transfersWithEthWETH", transfersWithEthWETH);
 
   const transfersWithAllMints = addMissingMintsToTransfers(transfersWithEthWETH, to);
-  // console.log('transfersWithAllMints', transfersWithAllMints);
+  // console.log("transfersWithAllMints", transfersWithAllMints);
 
   return transfersWithAllMints;
 }
@@ -35,6 +37,7 @@ export function addMissingMintsToTransfers(updatedReadableTransfers: ReadableTok
   let modifiedTransfers = [...updatedReadableTransfers];
 
   unaccountedOutgoings.forEach((unaccounted) => {
+    if (unaccounted.position! <= 5) return;
     const mintTransfer: ReadableTokenTransfer = {
       from: unaccounted.tokenAddress,
       to: to,
@@ -66,6 +69,10 @@ export function addMissingETHWETHTransfers(transfers: ReadableTokenTransfer[]): 
 
   for (let i = 0; i < modifiedTransfers.length; i++) {
     const transfer = modifiedTransfers[i];
+
+    if (!transfer.to || !transfer.tokenSymbol) {
+      continue;
+    }
 
     if (transfer.tokenSymbol === "ETH" && transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
       const correspondingWETHTransfer = {

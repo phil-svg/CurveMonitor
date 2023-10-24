@@ -5,10 +5,11 @@ import { findCoinDecimalsById, findCoinIdByAddress, findCoinSymbolById } from ".
 import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { ethers } from "ethers";
 export function updateTransferList(readableTransfers, to) {
+    // console.log("readableTransfers", readableTransfers);
     const transfersWithEthWETH = addMissingETHWETHTransfers(readableTransfers);
-    // console.log('transfersWithEthWETH', transfersWithEthWETH);
+    // console.log("transfersWithEthWETH", transfersWithEthWETH);
     const transfersWithAllMints = addMissingMintsToTransfers(transfersWithEthWETH, to);
-    // console.log('transfersWithAllMints', transfersWithAllMints);
+    // console.log("transfersWithAllMints", transfersWithAllMints);
     return transfersWithAllMints;
 }
 // finds token transfers from "to" to elsewhere, where the token came out of nowhere (no inflow). Used to complete transfer list.
@@ -22,6 +23,8 @@ export function addMissingMintsToTransfers(updatedReadableTransfers, to) {
     const unaccountedOutgoings = findUnaccountedOutgoingTransfers(updatedReadableTransfers, to);
     let modifiedTransfers = [...updatedReadableTransfers];
     unaccountedOutgoings.forEach((unaccounted) => {
+        if (unaccounted.position <= 5)
+            return;
         const mintTransfer = {
             from: unaccounted.tokenAddress,
             to: to,
@@ -48,6 +51,9 @@ export function addMissingETHWETHTransfers(transfers) {
     const modifiedTransfers = [...transfers];
     for (let i = 0; i < modifiedTransfers.length; i++) {
         const transfer = modifiedTransfers[i];
+        if (!transfer.to || !transfer.tokenSymbol) {
+            continue;
+        }
         if (transfer.tokenSymbol === "ETH" && transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
             const correspondingWETHTransfer = {
                 from: WETH_ADDRESS,

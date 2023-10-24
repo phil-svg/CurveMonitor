@@ -5,8 +5,13 @@ import { getImplementationAddressFromTable } from "../postgresTables/readFunctio
 import { getShortenReceiptByTxHash } from "../postgresTables/readFunctions/Receipts.js";
 import { ethers } from "ethers";
 
-export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise<(ParsedEvent | null | undefined)[]> {
+export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise<(ParsedEvent | null | undefined)[] | null> {
   const receipt = await getShortenReceiptByTxHash(txHash);
+
+  if (!receipt) {
+    console.log(`No receipt for ${txHash}`);
+    return null;
+  }
 
   const web3HttpProvider = await getWeb3HttpProvider();
   const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);

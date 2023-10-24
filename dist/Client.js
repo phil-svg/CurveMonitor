@@ -1,8 +1,8 @@
 import { io } from "socket.io-client";
 import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
 // Replace with "wss://api.curvemonitor.com" for production
-// const url = "http://localhost:443";
-const url = "wss://api.curvemonitor.com";
+const url = "http://localhost:443";
+// const url = "wss://api.curvemonitor.com";
 /**
  *
  * Possible Usages of /main
@@ -302,6 +302,15 @@ export function startPoolLabel(socket, poolAddress) {
     });
     handleErrors(socket, "/main");
 }
+// connecting to atomic arb livestream:
+export function startNewAtomicArbClient(socket) {
+    socket.on("NewAtomicArb", (atomicArbDetails) => {
+        console.log("Received new Atomic Arb");
+        console.dir(atomicArbDetails, { depth: null, colors: true });
+    });
+    socket.emit("connectToAtomicArbLivestream");
+    handleErrors(socket, "/main");
+}
 export async function startTestClient() {
     const mainSocket = io(`${url}/main`);
     console.log(`connecting to ${url}/main`);
@@ -315,7 +324,8 @@ export async function startTestClient() {
         // startFullSandwichTableClient(mainSocket, "1 week", 1);
         // startPoolSpecificSandwichTable(mainSocket, "0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B", "1 week", 1);
         // startNewGeneralTxClient(mainSocket);
-        startPoolSpecificTransactionTable(mainSocket, "0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14", "1 day", 3);
+        startNewAtomicArbClient(mainSocket);
+        // startPoolSpecificTransactionTable(mainSocket, "0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14", "1 day", 3);
         // startPoolLabel(mainSocket, "0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2");
     });
 }

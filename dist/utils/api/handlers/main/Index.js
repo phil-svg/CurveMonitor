@@ -8,6 +8,7 @@ import { handlePoolSandwichRoom } from "./SandwichTablePoolSpecfic.js";
 import { handleGeneralTxLivestream } from "./GeneralTxLivestream.js";
 import { handlePoolTxLivestream } from "./TxTablePoolSpecific.js";
 import { handlePoolLabel } from "./PoolLabels.js";
+import { handleAtomicArbLivestream } from "./AtomicArbLivestream.js";
 export function startMainEndpoint(io) {
     const mainRoom = io.of("/main");
     mainRoom.on("connection", (socket) => {
@@ -21,6 +22,7 @@ export function startMainEndpoint(io) {
         handleFullSandwichRoom(socket);
         handlePoolSandwichRoom(socket);
         handleGeneralTxLivestream(mainRoom, socket);
+        handleAtomicArbLivestream(mainRoom, socket);
         handlePoolTxLivestream(socket);
         handlePoolLabel(socket);
     });

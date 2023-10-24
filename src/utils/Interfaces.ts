@@ -181,6 +181,7 @@ export interface FormattedArbitrageResult {
     gasPrice: number;
     gasCostETH: number;
   };
+  blockBuilder: string | null;
 }
 
 export interface ContractDetail {
@@ -267,6 +268,7 @@ export type ParsedEvent = {
 };
 
 export interface USDValuedArbitrageResult {
+  ethPrice: number | null;
   bribeInETH: number | "unknown";
   bribeInUSD: number | "unknown";
   fullCostETH: number | "unknown";
@@ -279,6 +281,7 @@ export interface USDValuedArbitrageResult {
     gasCostETH: number;
     gasCostUSD: number;
   };
+  blockBuilder: string | null;
 }
 
 export interface ProfitDetails {
@@ -287,4 +290,17 @@ export interface ProfitDetails {
   bribe: number | "unknown";
   gas: number;
   totalCost: number | "unknown";
+  gasInGwei: number | null;
+  blockBuilder: string | null;
+}
+
+export interface TransactionDetailsForAtomicArbs extends EnrichedTransactionDetail {
+  revenue: number | null;
+  gasInUsd: number;
+  gasInGwei: number | null;
+  netWin: number | null;
+  bribe: number | null;
+  totalCost: number | null;
+  blockBuilder: string | null;
+  validatorPayOffUSD: number | null;
 }

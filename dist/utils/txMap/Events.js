@@ -5,6 +5,10 @@ import { getShortenReceiptByTxHash } from "../postgresTables/readFunctions/Recei
 import { ethers } from "ethers";
 export async function parseEventsFromReceiptForEntireTx(txHash) {
     const receipt = await getShortenReceiptByTxHash(txHash);
+    if (!receipt) {
+        console.log(`No receipt for ${txHash}`);
+        return null;
+    }
     const web3HttpProvider = await getWeb3HttpProvider();
     const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);
     // This set will store topics we've already processed

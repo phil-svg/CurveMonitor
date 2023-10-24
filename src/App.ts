@@ -33,7 +33,7 @@ export async function initDatabase() {
 
 await initDatabase();
 
-// await updateAtomicArbDetection(); it finally works!
+// await updateAtomicArbDetection(); // it finally works!
 
 startAPI();
 // await startTestClient();
@@ -52,6 +52,7 @@ async function main() {
   await updateRawLogs();
 
   eventFlags.canEmitGeneralTx = true;
+  eventFlags.canEmitAtomicArb = true;
 
   await updateBlockTimestamps();
   await updateContractCreations();
@@ -78,5 +79,3 @@ async function main() {
 }
 
 await main();
-
-//* note to future me: run: npx sequelize-cli db:migrate

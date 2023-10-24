@@ -28,7 +28,7 @@ export async function initDatabase() {
     }
 }
 await initDatabase();
-// await updateAtomicArbDetection(); it finally works!
+// await updateAtomicArbDetection(); // it finally works!
 startAPI();
 // await startTestClient();
 async function main() {
@@ -42,6 +42,7 @@ async function main() {
     await preparingLiveModeForRawEvents();
     await updateRawLogs();
     eventFlags.canEmitGeneralTx = true;
+    eventFlags.canEmitAtomicArb = true;
     await updateBlockTimestamps();
     await updateContractCreations();
     await parseEvents();
@@ -59,5 +60,4 @@ async function main() {
     // process.exit();
 }
 await main();
-//* note to future me: run: npx sequelize-cli db:migrate
 //# sourceMappingURL=App.js.map

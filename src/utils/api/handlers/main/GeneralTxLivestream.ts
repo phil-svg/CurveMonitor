@@ -12,12 +12,12 @@ export const handleGeneralTxLivestream = (mainRoom: Namespace, socket: Socket) =
   eventEmitter.on("New Transaction for General-Transaction-Livestream", newTransactionStreamHandler);
 
   socket.on("connectToGeneralTxLivestream", async () => {
-    console.log(`[${Math.floor(Date.now() / 1000)}] Client connected to General-Transaction-Livestream.`);
+    console.log(`Client connected to General-Transaction-Livestream.`);
     socket.join("GeneralTransactionLivestreamRoom");
   });
 
   socket.on("disconnect", () => {
     eventEmitter.off("New Transaction for General-Transaction-Livestream", newTransactionStreamHandler);
-    console.log(`[${Math.floor(Date.now() / 1000)}] Client disconnected.`);
+    console.log(`Client disconnected.`);
   });
 };

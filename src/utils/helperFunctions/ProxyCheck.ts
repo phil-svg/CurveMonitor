@@ -114,7 +114,13 @@ async function updateExistingProxyCheckStandards(existingRecord: any, standards:
 
 async function updateProxyCheckTable(contractAddress: string, isProxy: boolean, implementationAddress: string | null, standards: string[]) {
   // Find the record first
-  const existingRecord = await ProxyCheck.findOne({ where: { contractAddress } });
+  const existingRecord = await ProxyCheck.findOne({
+    where: {
+      contractAddress: {
+        [Op.iLike]: contractAddress,
+      },
+    },
+  });
 
   if (existingRecord) {
     updateExistingProxyCheckStandards(existingRecord, standards);

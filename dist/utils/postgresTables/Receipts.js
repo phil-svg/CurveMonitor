@@ -35,7 +35,7 @@ function convertHexReceiptToDecimal(hexTxReceipt) {
         type: web3.utils.toDecimal(hexTxReceipt.type),
     };
 }
-async function fetchAndSaveReceipt(txHash, txId) {
+export async function fetchAndSaveReceipt(txHash, txId) {
     let hexTxReceipt = await getTxReceipt(txHash);
     if (!hexTxReceipt) {
         console.warn(`No receipt found for hash: ${txHash}`);

@@ -378,4 +378,20 @@ export async function getTransactionTraceViaAlchemy(txHash, attempt = 0) {
         }
     }
 }
+// Get the Ether transfer value of the last transaction in a block.
+export async function getLastTxValue(blockNumber) {
+    try {
+        const transactions = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
+        if (transactions && transactions.transactions.length > 0) {
+            const lastTxHash = transactions.transactions[transactions.transactions.length - 1];
+            const txDetails = await WEB3_HTTP_PROVIDER.eth.getTransaction(lastTxHash);
+            return parseInt(txDetails.value) / 1e18;
+        }
+        return 0;
+    }
+    catch (err) {
+        console.log("err in getLastTxValue", err);
+        return null;
+    }
+}
 //# sourceMappingURL=generic.js.map

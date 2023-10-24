@@ -52,7 +52,6 @@ export async function addNewTokenToDbFromCoinAddress(coinAddress: string): Promi
     await Coins.create({ address: coinAddress });
     await updateSymbols();
     await updateDecimals();
-    console.log(`Coin address ${coinAddress} added to table.`);
   } catch (error) {
     console.error("Error adding coin address to table:", error);
   }
@@ -103,7 +102,7 @@ async function updateAddresses(): Promise<void> {
       const exists = await isCoinAddressInTable(UNIQUE_ADDRESSE);
       if (exists) continue;
       await Coins.create({ address: UNIQUE_ADDRESSE });
-      console.log(`Coin address ${UNIQUE_ADDRESSE} added to table.`);
+      // console.log(`Coin address ${UNIQUE_ADDRESSE} added to table.`);
     } catch (error) {
       console.error("Error adding coin address to table:", error);
     }
@@ -147,7 +146,7 @@ export async function updateSymbols(): Promise<void> {
           coin.symbol = "Unknown";
           await coin.save();
         } else {
-          console.warn("Warning: No Symbol for", coin.address);
+          continue;
         }
       }
     }
@@ -192,7 +191,7 @@ export async function updateDecimals(): Promise<void> {
           coin.decimals = 420; // will render mock coins to practically 0 when parsing
           await coin.save();
         } else {
-          console.warn("Warning: No Decimal for", coin.address);
+          continue;
         }
       }
     }

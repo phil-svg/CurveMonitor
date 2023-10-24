@@ -3,8 +3,10 @@ import { eventFlags } from "../api/utils/EventFlags.js";
 import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
 import { fetchContractAgeInRealtime } from "../postgresTables/ContractCreations.js";
 import { storeEvent } from "../postgresTables/RawLogs.js";
+import { fetchAndSaveReceipt } from "../postgresTables/Receipts.js";
 import { saveTransactionTrace } from "../postgresTables/TransactionTraces.js";
 import { solveSingleTdId } from "../postgresTables/TransactionsDetails.js";
+import { fetchDataThenDetectArb } from "../postgresTables/mevDetection/atomic/atomicArb.js";
 import { findCandidatesInBatch } from "../postgresTables/mevDetection/sandwich/SandwichDetection.js";
 import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/sandwich/SandwichUtils.js";
 import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
@@ -88,10 +90,25 @@ async function processBufferedEvents() {
     // live-sandwich-detection
     await findCandidatesInBatch(parsedTx);
     await addAddressesForLabelingForBlock(eventBlockNumbers[0]);
-    // fetching and saving of the transaction-trace
+    const processedTxHashes = new Set();
+    // building out live-arb-detection
     for (const tx of parsedTx) {
+        // *********************************************
+        console.log("\nlive atomic arb detection: txId", tx.tx_id, "txHash", tx.tx_hash);
+        if (!tx.tx_id || processedTxHashes.has(tx.tx_hash.toLowerCase()))
+            continue;
+        // fetching and saving of the transaction-trace
         const transactionTrace = await retryGetTransactionTraceViaAlchemy(tx.tx_hash);
         await saveTransactionTrace(tx.tx_hash, transactionTrace);
+        await fetchAndSaveReceipt(tx.tx_hash, tx.tx_id);
+        const atomicArbInfo = await fetchDataThenDetectArb(tx.tx_id);
+        if (eventFlags.canEmitAtomicArb) {
+            if (atomicArbInfo) {
+                eventEmitter.emit("New Transaction for Atomic-Arb-Livestream", atomicArbInfo);
+            }
+        }
+        // *********************************************
+        processedTxHashes.add(tx.tx_hash.toLowerCase());
     }
 }
 //# sourceMappingURL=RawTxLogsLive.js.map

@@ -11,4 +11,12 @@ export const manualLaborProxyContracts = [
     proxyAddress: "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
     implementationAddress: "0x8f8EF111B67C04Eb1641f5ff19EE54Cda062f163",
   },
+  {
+    proxyAddress: "0x09c2dd0061adad2604d72174038a78cb226408d5",
+    implementationAddress: "0x8f8EF111B67C04Eb1641f5ff19EE54Cda062f163",
+  },
+  {
+    proxyAddress: "0x4585fe77225b41b697c938b018e2ac67ac5a20c0",
+    implementationAddress: "0x8f8EF111B67C04Eb1641f5ff19EE54Cda062f163",
+  },
 ];

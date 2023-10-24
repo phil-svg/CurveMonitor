@@ -96,7 +96,7 @@ function convertHexReceiptToDecimal(hexTxReceipt: HexTxReceipt): TxReceipt {
   };
 }
 
-async function fetchAndSaveReceipt(txHash: string, txId: number) {
+export async function fetchAndSaveReceipt(txHash: string, txId: number) {
   let hexTxReceipt: HexTxReceipt = await getTxReceipt(txHash);
 
   if (!hexTxReceipt) {

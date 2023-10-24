@@ -46,3 +46,13 @@ export function extractGasPrice(transactionDetails: TransactionDetails | null): 
   }
   return null;
 }
+
+export async function getBlockNumberByTxHash(hash: string): Promise<number | null> {
+  const transactionDetail = await TransactionDetails.findOne({ where: { hash: hash } });
+
+  if (transactionDetail) {
+    return transactionDetail.blockNumber;
+  }
+
+  return null;
+}
