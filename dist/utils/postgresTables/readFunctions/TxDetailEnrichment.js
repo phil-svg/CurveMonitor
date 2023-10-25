@@ -23,11 +23,17 @@ export async function txDetailEnrichment(txId) {
             },
         ],
     });
+    if (!transaction) {
+        console.log("transaction missing in txDetailEnrichment for txId", txId);
+        return null;
+    }
     const transactionDetails = await TransactionDetails.findOne({
         where: { txId: txId },
     });
-    if (!transaction || !transactionDetails)
+    if (!transactionDetails) {
+        console.log("transactionDetails missing in txDetailEnrichment for txId", txId);
         return null;
+    }
     const coinsLeavingWallet = [];
     const coinsEnteringWallet = [];
     for (const txCoin of transaction.transactionCoins) {
@@ -71,6 +77,7 @@ export async function enrichTransactionDetail(txId) {
         return enrichedTransaction;
     }
     else {
+        console.log("detailedTransaction missing in enrichTransactionDetail for txId", txId);
         return null;
     }
 }

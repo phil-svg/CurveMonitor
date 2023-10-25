@@ -28,11 +28,19 @@ export async function txDetailEnrichment(txId: number): Promise<TransactionDetai
     ],
   });
 
+  if (!transaction) {
+    console.log("transaction missing in txDetailEnrichment for txId", txId);
+    return null;
+  }
+
   const transactionDetails = await TransactionDetails.findOne({
     where: { txId: txId },
   });
 
-  if (!transaction || !transactionDetails) return null;
+  if (!transactionDetails) {
+    console.log("transactionDetails missing in txDetailEnrichment for txId", txId);
+    return null;
+  }
 
   const coinsLeavingWallet: CoinDetail[] = [];
   const coinsEnteringWallet: CoinDetail[] = [];
@@ -92,6 +100,7 @@ export async function enrichTransactionDetail(txId: number): Promise<EnrichedTra
 
     return enrichedTransaction;
   } else {
+    console.log("detailedTransaction missing in enrichTransactionDetail for txId", txId);
     return null;
   }
 }

@@ -9,8 +9,10 @@ import { enrichTransactionDetail } from "../../../readFunctions/TxDetailEnrichme
 import { getLastTxValue } from "../../../../web3Calls/generic.js";
 async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) {
     const enrichedTransaction = await enrichTransactionDetail(txId);
-    if (!enrichedTransaction)
+    if (!enrichedTransaction) {
+        console.log("enrichedTransaction are missing for txId", txId, "profitDetails:", profitDetails);
         return null;
+    }
     return Object.assign(Object.assign({}, enrichedTransaction), { revenue: typeof profitDetails.revenue === "number" ? profitDetails.revenue : null, gasInUsd: profitDetails.gas, gasInGwei: typeof profitDetails.gasInGwei === "number" ? profitDetails.gasInGwei / 1e9 : null, netWin: typeof profitDetails.netWin === "number" ? profitDetails.netWin : null, bribe: typeof profitDetails.bribe === "number" ? profitDetails.bribe : null, totalCost: typeof profitDetails.totalCost === "number" ? profitDetails.totalCost : null, blockBuilder: typeof profitDetails.blockBuilder === "string" ? profitDetails.blockBuilder : null, validatorPayOffUSD: typeof validatorPayOffInUSD === "number" ? validatorPayOffInUSD : null });
 }
 export function filterTransfersByAddress(cleanedTransfers, to) {
@@ -444,6 +446,7 @@ export async function formatArbitrageCaseValueGoesOutsideFromOrTo(cleanedTransfe
     const { gasUsed, gasPrice, gasCostETH } = await calculateGasInfo(txHash, transactionDetails);
     const bribe = tryToExtractBribe(cleanedTransfers);
     const extractedValue = calculateExtractedValueCaseValueGoesOutsideFromOrTo(cleanedTransfers, from, to);
+    console.log("bribe", bribe);
     if (!extractedValue)
         return null;
     let netWin = calculateNetWin(extractedValue, bribe.amount, gasCostETH);
@@ -661,6 +664,25 @@ export function hasEnoughSwaps(balanceChangeTo, cleanedTransfers) {
     }
     return false;
 }
+// Function to check if an address is a leaf in the entire transfers array
+function isLeaf(address, transfers) {
+    const addressToCheck = address.toLowerCase();
+    return !transfers.some((t) => t.to.toLowerCase() === addressToCheck || t.from.toLowerCase() === addressToCheck);
+}
+// Function to check if a transfer has a leaf origin using isLeaf function
+function hasLeafOrigin(transfer, transfers) {
+    return isLeaf(transfer.from, transfers);
+}
+// Function to count the number of transfers with leaf origins
+function countLeafOrigins(onlyToTransfers, allTransfers) {
+    return onlyToTransfers.filter((t) => hasLeafOrigin(t, allTransfers)).length;
+}
+function hasMissmatchingForOriginLeafesToTo(onlyToTransfers, allTransfers, formAddress) {
+    const formAddressLowerCase = formAddress.toLowerCase();
+    const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== formAddressLowerCase);
+    const numOfLeafOrigins = countLeafOrigins(filteredOnlyToTransfers, allTransfers);
+    return numOfLeafOrigins > 0;
+}
 export function hasAtLeastTwoPairs(cleanedTransfers) {
     const tokenCountMap = {};
     for (const transfer of cleanedTransfers) {
@@ -717,7 +739,8 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
     // console.log("onlyToTransfers", onlyToTransfers, "\nto", to);
     if (!onlyToTransfers.some((t) => t.position <= 5))
         return null;
-    onlyToTransfers.some((t) => t.position <= 5) ? onlyToTransfers : null;
+    if (hasMissmatchingForOriginLeafesToTo(onlyToTransfers, cleanedTransfers, from))
+        return null;
     const balanceChangeFrom = await getBalanceChangeForAddressFromTransfers(from, cleanedTransfers);
     // console.log("balanceChangeFrom (" + from + ")", balanceChangeFrom);
     const balanceChangeTo = await getBalanceChangeForAddressFromTransfers(to, cleanedTransfers);

@@ -110,7 +110,7 @@ async function processBufferedEvents() {
   const processedTxHashes = new Set<string>();
 
   // waiting for traces to be available for pinging.
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 12069));
 
   // building out live-arb-detection
   for (const tx of parsedTx) {
@@ -125,6 +125,7 @@ async function processBufferedEvents() {
 
     await fetchAndSaveReceipt(tx.tx_hash, tx.tx_id);
     const atomicArbInfo = await fetchDataThenDetectArb(tx.tx_id);
+    console.log("atomicArbInfo", atomicArbInfo);
 
     if (eventFlags.canEmitAtomicArb) {
       if (atomicArbInfo) {

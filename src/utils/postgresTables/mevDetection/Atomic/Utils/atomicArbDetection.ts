@@ -22,7 +22,10 @@ import { getLastTxValue } from "../../../../web3Calls/generic.js";
 async function buildAtomicArbDetails(txId: number, profitDetails: ProfitDetails, validatorPayOffInUSD: number | null): Promise<TransactionDetailsForAtomicArbs | null> {
   const enrichedTransaction = await enrichTransactionDetail(txId);
 
-  if (!enrichedTransaction) return null;
+  if (!enrichedTransaction) {
+    console.log("enrichedTransaction are missing for txId", txId, "profitDetails:", profitDetails);
+    return null;
+  }
 
   return {
     ...enrichedTransaction,
@@ -596,6 +599,7 @@ export async function formatArbitrageCaseValueGoesOutsideFromOrTo(
 
   const bribe = tryToExtractBribe(cleanedTransfers);
   const extractedValue = calculateExtractedValueCaseValueGoesOutsideFromOrTo(cleanedTransfers, from, to);
+  console.log("bribe", bribe);
   if (!extractedValue) return null;
 
   let netWin = calculateNetWin(extractedValue, bribe.amount, gasCostETH);
@@ -876,6 +880,31 @@ export function hasEnoughSwaps(balanceChangeTo: BalanceChange[], cleanedTransfer
   return false;
 }
 
+// Function to check if an address is a leaf in the entire transfers array
+function isLeaf(address: string, transfers: ReadableTokenTransfer[]): boolean {
+  const addressToCheck = address.toLowerCase();
+
+  return !transfers.some((t) => t.to.toLowerCase() === addressToCheck || t.from.toLowerCase() === addressToCheck);
+}
+
+// Function to check if a transfer has a leaf origin using isLeaf function
+function hasLeafOrigin(transfer: ReadableTokenTransfer, transfers: ReadableTokenTransfer[]): boolean {
+  return isLeaf(transfer.from, transfers);
+}
+
+// Function to count the number of transfers with leaf origins
+function countLeafOrigins(onlyToTransfers: ReadableTokenTransfer[], allTransfers: ReadableTokenTransfer[]): number {
+  return onlyToTransfers.filter((t) => hasLeafOrigin(t, allTransfers)).length;
+}
+
+function hasMissmatchingForOriginLeafesToTo(onlyToTransfers: ReadableTokenTransfer[], allTransfers: ReadableTokenTransfer[], formAddress: string): boolean {
+  const formAddressLowerCase = formAddress.toLowerCase();
+  const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== formAddressLowerCase);
+
+  const numOfLeafOrigins = countLeafOrigins(filteredOnlyToTransfers, allTransfers);
+  return numOfLeafOrigins > 0;
+}
+
 export function hasAtLeastTwoPairs(cleanedTransfers: ReadableTokenTransfer[]): boolean {
   const tokenCountMap: { [symbol: string]: number } = {};
 
@@ -961,7 +990,7 @@ export async function solveAtomicArb(
   // console.log("onlyToTransfers", onlyToTransfers, "\nto", to);
   if (!onlyToTransfers.some((t) => t.position! <= 5)) return null;
 
-  onlyToTransfers.some((t) => t.position! <= 5) ? onlyToTransfers : null;
+  if (hasMissmatchingForOriginLeafesToTo(onlyToTransfers, cleanedTransfers, from)) return null;
 
   const balanceChangeFrom = await getBalanceChangeForAddressFromTransfers(from, cleanedTransfers);
   // console.log("balanceChangeFrom (" + from + ")", balanceChangeFrom);

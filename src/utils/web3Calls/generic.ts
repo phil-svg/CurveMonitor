@@ -355,22 +355,27 @@ export async function getTxWithLimiter(txHash: string): Promise<any | null> {
 }
 
 export async function retryGetTransactionTraceViaAlchemy(txHash: string, maxRetries: number = 5): Promise<any[] | null> {
-  let delay = 2000; // Starting delay of 2 seconds
+  try {
+    let delay = 2000; // Starting delay of 2 seconds
 
-  for (let i = 0; i < maxRetries; i++) {
-    const transactionTrace = await getTransactionTraceViaAlchemy(txHash);
-    if (transactionTrace) {
-      return transactionTrace;
+    for (let i = 0; i < maxRetries; i++) {
+      const transactionTrace = await getTransactionTraceViaAlchemy(txHash);
+      if (transactionTrace) {
+        return transactionTrace;
+      }
+
+      // Wait for delay before retrying
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      delay *= 2; // Double the delay for the next retry
     }
 
-    // Wait for delay before retrying
-    await new Promise((resolve) => setTimeout(resolve, delay));
-
-    delay *= 2; // Double the delay for the next retry
+    // If we've retried the specified number of times and still have no trace, return null.
+    return null;
+  } catch (err) {
+    console.log("err in retryGetTransactionTraceViaAlchemy for txHash", txHash, "err:", err);
+    return null;
   }
-
-  // If we've retried the specified number of times and still have no trace, return null.
-  return null;
 }
 
 export async function getTransactionTraceViaAlchemy(txHash: string, attempt = 0): Promise<ITransactionTrace[] | null> {
