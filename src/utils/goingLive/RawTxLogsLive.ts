@@ -110,7 +110,7 @@ async function processBufferedEvents() {
   const processedTxHashes = new Set<string>();
 
   // waiting for traces to be available for pinging.
-  await new Promise((resolve) => setTimeout(resolve, 12069));
+  await new Promise((resolve) => setTimeout(resolve, 18069));
 
   // building out live-arb-detection
   for (const tx of parsedTx) {

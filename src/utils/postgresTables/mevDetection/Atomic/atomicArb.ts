@@ -22,8 +22,8 @@ export async function fetchDataThenDetectArb(txId: number): Promise<TransactionD
   }
 
   const transactionDetails = await getTransactionDetails(txId);
-  console.log("transactionDetails are missing in fetchDataThenDetectArb for txId", txId);
   if (!transactionDetails) {
+    console.log("transactionDetails are missing in fetchDataThenDetectArb for txId", txId);
     return null;
   }
 
@@ -75,7 +75,8 @@ export async function updateAtomicArbDetection() {
   // const txHash = "0xd602f90c5e9e60a1f55b7399a3226448a8b9c09f2d2a347bc88570827c7e157e"; // solved
   // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // solved!
   // const txHash = "0x76f2b5ccaa420ce744b5bfa015b3ba47b4ee0d6b89a0a1a5483c8576b90ba7ba"; // solved!
-  const txHash = "0xa107f285c0e7f5f4453dd6e46fdf1d0b77f5b212446984af78b68bfad1fa872e"; // not entirely solved
+  // const txHash = "0xa107f285c0e7f5f4453dd6e46fdf1d0b77f5b212446984af78b68bfad1fa872e"; // not entirely solved
+  const txHash = "0x7d00dcd6cbc80553f84cee7be1c9a99f44c673a3a841a2335c06784909702c88";
 
   const txId = await getTxIdByTxHash(txHash);
 

@@ -599,7 +599,6 @@ export async function formatArbitrageCaseValueGoesOutsideFromOrTo(
 
   const bribe = tryToExtractBribe(cleanedTransfers);
   const extractedValue = calculateExtractedValueCaseValueGoesOutsideFromOrTo(cleanedTransfers, from, to);
-  console.log("bribe", bribe);
   if (!extractedValue) return null;
 
   let netWin = calculateNetWin(extractedValue, bribe.amount, gasCostETH);
@@ -872,7 +871,15 @@ export function hasEnoughSwaps(balanceChangeTo: BalanceChange[], cleanedTransfer
   if (balanceChangeTo.length === 0) return true;
 
   for (const change of balanceChangeTo) {
-    const transfersWithTokenSymbol = cleanedTransfers.filter((transfer) => transfer.tokenSymbol === change.tokenSymbol);
+    let normalizedTokenSymbol = change.tokenSymbol;
+    if (normalizedTokenSymbol === "WETH") normalizedTokenSymbol = "ETH";
+
+    const transfersWithTokenSymbol = cleanedTransfers.filter((transfer) => {
+      let transferToken = transfer.tokenSymbol;
+      if (transferToken === "WETH") transferToken = "ETH";
+      return transferToken === normalizedTokenSymbol;
+    });
+
     if (transfersWithTokenSymbol.length >= 2) {
       return true;
     }
