@@ -799,6 +799,8 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
     // console.log("onlyToTransfers", onlyToTransfers, "\nto", to);
     if (!onlyToTransfers.some((t) => t.position <= 5))
         return null;
+    if (onlyToTransfers.length <= 2)
+        return null;
     if (hasMissmatchingForOriginLeafesToTo(onlyToTransfers, cleanedTransfers, from))
         return null;
     const balanceChangeFrom = await getBalanceChangeForAddressFromTransfers(from, cleanedTransfers);
