@@ -279,14 +279,23 @@ export async function getTxReceipt(txHash: string): Promise<any> {
 }
 
 export async function getTxFromTxId(tx_id: number): Promise<any | null> {
+  try {
+    const txHash = await getTxHashByTxId(tx_id);
+    if (!txHash) return null;
+    return getTxFromTxHash(txHash);
+  } catch (err) {
+    return null;
+  }
+}
+
+export async function getTxFromTxHash(txHash: string): Promise<any | null> {
   const MAX_RETRIES = 5; // Maximum number of retries
   const RETRY_DELAY = 5000; // Delay between retries in milliseconds
   let retries = 0;
 
   while (retries < MAX_RETRIES) {
     try {
-      const txHash = await getTxHashByTxId(tx_id);
-      const TX = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash!);
+      const TX = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash);
       return TX;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -304,7 +313,7 @@ export async function getTxFromTxId(tx_id: number): Promise<any | null> {
     }
   }
 
-  console.log(`Failed to get transaction by ID ${tx_id} after several attempts. Please check your connection and the status of the Ethereum node.`);
+  console.log(`Failed to get transaction by txHash ${txHash} after several attempts. Please check your connection and the status of the Ethereum node.`);
   return null;
 }
 
@@ -428,6 +437,20 @@ export async function getLastTxValue(blockNumber: number): Promise<number | null
     return 0;
   } catch (err) {
     console.log("err in getLastTxValue", err);
+    return null;
+  }
+}
+
+// Function to fetch the transaction hash at a given position for a block number
+export async function getTxHashAtBlockPosition(blockNumber: number, position: number): Promise<string | null> {
+  try {
+    const block = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
+    if (block && block.transactions.length > position) {
+      return block.transactions[position];
+    }
+    return null;
+  } catch (err) {
+    console.error("Error in getTxHashAtPosition:", err);
     return null;
   }
 }

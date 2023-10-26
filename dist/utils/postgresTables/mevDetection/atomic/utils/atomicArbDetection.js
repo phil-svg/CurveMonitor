@@ -1,12 +1,16 @@
 import { CoWProtocolGPv2Settlement, ETH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
-import { getGasUsedFromReceipt } from "../../../readFunctions/Receipts.js";
-import { extractGasPrice, getBlockNumberByTxHash, getTransactionDetailsByTxHash } from "../../../readFunctions/TransactionDetails.js";
+import { getGasUsedFromReceipt, getShortenReceiptByTxHash } from "../../../readFunctions/Receipts.js";
+import { extractGasPrice, extractTransactionAddresses, getBlockNumberByTxHash, getTransactionDetailsByTxHash, } from "../../../readFunctions/TransactionDetails.js";
 import { Transactions } from "../../../../../models/Transactions.js";
 import { Op } from "sequelize";
 import { getHistoricalTokenPriceFromDefiLlama } from "../../txValue/DefiLlama.js";
 import { isActuallyBackrun } from "../../../readFunctions/Sandwiches.js";
 import { enrichTransactionDetail } from "../../../readFunctions/TxDetailEnrichment.js";
-import { getLastTxValue } from "../../../../web3Calls/generic.js";
+import { getLastTxValue, getTransactionTraceViaAlchemy, getTxFromTxHash, getTxHashAtBlockPosition } from "../../../../web3Calls/generic.js";
+import { getCleanedTransfers } from "../atomicArb.js";
+import { saveTransactionTrace } from "../../../TransactionTraces.js";
+import { getTransactionTraceFromDb } from "../../../readFunctions/TransactionTrace.js";
+import { fetchAndSaveReceipt } from "../../../Receipts.js";
 async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) {
     const enrichedTransaction = await enrichTransactionDetail(txId);
     if (!enrichedTransaction) {
@@ -17,6 +21,55 @@ async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) 
 }
 export function filterTransfersByAddress(cleanedTransfers, to) {
     return cleanedTransfers.filter((transfer) => transfer.from.toLowerCase() === to.toLowerCase() || transfer.to.toLowerCase() === to.toLowerCase());
+}
+function hasRelevantNegativeBalanceChange(balanceChanges) {
+    const threshold = -0.000033; // equals 1 cent of btc as of oct'23.
+    for (const change of balanceChanges) {
+        if (change.balanceChange < 0 && change.balanceChange <= threshold) {
+            return true;
+        }
+    }
+    return false;
+}
+async function isGlobalBackrun(transaction, txId) {
+    if (transaction.tx_position <= 1)
+        return false;
+    const previousTxHash = await getTxHashAtBlockPosition(transaction.block_number, transaction.tx_position - 2);
+    if (!previousTxHash)
+        return null;
+    const previousTx = await getTxFromTxHash(previousTxHash);
+    if (!previousTx)
+        return null;
+    // comparing the senders
+    if (previousTx.to.toLowerCase() !== transaction.trader.toLowerCase())
+        return false;
+    // at this point we have two tx with a gap of one, where both are done by the same address.
+    // next is checking if the first one is a frontrun.
+    const transactionDetails = await getTxFromTxHash(previousTxHash);
+    if (!transactionDetails)
+        return null;
+    const { from: from, to: to } = extractTransactionAddresses(transactionDetails);
+    if (!from || !to)
+        return null;
+    const transactionTraces = await getTransactionTraceFromDb(previousTxHash);
+    if (!transactionTraces || transactionTraces.length === 0) {
+        const transactionTrace = await getTransactionTraceViaAlchemy(previousTxHash);
+        await saveTransactionTrace(previousTxHash, transactionTrace);
+    }
+    const receipt = await getShortenReceiptByTxHash(previousTxHash);
+    if (!receipt) {
+        await fetchAndSaveReceipt(previousTxHash, txId);
+    }
+    const cleanedTransfers = await getCleanedTransfers(previousTxHash, to);
+    if (!cleanedTransfers)
+        return null;
+    const balanceChangeTo = await getBalanceChangeForAddressFromTransfers(to, cleanedTransfers);
+    if (hasRelevantNegativeBalanceChange(balanceChangeTo)) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 export function translateWETHToETHInTransfers(cleanedTransfers) {
     return cleanedTransfers.map((transfer) => {
@@ -763,10 +816,14 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
         // console.log("Not Atomic Arbitrage!");
         return null;
     }
-    // sandwichs' backrun can look like arb: 0x1a4f25133a15c5d226b291e9c5751d910ac1ca796c151f6bc917f3c65a69d340
-    // removing that, since its accounted for as sandwich.
-    const isBackrun = await isActuallyBackrun(txId);
-    if (isBackrun)
+    /*
+    sandwichs' backrun can look like arb: 0x1a4f25133a15c5d226b291e9c5751d910ac1ca796c151f6bc917f3c65a69d340
+    removing that, since its accounted for as sandwich.
+    only finds frontruns which occured on curve (easy look up in local db), a
+    global check (which takes longer) happens later down the code, when the chances are higher we have an actual arb.
+    */
+    const isBackrunViaLocalCheck = await isActuallyBackrun(txId);
+    if (isBackrunViaLocalCheck)
         return null;
     // Case 1: checking for the atomic arb case in which the profit stays in the bot/bot-operator system
     // Case 2: as in: is not checking for the atomic arb case in which the profit gets forwarded to a 3rd address
@@ -815,6 +872,12 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
     }
     if (!usdValuedArbitrageResult) {
         console.log("Skipping usdValuedArbitrageResult due to failed price fetching.");
+        return null;
+    }
+    const isBackrun = await isGlobalBackrun(transaction, txId);
+    if (isBackrun) {
+        // at this point we can be sure we found a sandwich, in which only the backrun went at some point through a curve pool,
+        // , but the frontrun and the victim tx never did.
         return null;
     }
     // console.log("\n\nusdValuedArbitrageResult:", usdValuedArbitrageResult, "\nid", txId, "\ntxHash", txHash);

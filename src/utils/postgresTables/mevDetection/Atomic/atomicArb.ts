@@ -12,7 +12,39 @@ import { getTransactionTraceFromDb } from "../../readFunctions/TransactionTrace.
 import { getTxHashByTxId, getTxIdByTxHash } from "../../readFunctions/Transactions.js";
 import { solveAtomicArb } from "./utils/atomicArbDetection.js";
 import { clearCaches } from "../../../helperFunctions/QualityOfLifeStuff.js";
-import { TransactionDetailsForAtomicArbs } from "../../../Interfaces.js";
+import { ReadableTokenTransfer, TransactionDetailsForAtomicArbs } from "../../../Interfaces.js";
+
+export async function getCleanedTransfers(txHash: string, to: string): Promise<ReadableTokenTransfer[] | null> {
+  const transactionTraces = await getTransactionTraceFromDb(txHash);
+  if (transactionTraces.length <= 1) {
+    console.log("alchemy trace api bugged out for", txHash);
+    return null;
+  }
+
+  // making sure we have all ABIs which are relevant in this tx.
+  await updateAbisFromTrace(transactionTraces);
+
+  const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+  // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
+
+  const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash);
+  // console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
+  if (!parsedEventsFromReceipt) return null;
+
+  const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
+  // console.log("mergedTransfers", mergedTransfers);
+
+  const readableTransfers = await makeTransfersReadable(mergedTransfers);
+  // console.log("readableTransfers", readableTransfers);
+
+  const updatedReadableTransfers = updateTransferList(readableTransfers, to);
+  // console.log("updatedReadableTransfers", updatedReadableTransfers);
+
+  const cleanedTransfers = removeDuplicatesAndUpdatePositions(updatedReadableTransfers);
+  // console.log("cleanedTransfers", cleanedTransfers);
+
+  return cleanedTransfers;
+}
 
 export async function fetchDataThenDetectArb(txId: number): Promise<TransactionDetailsForAtomicArbs | null> {
   const txHash = await getTxHashByTxId(txId);
@@ -33,32 +65,8 @@ export async function fetchDataThenDetectArb(txId: number): Promise<TransactionD
     return null;
   }
 
-  const transactionTraces = await getTransactionTraceFromDb(txHash!);
-  if (transactionTraces.length <= 1) {
-    console.log("alchemy trace api bugged out for", txHash);
-    return null;
-  }
-
-  // making sure we have all ABIs which are relevant in this tx.
-  await updateAbisFromTrace(transactionTraces);
-
-  const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
-  // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
-
-  const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash!);
-  // console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
-  if (!parsedEventsFromReceipt) return null;
-
-  const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
-  // console.log("mergedTransfers", mergedTransfers);
-
-  const readableTransfers = await makeTransfersReadable(mergedTransfers);
-  // console.log("readableTransfers", readableTransfers);
-
-  const updatedReadableTransfers = updateTransferList(readableTransfers, to);
-  // console.log("updatedReadableTransfers", updatedReadableTransfers);
-
-  const cleanedTransfers = removeDuplicatesAndUpdatePositions(updatedReadableTransfers);
+  const cleanedTransfers = await getCleanedTransfers(txHash, to);
+  if (!cleanedTransfers) return null;
   // console.log("cleanedTransfers", cleanedTransfers);
 
   const atomicArbDetails = await solveAtomicArb(txId, txHash!, cleanedTransfers, from, to);
@@ -76,7 +84,7 @@ export async function updateAtomicArbDetection() {
   // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // solved!
   // const txHash = "0x76f2b5ccaa420ce744b5bfa015b3ba47b4ee0d6b89a0a1a5483c8576b90ba7ba"; // solved!
   // const txHash = "0xa107f285c0e7f5f4453dd6e46fdf1d0b77f5b212446984af78b68bfad1fa872e"; // not entirely solved
-  const txHash = "0x7d00dcd6cbc80553f84cee7be1c9a99f44c673a3a841a2335c06784909702c88";
+  const txHash = "0x3755d33a98057a8f64b0f2c9c1f0e9353673441e68ecf4f6a731a38e615a6faa";
 
   const txId = await getTxIdByTxHash(txHash);
 
