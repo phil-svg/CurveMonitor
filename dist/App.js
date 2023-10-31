@@ -10,6 +10,7 @@ import { parseEvents } from "./utils/postgresTables/txParsing/ParseTx.js";
 import { updateLabels } from "./utils/postgresTables/Labels.js";
 import { subscribeToNewBlocks } from "./utils/postgresTables/CurrentBlock.js";
 import { preparingLiveModeForRawEvents } from "./utils/goingLive/RawTxLogsLive.js";
+import { startAPI } from "./utils/api/Server.js";
 import { updateTransactionsDetails } from "./utils/postgresTables/TransactionsDetails.js";
 import { updateAddressCounts } from "./utils/postgresTables/CalledAddressCounts.js";
 import { eventFlags } from "./utils/api/utils/EventFlags.js";
@@ -28,7 +29,7 @@ export async function initDatabase() {
 }
 await initDatabase();
 // await updateAtomicArbDetection(); // it finally works!
-// startAPI();
+startAPI();
 // await startTestClient();
 async function main() {
     await loadAddressProvider();

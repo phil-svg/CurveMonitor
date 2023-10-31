@@ -86,7 +86,7 @@ export async function updateAtomicArbDetection() {
     // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // solved!
     // const txHash = "0x76f2b5ccaa420ce744b5bfa015b3ba47b4ee0d6b89a0a1a5483c8576b90ba7ba"; // solved!
     // const txHash = "0xa107f285c0e7f5f4453dd6e46fdf1d0b77f5b212446984af78b68bfad1fa872e"; // not entirely solved
-    const txHash = "0x22d6ab5271cf633d44970479dd8a7910faf2948030366196d5d56622a712f9d2";
+    const txHash = "0x4570e565dda18c4b03bf7c1a71336d30b66fd13b0b806f72c4d745c122908141";
     const txId = await getTxIdByTxHash(txHash);
     // console.time();
     // const txId = 930;

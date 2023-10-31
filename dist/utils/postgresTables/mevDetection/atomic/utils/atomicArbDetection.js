@@ -11,6 +11,7 @@ import { getCleanedTransfers } from "../atomicArb.js";
 import { saveTransactionTrace } from "../../../TransactionTraces.js";
 import { getTransactionTraceFromDb } from "../../../readFunctions/TransactionTrace.js";
 import { fetchAndSaveReceipt } from "../../../Receipts.js";
+import { solveSpotPriceUpdate } from "./SpotPriceAction.js";
 async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) {
     const enrichedTransaction = await enrichTransactionDetail(txId);
     if (!enrichedTransaction) {
@@ -948,7 +949,7 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
     if (!atomicArbDetails)
         return null;
     // console.log("atomicArbDetails", atomicArbDetails);
-    // const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails);
+    const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails);
     return atomicArbDetails;
 }
 //# sourceMappingURL=atomicArbDetection.js.map
