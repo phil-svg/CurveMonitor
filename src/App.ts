@@ -35,7 +35,7 @@ await initDatabase();
 
 // await updateAtomicArbDetection(); // it finally works!
 
-// startAPI();
+startAPI();
 // await startTestClient();
 
 async function main() {

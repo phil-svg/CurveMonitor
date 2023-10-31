@@ -7,17 +7,17 @@ import { txDetailEnrichment } from "../../../readFunctions/TxDetailEnrichment.js
 
 export async function solveSpotPriceUpdate(atomicArbDetails: TransactionDetailsForAtomicArbs): Promise<any | null> {
   const blockNumber = atomicArbDetails.block_number;
-  console.log("blockNumber", blockNumber);
+
   const poolContract = await getContractByPoolID(atomicArbDetails.pool_id);
   if (!poolContract) return null;
 
-  const parsedTx = await txDetailEnrichment(atomicArbDetails.pool_id);
+  const parsedTx = await txDetailEnrichment(atomicArbDetails.tx_id);
   if (!parsedTx) return null;
   console.log("parsedTx", parsedTx);
 
   const event = await getEntireEventById(atomicArbDetails.event_id!);
   const returnValues = event.dataValues.returnValues;
-  console.log("returnValues", returnValues);
+  // console.log("returnValues", returnValues);
 
   const eventType = await getTransactionTypeByEventId(atomicArbDetails.event_id!);
   console.log("eventType", eventType);

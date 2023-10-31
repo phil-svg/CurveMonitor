@@ -1258,7 +1258,7 @@ export async function solveAtomicArb(
   if (!atomicArbDetails) return null;
   // console.log("atomicArbDetails", atomicArbDetails);
 
-  // const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails);
+  const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails);
 
   return atomicArbDetails;
 }
