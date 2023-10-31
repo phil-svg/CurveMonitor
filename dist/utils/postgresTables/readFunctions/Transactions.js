@@ -108,4 +108,12 @@ export async function getAllUniqueTransactionHashes() {
     });
     return transactions.map((transaction) => transaction.tx_hash);
 }
+export async function getTransactionTypeByEventId(event_id) {
+    const transaction = await Transactions.findOne({
+        where: {
+            event_id,
+        },
+    });
+    return transaction ? transaction.transaction_type : null;
+}
 //# sourceMappingURL=Transactions.js.map

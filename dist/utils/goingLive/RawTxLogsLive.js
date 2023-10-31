@@ -101,6 +101,8 @@ async function processBufferedEvents() {
             continue;
         // fetching and saving of the transaction-trace
         const transactionTrace = await retryGetTransactionTraceViaAlchemy(tx.tx_hash);
+        if (!transactionTrace)
+            continue;
         await saveTransactionTrace(tx.tx_hash, transactionTrace);
         await fetchAndSaveReceipt(tx.tx_hash, tx.tx_id);
         const atomicArbInfo = await fetchDataThenDetectArb(tx.tx_id);

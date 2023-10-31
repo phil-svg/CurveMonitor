@@ -15,6 +15,7 @@ export async function getMethodId(contractAddress, JsonRpcProvider, web3HttpProv
                 methodIdCache[contractAddress] = methodIds;
             }
             else {
+                methodIdCache[contractAddress] = [];
                 return null;
             }
         }

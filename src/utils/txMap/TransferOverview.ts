@@ -5,6 +5,7 @@ import { checkTokensInDatabase } from "./TransferCategories.js";
 import { findCoinDecimalsById, findCoinIdByAddress, findCoinSymbolById } from "../postgresTables/readFunctions/Coins.js";
 import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { ethers } from "ethers";
+import { ERC20_METHODS } from "../helperFunctions/Erc20Abis.js";
 
 export function updateTransferList(readableTransfers: ReadableTokenTransfer[], to: string): ReadableTokenTransfer[] {
   // console.log("readableTransfers", readableTransfers);
@@ -358,7 +359,7 @@ function handleDepositMethod(action: any, trace: ITransactionTrace, tokenTransfe
   });
 }
 
-export async function getTokenTransfersFromTransactionTrace(txTraces: ITransactionTrace[]): Promise<TokenTransfer[]> {
+export async function getTokenTransfersFromTransactionTrace(txTraces: ITransactionTrace[]): Promise<TokenTransfer[] | null> {
   const tokenTransfers: TokenTransfer[] = [];
 
   const web3HttpProvider = await getWeb3HttpProvider();
@@ -382,9 +383,14 @@ export async function getTokenTransfersFromTransactionTrace(txTraces: ITransacti
 
 async function extractTokenTransfers(trace: ITransactionTrace, tokenTransfers: TokenTransfer[], JsonRpcProvider: any, web3HttpProvider: any): Promise<void> {
   const methodIds = await getMethodId(trace.action.to, JsonRpcProvider, web3HttpProvider);
-  if (trace.action.input && methodIds) {
+
+  if (trace.action.input) {
     const methodId = trace.action.input.slice(0, 10).toLowerCase();
-    const methodInfo = methodIds.find((m) => m.methodId === methodId);
+
+    // If methodIds exists and has items, useing it; else: defaulting to ERC20_METHODS
+    const methodsToCheck = methodIds && methodIds.length ? methodIds : ERC20_METHODS;
+
+    const methodInfo = methodsToCheck.find((m) => m.methodId === methodId);
     if (methodInfo) {
       handleDynamicMethod(methodInfo.name, trace.action, tokenTransfers, trace);
     }

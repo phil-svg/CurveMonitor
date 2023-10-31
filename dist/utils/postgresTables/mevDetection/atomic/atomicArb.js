@@ -6,16 +6,39 @@ import { getTransactionTraceFromDb } from "../../readFunctions/TransactionTrace.
 import { getTxHashByTxId, getTxIdByTxHash } from "../../readFunctions/Transactions.js";
 import { solveAtomicArb } from "./utils/atomicArbDetection.js";
 import { clearCaches } from "../../../helperFunctions/QualityOfLifeStuff.js";
+import { getTransactionTraceViaAlchemy } from "../../../web3Calls/generic.js";
+import { saveTransactionTrace } from "../../TransactionTraces.js";
+function filterForCorrectTransfers(transfers) {
+    return transfers.filter((transfer) => {
+        // Check if token is ETH or WETH
+        const isEthOrWeth = ["ETH", "WETH"].includes(transfer.tokenSymbol || "");
+        // Check if amount is greater than 1 billion
+        const isAmountGreaterThanBillion = transfer.parsedAmount > 1e9;
+        // Return transfers that don't meet both conditions
+        return !(isEthOrWeth && isAmountGreaterThanBillion);
+    });
+}
 export async function getCleanedTransfers(txHash, to) {
-    const transactionTraces = await getTransactionTraceFromDb(txHash);
+    let transactionTraces = await getTransactionTraceFromDb(txHash);
+    // console.log("transactionTraces", transactionTraces);
+    if (transactionTraces.length <= 1) {
+        const traceFetchAttempt = await getTransactionTraceViaAlchemy(txHash);
+        if (traceFetchAttempt)
+            await saveTransactionTrace(txHash, traceFetchAttempt);
+    }
+    transactionTraces = await getTransactionTraceFromDb(txHash);
+    // console.log("transactionTraces", transactionTraces);
     if (transactionTraces.length <= 1) {
         console.log("alchemy trace api bugged out for", txHash);
         return null;
     }
+    // console.log("transactionTraces", transactionTraces);
     // making sure we have all ABIs which are relevant in this tx.
     await updateAbisFromTrace(transactionTraces);
     const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
-    // console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
+    if (!tokenTransfersFromTransactionTraces)
+        return null;
+    //console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
     const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash);
     // console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
     if (!parsedEventsFromReceipt)
@@ -26,7 +49,8 @@ export async function getCleanedTransfers(txHash, to) {
     // console.log("readableTransfers", readableTransfers);
     const updatedReadableTransfers = updateTransferList(readableTransfers, to);
     // console.log("updatedReadableTransfers", updatedReadableTransfers);
-    const cleanedTransfers = removeDuplicatesAndUpdatePositions(updatedReadableTransfers);
+    const correctTrasfers = filterForCorrectTransfers(updatedReadableTransfers);
+    const cleanedTransfers = removeDuplicatesAndUpdatePositions(correctTrasfers);
     // console.log("cleanedTransfers", cleanedTransfers);
     return cleanedTransfers;
 }
@@ -62,7 +86,7 @@ export async function updateAtomicArbDetection() {
     // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // solved!
     // const txHash = "0x76f2b5ccaa420ce744b5bfa015b3ba47b4ee0d6b89a0a1a5483c8576b90ba7ba"; // solved!
     // const txHash = "0xa107f285c0e7f5f4453dd6e46fdf1d0b77f5b212446984af78b68bfad1fa872e"; // not entirely solved
-    const txHash = "0x5cba2f69bfb248358c30254b17b56dadd20774883fa80535bf5e2ac34ab8e12c";
+    const txHash = "0x22d6ab5271cf633d44970479dd8a7910faf2948030366196d5d56622a712f9d2";
     const txId = await getTxIdByTxHash(txHash);
     // console.time();
     // const txId = 930;

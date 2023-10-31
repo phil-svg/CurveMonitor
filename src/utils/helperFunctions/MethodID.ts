@@ -11,11 +11,13 @@ export async function getMethodId(contractAddress: string, JsonRpcProvider: any,
   if (!methodIdCache[contractAddress]) {
     // checking if the contract is a proxy
     const implementationAddress = await getImplementationAddressFromTable(contractAddress);
+
     try {
       const methodIds = await getMethodIdsByContractAddress(implementationAddress || contractAddress, JsonRpcProvider, web3HttpProvider);
       if (methodIds) {
         methodIdCache[contractAddress] = methodIds;
       } else {
+        methodIdCache[contractAddress] = [];
         return null;
       }
     } catch (err) {

@@ -208,6 +208,13 @@ export async function getEventById(id) {
     }
     return record.event;
 }
+export async function getEntireEventById(id) {
+    const record = await RawTxLogs.findOne({ where: { eventId: id } });
+    if (!record) {
+        throw new Error(`Record with id ${id} not found`);
+    }
+    return record;
+}
 export async function getReturnValuesByEventId(eventId) {
     const logEntry = await RawTxLogs.findOne({ where: { eventId } });
     if (!logEntry) {

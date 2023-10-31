@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize";
-import { Transactions, TransactionData } from "../../../models/Transactions.js";
+import { Transactions, TransactionData, TransactionType } from "../../../models/Transactions.js";
 
 export async function findTransactionsByPoolIdAndHash(pool_id: number, tx_hash: string): Promise<TransactionData[]> {
   const transactions = await Transactions.findAll({
@@ -122,4 +122,14 @@ export async function getAllUniqueTransactionHashes(): Promise<string[]> {
   });
 
   return transactions.map((transaction) => transaction.tx_hash);
+}
+
+export async function getTransactionTypeByEventId(event_id: number): Promise<TransactionType | null> {
+  const transaction = await Transactions.findOne({
+    where: {
+      event_id,
+    },
+  });
+
+  return transaction ? transaction.transaction_type : null;
 }

@@ -4,6 +4,7 @@ import { checkTokensInDatabase } from "./TransferCategories.js";
 import { findCoinDecimalsById, findCoinIdByAddress, findCoinSymbolById } from "../postgresTables/readFunctions/Coins.js";
 import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { ethers } from "ethers";
+import { ERC20_METHODS } from "../helperFunctions/Erc20Abis.js";
 export function updateTransferList(readableTransfers, to) {
     // console.log("readableTransfers", readableTransfers);
     const transfersWithEthWETH = addMissingETHWETHTransfers(readableTransfers);
@@ -308,9 +309,11 @@ export async function getTokenTransfersFromTransactionTrace(txTraces) {
 }
 async function extractTokenTransfers(trace, tokenTransfers, JsonRpcProvider, web3HttpProvider) {
     const methodIds = await getMethodId(trace.action.to, JsonRpcProvider, web3HttpProvider);
-    if (trace.action.input && methodIds) {
+    if (trace.action.input) {
         const methodId = trace.action.input.slice(0, 10).toLowerCase();
-        const methodInfo = methodIds.find((m) => m.methodId === methodId);
+        // If methodIds exists and has items, useing it; else: defaulting to ERC20_METHODS
+        const methodsToCheck = methodIds && methodIds.length ? methodIds : ERC20_METHODS;
+        const methodInfo = methodsToCheck.find((m) => m.methodId === methodId);
         if (methodInfo) {
             handleDynamicMethod(methodInfo.name, trace.action, tokenTransfers, trace);
         }

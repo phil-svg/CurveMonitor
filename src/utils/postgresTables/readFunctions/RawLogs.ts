@@ -1,7 +1,6 @@
 import { Op, fn, col, literal } from "sequelize";
 import { RawTxLogs } from "../../../models/RawTxLogs.js";
 import pkg from "lodash";
-import { Transactions } from "../../../models/Transactions.js";
 const { pick, isNaN } = pkg;
 
 export async function getHighestStoredBlockForPoolId(poolId: number): Promise<number> {
@@ -228,6 +227,16 @@ export async function getEventById(id: number): Promise<string> {
   }
 
   return record.event;
+}
+
+export async function getEntireEventById(id: number): Promise<any | null> {
+  const record = await RawTxLogs.findOne({ where: { eventId: id } });
+
+  if (!record) {
+    throw new Error(`Record with id ${id} not found`);
+  }
+
+  return record;
 }
 
 export async function getReturnValuesByEventId(eventId: number): Promise<any | null> {

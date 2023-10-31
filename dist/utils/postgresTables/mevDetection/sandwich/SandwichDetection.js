@@ -58,6 +58,6 @@ export async function scanCandidate(candidate) {
 export async function updateSandwichDetection() {
     await detectSandwichesInAllTransactions();
     await addAddressesForLabeling();
-    updateConsoleOutput("[✓] Sandwich-Detection completed successfully.");
+    updateConsoleOutput("[✓] Sandwich-Detection completed successfully.\n");
 }
 //# sourceMappingURL=SandwichDetection.js.map

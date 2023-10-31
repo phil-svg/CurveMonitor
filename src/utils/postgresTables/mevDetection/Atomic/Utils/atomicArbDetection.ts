@@ -28,6 +28,7 @@ import { getCleanedTransfers } from "../atomicArb.js";
 import { saveTransactionTrace } from "../../../TransactionTraces.js";
 import { getTransactionTraceFromDb } from "../../../readFunctions/TransactionTrace.js";
 import { fetchAndSaveReceipt } from "../../../Receipts.js";
+import { solveSpotPriceUpdate } from "./SpotPriceAction.js";
 import { copyFileSync } from "fs";
 
 async function buildAtomicArbDetails(txId: number, profitDetails: ProfitDetails, validatorPayOffInUSD: number | null): Promise<TransactionDetailsForAtomicArbs | null> {
@@ -287,9 +288,9 @@ function isAtomicArbCaseValueStaysWithFromOrTo(
     });
   });
 
-  // Check if any of these leaf addresses are NOT either "from" or "to".
+  // Check if any of these leaf addresses are NOT either "from" or "to", but also come from "toAddress"
   const hasValidLeaf = leafReceivers.some((leafReceiver) => {
-    return leafReceiver.to.toLowerCase() !== from.toLowerCase() && leafReceiver.to.toLowerCase() !== to.toLowerCase();
+    return leafReceiver.to.toLowerCase() !== from.toLowerCase() && leafReceiver.to.toLowerCase() !== to.toLowerCase() && leafReceiver.from.toLowerCase() === to.toLowerCase();
   });
 
   // If no valid leaf address is found, return false.
@@ -302,20 +303,36 @@ function isAtomicArbCaseValueStaysWithFromOrTo(
   return true;
 }
 
+async function getValueReceivedByLeaf(token: string, parsedAmount: number, block_unixtime: number): Promise<number | null> {
+  const price = await getHistoricalTokenPriceFromDefiLlama(token, block_unixtime);
+  if (!price) return null;
+  return price * parsedAmount;
+}
+
 // New check for the case where value goes outside "from" and "to".
-function isAtomicArbCaseValueGoesOutsideFromOrTo(
+async function isAtomicArbCaseValueGoesOutsideFromOrTo(
+  onlyToTransfers: ReadableTokenTransfer[],
   cleanedTransfers: ReadableTokenTransfer[],
   balanceChangeFrom: BalanceChange[],
   balanceChangeTo: BalanceChange[],
   from: string,
-  to: string
-): boolean {
-  // Check that from and to have no balance changes
+  to: string,
+  block_unixtime: number
+): Promise<[boolean, number]> {
   if (balanceChangeFrom.length !== 0 || balanceChangeTo.length !== 0) {
-    return false;
+    return [false, 0];
   }
 
-  // Start from the last transfer and move towards the start of the array
+  const fromAddressLowerCase = from.toLowerCase();
+  const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== fromAddressLowerCase);
+
+  if (filteredOnlyToTransfers.length === 0) return [false, 0];
+  if (isLeaf(filteredOnlyToTransfers[0].from, cleanedTransfers.slice(1))) {
+    const dollarValue = await getValueReceivedByLeaf(filteredOnlyToTransfers[0].tokenAddress, filteredOnlyToTransfers[0].parsedAmount, block_unixtime);
+    if (!dollarValue) return [false, 0];
+    return [true, dollarValue];
+  }
+
   for (let i = cleanedTransfers.length - 1; i >= 0; i--) {
     let transfer = cleanedTransfers[i];
     if (
@@ -323,14 +340,11 @@ function isAtomicArbCaseValueGoesOutsideFromOrTo(
       transfer.to.toLowerCase() !== from.toLowerCase() &&
       transfer.to.toLowerCase() !== to.toLowerCase()
     ) {
-      return true; // Found a transfer where value moved outside of "from" and "to", so return true immediately
-    } else {
-      return false;
+      return [true, 0];
     }
   }
 
-  // If loop completes without finding any transfer matching the criteria, return false
-  return false;
+  return [false, 0];
 }
 
 function convertWETHtoETHforBalanceChanges(balanceChanges: BalanceChanges): BalanceChanges {
@@ -866,7 +880,7 @@ async function augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(
   };
 }
 
-function calculateProfitDetails(usdValuedArbitrageResult: USDValuedArbitrageResult): ProfitDetails {
+function calculateProfitDetails(usdValuedArbitrageResult: USDValuedArbitrageResult, dollarValueInflowFromLeaf: number): ProfitDetails | null {
   let netWin: number | "unknown" = "unknown";
   let revenue: number | "unknown" = "unknown";
   let totalCost: number | "unknown" = "unknown";
@@ -877,6 +891,15 @@ function calculateProfitDetails(usdValuedArbitrageResult: USDValuedArbitrageResu
 
   if (Array.isArray(usdValuedArbitrageResult.extractedValue)) {
     revenue = usdValuedArbitrageResult.extractedValue.reduce((acc, cur) => acc + cur.amountInUSD, 0);
+  }
+
+  if (typeof revenue === "number") {
+    revenue -= dollarValueInflowFromLeaf;
+    if (revenue < 0) return null;
+  }
+
+  if (typeof netWin === "number") {
+    netWin -= dollarValueInflowFromLeaf;
   }
 
   const {
@@ -967,13 +990,13 @@ function hasLeafOrigin(transfer: ReadableTokenTransfer, transfers: ReadableToken
 }
 
 // Function to count the number of transfers with leaf origins
-function countLeafOrigins(onlyToTransfers: ReadableTokenTransfer[], allTransfers: ReadableTokenTransfer[]): number {
-  return onlyToTransfers.filter((t) => hasLeafOrigin(t, allTransfers)).length;
+function countLeafOrigins(filteredOnlyToTransfers: ReadableTokenTransfer[], allTransfers: ReadableTokenTransfer[]): number {
+  return filteredOnlyToTransfers.filter((t) => hasLeafOrigin(t, allTransfers)).length;
 }
 
 function hasMissmatchingForOriginLeafesToTo(onlyToTransfers: ReadableTokenTransfer[], allTransfers: ReadableTokenTransfer[], formAddress: string): boolean {
-  const formAddressLowerCase = formAddress.toLowerCase();
-  const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== formAddressLowerCase);
+  const fromAddressLowerCase = formAddress.toLowerCase();
+  const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== fromAddressLowerCase);
 
   const numOfLeafOrigins = countLeafOrigins(filteredOnlyToTransfers, allTransfers);
   return numOfLeafOrigins > 0;
@@ -1002,21 +1025,25 @@ export function hasAtLeastTwoPairs(cleanedTransfers: ReadableTokenTransfer[]): b
 }
 
 export async function checkCaseValueGoesOutsideFromOrTo(
+  onlyToTransfers: ReadableTokenTransfer[],
   cleanedTransfers: ReadableTokenTransfer[],
   txHash: string,
   transactionDetails: TransactionDetails,
   balanceChangeFrom: BalanceChange[],
   balanceChangeTo: BalanceChange[],
   from: string,
-  to: string
-): Promise<FormattedArbitrageResult | null> {
-  const txWasAtomicArb = isAtomicArbCaseValueGoesOutsideFromOrTo(cleanedTransfers, balanceChangeFrom, balanceChangeTo, from, to);
-  if (!txWasAtomicArb) {
-    return null;
+  to: string,
+  block_unixtime: number
+): Promise<[FormattedArbitrageResult | null, number]> {
+  const [isAtomicArb, value] = await isAtomicArbCaseValueGoesOutsideFromOrTo(onlyToTransfers, cleanedTransfers, balanceChangeFrom, balanceChangeTo, from, to, block_unixtime);
+
+  if (!isAtomicArb) {
+    return [null, 0];
   }
 
   const formattedArbitrage = await formatArbitrageCaseValueGoesOutsideFromOrTo(cleanedTransfers, txHash, transactionDetails, from, to);
-  return formattedArbitrage;
+
+  return [formattedArbitrage, value];
 }
 
 export function testOtherBribePath(
@@ -1046,6 +1073,41 @@ export function testOtherBribePath(
   return formattedArbitrageResult;
 }
 
+export function hasExternalTokenInflow(onlyToTransfers: ReadableTokenTransfer[], toAddress: string, fromAddress: string): boolean {
+  const fromAddressLowerCase = fromAddress.toLowerCase();
+
+  // ensuring none of the transfers involve the fromAddress
+  if (onlyToTransfers.some((t) => t.to.toLowerCase() === fromAddressLowerCase || t.from.toLowerCase() === fromAddressLowerCase)) {
+    return false;
+  }
+
+  // if (onlyToTransfers.length !== 3) return false;
+
+  // filter transfers involving the toAddress
+  const relatedTransfers = onlyToTransfers.filter((t) => t.to.toLowerCase() === toAddress.toLowerCase() || t.from.toLowerCase() === toAddress.toLowerCase());
+
+  // finding one transfer where toAddress is the receiver
+  const receivedTransfer = relatedTransfers.find((t) => t.to.toLowerCase() === toAddress.toLowerCase());
+  if (!receivedTransfer) return false;
+
+  // And one where toAddress is the sender of the same token and amount
+  const sentTransfer = relatedTransfers.find(
+    (t) =>
+      t.from.toLowerCase() === toAddress.toLowerCase() &&
+      t.tokenAddress.toLowerCase() === receivedTransfer.tokenAddress.toLowerCase() &&
+      t.parsedAmount === receivedTransfer.parsedAmount
+  );
+  if (!sentTransfer) return false;
+
+  // Lastly, ensuring that there's a third transfer where toAddress is the receiver but with a different token
+  const otherReceivedTransfer = onlyToTransfers.find(
+    (t) => t.to.toLowerCase() === toAddress.toLowerCase() && t.tokenAddress.toLowerCase() !== receivedTransfer.tokenAddress.toLowerCase()
+  );
+  if (!otherReceivedTransfer) return false;
+
+  return true;
+}
+
 export const highestBlockPositionWorthChecking = 35;
 
 export async function solveAtomicArb(
@@ -1061,7 +1123,6 @@ export async function solveAtomicArb(
   if (!hasAtLeastTwoPairs(cleanedTransfers)) return null;
 
   const onlyToTransfers = filterTransfersByAddress(cleanedTransfers, to);
-  // console.log("onlyToTransfers", onlyToTransfers, "\nto", to);
   if (!onlyToTransfers.some((t) => t.position! <= 5)) return null;
 
   if (onlyToTransfers.length <= 2) return null;
@@ -1086,6 +1147,8 @@ export async function solveAtomicArb(
     // console.log("Not Atomic Arbitrage!");
     return null;
   }
+
+  if (hasExternalTokenInflow(onlyToTransfers, to, from)) return null;
 
   /*
   sandwichs' backrun can look like arb: 0x1a4f25133a15c5d226b291e9c5751d910ac1ca796c151f6bc917f3c65a69d340
@@ -1112,13 +1175,30 @@ export async function solveAtomicArb(
 
   let revenueStorageLocationCase;
 
+  /*
+    this dollar Value is storing the usd value, 
+    in case there was a value transfer in the first transfer from a leaf to toAddress
+    */
+  let dollarValueInflowFromLeaf = 0;
+
   // (If case 1)
   if (formattedArbitrage) {
     usdValuedArbitrageResult = await augmentWithUSDValuesCaseValueStaysWithFromOrTo(formattedArbitrage, block_unixtime);
     revenueStorageLocationCase = 1;
   } else {
     // If it is not case 1, check for case 2
-    formattedArbitrage = await checkCaseValueGoesOutsideFromOrTo(cleanedTransfers, txHash, transactionDetails, balanceChangeFrom, balanceChangeTo, from, to);
+    [formattedArbitrage, dollarValueInflowFromLeaf] = await checkCaseValueGoesOutsideFromOrTo(
+      onlyToTransfers,
+      cleanedTransfers,
+      txHash,
+      transactionDetails,
+      balanceChangeFrom,
+      balanceChangeTo,
+      from,
+      to,
+      block_unixtime
+    );
+
     if (formattedArbitrage) {
       usdValuedArbitrageResult = await augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(formattedArbitrage, block_unixtime);
       revenueStorageLocationCase = 2;
@@ -1160,7 +1240,8 @@ export async function solveAtomicArb(
 
   // console.log("\n\nusdValuedArbitrageResult:", usdValuedArbitrageResult, "\nid", txId, "\ntxHash", txHash);
 
-  const profitDetails = calculateProfitDetails(usdValuedArbitrageResult);
+  const profitDetails = calculateProfitDetails(usdValuedArbitrageResult, dollarValueInflowFromLeaf);
+  if (!profitDetails) return null;
 
   let validatorPayOffInEth: number | null = null;
   let validatorPayOffInUSD: number | null = null;
@@ -1174,6 +1255,10 @@ export async function solveAtomicArb(
   printProfitDetails(profitDetails, txHash);
 
   const atomicArbDetails = await buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD);
+  if (!atomicArbDetails) return null;
   // console.log("atomicArbDetails", atomicArbDetails);
+
+  // const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails);
+
   return atomicArbDetails;
 }

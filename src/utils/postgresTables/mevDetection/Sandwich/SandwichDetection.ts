@@ -72,5 +72,5 @@ export async function scanCandidate(candidate: TransactionData[]): Promise<void>
 export async function updateSandwichDetection(): Promise<void> {
   await detectSandwichesInAllTransactions();
   await addAddressesForLabeling();
-  updateConsoleOutput("[✓] Sandwich-Detection completed successfully.");
+  updateConsoleOutput("[✓] Sandwich-Detection completed successfully.\n");
 }
