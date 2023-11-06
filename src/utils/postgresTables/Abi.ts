@@ -212,5 +212,5 @@ export async function fetchMissingPoolAbisFromEtherscan(): Promise<void> {
 
 export async function updatePoolAbis(): Promise<void> {
   await fetchMissingPoolAbisFromEtherscan();
-  console.log(`[✓] Pool-ABIs' synced successfully.`);
+  console.log(`\n[✓] Pool-ABIs' synced successfully.`);
 }

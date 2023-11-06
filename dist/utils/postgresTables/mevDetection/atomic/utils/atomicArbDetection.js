@@ -1,4 +1,4 @@
-import { CoWProtocolGPv2Settlement, ETH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
+import { CoWProtocolGPv2Settlement, ETH_ADDRESS, NULL_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
 import { getGasUsedFromReceipt, getShortenReceiptByTxHash } from "../../../readFunctions/Receipts.js";
 import { extractGasPrice, extractTransactionAddresses, getBlockNumberByTxHash, getTransactionDetailsByTxHash, } from "../../../readFunctions/TransactionDetails.js";
 import { Transactions } from "../../../../../models/Transactions.js";
@@ -742,6 +742,25 @@ export function hasEnoughSwaps(balanceChangeTo, cleanedTransfers) {
     }
     return false;
 }
+function toHasInflowFromLeafOtherThanFrom(cleanedTransfers, fromAddress, toAddress) {
+    // converting fromAddress and toAddress to lower case for case-insensitive comparison
+    const fromAddressLowerCase = fromAddress.toLowerCase();
+    const toAddressLowerCase = toAddress.toLowerCase();
+    // filtering out transfers that involve fromAddress either as a sender or receiver
+    const transfersExcludingFrom = cleanedTransfers.filter((t) => t.from.toLowerCase() !== fromAddressLowerCase && t.to.toLowerCase() !== fromAddressLowerCase);
+    // iterating over the transfers to find any inflow to toAddress that is from a leaf
+    return transfersExcludingFrom.some((transfer) => {
+        // checking if the current transfer's receiver is toAddress
+        if (transfer.to.toLowerCase() === toAddressLowerCase) {
+            // creating a new array excluding the current transfer to check if the sender is a leaf
+            const transfersExcludingCurrent = transfersExcludingFrom.filter((t) => t !== transfer);
+            // using the isLeaf function to determine if the sender of the current transfer is a leaf
+            return isLeaf(transfer.from, transfersExcludingCurrent);
+        }
+        // skipping to the next transfer if the current one does not match toAddress
+        return false;
+    });
+}
 // Function to check if an address is a leaf in the entire transfers array
 function isLeaf(address, transfers) {
     const addressToCheck = address.toLowerCase();
@@ -760,6 +779,13 @@ function hasMissmatchingForOriginLeafesToTo(onlyToTransfers, allTransfers, formA
     const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== fromAddressLowerCase);
     const numOfLeafOrigins = countLeafOrigins(filteredOnlyToTransfers, allTransfers);
     return numOfLeafOrigins > 0;
+}
+export function wasDsProxy(cleanedTransfers) {
+    if (cleanedTransfers.length === 0) {
+        return false;
+    }
+    const firstTransfer = cleanedTransfers[0];
+    return firstTransfer.from.toLowerCase() === NULL_ADDRESS && firstTransfer.tokenSymbol === "DAI";
 }
 export function hasAtLeastTwoPairs(cleanedTransfers) {
     const tokenCountMap = {};
@@ -786,6 +812,7 @@ export async function checkCaseValueGoesOutsideFromOrTo(onlyToTransfers, cleaned
     if (!isAtomicArb) {
         return [null, 0];
     }
+    console.log("cleanedTransfers", cleanedTransfers);
     const formattedArbitrage = await formatArbitrageCaseValueGoesOutsideFromOrTo(cleanedTransfers, txHash, transactionDetails, from, to);
     return [formattedArbitrage, value];
 }
@@ -837,12 +864,16 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
         return null;
     if (!hasAtLeastTwoPairs(cleanedTransfers))
         return null;
+    if (wasDsProxy(cleanedTransfers))
+        return null;
     const onlyToTransfers = filterTransfersByAddress(cleanedTransfers, to);
     if (!onlyToTransfers.some((t) => t.position <= 5))
         return null;
     if (onlyToTransfers.length <= 2)
         return null;
     if (hasMissmatchingForOriginLeafesToTo(onlyToTransfers, cleanedTransfers, from))
+        return null;
+    if (toHasInflowFromLeafOtherThanFrom(cleanedTransfers, from, to))
         return null;
     const balanceChangeFrom = await getBalanceChangeForAddressFromTransfers(from, cleanedTransfers);
     // console.log("balanceChangeFrom (" + from + ")", balanceChangeFrom);

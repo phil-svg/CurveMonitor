@@ -196,6 +196,6 @@ export async function fetchMissingPoolAbisFromEtherscan() {
 }
 export async function updatePoolAbis() {
     await fetchMissingPoolAbisFromEtherscan();
-    console.log(`[✓] Pool-ABIs' synced successfully.`);
+    console.log(`\n[✓] Pool-ABIs' synced successfully.`);
 }
 //# sourceMappingURL=Abi.js.map

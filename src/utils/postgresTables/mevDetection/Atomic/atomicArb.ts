@@ -122,7 +122,8 @@ export async function updateAtomicArbDetection() {
   // const txHash = "0x04b16d300b65f6196467b1070bb2da0d64bf6d59301c5c3aea975d36e48056b8"; // todo | case: 3x tokenExchange
   // const txHash = "0x07580f7a4ace4af52c571e3f1395b0d94bbb25d82785876c60d98360ecccea84"; // todo | case: 4x tokenExchange
   // const txHash = "0xebad444d82e872cc20d4e412f77c6c754ea96a4b185eda1daa23929bff3dfa63"; // todo | cases: tokenExchange, exchangeUnderlying, addLiquidity
-  const txHash = "0x5f4230d23a3a37678fd8e7aefeb9851ac52d3e7285eac34d7ddea6a979fd0c10";
+
+  const txHash = "0xdf5a20f208109918782fef861d99114c22115a4e29c91720a732823df11090ea";
 
   const txId = await getTxIdByTxHash(txHash);
 
