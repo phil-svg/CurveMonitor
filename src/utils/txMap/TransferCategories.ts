@@ -243,8 +243,9 @@ export function categorizeTransfers(transfers: ReadableTokenTransfer[], from: st
   };
 }
 
-export async function getReadableTransfersFromTransactionTrace(transactionTraces: ITransactionTrace[]): Promise<ReadableTokenTransfer[]> {
+export async function getReadableTransfersFromTransactionTrace(transactionTraces: ITransactionTrace[]): Promise<ReadableTokenTransfer[] | null> {
   const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+  if (!tokenTransfersFromTransactionTraces) return null;
 
   const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
 

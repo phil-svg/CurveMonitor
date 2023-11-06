@@ -1077,11 +1077,9 @@ export function hasExternalTokenInflow(onlyToTransfers: ReadableTokenTransfer[],
   const fromAddressLowerCase = fromAddress.toLowerCase();
 
   // ensuring none of the transfers involve the fromAddress
-  if (onlyToTransfers.some((t) => t.to.toLowerCase() === fromAddressLowerCase || t.from.toLowerCase() === fromAddressLowerCase)) {
-    return false;
-  }
+  onlyToTransfers = onlyToTransfers.filter((t) => t.to.toLowerCase() !== fromAddressLowerCase && t.from.toLowerCase() !== fromAddressLowerCase);
 
-  // if (onlyToTransfers.length !== 3) return false;
+  if (onlyToTransfers.length !== 3) return false;
 
   // filter transfers involving the toAddress
   const relatedTransfers = onlyToTransfers.filter((t) => t.to.toLowerCase() === toAddress.toLowerCase() || t.from.toLowerCase() === toAddress.toLowerCase());
@@ -1258,7 +1256,7 @@ export async function solveAtomicArb(
   if (!atomicArbDetails) return null;
   // console.log("atomicArbDetails", atomicArbDetails);
 
-  const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails);
+  // const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails); // on hold, since big
 
   return atomicArbDetails;
 }

@@ -86,7 +86,14 @@ export async function updateAtomicArbDetection() {
     // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // solved!
     // const txHash = "0x76f2b5ccaa420ce744b5bfa015b3ba47b4ee0d6b89a0a1a5483c8576b90ba7ba"; // solved!
     // const txHash = "0xa107f285c0e7f5f4453dd6e46fdf1d0b77f5b212446984af78b68bfad1fa872e"; // not entirely solved
-    const txHash = "0x4570e565dda18c4b03bf7c1a71336d30b66fd13b0b806f72c4d745c122908141";
+    // const txHash = "0x9221e0903d930d0e3d4909b9ba0ceab99fe11457dbccbd8f0f11d45b57149ba4"; // edge case: a deposit before the swap breaks the sim.
+    // const txHash = "0x4570e565dda18c4b03bf7c1a71336d30b66fd13b0b806f72c4d745c122908141"; // todo | case: tokenExchange
+    // const txHash = "0x0ec529f89f7b8c8c58d7b15af72959f309c753d71aeaebc743be5624edcb32e1"; // todo | cases: deposit + exchangeUnderlying
+    // const txHash = "0xbb998ff70dfed090136b924e3ab31f80000a7783a41ad5f5797b19eb76f2ff86"; // todo | cases: remove + exchangeUnderlying
+    // const txHash = "0x04b16d300b65f6196467b1070bb2da0d64bf6d59301c5c3aea975d36e48056b8"; // todo | case: 3x tokenExchange
+    // const txHash = "0x07580f7a4ace4af52c571e3f1395b0d94bbb25d82785876c60d98360ecccea84"; // todo | case: 4x tokenExchange
+    // const txHash = "0xebad444d82e872cc20d4e412f77c6c754ea96a4b185eda1daa23929bff3dfa63"; // todo | cases: tokenExchange, exchangeUnderlying, addLiquidity
+    const txHash = "0x5f4230d23a3a37678fd8e7aefeb9851ac52d3e7285eac34d7ddea6a979fd0c10";
     const txId = await getTxIdByTxHash(txHash);
     // console.time();
     // const txId = 930;

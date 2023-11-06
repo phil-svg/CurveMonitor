@@ -11,7 +11,6 @@ import { getCleanedTransfers } from "../atomicArb.js";
 import { saveTransactionTrace } from "../../../TransactionTraces.js";
 import { getTransactionTraceFromDb } from "../../../readFunctions/TransactionTrace.js";
 import { fetchAndSaveReceipt } from "../../../Receipts.js";
-import { solveSpotPriceUpdate } from "./SpotPriceAction.js";
 async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) {
     const enrichedTransaction = await enrichTransactionDetail(txId);
     if (!enrichedTransaction) {
@@ -810,10 +809,9 @@ export function testOtherBribePath(usdValuedArbitrageResult, cleanedTransfers, f
 export function hasExternalTokenInflow(onlyToTransfers, toAddress, fromAddress) {
     const fromAddressLowerCase = fromAddress.toLowerCase();
     // ensuring none of the transfers involve the fromAddress
-    if (onlyToTransfers.some((t) => t.to.toLowerCase() === fromAddressLowerCase || t.from.toLowerCase() === fromAddressLowerCase)) {
+    onlyToTransfers = onlyToTransfers.filter((t) => t.to.toLowerCase() !== fromAddressLowerCase && t.from.toLowerCase() !== fromAddressLowerCase);
+    if (onlyToTransfers.length !== 3)
         return false;
-    }
-    // if (onlyToTransfers.length !== 3) return false;
     // filter transfers involving the toAddress
     const relatedTransfers = onlyToTransfers.filter((t) => t.to.toLowerCase() === toAddress.toLowerCase() || t.from.toLowerCase() === toAddress.toLowerCase());
     // finding one transfer where toAddress is the receiver
@@ -949,7 +947,7 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
     if (!atomicArbDetails)
         return null;
     // console.log("atomicArbDetails", atomicArbDetails);
-    const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails);
+    // const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails); // on hold, since big
     return atomicArbDetails;
 }
 //# sourceMappingURL=atomicArbDetection.js.map

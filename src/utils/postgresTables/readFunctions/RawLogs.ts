@@ -269,3 +269,20 @@ export async function getLargestBlockNumber(): Promise<number | null> {
 
   return null;
 }
+
+export async function getAllEventIdsByTxHash(txHash: string): Promise<number[]> {
+  try {
+    const rawTxLogs = await RawTxLogs.findAll({
+      where: {
+        transactionHash: txHash,
+      },
+      attributes: ["eventId"],
+    });
+
+    const eventIds = rawTxLogs.map((txLog) => txLog.eventId);
+    return eventIds;
+  } catch (error) {
+    console.error("Error fetching event IDs by transaction hash:", error);
+    return [];
+  }
+}

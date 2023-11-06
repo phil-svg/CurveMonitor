@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { Transactions } from "../../../models/Transactions.js";
 export async function findTransactionsByPoolIdAndHash(pool_id, tx_hash) {
     const transactions = await Transactions.findAll({
@@ -115,5 +115,65 @@ export async function getTransactionTypeByEventId(event_id) {
         },
     });
     return transaction ? transaction.transaction_type : null;
+}
+export async function getTxIdByEventId(event_id) {
+    try {
+        const transaction = await Transactions.findOne({
+            where: { event_id },
+        });
+        if (transaction) {
+            return transaction.tx_id;
+        }
+        else {
+            return null;
+        }
+    }
+    catch (error) {
+        console.error("Error fetching transaction by event ID:", error);
+        return null;
+    }
+}
+export async function getAllTxIdsByTxHash(txHash) {
+    try {
+        const transactions = await Transactions.findAll({
+            where: {
+                tx_hash: {
+                    [Op.iLike]: txHash,
+                },
+            },
+            attributes: ["tx_id"],
+        });
+        const txIds = transactions.map((transaction) => transaction.tx_id);
+        return txIds;
+    }
+    catch (error) {
+        console.error("Error fetching transaction IDs by transaction hash:", error);
+        return [];
+    }
+}
+export async function getEventIdByTxId(txId) {
+    try {
+        const transaction = await Transactions.findByPk(txId, {
+            attributes: ["event_id"],
+        });
+        return transaction && transaction.event_id !== undefined ? transaction.event_id : null;
+    }
+    catch (error) {
+        console.error("Error fetching event ID by transaction ID:", error);
+        return null;
+    }
+}
+export async function getPoolIdByTxId(txId) {
+    var _a;
+    try {
+        const transaction = await Transactions.findByPk(txId, {
+            attributes: ["pool_id"],
+        });
+        return (_a = transaction === null || transaction === void 0 ? void 0 : transaction.pool_id) !== null && _a !== void 0 ? _a : null;
+    }
+    catch (error) {
+        console.error("Error fetching pool ID by transaction ID:", error);
+        return null;
+    }
 }
 //# sourceMappingURL=Transactions.js.map

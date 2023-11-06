@@ -132,6 +132,7 @@ async function countFlashloans(txHashes: string[]): Promise<FlashloanResult> {
     // if (index >= 1000) continue;
     const transaction_trace = await getTransactionTraceFromDb(txHash);
     const readableTransfers = await getReadableTransfersFromTransactionTrace(transaction_trace);
+    if (!readableTransfers) continue;
     const flashloan_s = await findFlashloan_s(readableTransfers);
 
     if (flashloan_s.length > 0) {

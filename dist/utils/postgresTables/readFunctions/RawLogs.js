@@ -237,4 +237,20 @@ export async function getLargestBlockNumber() {
     }
     return null;
 }
+export async function getAllEventIdsByTxHash(txHash) {
+    try {
+        const rawTxLogs = await RawTxLogs.findAll({
+            where: {
+                transactionHash: txHash,
+            },
+            attributes: ["eventId"],
+        });
+        const eventIds = rawTxLogs.map((txLog) => txLog.eventId);
+        return eventIds;
+    }
+    catch (error) {
+        console.error("Error fetching event IDs by transaction hash:", error);
+        return [];
+    }
+}
 //# sourceMappingURL=RawLogs.js.map

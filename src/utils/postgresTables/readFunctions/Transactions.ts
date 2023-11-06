@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { Transactions, TransactionData, TransactionType } from "../../../models/Transactions.js";
 
 export async function findTransactionsByPoolIdAndHash(pool_id: number, tx_hash: string): Promise<TransactionData[]> {
@@ -132,4 +132,65 @@ export async function getTransactionTypeByEventId(event_id: number): Promise<Tra
   });
 
   return transaction ? transaction.transaction_type : null;
+}
+
+export async function getTxIdByEventId(event_id: number): Promise<number | null> {
+  try {
+    const transaction = await Transactions.findOne({
+      where: { event_id },
+    });
+
+    if (transaction) {
+      return transaction.tx_id;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching transaction by event ID:", error);
+    return null;
+  }
+}
+
+export async function getAllTxIdsByTxHash(txHash: string): Promise<number[]> {
+  try {
+    const transactions = await Transactions.findAll({
+      where: {
+        tx_hash: {
+          [Op.iLike]: txHash,
+        },
+      },
+      attributes: ["tx_id"],
+    });
+
+    const txIds = transactions.map((transaction) => transaction.tx_id);
+    return txIds;
+  } catch (error) {
+    console.error("Error fetching transaction IDs by transaction hash:", error);
+    return [];
+  }
+}
+
+export async function getEventIdByTxId(txId: number): Promise<number | null> {
+  try {
+    const transaction = await Transactions.findByPk(txId, {
+      attributes: ["event_id"],
+    });
+    return transaction && transaction.event_id !== undefined ? transaction.event_id : null;
+  } catch (error) {
+    console.error("Error fetching event ID by transaction ID:", error);
+    return null;
+  }
+}
+
+export async function getPoolIdByTxId(txId: number): Promise<number | null> {
+  try {
+    const transaction = await Transactions.findByPk(txId, {
+      attributes: ["pool_id"],
+    });
+
+    return transaction?.pool_id ?? null;
+  } catch (error) {
+    console.error("Error fetching pool ID by transaction ID:", error);
+    return null;
+  }
 }

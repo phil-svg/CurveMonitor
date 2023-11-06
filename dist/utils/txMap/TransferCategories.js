@@ -188,6 +188,8 @@ export function categorizeTransfers(transfers, from, to) {
 }
 export async function getReadableTransfersFromTransactionTrace(transactionTraces) {
     const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+    if (!tokenTransfersFromTransactionTraces)
+        return null;
     const readableTransfers = await makeTransfersReadable(tokenTransfersFromTransactionTraces);
     return readableTransfers;
 }
