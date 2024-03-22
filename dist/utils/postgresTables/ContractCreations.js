@@ -1,10 +1,9 @@
-import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
+import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { TransactionDetails } from "../../models/TransactionDetails.js";
 import { Contracts } from "../../models/Contracts.js";
 import axios from "axios";
-import { getTxWithLimiter } from "../web3Calls/generic.js";
+import { WEB3_HTTP_PROVIDER, getTxWithLimiter } from "../web3Calls/generic.js";
 import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
-import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { getInceptionBlock } from "./Pools.js";
 import { Op } from "sequelize";
 function delay(ms) {
@@ -37,31 +36,41 @@ export async function fetchContractAgeInRealtime(txHash, calledContractAddress) 
     }
 }
 async function fetchContractInception(txHash, calledContractAddress) {
-    const web3 = await getWeb3HttpProvider();
-    const highestBlock = await web3.eth.getBlockNumber();
+    const highestBlock = await WEB3_HTTP_PROVIDER.eth.getBlockNumber();
     const inceptionBlock = await getInceptionBlock(highestBlock, calledContractAddress);
     if (inceptionBlock === null) {
         throw new Error("Failed to get the inception block.");
     }
-    const block = await web3.eth.getBlock(inceptionBlock);
+    const block = await WEB3_HTTP_PROVIDER.eth.getBlock(inceptionBlock);
     return {
         blockNumber: inceptionBlock,
         timestamp: Number(block.timestamp),
     };
 }
 export async function fetchContractDetailsFromEtherscan(contractAddresses) {
-    const response = await axios.get("https://api.etherscan.io/api", {
-        params: {
-            module: "contract",
-            action: "getcontractcreation",
-            contractaddresses: contractAddresses.join(","),
-            apikey: process.env.ETHERSCAN_KEY,
-        },
-    });
-    if (response.data.status !== "1") {
-        throw new Error(`Failed to fetch contract details from Etherscan: ${response.data.message || "Unknown error"}`);
+    try {
+        const response = await axios.get("https://api.etherscan.io/api", {
+            params: {
+                module: "contract",
+                action: "getcontractcreation",
+                contractaddresses: contractAddresses.join(","),
+                apikey: process.env.ETHERSCAN_KEY,
+            },
+        });
+        if (response.data.status !== "1") {
+            throw new Error(`Failed to fetch contract details from Etherscan: ${response.data.message || "Unknown error"}`);
+        }
+        return response.data.result;
     }
-    return response.data.result;
+    catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            console.error(`Axios error code: ${error.code}`);
+        }
+        else {
+            console.error(`Error fetching contract details: ${error.message}`);
+        }
+        throw error;
+    }
 }
 async function fetchMissingBlockNumbers() {
     const contractsMissingBlocks = await Contracts.findAll({
@@ -126,7 +135,9 @@ async function solveMissingContracts() {
     const BATCH_SIZE = 5;
     const totalToBeFetched = missingAddresses.length;
     let fetchedCount = 0;
+    let totalTimeTaken = 0;
     for (let i = 0; i < missingAddresses.length; i += BATCH_SIZE) {
+        const startTime = new Date().getTime();
         const batch = missingAddresses.slice(i, i + BATCH_SIZE);
         try {
             const contractDetails = await fetchContractDetailsFromEtherscan(batch);
@@ -135,10 +146,9 @@ async function solveMissingContracts() {
             if (i + BATCH_SIZE < missingAddresses.length) {
                 await delay(210);
             }
-            if (fetchedCount % 50 === 0) {
-                const percentComplete = (fetchedCount / totalToBeFetched) * 100;
-                console.log(`${percentComplete.toFixed(2)}% | ${fetchedCount}/${totalToBeFetched}`);
-            }
+            const endTime = new Date().getTime();
+            totalTimeTaken += endTime - startTime;
+            logProgress("solveMissingContracts", 50, fetchedCount, totalTimeTaken, totalToBeFetched);
         }
         catch (error) {
             console.error("Error processing missing contracts batch:", batch, ((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) || error);

@@ -2,7 +2,7 @@ import Sequelize from "sequelize";
 import { Transactions } from "../../models/Transactions.js";
 import { TransactionTrace } from "../../models/TransactionTrace.js";
 import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
-import { getTransactionTraceViaAlchemy } from "../web3Calls/generic.js";
+import { getTransactionTraceViaWeb3Provider } from "../web3Calls/generic.js";
 export async function saveTransactionTrace(txHash, transactionTrace) {
     if (transactionTrace) {
         for (const trace of transactionTrace) {
@@ -24,9 +24,6 @@ export async function saveTransactionTrace(txHash, transactionTrace) {
                     resultOutput: trace.result.output,
                 });
             }
-            else {
-                console.log(`trace.result does not exist for ${txHash}`);
-            }
         }
     }
     else {
@@ -35,9 +32,9 @@ export async function saveTransactionTrace(txHash, transactionTrace) {
 }
 export async function updateTxTraces() {
     try {
-        // Fetch all unique transaction hashes from Transactions.
         const transactions = await Transactions.findAll({
-            attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("tx_hash")), "tx_hash"], "tx_id"],
+            attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("tx_hash")), "tx_hash"]],
+            raw: true,
         });
         // Fetch all unique transaction hashes from TransactionTraces.
         const existingTransactionTraces = await TransactionTrace.findAll({
@@ -53,12 +50,12 @@ export async function updateTxTraces() {
         let totalTimeTaken = 0;
         for (const txHash of toBeFetchedSet) {
             const start = new Date().getTime();
-            const transactionTrace = await getTransactionTraceViaAlchemy(txHash);
+            const transactionTrace = await getTransactionTraceViaWeb3Provider(txHash);
             const end = new Date().getTime();
             totalTimeTaken += end - start;
             fetchCount++;
             await saveTransactionTrace(txHash, transactionTrace);
-            logProgress(fetchCount, totalTimeTaken, totalToBeFetched);
+            logProgress("updateTxTraces", 50, fetchCount, totalTimeTaken, totalToBeFetched);
         }
     }
     catch (error) {

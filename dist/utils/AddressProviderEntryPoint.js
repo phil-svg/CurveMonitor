@@ -1,16 +1,9 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
-import Web3 from "web3";
 import { getAbiBy, isAbiStored, fetchAbiFromEtherscan, storeAbiForAddressProvider } from "./postgresTables/Abi.js";
 import { NULL_ADDRESS } from "./helperFunctions/Constants.js";
+import { WEB3_HTTP_PROVIDER } from "./web3Calls/generic.js";
 // only requires the address of the Address-Provider.
 // Collects addresses provided together with their ABIs.
 console.clear();
-if (!process.env.WEB3_WSS) {
-    console.error("Error: WEB3_WSS environment variable is not defined.");
-    process.exit(1);
-}
-const WEB3 = new Web3(new Web3.providers.WebsocketProvider(process.env.WEB3_WSS));
 export async function getProvidedAddress() {
     const TABLE_NAME = "AbisRelatedToAddressProvider";
     const ADDRESS_ADDRESSPROVIDER = "0x0000000022D53366457F9d5E68Ec105046FC4383";
@@ -19,7 +12,7 @@ export async function getProvidedAddress() {
         console.log(`Please provide the ABI for the Address Provider Contract`);
         return null;
     }
-    const CONTRACT_ADDRESS_PROVIDER = new WEB3.eth.Contract(ABI, ADDRESS_ADDRESSPROVIDER);
+    const CONTRACT_ADDRESS_PROVIDER = new WEB3_HTTP_PROVIDER.eth.Contract(ABI, ADDRESS_ADDRESSPROVIDER);
     const MAX_ID = Number(await CONTRACT_ADDRESS_PROVIDER.methods.max_id().call());
     const ADDRESS_ARR = [];
     for (var i = 0; i <= MAX_ID; i++) {

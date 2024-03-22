@@ -1,6 +1,6 @@
 import { saveCoins, saveTransaction, transactionExists } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
-import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
+import { getCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 
 export async function parseTokenExchange(event: any, BLOCK_UNIXTIME: any, POOL_COINS: any): Promise<void> {
   // if (await transactionExists(event.eventId)) return;
@@ -24,13 +24,13 @@ export async function parseTokenExchange(event: any, BLOCK_UNIXTIME: any, POOL_C
   const soldCoinAddress = POOL_COINS[event.returnValues.sold_id];
   const boughtCoinAddress = POOL_COINS[event.returnValues.bought_id];
 
-  const SOLD_COIN_ID = await findCoinIdByAddress(soldCoinAddress);
+  const SOLD_COIN_ID = await getCoinIdByAddress(soldCoinAddress);
   if (!SOLD_COIN_ID) return;
   const SOLD_COIN_DECIMALS = await findCoinDecimalsById(SOLD_COIN_ID);
   if (!SOLD_COIN_DECIMALS) return;
   let soldCoinAmount = event.returnValues.tokens_sold / 10 ** SOLD_COIN_DECIMALS;
 
-  const BOUGHT_COIN_ID = await findCoinIdByAddress(boughtCoinAddress);
+  const BOUGHT_COIN_ID = await getCoinIdByAddress(boughtCoinAddress);
   if (!BOUGHT_COIN_ID) return;
   const BOUGHT_COIN_DECIMALS = await findCoinDecimalsById(BOUGHT_COIN_ID);
   if (!BOUGHT_COIN_DECIMALS) return;

@@ -6,9 +6,18 @@ import { findUniqueSourceOfLossAddresses } from "./readFunctions/Sandwiches.js";
 import { findUniqueLabeledAddresses, findVyperContractAddresses } from "./readFunctions/Labels.js";
 import { Labels } from "../../models/Labels.js";
 import { fetchAbiFromEtherscan } from "./Abi.js";
-import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
-import { web3Call } from "../web3Calls/generic.js";
+import { WEB3_HTTP_PROVIDER, web3Call } from "../web3Calls/generic.js";
 import { manualLaborLabels } from "../api/utils/PoolNamesManualLabor.js";
+import { findAndCountUniqueCallesPlusCalledContracts } from "./readFunctions/TransactionDetails.js";
+
+export async function getAddressesWithMinOccurrences(minOccurrences: number): Promise<string[]> {
+  const foundAndCountedUniqueCallesPlusCalledContracts = await findAndCountUniqueCallesPlusCalledContracts();
+
+  // Filter addresses with at least 'minOccurrences' occurrences
+  const filteredAddresses = foundAndCountedUniqueCallesPlusCalledContracts.filter((item) => item.count >= minOccurrences).map((item) => item.address);
+
+  return filteredAddresses;
+}
 
 /**
  * Function to retrieve addresses that are not yet labeled
@@ -18,22 +27,30 @@ async function getUnlabeledAddresses(): Promise<Array<string>> {
   // Fetch all unique addresses from the source of loss
   let uniqueSourceOfLossAddresses = await findUniqueSourceOfLossAddresses();
 
+  // Fetch all addresses which occurred at least 500 times
+  const addressesWithMinOccurrences = await getAddressesWithMinOccurrences(500);
+
+  // Combine uniqueSourceOfLossAddresses and addressesWithMinOccurrences
+  let combinedAddresses = [...uniqueSourceOfLossAddresses, ...addressesWithMinOccurrences];
+
   // Fetch all addresses that are already labeled
   let uniqueLabeledAddresses = await findUniqueLabeledAddresses();
 
   // Normalize addresses to lowercase for a case-insensitive comparison and filter out any null or undefined values
-  uniqueSourceOfLossAddresses = uniqueSourceOfLossAddresses.filter(Boolean).map((address) => address.toLowerCase());
+  combinedAddresses = combinedAddresses.filter(Boolean).map((address) => address.toLowerCase());
   uniqueLabeledAddresses = uniqueLabeledAddresses.filter(Boolean).map((address) => address.toLowerCase());
 
+  // Remove duplicates from combinedAddresses to ensure each address is unique
+  combinedAddresses = _.uniq(combinedAddresses);
+
   // Get the difference between the two arrays to find unlabeled addresses
-  const unlabeledAddresses = _.difference(uniqueSourceOfLossAddresses, uniqueLabeledAddresses);
+  const unlabeledAddresses = _.difference(combinedAddresses, uniqueLabeledAddresses);
 
   return unlabeledAddresses;
 }
 
 async function vyper_contract() {
   let vyperContractAddresses = await findVyperContractAddresses();
-  const web3 = await getWeb3HttpProvider();
 
   for (const address of vyperContractAddresses) {
     // Delay each loop iteration by 200ms
@@ -49,7 +66,7 @@ async function vyper_contract() {
       continue;
     }
 
-    let contract = new web3.eth.Contract(abi, address);
+    let contract = new WEB3_HTTP_PROVIDER.eth.Contract(abi, address);
 
     // Check if the ABI has a "name" function
     const hasNameFunction = abi.some((item: any) => item.name === "name" && item.type === "function");
@@ -73,16 +90,6 @@ async function vyper_contract() {
         await Labels.update({ label: label }, { where: { address: address } });
       }
     }
-  }
-}
-
-async function fetchAllAddresses(): Promise<string[]> {
-  try {
-    const labels = await Labels.findAll();
-    return labels.map((label) => label.getDataValue("address"));
-  } catch (error) {
-    console.error(`Error in fetchAllAddresses: ${error}`);
-    return [];
   }
 }
 

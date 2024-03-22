@@ -1,12 +1,7 @@
-import Web3 from "web3";
 import { db } from "../../config/Database.js";
 import { Coins } from "../../models/Coins.js";
 import { Op, QueryTypes } from "sequelize";
-if (!process.env.WEB3_WSS) {
-    console.error("Error: WEB3_WSS environment variable is not defined.");
-    process.exit(1);
-}
-const WEB3 = new Web3(new Web3.providers.WebsocketProvider(process.env.WEB3_WSS));
+import { WEB3_WS_PROVIDER } from "../web3Calls/generic.js";
 const ABI_SYMBOL = [
     {
         name: "symbol",
@@ -102,7 +97,7 @@ export async function fetchSymbolFromChain(coinAddress) {
         return "MKR";
     if (coinAddress === ADDRESS_REUSD)
         return "REUSD";
-    const CONTRACT = new WEB3.eth.Contract(ABI_SYMBOL, coinAddress);
+    const CONTRACT = new WEB3_WS_PROVIDER.eth.Contract(ABI_SYMBOL, coinAddress);
     return CONTRACT.methods.symbol().call();
 }
 export async function updateSymbols() {
@@ -148,7 +143,7 @@ export async function updateSymbols() {
 export async function fetchDecimalsFromChain(coinAddress) {
     if (coinAddress === ADDRESS_ETH)
         return 18;
-    const CONTRACT = new WEB3.eth.Contract(ABI_DECIMALS, coinAddress);
+    const CONTRACT = new WEB3_WS_PROVIDER.eth.Contract(ABI_DECIMALS, coinAddress);
     return CONTRACT.methods.decimals().call();
 }
 export async function updateDecimals() {

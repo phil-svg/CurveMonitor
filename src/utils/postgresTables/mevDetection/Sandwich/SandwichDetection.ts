@@ -2,7 +2,19 @@ import { TransactionData } from "../../../../models/Transactions.js";
 import { fetchTransactionsBatch, getTotalTransactionsCount } from "../../readFunctions/Transactions.js";
 import { addAddressesForLabeling, enrichCandidateWithCoinInfo, removeProcessedTransactions } from "./SandwichUtils.js";
 import { screenCandidate } from "./SandwichCandidateScreening.js";
-import { displayProgressBar, updateConsoleOutput } from "../../../helperFunctions/QualityOfLifeStuff.js";
+import { logProgress, updateConsoleOutput } from "../../../helperFunctions/QualityOfLifeStuff.js";
+import { IsSandwich } from "../../../../models/IsSandwich.js";
+
+export async function updateSandwichFlagForSingleTx(txID: number, isSandwich: boolean): Promise<void> {
+  try {
+    await IsSandwich.upsert({
+      tx_id: txID,
+      is_sandwich: isSandwich,
+    });
+  } catch (error) {
+    console.error(`Error updating flag for txID ${txID}:`, error);
+  }
+}
 
 /**
  * Explanation for the term "Candidate":
@@ -16,20 +28,29 @@ import { displayProgressBar, updateConsoleOutput } from "../../../helperFunction
 // queries the db, and runs the parsed tx in batches through the detection process.
 async function detectSandwichesInAllTransactions(): Promise<void> {
   let totalTransactionsCount = await getTotalTransactionsCount();
-  const BATCH_SIZE = 10000;
+  const BATCH_SIZE = 4000000;
   let offset = 0;
+  let totalTimeTaken = 0;
+
+  const sandwichFlags = await IsSandwich.findAll({
+    attributes: ["tx_id", "is_sandwich"],
+  });
 
   while (true) {
-    // displayProgressBar("Sandwich-Detection", offset, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
-    console.log("Sandwich-Detection", offset, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
-    const transactions = await fetchTransactionsBatch(offset, BATCH_SIZE);
+    const start = new Date().getTime();
 
+    const transactions = await fetchTransactionsBatch(offset, BATCH_SIZE);
     if (transactions.length === 0) break;
 
-    const filteredTransactions = await removeProcessedTransactions(transactions);
+    const filteredTransactions = await removeProcessedTransactions(transactions, sandwichFlags);
+
     await findCandidatesInBatch(filteredTransactions);
 
     offset += BATCH_SIZE;
+
+    const end = new Date().getTime();
+    totalTimeTaken += end - start;
+    logProgress("Sandwich-Detection", 1, offset, totalTimeTaken, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
   }
 }
 
@@ -40,11 +61,7 @@ export async function findCandidatesInBatch(batch: TransactionData[]): Promise<v
   // group transactions by `block_number` and `pool_id`
   for (const transaction of batch) {
     const key = `${transaction.block_number}-${transaction.pool_id}`;
-
-    if (!groups[key]) {
-      groups[key] = [];
-    }
-
+    if (!groups[key]) groups[key] = [];
     groups[key].push(transaction);
   }
 
@@ -59,13 +76,19 @@ async function searchInCandidatesClusterForSandwiches(groups: { [key: string]: T
     if (candidate.length > 1) {
       await scanCandidate(candidate);
     }
+    if (candidate.length === 1) {
+      await updateSandwichFlagForSingleTx(candidate[0].tx_id!, false);
+    }
   }
 }
 
 // adding coin details
 export async function scanCandidate(candidate: TransactionData[]): Promise<void> {
   let enrichedCandidate = await enrichCandidateWithCoinInfo(candidate);
-  if (!enrichedCandidate) return;
+  if (!enrichedCandidate) {
+    console.log("Failed to enrich Condidate", candidate);
+    return;
+  }
   await screenCandidate(enrichedCandidate);
 }
 

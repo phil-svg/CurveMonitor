@@ -1,9 +1,7 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey } from "sequelize-typescript";
 import { Transactions } from "./Transactions.js";
 
-@Table({
-  tableName: "transaction_details",
-})
+@Table({ tableName: "transaction_details" })
 export class TransactionDetails extends Model {
   @PrimaryKey
   @ForeignKey(() => Transactions)
@@ -61,6 +59,6 @@ export class TransactionDetails extends Model {
   @Column(DataType.STRING)
   value!: string;
 
-  @BelongsTo(() => Transactions)
+  @BelongsTo(() => Transactions, "txId")
   transaction!: Transactions;
 }

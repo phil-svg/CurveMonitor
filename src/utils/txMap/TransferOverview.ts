@@ -2,8 +2,7 @@ import { ITransactionTrace, ParsedEvent, ReadableTokenTransfer, TokenTransfer } 
 import { ETH_ADDRESS, NULL_ADDRESS, WETH_ADDRESS } from "../helperFunctions/Constants.js";
 import { getMethodId } from "../helperFunctions/MethodID.js";
 import { checkTokensInDatabase } from "./TransferCategories.js";
-import { findCoinDecimalsById, findCoinIdByAddress, findCoinSymbolById } from "../postgresTables/readFunctions/Coins.js";
-import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
+import { findCoinDecimalsById, getCoinIdByAddress, findCoinSymbolById } from "../postgresTables/readFunctions/Coins.js";
 import { ethers } from "ethers";
 import { ERC20_METHODS } from "../helperFunctions/Erc20Abis.js";
 
@@ -21,12 +20,20 @@ export function updateTransferList(readableTransfers: ReadableTokenTransfer[], t
 
 // finds token transfers from "to" to elsewhere, where the token came out of nowhere (no inflow). Used to complete transfer list.
 export function findUnaccountedOutgoingTransfers(updatedReadableTransfers: ReadableTokenTransfer[], to: string): ReadableTokenTransfer[] {
-  const outgoingTransfers = updatedReadableTransfers.filter((transfer) => transfer.from.toLowerCase() === to.toLowerCase());
+  const toAddressLower = to?.toLowerCase() ?? "";
 
-  const incomingTransfers = updatedReadableTransfers.filter((transfer) => transfer.to.toLowerCase() === to.toLowerCase());
+  const outgoingTransfers = updatedReadableTransfers.filter((transfer) => transfer.from && transfer.from.toLowerCase() === toAddressLower);
+
+  const incomingTransfers = updatedReadableTransfers.filter((transfer) => transfer.to && transfer.to.toLowerCase() === toAddressLower);
 
   const unaccountedOutgoings = outgoingTransfers.filter(
-    (outgoingTransfer) => !incomingTransfers.some((incomingTransfer) => incomingTransfer.tokenAddress.toLowerCase() === outgoingTransfer.tokenAddress.toLowerCase())
+    (outgoingTransfer) =>
+      outgoingTransfer.tokenAddress.toLowerCase() !== ETH_ADDRESS.toLowerCase() && // Exclude ETH
+      outgoingTransfer.tokenAddress.toLowerCase() !== WETH_ADDRESS.toLowerCase() && // Exclude WETH
+      !incomingTransfers.some(
+        (incomingTransfer) =>
+          incomingTransfer.tokenAddress && outgoingTransfer.tokenAddress && incomingTransfer.tokenAddress.toLowerCase() === outgoingTransfer.tokenAddress.toLowerCase()
+      )
   );
 
   return unaccountedOutgoings;
@@ -205,7 +212,7 @@ export async function makeTransfersReadable(tokenTransfers: TokenTransfer[]): Pr
   let readableTransfers: ReadableTokenTransfer[] = [];
 
   for (let transfer of tokenTransfers) {
-    const coinId = await findCoinIdByAddress(transfer.token);
+    const coinId = await getCoinIdByAddress(transfer.token);
     let tokenSymbol: string | null = null;
     let tokenDecimals: number | null = null;
     let parsedAmount = 0;
@@ -299,10 +306,15 @@ function handleWrapMethod(action: any, tokenTransfers: TokenTransfer[]): void {
 }
 
 function handleMintMethod(action: any, tokenTransfers: TokenTransfer[]): void {
+  return; // voiding for now.
   const tokenAddress = action.to;
   const receiver = "0x" + action.input.slice(34, 74);
-  const amountHex = "0x" + action.input.slice(-64);
-  const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
+  const hasHexPrefix = action.input.slice(0, 2) === "0x";
+  const relevantSlice = hasHexPrefix ? action.input.slice(2) : action.input;
+  const amountHex = relevantSlice.slice(-64);
+
+  const trimmedAmountHex = amountHex.replace(/^0+/, "");
+  const value = trimmedAmountHex === "" ? BigInt(0) : BigInt("0x" + trimmedAmountHex);
 
   tokenTransfers.push({
     from: NULL_ADDRESS,
@@ -359,37 +371,43 @@ function handleDepositMethod(action: any, trace: ITransactionTrace, tokenTransfe
   });
 }
 
-export async function getTokenTransfersFromTransactionTrace(txTraces: ITransactionTrace[]): Promise<TokenTransfer[] | null> {
+export async function getTokenTransfersFromTransactionTrace(transactionTraces: ITransactionTrace[]): Promise<TokenTransfer[] | null> {
   const tokenTransfers: TokenTransfer[] = [];
+  const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP_MAINNET);
+  const localMethodIdCache: { [address: string]: any[] } = {};
 
-  const web3HttpProvider = await getWeb3HttpProvider();
-  const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);
+  const uniqueContractAddresses = new Set(
+    transactionTraces
+      .filter((trace) => trace.action.input !== "0x" || trace.action.value !== "0x0" || (trace.result && trace.result.output !== "0x"))
+      .map((trace) => (trace.action.to ? trace.action.to.toLowerCase() : null))
+      .filter((address): address is string => address !== null)
+  );
 
-  // Extract all unique contract addresses
-  const uniqueContractAddresses = new Set(txTraces.map((trace) => trace.action.to));
-
-  // Prefetch method IDs
   for (const contractAddress of uniqueContractAddresses) {
-    await getMethodId(contractAddress, JsonRpcProvider, web3HttpProvider);
+    if (!localMethodIdCache[contractAddress]) {
+      const fetchedMethodIds = await getMethodId(contractAddress, JsonRpcProvider);
+      localMethodIdCache[contractAddress] = fetchedMethodIds || [];
+    }
   }
 
-  // Process txTraces
-  for (const txTrace of txTraces) {
-    await extractTokenTransfers(txTrace, tokenTransfers, JsonRpcProvider, web3HttpProvider);
+  for (const txTrace of transactionTraces) {
+    const contractAddress = txTrace.action.to ? txTrace.action.to.toLowerCase() : null;
+    if (contractAddress) {
+      const methodIds = localMethodIdCache[contractAddress] || [];
+      await extractTokenTransfers(txTrace, tokenTransfers, JsonRpcProvider, methodIds);
+    }
   }
 
   return tokenTransfers;
 }
 
-async function extractTokenTransfers(trace: ITransactionTrace, tokenTransfers: TokenTransfer[], JsonRpcProvider: any, web3HttpProvider: any): Promise<void> {
-  const methodIds = await getMethodId(trace.action.to, JsonRpcProvider, web3HttpProvider);
+async function extractTokenTransfers(trace: ITransactionTrace, tokenTransfers: TokenTransfer[], JsonRpcProvider: any, methodIds: any[]): Promise<void> {
+  const contractAddress = trace.action.to ? trace.action.to.toLowerCase() : null;
+  if (!contractAddress) return;
 
   if (trace.action.input) {
     const methodId = trace.action.input.slice(0, 10).toLowerCase();
-
-    // If methodIds exists and has items, useing it; else: defaulting to ERC20_METHODS
-    const methodsToCheck = methodIds && methodIds.length ? methodIds : ERC20_METHODS;
-
+    const methodsToCheck = methodIds.length > 0 ? methodIds : ERC20_METHODS;
     const methodInfo = methodsToCheck.find((m) => m.methodId === methodId);
     if (methodInfo) {
       handleDynamicMethod(methodInfo.name, trace.action, tokenTransfers, trace);
@@ -409,7 +427,7 @@ async function extractTokenTransfers(trace: ITransactionTrace, tokenTransfers: T
   // Recursively extract token transfers from subtraces
   if (trace.subtraces && Array.isArray(trace.subtraces)) {
     for (const subtrace of trace.subtraces) {
-      await extractTokenTransfers(subtrace, tokenTransfers, JsonRpcProvider, web3HttpProvider);
+      await extractTokenTransfers(subtrace, tokenTransfers, JsonRpcProvider, methodIds);
     }
   }
 }
@@ -454,30 +472,67 @@ function handleDynamicMethod(methodName: string, action: any, tokenTransfers: To
   }
 }
 
+/**
+ * Merges token transfers from transaction traces with parsed events from a receipt,
+ * placing new entries in the first array based on their position in the second array.
+ *
+ * @param tokenTransfersFromTransactionTraces - Array of token transfers from transaction traces.
+ * @param parsedEventsFromReceipt - Array of parsed events (possibly including null or undefined elements).
+ * @returns Array of TokenTransfer objects after merging and filtering.
+ */
 export function mergeAndFilterTransfers(tokenTransfersFromTransactionTraces: TokenTransfer[], parsedEventsFromReceipt: (ParsedEvent | null | undefined)[]): TokenTransfer[] {
-  const filteredEvents = parsedEventsFromReceipt.filter((event) => event?.eventName === "Transfer");
+  // Filter out only transfer events from the parsed events
+  const transferEventsFromReceipt = parsedEventsFromReceipt.filter((event) => event?.eventName === "Transfer");
 
-  for (const event of filteredEvents) {
+  // Iterate over each transfer event from the receipt
+  transferEventsFromReceipt.forEach((event, index) => {
     if (event) {
+      // Extract keys from the event object
       const keys = Object.keys(event);
 
+      // Find a matching transfer in the tokenTransfersFromTransactionTraces
       const matchingTransfer = tokenTransfersFromTransactionTraces.find(
         (transfer) =>
           transfer.from.toLowerCase() === event[keys[0]].toLowerCase() &&
           transfer.to.toLowerCase() === event[keys[1]].toLowerCase() &&
-          transfer.token.toLowerCase() === event.contractAddress.toLowerCase()
+          transfer.token.toLowerCase() === event.contractAddress.toLowerCase() &&
+          transfer.value === event[keys[2]]
       );
 
+      // If no matching transfer is found, create and insert a new transfer
       if (!matchingTransfer) {
-        tokenTransfersFromTransactionTraces.push({
+        const newTransfer = {
           from: event[keys[0]],
           to: event[keys[1]],
           token: event[keys[3]],
           value: event[keys[2]],
-        });
+        };
+
+        // Insert at the same index as in parsedEventsFromReceipt, or push at the end if index is out of bounds
+        if (index < tokenTransfersFromTransactionTraces.length) {
+          tokenTransfersFromTransactionTraces.splice(index, 0, newTransfer);
+        } else {
+          tokenTransfersFromTransactionTraces.push(newTransfer);
+        }
       }
     }
-  }
+  });
 
+  // Return the merged and reordered array of transfers
   return tokenTransfersFromTransactionTraces;
+}
+
+export function convertEventsToTransfers(parsedEventsFromReceipt: (ParsedEvent | null | undefined)[]): TokenTransfer[] {
+  return parsedEventsFromReceipt
+    .filter((event): event is ParsedEvent => !!event && event.eventName === "Transfer")
+    .map((event) => {
+      const keys = Object.keys(event);
+
+      return {
+        from: event[keys[0]],
+        to: event[keys[1]],
+        token: event[keys[3]],
+        value: event[keys[2]],
+      };
+    });
 }

@@ -1,11 +1,11 @@
 import { TransactionDetailsForAtomicArbs } from "../../../../Interfaces.js";
 import { getContractByPoolID } from "../../../../helperFunctions/Web3.js";
 import { web3Call } from "../../../../web3Calls/generic.js";
-import { findCoinDecimalsById } from "../../../readFunctions/Coins.js";
+import { findCoinDecimalsById, getCoinIdByAddress } from "../../../readFunctions/Coins.js";
+import { getTokenPriceWithTimestampFromDb } from "../../../readFunctions/PriceMap.js";
 import { getEntireEventById, getEventById } from "../../../readFunctions/RawLogs.js";
 import { getAllTxIdsByTxHash, getEventIdByTxId, getPoolIdByTxId, getTransactionTypeByEventId } from "../../../readFunctions/Transactions.js";
 import { txDetailEnrichment } from "../../../readFunctions/TxDetailEnrichment.js";
-import { getHistoricalTokenPriceFromDefiLlama } from "../../txValue/DefiLlama.js";
 
 export async function solveSpotPriceUpdate(atomicArbDetails: TransactionDetailsForAtomicArbs): Promise<any | null> {
   const blockNumber = atomicArbDetails.block_number;
@@ -61,7 +61,10 @@ async function solveSpotPriceForSingleCase(txId: number, blockNumber: number): P
     const decimalsCoinBought = await findCoinDecimalsById(boughtCoinInfo[0].coin_id);
     if (!decimalsCoinBought) return null;
 
-    const historicalPrice = await getHistoricalTokenPriceFromDefiLlama(boughtCoinInfo[0].address, parsedTx.block_unixtime);
+    const tokenId = await getCoinIdByAddress(boughtCoinInfo[0].address);
+    if (!tokenId) return null;
+
+    const historicalPrice = await getTokenPriceWithTimestampFromDb(tokenId, parsedTx.block_unixtime);
     if (!historicalPrice) return null;
     console.log("historical price of", boughtCoinInfo[0].name, historicalPrice);
 

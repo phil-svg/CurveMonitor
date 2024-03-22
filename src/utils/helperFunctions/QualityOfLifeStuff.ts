@@ -1,6 +1,6 @@
 import { addMinutes, differenceInMinutes, format } from "date-fns";
 import * as readline from "readline";
-import { abiCache, methodIdCache } from "./MethodID.js";
+import { abiCache } from "./MethodID.js";
 
 export function updateConsoleOutput(message: string, yOffset: number = 0): void {
   readline.moveCursor(process.stdout, 0, yOffset);
@@ -34,8 +34,9 @@ export function getCurrentTimeString(): string {
 }
 
 // Log after every 50 fetches
-export function logProgress(fetchCount: number, totalTimeTaken: number, totalToBeFetched: number) {
-  if (fetchCount % 50 === 0) {
+export function logProgress(info: string, printStepInterval: number, fetchCount: number, totalTimeTaken: number, totalToBeFetched: number) {
+  if (fetchCount === 0) return;
+  if (fetchCount % printStepInterval === 0) {
     const averageTimePerFetch = totalTimeTaken / fetchCount / 1000 / 60;
     const estimatedFinishTime = addMinutes(new Date(), averageTimePerFetch * (totalToBeFetched - fetchCount));
     const percentComplete = (fetchCount / totalToBeFetched) * 100;
@@ -43,9 +44,9 @@ export function logProgress(fetchCount: number, totalTimeTaken: number, totalToB
     const finishTimeFormatted = format(estimatedFinishTime, "EEE hh:mma");
     const timeToCompletion = differenceInMinutes(estimatedFinishTime, new Date());
     const hoursToCompletion = Math.floor(timeToCompletion / 60);
-    const minutesToCompletion = timeToCompletion % 60;
+    const minutesToCompletion = (timeToCompletion % 60).toString().padStart(2, "0");
 
-    console.log(`${percentComplete.toFixed(2)}% | ${fetchCount}/${totalToBeFetched} | ${finishTimeFormatted} | ${hoursToCompletion}h:${minutesToCompletion}min`);
+    console.log(`${percentComplete.toFixed(2)}% | ${fetchCount}/${totalToBeFetched} | ${finishTimeFormatted} | ${hoursToCompletion}h:${minutesToCompletion}min | ${info}`);
   }
 }
 
@@ -84,19 +85,64 @@ export class RateLimiter {
   }
 }
 
-function clearMethodIdCache() {
-  Object.keys(methodIdCache).forEach((key) => {
-    delete methodIdCache[key];
-  });
-}
-
-function clearAbiCache() {
+export function clearAbiCache() {
   Object.keys(abiCache).forEach((key) => {
     delete abiCache[key];
   });
 }
 
-export function clearCaches() {
-  clearMethodIdCache();
-  clearAbiCache();
+export function getCurrentFormattedTime(): string {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const ampm = hours >= 12 ? "pm" : "am";
+  const formattedHours = hours % 12 || 12; // Convert 24h to 12h format and handle midnight as 12 instead of 0
+  const formattedMinutes = minutes < 10 ? "0" + minutes : minutes; // Add leading zero to minutes if needed
+  return `${formattedHours}:${formattedMinutes}${ampm}`;
+}
+
+// Helper function to convert date strings to Unix time
+export function convertDateToUnixTime(dateString: string): number {
+  const date = new Date(dateString);
+  return Math.floor(date.getTime() / 1000);
+}
+
+export function getElementCountChunkedForArrayAndChunksize(numbers: number[], chunkSize: number): Record<string, number> {
+  if (chunkSize <= 0) throw new Error("Chunk size must be greater than zero");
+
+  // Sort the array
+  const sortedNumbers = [...numbers].sort((a, b) => a - b);
+
+  // Create an object to hold the counts
+  const chunkCounts: Record<string, number> = {};
+
+  // Initialize variables for the current chunk
+  let currentChunkStart = Math.floor(sortedNumbers[0] / chunkSize) * chunkSize;
+  let currentChunkEnd = currentChunkStart + chunkSize;
+  let currentIndex = 0;
+
+  // Iterate through the array and count the elements in each chunk
+  while (currentIndex < sortedNumbers.length) {
+    let count = 0;
+    while (currentIndex < sortedNumbers.length && sortedNumbers[currentIndex] < currentChunkEnd) {
+      count++;
+      currentIndex++;
+    }
+
+    // Add the count to the chunkCounts object
+    chunkCounts[`${currentChunkStart}-${currentChunkEnd}`] = count;
+
+    // Move to the next chunk
+    currentChunkStart = currentChunkEnd;
+    currentChunkEnd += chunkSize;
+  }
+
+  return chunkCounts;
+}
+
+// Function to estimate the size of an object in MB
+export function estimateSizeInMB(object: any): number {
+  const jsonString = JSON.stringify(object);
+  const bytes = new TextEncoder().encode(jsonString).length;
+  return bytes / 1024 / 1024;
 }

@@ -98,7 +98,7 @@ export async function chunkedAsync<T, U>(arr: T[], concurrency: number, worker: 
   while (queue.length > 0) {
     const tasks = queue.splice(0, concurrency).map((item) =>
       worker(item).catch((e: any) => {
-        console.error(`Error processing item ${item}: ${e}`);
+        // console.error(`Error processing item ${item}: ${e}`);
         return null as U | null;
       })
     );

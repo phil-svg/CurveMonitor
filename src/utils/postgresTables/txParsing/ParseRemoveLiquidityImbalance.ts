@@ -1,7 +1,7 @@
 import { saveCoins, saveTransaction, transactionExists } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
 import { getCoinsBy } from "../readFunctions/Pools.js";
-import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
+import { getCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 import { Coin } from "../../Interfaces.js";
 
 export async function parseRemoveLiquidityImbalance(event: any, BLOCK_UNIXTIME: any, POOL_COINS: any): Promise<void> {
@@ -28,7 +28,7 @@ export async function parseRemoveLiquidityImbalance(event: any, BLOCK_UNIXTIME: 
 
   const coinAmounts: (Coin | undefined)[] = await Promise.all(
     coinAddresses.map(async (address, index) => {
-      const COIN_ID = await findCoinIdByAddress(address);
+      const COIN_ID = await getCoinIdByAddress(address);
       if (!COIN_ID) return;
       const COIN_DECIMALS = await findCoinDecimalsById(COIN_ID);
       if (!COIN_DECIMALS) return;

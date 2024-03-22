@@ -1,24 +1,27 @@
-import { getCurrentTokenPriceFromDefiLlama } from "./DefiLlama.js";
-export async function priceTransaction(enrichedTransaction) {
-    let coins;
-    switch (enrichedTransaction.transaction_type) {
+import { TransactionCoins } from "../../../models/TransactionCoins.js";
+import { Transactions } from "../../../models/Transactions.js";
+import { getTokenPriceWithTimestampFromDb } from "../../postgresTables/readFunctions/PriceMap.js";
+export async function priceTransaction(transactionData) {
+    let coins = [];
+    if (Array.isArray(transactionData.transactionCoins)) {
+        coins = [...coins, ...transactionData.transactionCoins];
+    }
+    switch (transactionData.transaction_type) {
         case "swap":
-            coins = [...enrichedTransaction.coins_leaving_wallet, ...enrichedTransaction.coins_entering_wallet];
             for (const coin of coins) {
-                const price = await getCurrentTokenPriceFromDefiLlama(coin.address);
+                const price = await getTokenPriceWithTimestampFromDb(coin.coin_id, transactionData.block_unixtime);
                 if (price !== null) {
-                    return price * coin.amount; // Return as soon as we get a price.
+                    return price * Number(coin.amount); // Return as soon as we get a price.
                 }
             }
             break;
         case "deposit":
         case "remove":
-            coins = [...enrichedTransaction.coins_leaving_wallet, ...enrichedTransaction.coins_entering_wallet];
             let totalValue = 0;
             for (const coin of coins) {
-                const price = await getCurrentTokenPriceFromDefiLlama(coin.address);
+                const price = await getTokenPriceWithTimestampFromDb(coin.coin_id, transactionData.block_unixtime);
                 if (price !== null) {
-                    totalValue += price * coin.amount;
+                    totalValue += price * Number(coin.amount);
                 }
             }
             if (totalValue > 0) {
@@ -26,9 +29,38 @@ export async function priceTransaction(enrichedTransaction) {
             }
             break;
         default:
-            console.log(`Unknown transaction type: ${enrichedTransaction.transaction_type}`);
+            console.log(`Unknown transaction type: ${transactionData.transaction_type}`);
             break;
     }
     return null; // Return null if no price could be fetched for any coin.
+}
+/**
+ * Calculates the total volume in USD of all "out" coins in a given transaction.
+ * @param txId The ID of the transaction to process.
+ * @returns The total volume in USD, or null if the transaction or coin prices are not found.
+ */
+export async function priceTransactionFromTxId(txId) {
+    try {
+        const transaction = await Transactions.findByPk(txId, {
+            include: [TransactionCoins],
+        });
+        if (!transaction || !transaction.transactionCoins) {
+            console.log(`Transaction with ID ${txId} not found.`);
+            return null;
+        }
+        // console.log("transaction.transactionCoins", transaction.transactionCoins);
+        // console.log("transaction.tx_hash", transaction.tx_hash);
+        let totalVolume = 0;
+        transaction.transactionCoins.forEach((coin) => {
+            if (coin.direction === "out" && coin.dollar_value != null) {
+                totalVolume += Number(coin.dollar_value);
+            }
+        });
+        return totalVolume;
+    }
+    catch (error) {
+        console.error(`Error calculating total out volume for transaction ID ${txId}:`, error);
+        return null;
+    }
 }
 //# sourceMappingURL=PriceTransaction.js.map

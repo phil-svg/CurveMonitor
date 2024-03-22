@@ -1,7 +1,7 @@
 import { saveCoins, saveTransaction } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
 import { getCoinsBy, getIdByAddress, getBasePoolBy } from "../readFunctions/Pools.js";
-import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
+import { getCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 import { findTransactionsByPoolIdAndHash } from "../readFunctions/Transactions.js";
 import { findTransactionCoinsByTxIds } from "../readFunctions/TransactionCoins.js";
 import { Decimal } from "decimal.js";
@@ -22,7 +22,10 @@ function findNearestCoinMovementAmount(LP_TRANSFER_AMOUNT, COIN_MOVEMENTS_IN_BAS
     return (_a = soldCoinMovements[0]) === null || _a === void 0 ? void 0 : _a.amount;
 }
 export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_COINS) {
-    // if (await transactionExists(event.eventId)) return;
+    if (!event)
+        return;
+    if (!POOL_COINS)
+        return;
     let soldCoinEventID = parseInt(event.returnValues.sold_id);
     let soldCoinAmount = event.returnValues.tokens_sold;
     let boughtCoinEventID = parseInt(event.returnValues.bought_id);
@@ -33,7 +36,7 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
     // if the token_id is 1,2,..., then we have to find the actual token from the basepool.
     if (soldCoinEventID === 0) {
         const soldCoinAddress = POOL_COINS[soldCoinEventID];
-        soldCoinID = await findCoinIdByAddress(soldCoinAddress);
+        soldCoinID = await getCoinIdByAddress(soldCoinAddress);
         if (!soldCoinID)
             return;
         const SOLD_COIN_DECIMALS = await findCoinDecimalsById(soldCoinID);
@@ -43,7 +46,7 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
     }
     else if (boughtCoinEventID === 0) {
         const boughtCoinAddress = POOL_COINS[boughtCoinEventID];
-        boughtCoinID = await findCoinIdByAddress(boughtCoinAddress);
+        boughtCoinID = await getCoinIdByAddress(boughtCoinAddress);
         if (!boughtCoinID)
             return;
         const BOUGHT_COIN_DECIMALS = await findCoinDecimalsById(boughtCoinID);
@@ -63,7 +66,7 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
         if (!BASEPOOL_COINS)
             return;
         const SOLD_COIN_ADDRESS = BASEPOOL_COINS[soldCoinEventID - 1];
-        soldCoinID = await findCoinIdByAddress(SOLD_COIN_ADDRESS);
+        soldCoinID = await getCoinIdByAddress(SOLD_COIN_ADDRESS);
         const TRANSFERS_IN_BASEPOOL = await findTransactionsByPoolIdAndHash(BASEPOOL_ID, event.transactionHash);
         const TX_IDS_FROM_TRANSFERS = TRANSFERS_IN_BASEPOOL.map((transfer) => transfer.tx_id);
         const COIN_MOVEMENTS_IN_BASEPOOL = await findTransactionCoinsByTxIds(TX_IDS_FROM_TRANSFERS);
@@ -82,7 +85,7 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
         if (!BASEPOOL_COINS)
             return;
         const BOUGHT_COIN_ADDRESS = BASEPOOL_COINS[boughtCoinEventID - 1];
-        boughtCoinID = await findCoinIdByAddress(BOUGHT_COIN_ADDRESS);
+        boughtCoinID = await getCoinIdByAddress(BOUGHT_COIN_ADDRESS);
         const TRANSFERS_IN_BASEPOOL = await findTransactionsByPoolIdAndHash(BASEPOOL_ID, event.transactionHash);
         const TX_IDS_FROM_TRANSFERS = TRANSFERS_IN_BASEPOOL.map((transfer) => transfer.tx_id);
         const COIN_MOVEMENTS_IN_BASEPOOL = await findTransactionCoinsByTxIds(TX_IDS_FROM_TRANSFERS);

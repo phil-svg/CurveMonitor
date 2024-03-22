@@ -23,6 +23,13 @@ import { TransactionTrace } from "../models/TransactionTrace.js";
 import { Contracts } from "../models/Contracts.js";
 import { ProxyCheck } from "../models/ProxyCheck.js";
 import { UnverifiedContracts } from "../models/UnverifiedContracts.js";
+import { PriceMap } from "../models/PriceMap.js";
+import { FirstPriceTimestamp } from "../models/FirstTokenPrices.js";
+import { AtomicArbs } from "../models/AtomicArbs.js";
+import { TokenTransfers } from "../models/CleanedTransfers.js";
+import { IsCexDexArb } from "../models/IsCexDexArb.js";
+import { CexDexArbs } from "../models/CexDexArbs.js";
+import { IsSandwich } from "../models/IsSandwich.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 config({ path: resolve(__dirname, "..", "..", ".env") });
@@ -55,6 +62,13 @@ const sequelize = new Sequelize({
         Contracts,
         ProxyCheck,
         UnverifiedContracts,
+        PriceMap,
+        FirstPriceTimestamp,
+        AtomicArbs,
+        TokenTransfers,
+        IsCexDexArb,
+        CexDexArbs,
+        IsSandwich,
     ],
     logging: false,
 });

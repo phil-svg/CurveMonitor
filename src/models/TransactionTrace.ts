@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, Index } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, AutoIncrement, ForeignKey } from "sequelize-typescript";
+import { Transactions } from "./Transactions.js";
 
 @Table({ tableName: "transaction_trace", indexes: [{ unique: false, fields: ["transactionHash"] }] })
 export class TransactionTrace extends Model {
@@ -7,6 +8,7 @@ export class TransactionTrace extends Model {
   @Column(DataType.INTEGER)
   id!: number;
 
+  @ForeignKey(() => Transactions)
   @Column(DataType.STRING)
   transactionHash!: string;
 

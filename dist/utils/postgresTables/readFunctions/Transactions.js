@@ -1,5 +1,6 @@
-import { Op, Sequelize } from "sequelize";
-import { Transactions } from "../../../models/Transactions.js";
+import { Op, Sequelize, col, fn } from "sequelize";
+import { Transactions, TransactionType } from "../../../models/Transactions.js";
+import { TransactionCoins } from "../../../models/TransactionCoins.js";
 export async function findTransactionsByPoolIdAndHash(pool_id, tx_hash) {
     const transactions = await Transactions.findAll({
         where: {
@@ -22,7 +23,7 @@ export async function getTransactionUnixtimes(txIds) {
         where: {
             tx_id: txIds,
         },
-        attributes: ["tx_id", "block_unixtime"], // Select only 'tx_id' and 'block_unixtime'
+        attributes: ["tx_id", "block_unixtime"],
     });
     // Map the transactions to the desired format
     const result = transactions.map((transaction) => ({
@@ -40,7 +41,7 @@ export async function fetchTransactionsBatch(offset, BATCH_SIZE) {
         order: [
             ["block_number", "ASC"],
             ["pool_id", "ASC"],
-        ], // order by block_number and pool_id to ensure consistency between batches
+        ],
     });
     return transactions;
 }
@@ -54,7 +55,7 @@ export async function fetchTransactionsForBlock(blockNumber) {
         order: [
             ["block_number", "ASC"],
             ["pool_id", "ASC"],
-        ], // order by block_number and pool_id
+        ],
     });
     return transactions;
 }
@@ -173,6 +174,172 @@ export async function getPoolIdByTxId(txId) {
     }
     catch (error) {
         console.error("Error fetching pool ID by transaction ID:", error);
+        return null;
+    }
+}
+export async function getAllTransactionIds() {
+    try {
+        const transactions = await Transactions.findAll({
+            attributes: ["tx_id"],
+            order: [["tx_id", "ASC"]],
+            raw: true,
+        });
+        return transactions.map((t) => t.tx_id);
+    }
+    catch (error) {
+        console.error("Error fetching transaction IDs:", error);
+        return [];
+    }
+}
+export async function fetchTransactionsForPoolAndTime(poolId, startUnixtime, endUnixtime) {
+    return Transactions.findAll({
+        where: {
+            pool_id: poolId,
+            block_unixtime: {
+                [Op.gte]: startUnixtime,
+                [Op.lt]: endUnixtime,
+            },
+            transaction_type: {
+                [Op.in]: [TransactionType.Swap, TransactionType.Deposit, TransactionType.Remove],
+            },
+        },
+        include: [
+            {
+                model: TransactionCoins,
+                required: true,
+            },
+        ],
+    });
+}
+export async function fetchTransactionsWithCoinsByTxIds(txIds) {
+    return Transactions.findAll({
+        where: {
+            tx_id: txIds,
+        },
+        include: [
+            {
+                model: TransactionCoins,
+                required: true,
+            },
+        ],
+    });
+}
+export async function getUnixTimestampByTxId(txId) {
+    try {
+        const transaction = await Transactions.findOne({
+            where: { tx_id: txId },
+            attributes: ["block_unixtime"],
+        });
+        if (transaction) {
+            return transaction.block_unixtime;
+        }
+        else {
+            return null;
+        }
+    }
+    catch (error) {
+        console.error("Error fetching transaction data:", error);
+        throw error;
+    }
+}
+export async function getHighestBlockNumberForTransactions(poolId) {
+    try {
+        const result = await Transactions.max("block_number", { where: { pool_id: poolId } });
+        return typeof result === "number" ? result : null;
+    }
+    catch (error) {
+        console.error("Error fetching highest block number from transactions: ", error);
+        return null;
+    }
+}
+export async function getLowestBlockNumberForTransactions(poolId) {
+    try {
+        const result = await Transactions.min("block_number", { where: { pool_id: poolId } });
+        return typeof result === "number" ? result : null;
+    }
+    catch (error) {
+        console.error("Error fetching highest block number from transactions: ", error);
+        return null;
+    }
+}
+/**
+ * Gets the time in days since the last transaction for a given pool ID.
+ * @param poolId The pool ID to query.
+ * @returns The time in days since the last transaction, or null if no transactions found.
+ */
+export async function getTimeSinceLastTransactionInDays(poolId) {
+    const latestTransaction = await Transactions.findOne({
+        where: { pool_id: poolId },
+        order: [["block_unixtime", "DESC"]],
+        attributes: ["block_unixtime"],
+        raw: true,
+    });
+    if (!latestTransaction) {
+        return null; // No transactions found for the given pool ID
+    }
+    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+    const lastTransactionTime = latestTransaction.block_unixtime; // Assuming block_unixtime is stored in seconds
+    const timeDiffInSeconds = currentTime - lastTransactionTime;
+    const timeDiffInDays = timeDiffInSeconds / 86400; // Convert seconds to days
+    return timeDiffInDays; // Time in days since the last transaction
+}
+export async function getLatestTransactionTimeForAllPools() {
+    const latestTransactions = await Transactions.findAll({
+        attributes: ["pool_id", [fn("MAX", col("block_unixtime")), "latestBlockUnixtime"]],
+        group: ["pool_id"],
+        raw: true,
+    });
+    return latestTransactions;
+}
+export async function getBlockNumberFromTxId(txId) {
+    try {
+        const transaction = await Transactions.findByPk(txId);
+        if (transaction) {
+            return transaction.block_number;
+        }
+        else {
+            console.log(`Transaction with ID ${txId} not found.`);
+            return null;
+        }
+    }
+    catch (error) {
+        console.error("Error fetching transaction block number:", error);
+        return null;
+    }
+}
+export async function fetchTxHashesForPoolAndTime(poolId, startUnixtime, endUnixtime) {
+    const transactions = await Transactions.findAll({
+        where: {
+            pool_id: poolId,
+            block_unixtime: {
+                [Op.gte]: startUnixtime,
+                [Op.lt]: endUnixtime,
+            },
+            transaction_type: {
+                [Op.in]: [TransactionType.Swap, TransactionType.Deposit, TransactionType.Remove],
+            },
+        },
+        attributes: ["tx_hash"],
+    });
+    const txHashes = transactions.map((transaction) => transaction.tx_hash);
+    return txHashes;
+}
+export async function fetchTxPositionByTxId(txId) {
+    try {
+        const transaction = await Transactions.findOne({
+            where: { tx_id: txId },
+            attributes: ["tx_position"],
+        });
+        if (transaction) {
+            return transaction.tx_position;
+        }
+        else {
+            console.log(`Transaction with ID ${txId} not found.`);
+            return null;
+        }
+    }
+    catch (error) {
+        console.error(`Error fetching transaction position for txId ${txId}:`, error);
         return null;
     }
 }

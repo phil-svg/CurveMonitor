@@ -1,17 +1,9 @@
-import Web3 from "web3";
 import { getVersionBy, getInceptionBlockBy, getAllPoolIds, getAddressById } from "./readFunctions/Pools.js";
-import { getPastEvents, getBlockTimeStamp } from "../web3Calls/generic.js";
+import { getPastEvents, getBlockTimeStamp, WEB3_HTTP_PROVIDER } from "../web3Calls/generic.js";
 import { getAbiBy } from "./Abi.js";
 import { PoolParamsEvents } from "../../models/PoolParamsEvents.js";
 import { retry } from "../helperFunctions/Web3Retry.js";
 import { getLatestEventTimestampFromSubgraph } from "../subgraph/DaoSubgraph.js";
-
-if (!process.env.WEB3_HTTP) {
-  console.error("Error: WEB3_WSS environment variable is not defined.");
-  process.exit(1);
-}
-
-const WEB3 = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP));
 
 async function addPoolParamsEvent(pool_id: number, log_index: number, event_name: string, raw_log: string, event_block: number, event_timestamp: number): Promise<void> {
   const newPoolParamsEvent = new PoolParamsEvents({
@@ -54,7 +46,7 @@ function isEventInABI(abi: any[], eventName: string): boolean {
 }
 
 async function handleVersion(poolId: number, POOL_ADDRESS: string, POOL_ABI: any[], CURRENT_BLOCK: number, POTENTIAL_EVENTS: string[]): Promise<void> {
-  const CONTRACT = new WEB3.eth.Contract(POOL_ABI, POOL_ADDRESS);
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
 
   const poolParamsEvent = await PoolParamsEvents.findOne({ where: { pool_id: poolId } });
   const lastBlockChecked = poolParamsEvent?.last_block_checked;
@@ -105,7 +97,7 @@ export async function updatePoolParamsEvents(): Promise<void> {
   // gets triggered if say the last check was Monday, it is now Friday, and Subgraph shows Event for Wednesday.
   if (latestEventTimestampFromSubgraph >= LAST_UNIXTIME_CHECKED) {
     const ALL_POOL_IDS = (await getAllPoolIds()).sort((a, b) => a - b);
-    const CURRENT_BLOCK = await WEB3.eth.getBlockNumber();
+    const CURRENT_BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlockNumber();
     let i = 1;
     for (const POOL_ID of ALL_POOL_IDS) {
       console.log(i + "/" + ALL_POOL_IDS.length);

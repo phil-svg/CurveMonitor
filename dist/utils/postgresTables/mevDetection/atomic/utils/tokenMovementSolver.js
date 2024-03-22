@@ -1,5 +1,5 @@
 import { addNewTokenToDbFromCoinAddress } from "../../../Coins.js";
-import { findCoinIdByAddress } from "../../../readFunctions/Coins.js";
+import { getCoinIdByAddress } from "../../../readFunctions/Coins.js";
 import { NULL_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
 import {
   addMissingETHWETHTransfers,
@@ -10,7 +10,7 @@ import {
 // checking if a token, transferred in the tx, is stored in the db, if not, adding it.
 export async function checkTokensInDatabase(tokenTransfers) {
   for (let transfer of tokenTransfers) {
-    const coinId = await findCoinIdByAddress(transfer.token);
+    const coinId = await getCoinIdByAddress(transfer.token);
     if (coinId !== null) continue;
     await addNewTokenToDbFromCoinAddress(transfer.token);
   }

@@ -49,7 +49,6 @@ export async function getBlockTimestamps(blockNumbers: number[]) {
     queue.add(async () => {
       const result = await fetchGraphQLData(query);
       blocks = blocks.concat(result.data.blocks);
-      console.log(`Processed batch ${i + 1}/${Math.ceil(blockNumbers.length / BATCH_SIZE)} for BlockTimestamps`);
     });
   }
 

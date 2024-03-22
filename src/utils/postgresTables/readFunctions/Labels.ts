@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import { Labels } from "../../../models/Labels.js";
-import { Op, fn, col } from "sequelize";
+import { Op } from "sequelize";
 
 export async function findUniqueLabeledAddresses(): Promise<string[]> {
   const labels = await Labels.findAll({

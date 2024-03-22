@@ -1,10 +1,10 @@
-import { getWeb3WsProvider } from "../helperFunctions/Web3";
 import { getAbiByForAddressProvider, updatePoolAbis } from "../postgresTables/Abi";
 import { updatePools } from "../postgresTables/Pools";
 import { getAllAddressesFromProvider } from "../postgresTables/readFunctions/PoolCountFromProvider";
 import { getAllPoolAddresses } from "../postgresTables/readFunctions/Pools";
 import eventEmitter from "./EventEmitter";
 import { updateCoinTable } from "../postgresTables/Coins";
+import { WEB3_WS_PROVIDER } from "../web3Calls/generic";
 
 // when histo-parsing is finished, subscribe to new events.
 export async function preparingLiveModeForRawEvents(): Promise<void> {
@@ -20,14 +20,13 @@ async function subscribeToNewPools() {
 }
 
 async function subscribe(ADDRESS: string): Promise<void> {
-  const web3 = getWeb3WsProvider();
   const ABI = await getAbiByForAddressProvider({ address: ADDRESS });
   if (!ABI) return;
-  const contract = new web3.eth.Contract(ABI, ADDRESS);
+  const contract = new WEB3_WS_PROVIDER.eth.Contract(ABI, ADDRESS);
 
   if (!contract) return;
 
-  contract.events
+  const subscription = contract.events
     .allEvents({ fromBlock: "latest" })
     .on("data", async () => {
       handleProviderEvent;

@@ -1,7 +1,5 @@
 import { Op } from "sequelize";
 import { Sandwiches } from "../../models/Sandwiches.js";
-import { writeFileSync } from "fs";
-import * as XLSX from "xlsx";
 
 /**
  * The purpose of this function is to provide a way to quickly check the total

@@ -2,20 +2,26 @@ import { TransactionData, TransactionType } from "../models/Transactions.js";
 
 export interface EventObject {
   address: string;
-  blockHash: string;
   blockNumber: number;
-  logIndex: number;
-  removed: boolean;
   transactionHash: string;
   transactionIndex: number;
+  blockHash: string;
+  logIndex: number;
+  removed: boolean;
   id: string;
-  returnValues: any;
+  returnValues: {
+    [key: string]: any;
+  };
   event: string;
   signature: string;
-  raw: { data: string; topics: string[] };
+  raw: {
+    data: string;
+    topics: string[];
+  };
 }
 
 export interface Coin {
+  symbol: any;
   address: string;
   COIN_ID: number;
   amount: number;
@@ -303,4 +309,19 @@ export interface TransactionDetailsForAtomicArbs extends EnrichedTransactionDeta
   totalCost: number | null;
   blockBuilder: string | null;
   validatorPayOffUSD: number | null;
+}
+
+export interface Subscription {
+  unsubscribe: (callback: (error: any, success: any) => void) => void;
+  connection?: { readyState: number };
+}
+
+export interface EnrichedCexDexDetails extends TransactionDetail {
+  builder: string;
+  blockPayoutETH: number;
+  blockPayoutUSD: number;
+  eoaNonce: number;
+  gasInGwei: number;
+  gasCostUSD: number;
+  bribeInUSD: number;
 }

@@ -5,21 +5,13 @@
  * Uses either the inception block, or in some cases the first block in which there was an event.
  */
 
-import Web3 from "web3";
 import { getAllPoolIds, getInceptionBlockBy, getAddressById, getVersionBy } from "./readFunctions/Pools.js";
 import { getAbiBy } from "./Abi.js";
 import { InitialParams } from "../../models/InitialParams.js";
-import { getPastEvents } from "../web3Calls/generic.js";
-
-if (!process.env.WEB3_HTTP) {
-  console.error("Error: WEB3_WSS environment variable is not defined.");
-  process.exit(1);
-}
-
-var WEB3 = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP));
+import { WEB3_HTTP_PROVIDER, getPastEvents } from "../web3Calls/generic.js";
 
 async function getRelevantEventBlock(POOL_ADDRESS: string, POOL_ABI: any[], INCEPTION_BLOCK: number): Promise<number> {
-  const CURRENT_BLOCK = await WEB3.eth.getBlockNumber();
+  const CURRENT_BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlockNumber();
   let range = 2000;
   const MAX_RANGE = 200000; // Maximum request range
 
@@ -32,7 +24,7 @@ async function getRelevantEventBlock(POOL_ADDRESS: string, POOL_ABI: any[], INCE
   }
 
   let prevUpperBlockNumber = INCEPTION_BLOCK;
-  const CONTRACT = new WEB3.eth.Contract(POOL_ABI, POOL_ADDRESS);
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
 
   while (true) {
     console.log("Searching for the first Event for", POOL_ADDRESS);
@@ -95,19 +87,19 @@ async function hasGammaEntry(poolId: number): Promise<boolean> {
 }
 
 async function getAFromChain(poolAddress: string, POOL_ABI: any[], blockNumber: number): Promise<string> {
-  const CONTRACT = new WEB3.eth.Contract(POOL_ABI, poolAddress);
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, poolAddress);
   const A = await CONTRACT.methods.A().call(blockNumber);
   return A;
 }
 
 async function getFeeFromChain(poolAddress: string, POOL_ABI: any[], blockNumber: number): Promise<string> {
-  const CONTRACT = new WEB3.eth.Contract(POOL_ABI, poolAddress);
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, poolAddress);
   const FEE = await CONTRACT.methods.fee().call(blockNumber);
   return FEE;
 }
 
 async function getGammaFromChain(poolAddress: string, POOL_ABI: any[], blockNumber: number): Promise<string> {
-  const CONTRACT = new WEB3.eth.Contract(POOL_ABI, poolAddress);
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, poolAddress);
   const GAMMA = await CONTRACT.methods.A().call(blockNumber);
   return GAMMA;
 }

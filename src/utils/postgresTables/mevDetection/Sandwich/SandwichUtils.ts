@@ -3,11 +3,12 @@ import { TransactionCoins } from "../../../../models/TransactionCoins.js";
 import { TransactionData } from "../../../../models/Transactions.js";
 import { ExtendedTransactionData, SandwichLoss, TransactionCoin, TransactionCoinRecord } from "../../../Interfaces.js";
 import { findCoinSymbolById } from "../../readFunctions/Coins.js";
-import { getTokenTransferEvents, getTxFromTxId } from "../../../web3Calls/generic.js";
+import { WEB3_HTTP_PROVIDER, getTokenTransferEvents, getTxFromTxId } from "../../../web3Calls/generic.js";
 import { getAbiBy } from "../../Abi.js";
 import { LossTransaction, Sandwiches } from "../../../../models/Sandwiches.js";
 import { readSandwichesInBatches, readSandwichesInBatchesForBlock } from "../../readFunctions/Sandwiches.js";
 import { calculateLossForDeposit, calculateLossForSwap, calculateLossForWithdraw } from "./VictimLossFromSandwich.js";
+import { IsSandwich } from "../../../../models/IsSandwich.js";
 
 export async function enrichCandidateWithCoinInfo(candidate: TransactionData[]): Promise<ExtendedTransactionData[] | null> {
   // Extract tx_ids from candidate array
@@ -70,7 +71,7 @@ export async function calcTheLossOfCurveUserFromSandwich(parsedTx: ExtendedTrans
 }
 
 export async function findMatchingTokenTransferAmout(coinID: number, parsedTx: any, amountHappyUser: number) {
-  const COIN_TRANSFER_EVENTS = await getTokenTransferEvents(coinID!, parsedTx.block_number);
+  const COIN_TRANSFER_EVENTS = await getTokenTransferEvents(WEB3_HTTP_PROVIDER, coinID!, parsedTx.block_number);
   if (!Array.isArray(COIN_TRANSFER_EVENTS)) return null;
   let amounts: number[] = COIN_TRANSFER_EVENTS.map((EVENT) => (EVENT as any).returnValues.value / 1e18);
   let closest = amounts.reduce((prev, curr) => {
@@ -111,17 +112,15 @@ export async function saveSandwich(poolId: number, frontrunId: number, backrunId
   });
 }
 
-export async function removeProcessedTransactions(transactions: TransactionData[]): Promise<TransactionData[]> {
-  // Fetch all tx_ids in the sandwiches table
-  const sandwiches = await Sandwiches.findAll({ attributes: ["frontrun", "backrun"] });
-  const processedTxIds = sandwiches.reduce((result, sandwich) => {
-    result.add(sandwich.frontrun);
-    result.add(sandwich.backrun);
-    return result;
-  }, new Set<number>());
+export async function removeProcessedTransactions(transactions: TransactionData[], sandwichFlags: IsSandwich[]): Promise<TransactionData[]> {
+  // Create a Set of all tx_ids that are marked as sandwiches or not sandwiches
+  const flaggedTxIds = new Set<number>();
+  for (const flag of sandwichFlags) {
+    flaggedTxIds.add(flag.tx_id);
+  }
 
-  // Filter out transactions that already appear in the sandwiches table
-  return transactions.filter((transaction) => !processedTxIds.has(transaction.tx_id!));
+  // Filter out transactions that are flagged as sandwiches or not sandwiches
+  return transactions.filter((transaction) => !flaggedTxIds.has(transaction.tx_id!));
 }
 
 function isValidEthereumAddress(someString: string): boolean {

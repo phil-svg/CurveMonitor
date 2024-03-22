@@ -1,4 +1,3 @@
-import Web3 from "web3";
 import { getAbiBy } from "./Abi.js";
 import { db } from "../../config/Database.js";
 import { PoolCountFromProvider } from "../../models/PoolCountFromProvider.js";
@@ -7,14 +6,7 @@ import { Op } from "sequelize";
 import { AbiItem } from "web3-utils";
 import { getProvidedAddress } from "../AddressProviderEntryPoint.js";
 import eventEmitter from "../goingLive/EventEmitter.js";
-import { displayProgressBar } from "../helperFunctions/QualityOfLifeStuff.js";
-
-if (!process.env.WEB3_WSS) {
-  console.error("Error: WEB3_WSS environment variable is not defined.");
-  process.exit(1);
-}
-
-const WEB3 = new Web3(new Web3.providers.WebsocketProvider(process.env.WEB3_WSS));
+import { WEB3_HTTP_PROVIDER, getCurrentBlockNumber, web3Call } from "../web3Calls/generic.js";
 
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 const ADDRESS_META_REGISTRY = "0xF98B45FA17DE75FB1aD0e7aFD971b0ca00e379fC";
@@ -94,7 +86,7 @@ async function updatePoolTableForAddresses(address: string, poolCount: number): 
     console.log(`Error fetching ABI at updatePoolTableForAddresses for ${address}`);
     return;
   }
-  const CONTRACT = new WEB3.eth.Contract(ABI, address);
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI, address);
 
   const PREV_MAX_COUNT = await getCountByAddress(address);
 
@@ -150,7 +142,8 @@ async function getLpTokenAddress(poolAddress: string, sourceAddress: string): Pr
     console.log(`Error fetching ABI at updatePoolTableForAddresses for ${sourceAddress}`);
     return null;
   }
-  const CONTRACT = new WEB3.eth.Contract(ABI, sourceAddress);
+
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI, sourceAddress);
 
   if (await hasGetLpToken(sourceAddress)) {
     const LP_ADDRESS = await CONTRACT.methods.get_lp_token(poolAddress).call();
@@ -176,7 +169,7 @@ async function getLpTokenAddress(poolAddress: string, sourceAddress: string): Pr
       } as AbiItem,
     ];
 
-    const GAUGE_CONTRACT = new WEB3.eth.Contract(ABI_LP_TOKEN, GAUGE_ADDRESS);
+    const GAUGE_CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI_LP_TOKEN, GAUGE_ADDRESS);
     const LP_ADDRESS = await GAUGE_CONTRACT.methods.lp_token().call();
     return LP_ADDRESS;
   }
@@ -223,7 +216,8 @@ async function getPoolNameFromLpToken(tokenAddress: string): Promise<string> {
       ],
     } as AbiItem,
   ];
-  const CONTRACT = new WEB3.eth.Contract(ABI_NAME, tokenAddress);
+
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI_NAME, tokenAddress);
   const NAME = await CONTRACT.methods.name().call();
   return NAME;
 }
@@ -260,7 +254,7 @@ async function getCoins(poolAddress: string, sourceAddress: string): Promise<str
     console.log(`no ABI was found for ${sourceAddress}`);
     return null;
   }
-  const CONTRACT = new WEB3.eth.Contract(ABI, sourceAddress);
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI, sourceAddress);
   const COINS = await CONTRACT.methods.get_coins(poolAddress).call();
   return COINS.filter((value: string) => value !== "0x0000000000000000000000000000000000000000");
 }
@@ -338,7 +332,7 @@ export async function getInceptionBlock(highestBlock: number, poolAddress: strin
 
   while (lowestBlock <= highestBlock) {
     let searchBlock = Math.round((lowestBlock + highestBlock) / 2);
-    let nonce = await WEB3.eth.getTransactionCount(poolAddress, searchBlock);
+    let nonce = await WEB3_HTTP_PROVIDER.eth.getTransactionCount(poolAddress, searchBlock);
 
     if (nonce >= 1) {
       highestBlock = searchBlock;
@@ -355,7 +349,9 @@ export async function getInceptionBlock(highestBlock: number, poolAddress: strin
 }
 
 async function updateInceptionBlock(): Promise<void> {
-  const HIGHEST_BLOCK = await WEB3.eth.getBlockNumber();
+  const HIGHEST_BLOCK = await getCurrentBlockNumber();
+  if (!HIGHEST_BLOCK) return;
+
   try {
     const POOLS_WITHOUT_INCEPTION_BLOCK = await Pool.findAll({
       where: {
@@ -368,7 +364,7 @@ async function updateInceptionBlock(): Promise<void> {
     let i = 0;
     for (const POOL of POOLS_WITHOUT_INCEPTION_BLOCK) {
       i += 1;
-      displayProgressBar(`Solving Inception-Block`, i, POOLS_WITHOUT_INCEPTION_BLOCK.length);
+      console.log(`Solving Inception-Block`, i, POOLS_WITHOUT_INCEPTION_BLOCK.length);
       const INCEPION_BLOCK = await getInceptionBlock(HIGHEST_BLOCK, POOL.address);
       if (!INCEPION_BLOCK) continue;
       POOL.inception_block = INCEPION_BLOCK;
@@ -397,7 +393,7 @@ async function getCreationTimestamp(poolAddress: string): Promise<number | null>
     return null;
   }
 
-  const BLOCK = await WEB3.eth.getBlock(inceptionBlock);
+  const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(inceptionBlock);
   return Number(BLOCK.timestamp);
 }
 
@@ -486,7 +482,7 @@ async function updateBasepool(): Promise<void> {
 async function getVersionForDatabase(poolAddress: string): Promise<PoolVersion | null> {
   try {
     const ABI_GAMMA: AbiItem[] = [{ stateMutability: "view", type: "function", name: "gamma", inputs: [], outputs: [{ name: "", type: "uint256" }], gas: 11991 }];
-    const CONTRACT = new WEB3.eth.Contract(ABI_GAMMA, poolAddress);
+    const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI_GAMMA, poolAddress);
     await CONTRACT.methods.gamma().call();
     return PoolVersion.v2;
   } catch (err) {
@@ -546,6 +542,14 @@ async function getHasPoolCountContracts(): Promise<string[] | null> {
         POOL_COUNT_ADDRESSES.push(ADDRESS);
       }
     }
+
+    // hacked in as a temp solution.
+    const STABLESWAP_NG_FACTORY = "0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf";
+    const includesAddressCaseInsensitive = (arr: any[], addressToCheck: string) => arr.some((address) => address.toLowerCase() === addressToCheck.toLowerCase());
+    if (!includesAddressCaseInsensitive(POOL_COUNT_ADDRESSES, STABLESWAP_NG_FACTORY)) {
+      POOL_COUNT_ADDRESSES.push(STABLESWAP_NG_FACTORY);
+    }
+
     return POOL_COUNT_ADDRESSES;
   } else {
     console.log(`Error finding pool_count Contracts`);
@@ -559,8 +563,10 @@ async function getPoolCount(address: string): Promise<number | null> {
     console.log(`Error loading ABI at getPoolCount.`);
     return null;
   }
-  const CONTRACT = new WEB3.eth.Contract(ABI, address);
-  const POOL_COUNT = await CONTRACT.methods.pool_count().call();
+
+  const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI, address);
+  const POOL_COUNT = await web3Call(CONTRACT, "pool_count", []);
+
   return POOL_COUNT;
 }
 
@@ -580,28 +586,28 @@ export async function updatePools() {
     }
   }
 
-  console.log("running updateLpTokenAddresses");
+  // console.log("running updateLpTokenAddresses");
   await updateLpTokenAddresses();
 
-  console.log("running updateNames");
+  // console.log("running updateNames");
   await updateNames();
 
-  console.log("running updateCoins");
+  // console.log("running updateCoins");
   await updateCoins();
 
-  console.log("running updateNCoins");
+  // console.log("running updateNCoins");
   await updateNCoins();
 
-  console.log("running updateInceptionBlock");
+  // console.log("running updateInceptionBlock");
   await updateInceptionBlock();
 
-  console.log("running updateCreationTimestamp");
+  // console.log("running updateCreationTimestamp");
   await updateCreationTimestamp();
 
-  console.log("running updateBasepool");
+  // console.log("running updateBasepool");
   await updateBasepool();
 
-  console.log("running updateVersions");
+  // console.log("running updateVersions");
   await updateVersions();
 
   eventEmitter.emit("ready for new pool subscription");

@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Index, PrimaryKey, AutoIncrement } from "sequelize-typescript";
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey, AutoIncrement } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 
 @Table({
@@ -8,6 +8,10 @@ import { Pool } from "./Pools.js";
       name: "unique_blockhash_logindex",
       unique: true,
       fields: ["block_hash", "logIndex"],
+    },
+    {
+      name: "index_on_pool_id",
+      fields: ["pool_id"],
     },
   ],
 })

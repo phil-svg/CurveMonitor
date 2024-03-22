@@ -80,6 +80,10 @@ RawTxLogs = __decorate([
                 unique: true,
                 fields: ["block_hash", "logIndex"],
             },
+            {
+                name: "index_on_pool_id",
+                fields: ["pool_id"],
+            },
         ],
     })
 ], RawTxLogs);

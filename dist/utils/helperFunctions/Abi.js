@@ -1,16 +1,20 @@
 import { updateAbiIWithProxyCheck, updateProxiesFromManualList } from "./ProxyCheck.js";
-import { getWeb3HttpProvider } from "./Web3.js";
 import { ethers } from "ethers";
 export async function updateAbisFromTrace(transactionTraces) {
     await updateProxiesFromManualList();
     const processedAddresses = new Set();
-    const web3HttpProvider = await getWeb3HttpProvider();
-    const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);
-    const uniqueAddresses = new Set(transactionTraces.map((trace) => trace.action.to));
+    const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP_MAINNET);
+    const uniqueAddresses = new Set(transactionTraces
+        .filter((trace) => {
+        // Check for non-null input, value, or output
+        return trace.action.input !== "0x" || trace.action.value !== "0x0" || (trace.result && trace.result.output !== "0x");
+    })
+        .map((trace) => trace.action.to));
     for (const contractAddress of uniqueAddresses) {
         if (!contractAddress || processedAddresses.has(contractAddress))
             continue;
-        await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
+        // console.log("\ncontractAddress", contractAddress);
+        await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider);
         processedAddresses.add(contractAddress);
     }
 }

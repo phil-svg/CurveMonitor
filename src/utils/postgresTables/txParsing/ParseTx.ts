@@ -13,8 +13,9 @@ import Bottleneck from "bottleneck";
 import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from "../../../config/Alchemy.js";
 import { getCurrentBlockNumber } from "../../web3Calls/generic.js";
 import { getTotalTransactionsCount } from "../readFunctions/Transactions.js";
+import { PoolCoinsForLiveMode } from "../../goingLive/RawTxLogsLive.js";
 
-export async function sortAndProcess(EVENTS: any, BLOCK_UNIXTIMES: any, POOL_COINS: any): Promise<void> {
+export async function sortAndProcess(EVENTS: any, BLOCK_UNIXTIMES: any, POOL_COINS: PoolCoinsForLiveMode): Promise<void> {
   const functions = {
     RemoveLiquidity: parseRemoveLiquidity,
     AddLiquidity: parseAddLiquidity,
@@ -88,13 +89,11 @@ async function parseEventsMain() {
   if (eventParsingFromBlock === null) eventParsingFromBlock = blockNumbers[0];
   await updateEventParsingFromBlock(eventParsingFromBlock!);
 
-  let counter = 0;
+  let nowBlock = await getCurrentBlockNumber();
 
   for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
     let eventParsingToBlock = await getEventParsingToBlock();
     if (eventParsingToBlock === null) eventParsingToBlock = blockNumbers[Math.max(i, BATCH_SIZE)];
-
-    let nowBlock = await getCurrentBlockNumber();
 
     const startBlock = eventParsingToBlock! + 1;
     const endBlock = Math.min(startBlock + BATCH_SIZE, nowBlock!);
@@ -113,19 +112,20 @@ async function parseEventsMain() {
 
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
 
+    const numParsedTx = await getTotalTransactionsCount();
+    const numParsedTxInK = Number((numParsedTx / 1e6).toFixed(3));
+
+    const daysToParse = Number((((nowBlock! - endBlock) * 12) / (60 * 60 * 24)).toFixed(2));
+
     await updateEventParsingToBlock(endBlock);
-    counter += EVENTS.length;
-    console.log(
-      "Parsing in progress",
-      nowBlock! - endBlock,
-      "blocks left, thats",
-      Number((((nowBlock! - endBlock) * 12) / (60 * 60 * 24)).toFixed(2)),
-      "days in blockchain-time,",
-      await getTotalTransactionsCount(),
-      "parsed Tx stored."
-    );
+
+    console.log(`${daysToParse} days in blockchain-time to parse, ${numParsedTxInK.toLocaleString()}m parsed Tx stored.`);
+    if (nowBlock === endBlock) {
+      break;
+    }
   }
 }
+
 export async function parseEvents(): Promise<void> {
   await parseEventsMain();
   updateConsoleOutput("[✓] Events parsed successfully.\n");

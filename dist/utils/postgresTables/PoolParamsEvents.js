@@ -1,15 +1,9 @@
-import Web3 from "web3";
 import { getVersionBy, getInceptionBlockBy, getAllPoolIds, getAddressById } from "./readFunctions/Pools.js";
-import { getPastEvents, getBlockTimeStamp } from "../web3Calls/generic.js";
+import { getPastEvents, getBlockTimeStamp, WEB3_HTTP_PROVIDER } from "../web3Calls/generic.js";
 import { getAbiBy } from "./Abi.js";
 import { PoolParamsEvents } from "../../models/PoolParamsEvents.js";
 import { retry } from "../helperFunctions/Web3Retry.js";
 import { getLatestEventTimestampFromSubgraph } from "../subgraph/DaoSubgraph.js";
-if (!process.env.WEB3_HTTP) {
-    console.error("Error: WEB3_WSS environment variable is not defined.");
-    process.exit(1);
-}
-const WEB3 = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP));
 async function addPoolParamsEvent(pool_id, log_index, event_name, raw_log, event_block, event_timestamp) {
     const newPoolParamsEvent = new PoolParamsEvents({
         pool_id,
@@ -46,7 +40,7 @@ function isEventInABI(abi, eventName) {
     return abi.some((entry) => entry.type === "event" && entry.name === eventName);
 }
 async function handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, POTENTIAL_EVENTS) {
-    const CONTRACT = new WEB3.eth.Contract(POOL_ABI, POOL_ADDRESS);
+    const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
     const poolParamsEvent = await PoolParamsEvents.findOne({ where: { pool_id: poolId } });
     const lastBlockChecked = poolParamsEvent === null || poolParamsEvent === void 0 ? void 0 : poolParamsEvent.last_block_checked;
     const startingBlock = lastBlockChecked == null ? await getInceptionBlockBy({ address: POOL_ADDRESS }) : lastBlockChecked;
@@ -92,7 +86,7 @@ export async function updatePoolParamsEvents() {
     // gets triggered if say the last check was Monday, it is now Friday, and Subgraph shows Event for Wednesday.
     if (latestEventTimestampFromSubgraph >= LAST_UNIXTIME_CHECKED) {
         const ALL_POOL_IDS = (await getAllPoolIds()).sort((a, b) => a - b);
-        const CURRENT_BLOCK = await WEB3.eth.getBlockNumber();
+        const CURRENT_BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlockNumber();
         let i = 1;
         for (const POOL_ID of ALL_POOL_IDS) {
             console.log(i + "/" + ALL_POOL_IDS.length);

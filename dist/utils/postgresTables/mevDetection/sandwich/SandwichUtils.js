@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
 import { TransactionCoins } from "../../../../models/TransactionCoins.js";
 import { findCoinSymbolById } from "../../readFunctions/Coins.js";
-import { getTokenTransferEvents, getTxFromTxId } from "../../../web3Calls/generic.js";
+import { WEB3_HTTP_PROVIDER, getTokenTransferEvents, getTxFromTxId } from "../../../web3Calls/generic.js";
 import { getAbiBy } from "../../Abi.js";
 import { Sandwiches } from "../../../../models/Sandwiches.js";
 import { readSandwichesInBatches, readSandwichesInBatchesForBlock } from "../../readFunctions/Sandwiches.js";
@@ -52,7 +52,7 @@ export async function calcTheLossOfCurveUserFromSandwich(parsedTx) {
     return null;
 }
 export async function findMatchingTokenTransferAmout(coinID, parsedTx, amountHappyUser) {
-    const COIN_TRANSFER_EVENTS = await getTokenTransferEvents(coinID, parsedTx.block_number);
+    const COIN_TRANSFER_EVENTS = await getTokenTransferEvents(WEB3_HTTP_PROVIDER, coinID, parsedTx.block_number);
     if (!Array.isArray(COIN_TRANSFER_EVENTS))
         return null;
     let amounts = COIN_TRANSFER_EVENTS.map((EVENT) => EVENT.returnValues.value / 1e18);
@@ -87,16 +87,14 @@ export async function saveSandwich(poolId, frontrunId, backrunId, extractedFromC
         },
     });
 }
-export async function removeProcessedTransactions(transactions) {
-    // Fetch all tx_ids in the sandwiches table
-    const sandwiches = await Sandwiches.findAll({ attributes: ["frontrun", "backrun"] });
-    const processedTxIds = sandwiches.reduce((result, sandwich) => {
-        result.add(sandwich.frontrun);
-        result.add(sandwich.backrun);
-        return result;
-    }, new Set());
-    // Filter out transactions that already appear in the sandwiches table
-    return transactions.filter((transaction) => !processedTxIds.has(transaction.tx_id));
+export async function removeProcessedTransactions(transactions, sandwichFlags) {
+    // Create a Set of all tx_ids that are marked as sandwiches or not sandwiches
+    const flaggedTxIds = new Set();
+    for (const flag of sandwichFlags) {
+        flaggedTxIds.add(flag.tx_id);
+    }
+    // Filter out transactions that are flagged as sandwiches or not sandwiches
+    return transactions.filter((transaction) => !flaggedTxIds.has(transaction.tx_id));
 }
 function isValidEthereumAddress(someString) {
     // Ethereum addresses are 42 characters long (including the '0x') and consist only of hexadecimal characters

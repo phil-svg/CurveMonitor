@@ -386,5 +386,1197 @@
   {
     "Address": "0xc972d37d48038d289251347a7e52aede64b47a40",
     "Label": "Sturdy Finance: TUSD FRAX BP Lev Swap"
+  },
+  {
+    "Address": "0xff40d451d1875a330bf8a195aa98f39c355e9bb4",
+    "Label": "DSProxy #215,006"
+  },
+  {
+    "Address": "0x1c5f80b6b68a9e1ef25926eee00b5255791b996b",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x24c67beef21c83546062f29afa1bfe7bc35e4b13",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x9dd0e8a985315785473f7eb81bc4e28838e13d96",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x56fa49538111351819567b611cb46560d0777a03",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xe7a3b38c39f97e977723bd1239c3470702568e7b",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x2e5f3cb6e4e18085b120dfda8bf6a39f935a2bf1",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0xbd4dbe0cb9136ffb4955ede88ebd5e92222ad09a",
+    "Label": "Contract Address 0xbd4dbe0cb9136ffb4955ede88ebd5e92222ad09a"
+  },
+  {
+    "Address": "0x64a53b849072a4d778cec579396e279f299b0bec",
+    "Label": "Contract Address 0x64a53b849072a4d778cec579396e279f299b0bec"
+  },
+  {
+    "Address": "0xbf5a7f3629fb325e2a8453d595ab103465f75e62",
+    "Label": "Portals.fi: Router"
+  },
+  {
+    "Address": "0xdc899ab992fbcfbac936ce5a5bc5a86a5d35a66a",
+    "Label": "YCRV Zap v3"
+  },
+  {
+    "Address": "0x11111112542d85b3ef69ae05771c2dccff4faa26",
+    "Label": "1inch v3: Aggregation Router"
+  },
+  {
+    "Address": "0x1f3aabf169ae52e868a6065cd1ae6b29ae1a0368",
+    "Label": "ConicZap"
+  },
+  {
+    "Address": "0x70ccbe10f980d80b7ebaab7d2e3a73e87d67b775",
+    "Label": "Gitcoin Grants: Vyper"
+  },
+  {
+    "Address": "0x24b1c83e7595cfc999570c057c72154028c6856c",
+    "Label": "DSProxy #160,737"
+  },
+  {
+    "Address": "0xeb0265938c1190ab4e3e1f6583bc956df47c0f93",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x55b916ce078ea594c10a874ba67ecc3d62e29822",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x4e7b1bc3da9d2e1ab1edb98293e92cdbb7319dc8",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x7514080992093c06d57d4819f8287966271d0331",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x0d196752c15eaa3002557ffa239269c42e6e0d78",
+    "Label": "ComptrollerProxy"
+  },
+  {
+    "Address": "0x7a955509f37bbe9c65dfba0d37d2212208241992",
+    "Label": "DSProxy #219,439"
+  },
+  {
+    "Address": "0x9799b475dec92bd99bbdd943013325c36157f383",
+    "Label": "Fund: 0x979...383"
+  },
+  {
+    "Address": "0x73069892f6750ccaaababadc54b6b6b36b3a057d",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x3341bcc9268335abfc8096707903c13a22dd5990",
+    "Label": "DSProxy #206,007"
+  },
+  {
+    "Address": "0x071c661b4deefb59e2a3ddb20db036821eee8f4b",
+    "Label": "Curve.fi: bBTC Metapool"
+  },
+  {
+    "Address": "0x389fb29230d02e67eb963c1f5a00f2b16f95beb7",
+    "Label": "LpxCvx"
+  },
+  {
+    "Address": "0x55a8a39bc9694714e2874c1ce77aa1e599461e18",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x61de9339360d0a0b94f6490c8c8e312bda8c7d5c",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xcf665996a648039e73a7e4b7cc6ce816937c298b",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x8b4334d4812c530574bd4f2763fcd22de94a969b",
+    "Label": "Tokemak: Treasury Address"
+  },
+  {
+    "Address": "0x7259e152103756e1616a77ae982353c3751a6a90",
+    "Label": "CauldronV4"
+  },
+  {
+    "Address": "0xce97cc6365019f241052029fed77dc40765b1ff5",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x9d0464996170c6b9e75eed71c68b99ddedf279e8",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x66384215e62ba1c80954929feffd919e3d2162e7",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x892d701d94a43bdbcb5ea28891daca2fa22a690b",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xf002dcdd08a0d1879901956f1b4de227ebb44678",
+    "Label": "DSProxy #218,384"
+  },
+  {
+    "Address": "0xca10e8825fa9f1db0651cd48a9097997dbf7615d",
+    "Label": "WooCrossChainRouterV4"
+  },
+  {
+    "Address": "0x0520467f71cbfa91089b7a7e9389b2dc85868143",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x5bca660e4479cd991f8ecd70c272b561fd7bd63b",
+    "Label": "DSProxy #215,122"
+  },
+  {
+    "Address": "0x942d484c008d86c92d62fce9cbdf010f89d4f899",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xe921d6f4eb93b9e740008d7c68377b9b85422a4c",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0x01f64dd95c758fdeb7f8066fe7f32c805d60469d",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xeef86c2e49e11345f1a693675df9a38f7d880c8f",
+    "Label": "MEV Bot: 0xeef...c8f"
+  },
+  {
+    "Address": "0x0f59071560eecffff79aeb9a7c9bd1610141cf3d",
+    "Label": "DSProxy #217,336"
+  },
+  {
+    "Address": "0x5523985926aa12ba58dc5ad00ddca99678d7227e",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x1c91da0223c763d2e0173243eadaa0a2ea47e704",
+    "Label": "crvUSD Controller"
+  },
+  {
+    "Address": "0x8e8bd01b5a9eb272cc3892a2e40e64a716aa2a40",
+    "Label": "dYdX: Currency Convertor"
+  },
+  {
+    "Address": "0xc15f285679a1ef2d25f53d4cbd0265e1d02f2a92",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x319964dfd4599332e376275646c38632cba2df5a",
+    "Label": "DSProxy #216,484"
+  },
+  {
+    "Address": "0x4eaed76c3a388f4a841e9c765560bbe7b3e4b3a0",
+    "Label": "Abracadabra.Money: cvxtricrypto2 Market"
+  },
+  {
+    "Address": "0xda6323da3f258a18b887cf9776923745fc0f3259",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0x3f64bc83f10c4f11a2c7fbd9190949b1c8d54a43",
+    "Label": "DSProxy #218,152"
+  },
+  {
+    "Address": "0x72dbb666880768b51ef126419306aefa3415546b",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x854f178112008143014ecffd4059e3f913a47b40",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x0e3eb2eab0e524b69c79e24910f4318db46baa9c",
+    "Label": "OptimizedTransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0xa88800cd213da5ae406ce248380802bd53b47647",
+    "Label": "1inch: Settlement"
+  },
+  {
+    "Address": "0xe808996fdcb62347788c48f79f8ce8164d07ecce",
+    "Label": "DSProxy #220,832"
+  },
+  {
+    "Address": "0x3d6f08ae8c2931e27e95811e42f5d70164759a94",
+    "Label": "DefiEdgeStrategy"
+  },
+  {
+    "Address": "0x828b154032950c8ff7cf8085d841723db2696056",
+    "Label": "Lido: Curve stETH-ETH Pool"
+  },
+  {
+    "Address": "0x8306300ffd616049fd7e4b0354a64da835c1a81c",
+    "Label": "Frax Finance: Frx ETH Multisig"
+  },
+  {
+    "Address": "0xf50492363c65e7603c450a123c807c75d47776b4",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0x9e2b6378ee8ad2a4a95fe481d63caba8fb0ebbf9",
+    "Label": "Alchemix Finance: Dev Multisig"
+  },
+  {
+    "Address": "0x70270c228c5b4279d1578799926873aa72446ccd",
+    "Label": "Krystal: Router"
+  },
+  {
+    "Address": "0x4d1f0461d41b72bb6bc5e05552aa857324024587",
+    "Label": "DSProxy #165,028"
+  },
+  {
+    "Address": "0x3b3ae790df4f312e745d270119c6052904fb6790",
+    "Label": "OKX DEX: Aggregation Router"
+  },
+  {
+    "Address": "0xacce4fe9ce2a6fe9af83e7cf321a3ff7675e0ab6",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xa20ef8a9a21cb318f0d396ba0134698e472e38dd",
+    "Label": "DSProxy #196,625"
+  },
+  {
+    "Address": "0xa0d3707c569ff8c87fa923d3823ec5d81c98be78",
+    "Label": "Instadapp: iETHv2 Token"
+  },
+  {
+    "Address": "0x7e050cf658777cc1da4a4508e79d71859044b60e",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x91c00ece6019bc36b68ee68a1b560849a59155a5",
+    "Label": "Contract Address 0x91c00ece6019bc36b68ee68a1b560849a59155a5"
+  },
+  {
+    "Address": "0x971add32ea87f10bd192671630be3be8a11b8623",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x2c0c2e3aad2938411319fe596a5127280e75ceab",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x5b79121ea6dc2395b8046ecdce14d66c2bf221b0",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x59828fdf7ee634aaad3f58b19fdba3b03e2d9d80",
+    "Label": "Euler: Exec v1 Proxy"
+  },
+  {
+    "Address": "0xc766709c6b5965d63d934b0fa5cb1e4c2827ef14",
+    "Label": "DSProxy #176,225"
+  },
+  {
+    "Address": "0x2a2653dea86504c84f9de3f0359f2983f3f7ec84",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xf16b10a1cdd906e61e2590b66483fa453b688e40",
+    "Label": "SwapFeeRouter"
+  },
+  {
+    "Address": "0x38a1753aed353e58c64a55a3f3c750e919915537",
+    "Label": "rUSTPool"
+  },
+  {
+    "Address": "0x10e17b5adbccb8b8e9657fb1fa5a688f58d88850",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x49e51067e695bd79d6275ecab6e9e527a72abde4",
+    "Label": "FxGateway"
+  },
+  {
+    "Address": "0xe6ec900d9f7e53652b7802b7493bc2c1c4d0bc9c",
+    "Label": "DSProxy #215,000"
+  },
+  {
+    "Address": "0x3f29cb4111cbda8081642da1f75b3c12decf2516",
+    "Label": "ClaimZap"
+  },
+  {
+    "Address": "0x465f402dd8acdad63d968bf22d0c2d273ae1691b",
+    "Label": "DSProxy #198,671"
+  },
+  {
+    "Address": "0xbbe984279ddb4268b9e6b214e818002d6bce5d50",
+    "Label": "DSProxy #217,377"
+  },
+  {
+    "Address": "0x9dd864d39fbfdf7648402746263e451cd4f36af0",
+    "Label": "MEV Bot: 0x9DD...Af0"
+  },
+  {
+    "Address": "0x0408ca2a9b8c9df1ad42b4c4d2135c119c494664",
+    "Label": "DSProxy #217,912"
+  },
+  {
+    "Address": "0x522f5e1471fc63de17a6a1e93372d7761e153231",
+    "Label": "DSProxy #220,390"
+  },
+  {
+    "Address": "0xfbdca68601f835b27790d98bbb8ec7f05fdeaa9b",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x9a22cdb1ca1cdd2371cd5bb5199564c4e89465eb",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x4cca47577a308a4d77ab03603221e13c77030cee",
+    "Label": "DSProxy #212,508"
+  },
+  {
+    "Address": "0xdff2aea378e41632e45306a6de26a7e0fd93ab07",
+    "Label": "Silo: Treasury"
+  },
+  {
+    "Address": "0x7abdbaf29929e7f8621b757d2a7c04d78d633834",
+    "Label": "Curve Finance: sBTC Deposit Zap"
+  },
+  {
+    "Address": "0x6e513d492ded19ad8211a57cc6b4493c9e6c857b",
+    "Label": "AllInOneGateway"
+  },
+  {
+    "Address": "0xe73c5a631c55b0c3ade1549506ccb45fddfb8bd4",
+    "Label": "DSProxy #217,788"
+  },
+  {
+    "Address": "0x5d5d63822647b9068ff95fd263ff9a00b6cdd7c0",
+    "Label": "MCDMonitorV2"
+  },
+  {
+    "Address": "0x5bcb06c56e8f28da0b038a373199240ca3f5a2f4",
+    "Label": "CreditFacade"
+  },
+  {
+    "Address": "0xe678cf140014dace8d12d26b7c0369a0db7d5429",
+    "Label": "DSProxy #220,647"
+  },
+  {
+    "Address": "0x01d1f55d94a53a9517c07f793f35320faa0d2dcf",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xb27dc5f8286f063f11491c8f349053cb37718bea",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x2889302a794da87fbf1d6db415c1492194663d13",
+    "Label": "CurveTricryptoOptimizedWETH"
+  },
+  {
+    "Address": "0xa46fd59672434d1917972f1469565baeb57ed204",
+    "Label": "Contract Address 0xa46fd59672434d1917972f1469565baeb57ed204"
+  },
+  {
+    "Address": "0x4c227617e1b80b0f2f6df218098990fe01cb2b7a",
+    "Label": "DSProxy #7,063"
+  },
+  {
+    "Address": "0x1c073d5045b1abb6924d5f0f8b2f667b1653a4c3",
+    "Label": "Contract Address 0x1c073d5045b1abb6924d5f0f8b2f667b1653a4c3"
+  },
+  {
+    "Address": "0x6a9014fb802dcc5efe3b97fd40aaa632585636d0",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x03c609c569993913aab877a94c8e58aec13e67cc",
+    "Label": "MEV Bot: 0x03c...7cc"
+  },
+  {
+    "Address": "0x4e59541306910ad6dc1dac0ac9dfb29bd9f15c67",
+    "Label": "crvUSD Controller"
+  },
+  {
+    "Address": "0x938981627835ca1c821af36777d8e942acc3f555",
+    "Label": "Contract Address 0x938981627835ca1c821af36777d8e942acc3f555"
+  },
+  {
+    "Address": "0x45716d9eddbc332df1d42b9f540fbebed671b20f",
+    "Label": "MEV Bot: 0x457...20F"
+  },
+  {
+    "Address": "0x958979432a7c58fd3f30be8071bba79401bbae3e",
+    "Label": "ALE"
+  },
+  {
+    "Address": "0x7a0a6906de7714d27413f5092ed1a0636a3fbc9a",
+    "Label": "Zapper.Fi: Curve Zap In 2"
+  },
+  {
+    "Address": "0xabb8b277f49de499b902a1e09a2aca727595b544",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x02dd2834005c8147ba249d63f5c4629ed23aa487",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x5ec47ee69bede0b6c2a2fc0d9d094df16c192498",
+    "Label": "CauldronV2"
+  },
+  {
+    "Address": "0x72dcfc6f1aa963d01b1d48c53a1b0630ef87db28",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x04c90c198b2eff55716079bc06d7ccc4aa4d7512",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x8301ae4fc9c624d1d396cbdaa1ed877821d7c511",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x4ebdf703948ddcea3b11f675b4d1fba9d2414a14",
+    "Label": "CurveTricryptoOptimizedWETH"
+  },
+  {
+    "Address": "0xf73bd29daf60dfe09608d46f5e8eae87284fd3d3",
+    "Label": "Contract Address 0xf73bd29daf60dfe09608d46f5e8eae87284fd3d3"
+  },
+  {
+    "Address": "0x5097f25622609ac4f3cc6b7197d22d0ffcd1c6ec",
+    "Label": "DSProxy #221,213"
+  },
+  {
+    "Address": "0x1a8e2866523254788ea7eb6a140aba957ef8787d",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0x84e546441faa3699b2bd5d006901fa99428f20cc",
+    "Label": "DSProxy #217,599"
+  },
+  {
+    "Address": "0x9ac549fe3f83d4d599a61619135383ffc7b657ae",
+    "Label": "Contract Address 0x9ac549fe3f83d4d599a61619135383ffc7b657ae"
+  },
+  {
+    "Address": "0x9cb7e19861665366011899d74e75d4f2a419aeed",
+    "Label": "DSProxy #220,231"
+  },
+  {
+    "Address": "0x415e1ddcfdb9a220a402684da9511d79a71a2141",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xa1b3c586731d74178803318db709ffaac442ead7",
+    "Label": "DSProxy #218,588"
+  },
+  {
+    "Address": "0x767c8bb1574bee5d4fe35e27e0003c89d43c5121",
+    "Label": "Contract Address 0x767c8bb1574bee5d4fe35e27e0003c89d43c5121"
+  },
+  {
+    "Address": "0x95af5a5eedc1c1eca33a78229260a7c582a1b997",
+    "Label": "DSProxy #220,191"
+  },
+  {
+    "Address": "0x83a30b9c73de15560aa02a18964c45ad7a41d88e",
+    "Label": "Contract Address 0x83a30b9c73de15560aa02a18964c45ad7a41d88e"
+  },
+  {
+    "Address": "0x80d4230c0a68fc59cb264329d3a717fcaa472a13",
+    "Label": "MEV Bot: 0x80d...a13"
+  },
+  {
+    "Address": "0x3ef6a01a0f81d6046290f3e2a8c5b843e738e604",
+    "Label": "Curve.fi: HUSD Pool"
+  },
+  {
+    "Address": "0xaea32fa257c332d92bdf2c22abea88a28e042356",
+    "Label": "DSProxy #220,108"
+  },
+  {
+    "Address": "0x35f0df73195d76fdb489719d37de58d0b8edac29",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x898c6575be238582f3d28a7e98e395549c1323f0",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x47d5e1679fe5f0d9f0a657c6715924e33ce05093",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x3b21c2868b6028cfb38ff86127ef22e68d16d53b",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xe1b4876b98b82d774431fd73278361d0e4e4481b",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x383ad525211b8a1a9c13532cc021773052b2f4f8",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x5c28b966ab37cfb9397bbc04595f91f0fbf06d9b",
+    "Label": "FxGateway"
+  },
+  {
+    "Address": "0xe7c6e0a739021cdba7aac21b4b728779eef974d9",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x82f2e6c57b7fde0ebb42f22bfc6b4a297e7d9be8",
+    "Label": "VarenRouter"
+  },
+  {
+    "Address": "0x2202a6d78f522eeacbe824608491ecd30ba71aad",
+    "Label": "DSProxy #215,118"
+  },
+  {
+    "Address": "0x100daa78fc509db39ef7d04de0c1abd299f4c6ce",
+    "Label": "crvUSD Controller"
+  },
+  {
+    "Address": "0x0e9b5b092cad6f1c5e6bc7f89ffe1abb5c95f1c2",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xc8904f2e8c489737f8d5d644b97784f7123da230",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x69accb968b19a53790f43e57558f5e443a91af22",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xb0bababe78a9be0810fadf99dd2ed31ed12568be",
+    "Label": "MEV Bot: 0xb0...8bE"
+  },
+  {
+    "Address": "0x8ac3b96d118288427055ae7f62e407fc7c482f57",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xe7f8f769bf30de8207019d5520762e453c5691b9",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xd692f79d253c4322aedacb06126112d09e737aa8",
+    "Label": "DSProxy #215,140"
+  },
+  {
+    "Address": "0x4066d196a423b2b3b8b054f4f40efb47a74e200c",
+    "Label": "OptimizedTransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x9b16c1b20ff91018fa3f006be6395d5be3a295e0",
+    "Label": "DSProxy #219,757"
+  },
+  {
+    "Address": "0x63d44fbe420efb4f498c3aca170570547b8bcde0",
+    "Label": "DSProxy #8,369"
+  },
+  {
+    "Address": "0xbf61595c0f53f01e92cc210663dccd7ab237b1d9",
+    "Label": "MEV Bot: 0xBf6...1d9"
+  },
+  {
+    "Address": "0x7020b680d5e88092b0fc7cd7199b2dd4b68afa2f",
+    "Label": "DSProxy #151,449"
+  },
+  {
+    "Address": "0x44086fb6455541b36ad5c6680d65157287e3727c",
+    "Label": "DSProxy #219,651"
+  },
+  {
+    "Address": "0x1aaad07998466cd3eb8140827dddb37570be1e63",
+    "Label": "ZeroExOptimized"
+  },
+  {
+    "Address": "0x83ff6ba39c3422c682022ded36872eb5b01e67c4",
+    "Label": "DSProxy #220,246"
+  },
+  {
+    "Address": "0xe0c38b2a8d09aad53f1c67734b9a95e43d5981c0",
+    "Label": "Firebird Finance: Aggregator Router"
+  },
+  {
+    "Address": "0xdc08c0d582894214ec704108b6750b58b241a5d1",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x9e59ea5333cd4f402dac320a04fafa023fe3810d",
+    "Label": "RelayHub"
+  },
+  {
+    "Address": "0xc77a25e041b8a97847fe6aa71e373893a05c1bfd",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x65b86d1dc66dd87704a0613052ff997772307714",
+    "Label": "DSProxy #215,107"
+  },
+  {
+    "Address": "0xa976ea51b9ba3232706af125a92e32788dc08ddc",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x3335733c454805df6a77f825f266e136fb4a3333",
+    "Label": "ERC20Proxy"
+  },
+  {
+    "Address": "0xf083fba98ded0f9c970e5a418500bad08d8b9732",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x8d2f33d168cca6d2436de16c27d3f1cea30ac245",
+    "Label": "CreditFacade"
+  },
+  {
+    "Address": "0x7636a5bfd763cefec2da9858c459f2a9b0fe8a6c",
+    "Label": "ERC1967Proxy"
+  },
+  {
+    "Address": "0x74a0b3b58d4481c6b82b43cb4997f5a4b05ff152",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xaa99c40a936a2cf11eb1d5387897ce9a626e53c7",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xd2c46b4c28f4b7976d9f87687863c46bb2f71dbb",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x93054188d876f558f4a66b2ef1d97d16edf0895b",
+    "Label": "Curve.fi: REN Swap"
+  },
+  {
+    "Address": "0x9bc7c6ad7e7cf3a6fcb58fb21e27752ac1e53f99",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x50f3752289e1456bfa505afd37b241bca23e685d",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xddc65fac7201922395045ffdffe28d3cf6012e22",
+    "Label": "DSProxy #9,802"
+  },
+  {
+    "Address": "0xc36442b4a4522e871399cd717abdd847ab11fe88",
+    "Label": "Uniswap V3: Positions NFT"
+  },
+  {
+    "Address": "0xdafca7a5e3b67b8f36c1fdd7691ed85bbb54cc18",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x0500972c6c4121d8d436b998c91f42b1f02aa4f4",
+    "Label": "DSProxy #154,031"
+  },
+  {
+    "Address": "0x8b32e7a0214e034803a07dacb10c424a8418c1a2",
+    "Label": "DSProxy #217,174"
+  },
+  {
+    "Address": "0x1291c02d288de3de7dc25353459489073d11e1ae",
+    "Label": "PermitAndCall"
+  },
+  {
+    "Address": "0x19b3eb3af5d93b77a5619b047de0eed7115a19e7",
+    "Label": "SushiSwap: Operation Multisig"
+  },
+  {
+    "Address": "0x3aa228a80f50763045bdfc45012da124bd0a6809",
+    "Label": "Contract Address 0x3aa228a80f50763045bdfc45012da124bd0a6809"
+  },
+  {
+    "Address": "0x86f30bc33c0dda4dd5f48158ed8023aa371f833d",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xeb02f576cf17aa0ca9135aca004e3bb1dc04521e",
+    "Label": "Contract Address 0xeb02f576cf17aa0ca9135aca004e3bb1dc04521e"
+  },
+  {
+    "Address": "0x245cc372c84b3645bf0ffe6538620b04a217988b",
+    "Label": "OlympusDAO: DAO Funds"
+  },
+  {
+    "Address": "0x6e3b2eabf254b41e53a327ea6c868d232cfdeeba",
+    "Label": "DSProxy #220,645"
+  },
+  {
+    "Address": "0xe3a00b42b7f292672e16984cb4c2d48d02166360",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x99f5acc8ec2da2bc0771c32814eff52b712de1e5",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x135896de8421be2ec868e0b811006171d9df802a",
+    "Label": "ParaSwapLiquiditySwapAdapter"
+  },
+  {
+    "Address": "0x2570f1bd5d2735314fc102eb12fc1afe9e6e7193",
+    "Label": "CurveTricryptoOptimizedWETH"
+  },
+  {
+    "Address": "0x3211c6cbef1429da3d0d58494938299c92ad5860",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x7251febeabb01ec9de53ece7a96f1c951f886dd2",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x5170456242cbe26b2b68a9355c4fe2fc03443b09",
+    "Label": "DSProxy #219,684"
+  },
+  {
+    "Address": "0xfd14f62d13087847c0980bb9fced615c98f08bdc",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x0630a92218b211644c9b83bce53e000c06c127aa",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xb469afa706733b3502dcb28197867eae6e82949b",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0xadc0a53095a0af87f3aa29fe0715b5c28016364e",
+    "Label": "Aave: Swap Collateral Adapter V3"
+  },
+  {
+    "Address": "0xdf2c270f610dc35d8ffda5b453e74db5471e126b",
+    "Label": "Abracadabra.Money: MIM Treasury Wallet"
+  },
+  {
+    "Address": "0xa57bd00134b2850b2a1c55860c9e9ea100fdd6cf",
+    "Label": "MEV Bot: 0xa57...6CF"
+  },
+  {
+    "Address": "0xdcef968d416a41cdac0ed8702fac8128a64241a2",
+    "Label": "Curve Finance: Swap"
+  },
+  {
+    "Address": "0xb5ae2a6b084f59ff9ef6b2e79302a1878306d58c",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xfb8814d005c5f32874391e888da6eb2fe7a27902",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x56c4f38f95355e86ee42033ad8aef733feaf40bd",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0x3caca7b48d0573d793d3b0279b5f0029180e83b6",
+    "Label": "Gelato Network: Gelato"
+  },
+  {
+    "Address": "0xba3f5c056500ce033e9d74494b820d495efcf19d",
+    "Label": "MEV Bot: 0xBA3...19d"
+  },
+  {
+    "Address": "0x2e173e71e8021d641c98d04336a6b6d00a8869c3",
+    "Label": "DSProxy #109,466"
+  },
+  {
+    "Address": "0x8016907d54ed8bcf5da100c4d0eb434c0185dc0e",
+    "Label": "bVault"
+  },
+  {
+    "Address": "0xf26055894aeaae23d136defaa355a041a43d7dfd",
+    "Label": "TransferSwapper"
+  },
+  {
+    "Address": "0x69592e6f9d21989a043646fe8225da2600e5a0f7",
+    "Label": "Gravity"
+  },
+  {
+    "Address": "0xc7c095f264a6110ac656dcf0efa0cba5ac767077",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x607e23ddeffada10651736108ef9a55f05065b25",
+    "Label": "DSProxy #219,766"
+  },
+  {
+    "Address": "0xed279fdd11ca84beef15af5d39bb4d4bee23f0ca",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xdd7826e117cebbf30be4ceb00a47379288379ac1",
+    "Label": "DSProxy #216,844"
+  },
+  {
+    "Address": "0x43e54c2e7b3e294de3a155785f52ab49d87b9922",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x8f02fbb56c318814de0e96bc83bb50fd3340a7eb",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x4dece678ceceb27446b35c672dc7d61f30bad69e",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x0e5437b1b3448d22c07caed31e5bcdc4ec5284a9",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x7e5fefc8df089ab6feda974355b72e7dffe4903d",
+    "Label": "DSProxy #220,424"
+  },
+  {
+    "Address": "0xe6b5cc1b4b47305c58392ce3d359b10282fc36ea",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xc5bf10fd721f7078b1715597c4fdbb3018c45e05",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x40e93a52f6af9fcd3b476aedadd7feabd9f7aba8",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x67defac35e2a3f8d9a37ffa989e1b3ed70d3262b",
+    "Label": "DSProxy #220,282"
+  },
+  {
+    "Address": "0x64448b78561690b70e17cbe8029a3e5c1bb7136e",
+    "Label": "Curve.fi: Deposit GUSD"
+  },
+  {
+    "Address": "0xf1dc4badf863b408ed8ec0d9066c955040b21516",
+    "Label": "DSProxy #216,180"
+  },
+  {
+    "Address": "0x09bd04f96b6a1ffd511d17d8ecbcbe966df6ed98",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0x0a56d07a0b8ba800358ddeeb20eb46a618bfbe27",
+    "Label": "DSProxy #213,889"
+  },
+  {
+    "Address": "0xb7848eeaad5d44c50d0b7bf8e7d0f8afb892fb44",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x50839512d661c20ecb5186a0dccc8862e90e5e86",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0x3364f53cb866762aef66deef2a6b1a17c1f17f46",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x0000900e00070d8090169000d2b090b67f0c1050",
+    "Label": "Contract Address 0x0000900e00070d8090169000d2b090b67f0c1050"
+  },
+  {
+    "Address": "0x80c50231bbeaf678a950c4b9b7c68a6b62e69b0c",
+    "Label": "BitKeep: Swap Router"
+  },
+  {
+    "Address": "0xbadc0defafcf6d4239bdf0b66da4d7bd36fcf05a",
+    "Label": "MEV Bot: 0xbaD…05A"
+  },
+  {
+    "Address": "0x798576f0b501a8eb61d914249676e3878584b2ee",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x72146a3ead3a256e8a2189e3cedc0b7bd61991ed",
+    "Label": "DSProxy #122,129"
+  },
+  {
+    "Address": "0x6aa050a4b8bb1979fc5dc8753358ebfab9378cd2",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xa70c8401c058b6198e1cb085091de13498cec0dc",
+    "Label": "UniversalPermit2Adapter"
+  },
+  {
+    "Address": "0x6d994ad353f44a2da4732edb91e6ce999ae69bcf",
+    "Label": "DSProxy #220,945"
+  },
+  {
+    "Address": "0xa4630047b6689a139b83d15adf9c237c441c0296",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xf2b25362a03f6eacca8de8d5350a9f37944c1e59",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x6e314039f4c56000f4ebb3a7854a84cc6225fb92",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x0697f14634b1b5c10a9c258cb98f75b83e44d871",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0x8ff38490746d83ab285c0ee08c3bd5098949b39c",
+    "Label": "Contract Address 0x8ff38490746d83ab285c0ee08c3bd5098949b39c"
+  },
+  {
+    "Address": "0xd5bcf53e2c81e1991570f33fa881c49eea570c8d",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x75a6787c7ee60424358b449b539a8b774c9b4862",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xa96a65c051bf88b4095ee1f2451c2a9d43f53ae2",
+    "Label": "Curve.fi: aETHc Pool"
+  },
+  {
+    "Address": "0x22ce84a7f86662b78e49c6ec9e51d60fdde7b70a",
+    "Label": "Bitget Wallet: Swap Bridge"
+  },
+  {
+    "Address": "0x3b7345ec3d95102bdfee84c6561e6437647dbf4a",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0xff54d62db0d8f1b4302158fa14b2d6ad9050d864",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0x21114f10332585c5223963ffa384e112c88459eb",
+    "Label": "CurveV1Adapter3Assets"
+  },
+  {
+    "Address": "0x355d72fb52ad4591b2066e43e89a7a38cf5cb341",
+    "Label": "Wonderland: DAO"
+  },
+  {
+    "Address": "0x79e281bc69a03dabccd66858c65ef6724e50aebe",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x25ce4aafefb0bd2e44901872fbf612cfe390e050",
+    "Label": "DSProxy #205,372"
+  },
+  {
+    "Address": "0x4feca9911d3b19c3f79e4f38677cc32834a105a9",
+    "Label": "DSProxy #220,273"
+  },
+  {
+    "Address": "0xb1748c79709f4ba2dd82834b8c82d4a505003f27",
+    "Label": "Frax Finance: Comptroller"
+  },
+  {
+    "Address": "0x45c993ab8633fbaaac3bb095cf558ebb7e2f5be9",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x306845bfc02bc58a5ae55cf99d92266903380298",
+    "Label": "DSProxy #190,744"
+  },
+  {
+    "Address": "0x0000000a3fc396b89e4c11841b39d9dff85a5d05",
+    "Label": "AllMight"
+  },
+  {
+    "Address": "0x5426178799ee0a0181a89b4f57efddfab49941ec",
+    "Label": "CurveTricryptoOptimizedWETH"
+  },
+  {
+    "Address": "0x98a7f18d4e56cfe84e3d081b40001b3d5bd3eb8b",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xa0fb1b11cca5871fb0225b64308e249b97804e99",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x8472a9a7632b173c8cf3a86d3afec50c35548e76",
+    "Label": "crvUSD Controller"
+  },
+  {
+    "Address": "0xbdfae7d2cf2e69e27b75a5287ecd3808f62b5a76",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xec263efe3df2b0a5148df59b2551cf46ce8c763e",
+    "Label": "DSProxy #218,570"
+  },
+  {
+    "Address": "0x573c8dc186f4c44e99ef5e7cda3df4ab28187e03",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xe6c899cef11c69506d9ed8cc7589c76e3ae87c12",
+    "Label": "DSProxy #142,999"
+  },
+  {
+    "Address": "0x118f2c4497ebd671fa5ff4a55d98c9d78caae355",
+    "Label": "DSProxy #213,857"
+  },
+  {
+    "Address": "0x3409f8f8fc51900097b5c22ddd45175099ecd8e5",
+    "Label": "DSProxy #216,302"
+  },
+  {
+    "Address": "0xec0820efafc41d8943ee8de495fc9ba8495b15cf",
+    "Label": "crvUSD Controller"
+  },
+  {
+    "Address": "0xb8ec7c6483444572a486e22dd8f875bb26e14472",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0x3fb78e61784c9c637d560ede23ad57ca1294c14a",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xd05cbca7dc4710d8fc8275f851bc987ac0b1ca90",
+    "Label": "DSProxy #219,657"
+  },
+  {
+    "Address": "0x8ed11443414197f6f63e13c77d679f3941e8b522",
+    "Label": "Contract Address 0x8ed11443414197f6f63e13c77d679f3941e8b522"
+  },
+  {
+    "Address": "0xc6b2b3fe7c3d7a6f823d9106e22e66660709001e",
+    "Label": "CauldronV3"
+  },
+  {
+    "Address": "0x9901bac880caecad999e292811db9c1db3e86f8a",
+    "Label": "Furucombo: Proxy V2.0.0"
+  },
+  {
+    "Address": "0x889d1ca5cc79ce90ae5a828637ba6cd18ce3a286",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x8d47c67537aed4b84108b1c303b59eb76626ccf5",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xf3a1c284d61710155ff1e36d7c4e01d32fff9a68",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0x617dee16b86534a5d792a4d7a62fb491b544111e",
+    "Label": "KyberSwap: Meta Aggregation Router"
+  },
+  {
+    "Address": "0x252025df8680c275d0ba80d084e5967d8bd26caf",
+    "Label": "DeFi Saver: Strategy Executor"
+  },
+  {
+    "Address": "0x122454360d520234d3f20a98f045ac4abdcd783d",
+    "Label": "DSProxy #165,533"
+  },
+  {
+    "Address": "0xaac4d2293bb5d6701f4b739b234f1bf788726475",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xc25099792e9349c7dd09759744ea681c7de2cb66",
+    "Label": "Curve.fi: tBTC MetaPool"
+  },
+  {
+    "Address": "0x1570af3df649fc74872c5b8f280a162a3bdd4eb6",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xbb48c21e9101a85ee6d00b4f1a7b946df1b09ea7",
+    "Label": "TreasuryManager"
+  },
+  {
+    "Address": "0x72725c0c879489986d213a9a6d2116de45624c1c",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x1ff7817621aa6aaf5387c42fea171a9f710ad0c8",
+    "Label": "DSProxy #214,397"
+  },
+  {
+    "Address": "0xce88f73faa2c8de5fde0951a6b80583af4c14265",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xf4e297a9632369df54ef53c3b62e530487517a44",
+    "Label": "DSProxy #175,828"
+  },
+  {
+    "Address": "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+    "Label": "AladdinDAO: Management Multisig"
+  },
+  {
+    "Address": "0x4f062658eaaf2c1ccf8c8e36d6824cdf41167956",
+    "Label": "Curve.fi: GUSD Pool"
+  },
+  {
+    "Address": "0x872fbcb1b582e8cd0d0dd4327fbfa0b4c2730995",
+    "Label": "Aave: ParaSwap Liquidity Swap Adapter"
+  },
+  {
+    "Address": "0xd7252c026c3ca28d73b4deef62fe6ade86ec17a9",
+    "Label": "Relayer"
+  },
+  {
+    "Address": "0x1eb0d48bf31caf9dbe1ad2e35b3755fdf2898068",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xb2d785a644fce1102403dabf4492b5af37909f26",
+    "Label": "DSProxy #202,945"
+  },
+  {
+    "Address": "0xca0253a98d16e9c1e3614cafda19318ee69772d0",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+    "Label": "LI.FI: LiFi Diamond"
+  },
+  {
+    "Address": "0xa44a89ae267383345dd63b67a4ca26c2a56f1d84",
+    "Label": "Contract Address 0xa44a89ae267383345dd63b67a4ca26c2a56f1d84"
+  },
+  {
+    "Address": "0x8d34145ca2c2ce05f672f4b9c8a934799901daa1",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0xf7364e230ea0e5cc41e6cd4e2a30a26ca1850b73",
+    "Label": "TransparentUpgradeableProxy"
   }
 ]

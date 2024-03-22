@@ -1,16 +1,19 @@
-import { CoWProtocolGPv2Settlement, ETH_ADDRESS, NULL_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
+import { CoWProtocolGPv2Settlement, ETH_ADDRESS, NULL_ADDRESS, ONEINCH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
 import { getGasUsedFromReceipt, getShortenReceiptByTxHash } from "../../../readFunctions/Receipts.js";
-import { extractGasPrice, extractTransactionAddresses, getBlockNumberByTxHash, getTransactionDetailsByTxHash, } from "../../../readFunctions/TransactionDetails.js";
+import { extractGasPrice, extractTransactionAddresses, getBlockNumberByTxHash, getTransactionDetails, getTransactionDetailsByTxId, } from "../../../readFunctions/TransactionDetails.js";
 import { Transactions } from "../../../../../models/Transactions.js";
 import { Op } from "sequelize";
-import { getHistoricalTokenPriceFromDefiLlama } from "../../txValue/DefiLlama.js";
 import { isActuallyBackrun } from "../../../readFunctions/Sandwiches.js";
 import { enrichTransactionDetail } from "../../../readFunctions/TxDetailEnrichment.js";
-import { getLastTxValue, getTransactionTraceViaAlchemy, getTxFromTxHash, getTxHashAtBlockPosition } from "../../../../web3Calls/generic.js";
+import { getBlockBuilderFromBlockNumber, getBlockTimeStamp, getLastTxValue, getTransactionTraceViaWeb3Provider, getTxFromTxHash, getTxHashAtBlockPosition, } from "../../../../web3Calls/generic.js";
 import { getCleanedTransfers } from "../atomicArb.js";
 import { saveTransactionTrace } from "../../../TransactionTraces.js";
 import { getTransactionTraceFromDb } from "../../../readFunctions/TransactionTrace.js";
 import { fetchAndSaveReceipt } from "../../../Receipts.js";
+import { readAbiFromAbisEthereumTable } from "../../../readFunctions/Abi.js";
+import { getEthPriceWithTimestampFromTable, getTokenPriceWithTimestampFromDb } from "../../../readFunctions/PriceMap.js";
+import { getCoinIdByAddress } from "../../../readFunctions/Coins.js";
+import { getBlockNumberFromTxId, getTxIdByTxHash } from "../../../readFunctions/Transactions.js";
 async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) {
     const enrichedTransaction = await enrichTransactionDetail(txId);
     if (!enrichedTransaction) {
@@ -20,7 +23,15 @@ async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) 
     return Object.assign(Object.assign({}, enrichedTransaction), { revenue: typeof profitDetails.revenue === "number" ? profitDetails.revenue : null, gasInUsd: profitDetails.gas, gasInGwei: typeof profitDetails.gasInGwei === "number" ? profitDetails.gasInGwei / 1e9 : null, netWin: typeof profitDetails.netWin === "number" ? profitDetails.netWin : null, bribe: typeof profitDetails.bribe === "number" ? profitDetails.bribe : null, totalCost: typeof profitDetails.totalCost === "number" ? profitDetails.totalCost : null, blockBuilder: typeof profitDetails.blockBuilder === "string" ? profitDetails.blockBuilder : null, validatorPayOffUSD: typeof validatorPayOffInUSD === "number" ? validatorPayOffInUSD : null });
 }
 export function filterTransfersByAddress(cleanedTransfers, to) {
-    return cleanedTransfers.filter((transfer) => transfer.from.toLowerCase() === to.toLowerCase() || transfer.to.toLowerCase() === to.toLowerCase());
+    if (!cleanedTransfers || !to)
+        return null;
+    const lowerCaseTo = to.toLowerCase();
+    return cleanedTransfers.filter((transfer) => {
+        var _a, _b;
+        const fromLower = (_a = transfer.from) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+        const toLower = (_b = transfer.to) === null || _b === void 0 ? void 0 : _b.toLowerCase();
+        return fromLower === lowerCaseTo || toLower === lowerCaseTo;
+    });
 }
 function hasRelevantNegativeBalanceChange(balanceChanges) {
     const threshold = -0.000033; // equals 1 cent of btc as of oct'23.
@@ -41,25 +52,27 @@ async function isGlobalBackrun(transaction, txId) {
     if (!previousTx)
         return null;
     // comparing the senders
+    if (!previousTx.to)
+        return false;
     if (previousTx.to.toLowerCase() !== transaction.trader.toLowerCase())
         return false;
     // at this point we have two tx with a gap of one, where both are done by the same address.
     // next is checking if the first one is a frontrun.
-    const transactionDetails = await getTxFromTxHash(previousTxHash);
-    if (!transactionDetails)
-        return null;
-    const { from: from, to: to } = extractTransactionAddresses(transactionDetails);
-    if (!from || !to)
-        return null;
     const transactionTraces = await getTransactionTraceFromDb(previousTxHash);
     if (!transactionTraces || transactionTraces.length === 0) {
-        const transactionTrace = await getTransactionTraceViaAlchemy(previousTxHash);
+        const transactionTrace = await getTransactionTraceViaWeb3Provider(previousTxHash);
         await saveTransactionTrace(previousTxHash, transactionTrace);
     }
     const receipt = await getShortenReceiptByTxHash(previousTxHash);
     if (!receipt) {
         await fetchAndSaveReceipt(previousTxHash, txId);
     }
+    const transactionDetails = await getTxFromTxHash(previousTxHash);
+    if (!transactionDetails)
+        return null;
+    const { from: from, to: to } = extractTransactionAddresses(transactionDetails);
+    if (!from || !to)
+        return null;
     const cleanedTransfers = await getCleanedTransfers(previousTxHash, to);
     if (!cleanedTransfers)
         return null;
@@ -81,19 +94,23 @@ export function translateWETHToETHInTransfers(cleanedTransfers) {
 }
 export async function getBalanceChangeForAddressFromTransfers(walletAddress, cleanedTransfers) {
     const balances = {};
+    const walletAddressLowerCase = walletAddress.toLowerCase();
     const translatedTransfers = translateWETHToETHInTransfers(cleanedTransfers);
     translatedTransfers.forEach((transfer) => {
+        // Check if 'from' and 'to' are defined and convert them to lowercase
+        const fromAddress = transfer.from ? transfer.from.toLowerCase() : null;
+        const toAddress = transfer.to ? transfer.to.toLowerCase() : null;
         // If the address is involved in the transaction
-        if (transfer.from.toLowerCase() === walletAddress.toLowerCase() || transfer.to.toLowerCase() === walletAddress.toLowerCase()) {
+        if (fromAddress === walletAddressLowerCase || toAddress === walletAddressLowerCase) {
             const address = transfer.tokenAddress;
             const symbol = transfer.tokenSymbol || "Unknown Token";
             if (!balances[address]) {
                 balances[address] = { symbol: symbol, amount: 0 };
             }
-            if (transfer.from.toLowerCase() === walletAddress.toLowerCase()) {
+            if (fromAddress === walletAddressLowerCase) {
                 balances[address].amount -= transfer.parsedAmount;
             }
-            if (transfer.to.toLowerCase() === walletAddress.toLowerCase()) {
+            if (toAddress === walletAddressLowerCase) {
                 balances[address].amount += transfer.parsedAmount;
             }
         }
@@ -159,6 +176,34 @@ const calculateBalanceChangesForMints = (liquidityPairs, calledContractAddress) 
     });
     return balanceChange;
 };
+function hasIllegalTransfers(cleanedTransfers) {
+    const shortenedNull = "0x000000000000000000000000000000000";
+    const nullTransfersCount = cleanedTransfers.reduce((count, transfer) => {
+        if (transfer.from.startsWith(shortenedNull) && transfer.to.startsWith(shortenedNull)) {
+            return count + 1;
+        }
+        return count;
+    }, 0);
+    return nullTransfersCount >= 3;
+}
+function checkIlleglWETHTransfer(cleanedTransfers, balanceChangesTo, toAddress) {
+    const ETH_SYMBOL = "ETH";
+    toAddress = toAddress.toLowerCase();
+    // Filter for WETH transfers received by toAddress
+    const receivedWETHTransfers = cleanedTransfers.filter((transfer) => transfer.to.toLowerCase() === toAddress && transfer.tokenSymbol === "WETH");
+    // Check for exactly one received WETH transfer
+    if (receivedWETHTransfers.length === 1) {
+        const receivedWETHAmount = receivedWETHTransfers[0].parsedAmount;
+        // Check balance changes for a positive ETH balance change that matches the received WETH amount
+        const matchingETHBalanceChange = balanceChangesTo.some((change) => change.tokenSymbol === ETH_SYMBOL && change.balanceChange === receivedWETHAmount);
+        return matchingETHBalanceChange;
+    }
+    return false;
+}
+export function hasIllegalOutboundsToFrom(transfers, from) {
+    const countToFrom = transfers.filter((transfer) => transfer.to.toLowerCase() === from.toLowerCase()).length;
+    return countToFrom >= 2;
+}
 /**
  * all balance changes are positive
  * or
@@ -214,6 +259,10 @@ function isAtomicArbCaseValueStaysWithFromOrTo(cleanedTransfers, balanceChangesF
         return false;
     if (hasNonEthNegativeChange)
         return false;
+    if (hasIllegalTransfers(cleanedTransfers))
+        return false;
+    if (checkIlleglWETHTransfer(cleanedTransfers, balanceChangesTo, to))
+        return false;
     // Filter out ETH transfers
     const ethTransfers = cleanedTransfers.filter((transfer) => transfer.tokenSymbol === "ETH");
     // Filter leafs which receive ETH
@@ -232,21 +281,64 @@ function isAtomicArbCaseValueStaysWithFromOrTo(cleanedTransfers, balanceChangesF
     if (hasNegativeEthChangeTo) {
         return hasPositiveChangeInFrom || hasPositiveChangeInTo;
     }
+    if (hasIllegalOutboundsToFrom(cleanedTransfers, from))
+        return false;
     return true;
 }
 async function getValueReceivedByLeaf(token, parsedAmount, block_unixtime) {
-    const price = await getHistoricalTokenPriceFromDefiLlama(token, block_unixtime);
+    const tokenId = await getCoinIdByAddress(token);
+    if (!tokenId)
+        return null;
+    const price = await getTokenPriceWithTimestampFromDb(tokenId, block_unixtime);
     if (!price)
         return null;
     return price * parsedAmount;
 }
+/**
+ * Checks if a given address is part of any transfer in the cleanedTransfers array,
+ * excluding a specified transfer.
+ *
+ * @param cleanedTransfers - Array of ReadableTokenTransfer objects.
+ * @param transfer - The transfer to exclude from the search.
+ * @param address - The address to search for in the transfers.
+ * @returns true if the address is found in any transfer other than the specified transfer.
+ */
+export function isTrueLeaf(cleanedTransfers, transfer, address) {
+    const lowerCaseAddress = address.toLowerCase();
+    // Iterate through the cleanedTransfers array to check if the address is involved in other transfers
+    for (const t of cleanedTransfers) {
+        // Exclude the current transfer from the check
+        if (t.position !== transfer.position) {
+            // Check if the address is a sender or receiver in any other transfer
+            if (t.from.toLowerCase() === lowerCaseAddress || t.to.toLowerCase() === lowerCaseAddress) {
+                return false; // Address found in another transfer, hence not a leaf
+            }
+        }
+    }
+    // Address is not involved in any other transfer, hence it is a leaf
+    return true;
+}
+/**
+ * Checks if a transfer is from the bot or the bot operator to a different address,
+ * and if the recipient is a leaf node.
+ *
+ * @param transfer - The transfer to check.
+ * @param from - The address of the bot.
+ * @param to - The address of the bot operator.
+ * @param cleanedTransfers - All transfers to check against for the leaf node.
+ * @returns true if the transfer is from the bot or bot operator to a different address, which is a leaf node.
+ */
+function botOrFromTransferToLeaf(transfer, from, to, cleanedTransfers) {
+    return ((transfer.from.toLowerCase() === from.toLowerCase() || transfer.from.toLowerCase() === to.toLowerCase()) &&
+        transfer.to.toLowerCase() !== from.toLowerCase() &&
+        transfer.to.toLowerCase() !== to.toLowerCase() &&
+        isTrueLeaf(cleanedTransfers, transfer, transfer.to));
+}
 // New check for the case where value goes outside "from" and "to".
 async function isAtomicArbCaseValueGoesOutsideFromOrTo(onlyToTransfers, cleanedTransfers, balanceChangeFrom, balanceChangeTo, from, to, block_unixtime) {
-    if (balanceChangeFrom.length !== 0 || balanceChangeTo.length !== 0) {
+    if (balanceChangeFrom.length !== 0 || balanceChangeTo.length !== 0)
         return [false, 0];
-    }
-    const fromAddressLowerCase = from.toLowerCase();
-    const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== fromAddressLowerCase);
+    const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== from.toLowerCase());
     if (filteredOnlyToTransfers.length === 0)
         return [false, 0];
     if (isLeaf(filteredOnlyToTransfers[0].from, cleanedTransfers.slice(1))) {
@@ -255,11 +347,18 @@ async function isAtomicArbCaseValueGoesOutsideFromOrTo(onlyToTransfers, cleanedT
             return [false, 0];
         return [true, dollarValue];
     }
-    for (let i = cleanedTransfers.length - 1; i >= 0; i--) {
+    for (let i = cleanedTransfers.length - 1; i >= cleanedTransfers.length - 2; i--) {
         let transfer = cleanedTransfers[i];
-        if ((transfer.from.toLowerCase() === from.toLowerCase() || transfer.from.toLowerCase() === to.toLowerCase()) &&
-            transfer.to.toLowerCase() !== from.toLowerCase() &&
-            transfer.to.toLowerCase() !== to.toLowerCase()) {
+        if (botOrFromTransferToLeaf(transfer, from, to, cleanedTransfers)) {
+            // Last transfer matches
+            if (i === cleanedTransfers.length - 1) {
+                // Check the second-to-last transfer for the special case
+                let secondToLastTransfer = cleanedTransfers[cleanedTransfers.length - 2];
+                if (secondToLastTransfer.tokenAddress.toLowerCase() !== ETH_ADDRESS.toLowerCase() && secondToLastTransfer.tokenAddress.toLowerCase() !== WETH_ADDRESS.toLowerCase()) {
+                    // If the second-to-last transfer is not ETH or WETH, continue checking
+                    return [false, 0];
+                }
+            }
             return [true, 0];
         }
     }
@@ -342,7 +441,7 @@ function convertWETHToETH(balanceChanges) {
  * @param from Excluded from address as bribe receiver but included as a sender
  * @param to Excluded to address as bribe receiver but included as a sender
  */
-function getLeafEthTransfers(transfers, from, to) {
+export function getLeafEthTransfers(transfers, from, to) {
     return transfers.filter((transfer) => {
         const isEthTransfer = transfer.tokenSymbol === "ETH";
         const isLeaf = !transfers.some((otherTransfer) => otherTransfer.from.toLowerCase() === transfer.to.toLowerCase());
@@ -450,7 +549,7 @@ function calculateNetWin(extractedValue, bribe, gasCostETH) {
     }
     return newNetWin;
 }
-async function calculateGasInfo(txHash, transactionDetails) {
+export async function calculateGasInfo(txHash, transactionDetails) {
     const gasUsedResult = await getGasUsedFromReceipt(txHash);
     const gasPriceResult = extractGasPrice(transactionDetails);
     if (!gasUsedResult) {
@@ -464,15 +563,41 @@ async function calculateGasInfo(txHash, transactionDetails) {
     const gasCostETH = (gasUsed * gasPrice) / 1e18;
     return { gasUsed, gasPrice, gasCostETH };
 }
-async function getHistoricalPrices(tokens, timestamp) {
-    const uniqueTokens = [...new Set(tokens.map((token) => token.tokenAddress))];
-    const priceMap = new Map();
-    for (const token of uniqueTokens) {
-        const price = await getHistoricalTokenPriceFromDefiLlama(token, timestamp);
-        if (price !== null)
-            priceMap.set(token.toLowerCase(), price);
-    }
-    return priceMap;
+export async function getTransactionCostInUSD(txHash) {
+    const txId = await getTxIdByTxHash(txHash);
+    if (!txId)
+        return null;
+    const transactionDetails = await getTransactionDetails(txId);
+    const gasUsedResult = await getGasUsedFromReceipt(txHash);
+    const gasPriceResult = extractGasPrice(transactionDetails);
+    if (!gasUsedResult)
+        return null;
+    if (!gasPriceResult)
+        return null;
+    const gasUsed = parseInt(gasUsedResult, 10);
+    const gasPrice = parseInt(gasPriceResult, 10);
+    const gasCostETH = (gasUsed * gasPrice) / 1e18;
+    const blockNumber = await getBlockNumberFromTxId(txId);
+    if (!blockNumber)
+        return null;
+    const unixtime = await getBlockTimeStamp(blockNumber);
+    if (!unixtime)
+        return null;
+    const ethInUsd = await getEthPriceWithTimestampFromTable(unixtime);
+    if (!ethInUsd)
+        return null;
+    return gasCostETH * ethInUsd;
+}
+export async function getGasPriceInGwei(txHash) {
+    const txId = await getTxIdByTxHash(txHash);
+    if (!txId)
+        return null;
+    const transactionDetails = await getTransactionDetails(txId);
+    const gasPriceResult = extractGasPrice(transactionDetails);
+    if (!gasPriceResult)
+        return null;
+    const gasPrice = parseInt(gasPriceResult, 10);
+    return gasPrice / 1e9;
 }
 export async function formatArbitrageCaseValueStaysWithFromOrTo(cleanedTransfers, txHash, transactionDetails, balanceChangeFrom, balanceChangeTo, from, to) {
     const { gasUsed, gasPrice, gasCostETH } = await calculateGasInfo(txHash, transactionDetails);
@@ -501,7 +626,7 @@ export function tryToExtractBribe(cleanedTransfers) {
     return {
         address: cleanedTransfers[len - 2].tokenAddress,
         symbol: "ETH",
-        amount: cleanedTransfers[len - 2].parsedAmount,
+        amount: amount,
         blockBuilder: cleanedTransfers[len - 2].to,
     };
 }
@@ -580,7 +705,10 @@ async function augmentWithUSDValuesCaseValueStaysWithFromOrTo(formattedArbitrage
     // Fetching unique prices
     let prices = new Map();
     for (const token of uniqueTokens) {
-        const price = await getHistoricalTokenPriceFromDefiLlama(token, block_unixtime);
+        const tokenId = await getCoinIdByAddress(token);
+        if (!tokenId)
+            continue;
+        const price = await getTokenPriceWithTimestampFromDb(tokenId, block_unixtime);
         if (price !== null) {
             prices.set(token.toLowerCase(), price);
         }
@@ -632,7 +760,10 @@ async function augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(formattedArbitra
     // Fetching unique prices
     let prices = new Map();
     for (const token of uniqueTokens) {
-        const price = await getHistoricalTokenPriceFromDefiLlama(token, block_unixtime);
+        const tokenId = await getCoinIdByAddress(token);
+        if (!tokenId)
+            continue;
+        const price = await getTokenPriceWithTimestampFromDb(tokenId, block_unixtime);
         if (price !== null) {
             prices.set(token.toLowerCase(), price);
         }
@@ -673,10 +804,12 @@ function calculateProfitDetails(usdValuedArbitrageResult, dollarValueInflowFromL
     let revenue = "unknown";
     let totalCost = "unknown";
     if (Array.isArray(usdValuedArbitrageResult.netWin)) {
-        netWin = usdValuedArbitrageResult.netWin.reduce((acc, cur) => acc + cur.amountInUSD, 0);
+        const validNetWinEntries = usdValuedArbitrageResult.netWin.filter((entry) => entry && entry.amountInUSD != null);
+        netWin = validNetWinEntries.reduce((acc, cur) => acc + cur.amountInUSD, 0);
     }
     if (Array.isArray(usdValuedArbitrageResult.extractedValue)) {
-        revenue = usdValuedArbitrageResult.extractedValue.reduce((acc, cur) => acc + cur.amountInUSD, 0);
+        const validRevenueEntries = usdValuedArbitrageResult.extractedValue.filter((entry) => entry && entry.amountInUSD != null);
+        revenue = validRevenueEntries.reduce((acc, cur) => acc + cur.amountInUSD, 0);
     }
     if (typeof revenue === "number") {
         revenue -= dollarValueInflowFromLeaf;
@@ -715,6 +848,13 @@ export async function getValidatorPayOff(txHash) {
     const lastTxValue = await getLastTxValue(blockNumber);
     return lastTxValue;
 }
+export async function getBlockBuilderAddress(txHash) {
+    const blockNumber = await getBlockNumberByTxHash(txHash);
+    if (!blockNumber)
+        return null;
+    const lastTxFrom = await getBlockBuilderFromBlockNumber(blockNumber);
+    return lastTxFrom;
+}
 export async function checkCaseValueStaysWithFromOrTo(cleanedTransfers, txHash, transactionDetails, balanceChangeFrom, balanceChangeTo, from, to) {
     const txWasAtomicArb = isAtomicArbCaseValueStaysWithFromOrTo(cleanedTransfers, balanceChangeFrom, balanceChangeTo, from, to);
     if (!txWasAtomicArb) {
@@ -742,22 +882,50 @@ export function hasEnoughSwaps(balanceChangeTo, cleanedTransfers) {
     }
     return false;
 }
+/**
+ * Removes false duplicate ETH transfers from the array based on the provided address,
+ * amount, and sender. If two transfers have the same sender, amount, and receiver,
+ * the one with the smaller position is removed.
+ *
+ * @param cleanedTransfers - Array of ReadableTokenTransfer objects.
+ * @param from - The address to check as the receiver of ETH transfers.
+ * @returns A new array with false duplicates removed.
+ */
+function removeFalseDupes(cleanedTransfers, from) {
+    // Filter transfers where 'from' is the receiver and token is ETH
+    const fromLowerCase = from.toLowerCase();
+    // Filter transfers where 'from' is the receiver and token is ETH
+    const relevantTransfers = cleanedTransfers.filter((t) => t.to && t.to.toLowerCase() === fromLowerCase && t.tokenSymbol === "ETH");
+    // Group transfers by sender and amount, case-insensitive for 'from'
+    const groups = {};
+    relevantTransfers.forEach((transfer) => {
+        const key = `${transfer.from.toLowerCase()}_${transfer.parsedAmount}`;
+        if (!groups[key]) {
+            groups[key] = [];
+        }
+        groups[key].push(transfer);
+    });
+    // Remove duplicates with smaller position
+    Object.values(groups).forEach((group) => {
+        if (group.length === 2) {
+            const transferToRemove = group[0].position < group[1].position ? group[0] : group[1];
+            const index = cleanedTransfers.indexOf(transferToRemove);
+            if (index !== -1) {
+                cleanedTransfers.splice(index, 1);
+            }
+        }
+    });
+    return cleanedTransfers;
+}
 function toHasInflowFromLeafOtherThanFrom(cleanedTransfers, fromAddress, toAddress) {
-    // converting fromAddress and toAddress to lower case for case-insensitive comparison
     const fromAddressLowerCase = fromAddress.toLowerCase();
     const toAddressLowerCase = toAddress.toLowerCase();
-    // filtering out transfers that involve fromAddress either as a sender or receiver
-    const transfersExcludingFrom = cleanedTransfers.filter((t) => t.from.toLowerCase() !== fromAddressLowerCase && t.to.toLowerCase() !== fromAddressLowerCase);
-    // iterating over the transfers to find any inflow to toAddress that is from a leaf
+    const transfersExcludingFrom = cleanedTransfers.filter((t) => t.from && t.from.toLowerCase() !== fromAddressLowerCase && t.to && t.to.toLowerCase() !== fromAddressLowerCase);
     return transfersExcludingFrom.some((transfer) => {
-        // checking if the current transfer's receiver is toAddress
-        if (transfer.to.toLowerCase() === toAddressLowerCase) {
-            // creating a new array excluding the current transfer to check if the sender is a leaf
+        if (transfer.to && transfer.to.toLowerCase() === toAddressLowerCase) {
             const transfersExcludingCurrent = transfersExcludingFrom.filter((t) => t !== transfer);
-            // using the isLeaf function to determine if the sender of the current transfer is a leaf
             return isLeaf(transfer.from, transfersExcludingCurrent);
         }
-        // skipping to the next transfer if the current one does not match toAddress
         return false;
     });
 }
@@ -773,6 +941,14 @@ function hasLeafOrigin(transfer, transfers) {
 // Function to count the number of transfers with leaf origins
 function countLeafOrigins(filteredOnlyToTransfers, allTransfers) {
     return filteredOnlyToTransfers.filter((t) => hasLeafOrigin(t, allTransfers)).length;
+}
+export async function isMakerProxy(contractAddress) {
+    const abi = await readAbiFromAbisEthereumTable(contractAddress);
+    if (!abi) {
+        return false;
+    }
+    const requiredFunctions = ["cache", "owner", "authority"];
+    return requiredFunctions.every((funcName) => abi.some((item) => item.type === "function" && item.name === funcName && item.stateMutability === "view"));
 }
 function hasMissmatchingForOriginLeafesToTo(onlyToTransfers, allTransfers, formAddress) {
     const fromAddressLowerCase = formAddress.toLowerCase();
@@ -812,19 +988,21 @@ export async function checkCaseValueGoesOutsideFromOrTo(onlyToTransfers, cleaned
     if (!isAtomicArb) {
         return [null, 0];
     }
-    console.log("cleanedTransfers", cleanedTransfers);
     const formattedArbitrage = await formatArbitrageCaseValueGoesOutsideFromOrTo(cleanedTransfers, txHash, transactionDetails, from, to);
     return [formattedArbitrage, value];
 }
 export function testOtherBribePath(usdValuedArbitrageResult, cleanedTransfers, from, to, formattedArbitrageResult) {
-    // Ensure netWin is an array and not "unknown"
-    if (usdValuedArbitrageResult.netWin !== "unknown" && usdValuedArbitrageResult.fullCostUSD !== "unknown") {
+    if (Array.isArray(usdValuedArbitrageResult.netWin) && usdValuedArbitrageResult.fullCostUSD !== "unknown") {
+        // Filter out any null entries before performing the reduce operation
+        const validEntries = usdValuedArbitrageResult.netWin.filter((entry) => entry && entry.amountInUSD != null);
         // Calculate the sum of amountInUSD in the netWin array
-        const sumAmountInUSD = usdValuedArbitrageResult.netWin.reduce((acc, entry) => acc + entry.amountInUSD, 0);
-        // If there appears to be a netloss, re-visit bribe logic
+        const sumAmountInUSD = validEntries.reduce((acc, entry) => acc + entry.amountInUSD, 0);
+        // If there appears to be a net loss, re-visit bribe logic
         if (sumAmountInUSD < 0) {
             // updating bribe
             const bribe = calculateBribeAmoundForSingleBribe(cleanedTransfers, from, to);
+            if (bribe.amount === 0)
+                return formattedArbitrageResult;
             formattedArbitrageResult.bribe = bribe;
             // updating netWin
             const netWin = calculateNetWin(formattedArbitrageResult.extractedValue, bribe.amount, formattedArbitrageResult.txGas.gasCostETH);
@@ -835,63 +1013,81 @@ export function testOtherBribePath(usdValuedArbitrageResult, cleanedTransfers, f
 }
 export function hasExternalTokenInflow(onlyToTransfers, toAddress, fromAddress) {
     const fromAddressLowerCase = fromAddress.toLowerCase();
-    // ensuring none of the transfers involve the fromAddress
-    onlyToTransfers = onlyToTransfers.filter((t) => t.to.toLowerCase() !== fromAddressLowerCase && t.from.toLowerCase() !== fromAddressLowerCase);
+    const toAddressLowerCase = toAddress.toLowerCase();
+    // Ensure transfers do not involve fromAddress
+    onlyToTransfers = onlyToTransfers.filter((t) => t.to && t.to.toLowerCase() !== fromAddressLowerCase && t.from && t.from.toLowerCase() !== fromAddressLowerCase);
     if (onlyToTransfers.length !== 3)
         return false;
-    // filter transfers involving the toAddress
-    const relatedTransfers = onlyToTransfers.filter((t) => t.to.toLowerCase() === toAddress.toLowerCase() || t.from.toLowerCase() === toAddress.toLowerCase());
-    // finding one transfer where toAddress is the receiver
-    const receivedTransfer = relatedTransfers.find((t) => t.to.toLowerCase() === toAddress.toLowerCase());
+    // Filter transfers involving toAddress
+    const relatedTransfers = onlyToTransfers.filter((t) => (t.to && t.to.toLowerCase() === toAddressLowerCase) || (t.from && t.from.toLowerCase() === toAddressLowerCase));
+    // Finding one transfer where toAddress is the receiver
+    const receivedTransfer = relatedTransfers.find((t) => t.to && t.to.toLowerCase() === toAddressLowerCase);
     if (!receivedTransfer)
         return false;
-    // And one where toAddress is the sender of the same token and amount
-    const sentTransfer = relatedTransfers.find((t) => t.from.toLowerCase() === toAddress.toLowerCase() &&
+    // One where toAddress is the sender of the same token and amount
+    const sentTransfer = relatedTransfers.find((t) => t.from &&
+        t.from.toLowerCase() === toAddressLowerCase &&
         t.tokenAddress.toLowerCase() === receivedTransfer.tokenAddress.toLowerCase() &&
         t.parsedAmount === receivedTransfer.parsedAmount);
     if (!sentTransfer)
         return false;
-    // Lastly, ensuring that there's a third transfer where toAddress is the receiver but with a different token
-    const otherReceivedTransfer = onlyToTransfers.find((t) => t.to.toLowerCase() === toAddress.toLowerCase() && t.tokenAddress.toLowerCase() !== receivedTransfer.tokenAddress.toLowerCase());
+    // Ensure there's a third transfer where toAddress is the receiver but with a different token
+    const otherReceivedTransfer = onlyToTransfers.find((t) => t.to && t.to.toLowerCase() === toAddressLowerCase && t.tokenAddress.toLowerCase() !== receivedTransfer.tokenAddress.toLowerCase());
     if (!otherReceivedTransfer)
         return false;
     return true;
 }
+export const is1InchInvolvedInTransfers = (transfers) => {
+    return transfers.some((transfer) => {
+        var _a, _b;
+        const from = (_a = transfer.from) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+        const to = (_b = transfer.to) === null || _b === void 0 ? void 0 : _b.toLowerCase();
+        const oneInchLower = ONEINCH_ADDRESS.toLowerCase();
+        return from === oneInchLower || to === oneInchLower;
+    });
+};
 export const highestBlockPositionWorthChecking = 35;
 export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
-    const transactionDetails = await getTransactionDetailsByTxHash(txHash);
-    if (!transactionDetails)
-        return null;
-    if (!hasAtLeastTwoPairs(cleanedTransfers))
-        return null;
-    if (wasDsProxy(cleanedTransfers))
-        return null;
+    const txHasAtLeastTwoPairs = hasAtLeastTwoPairs(cleanedTransfers);
+    if (!txHasAtLeastTwoPairs) {
+        return "not an arb";
+    }
+    const OneInchInvolvedInTransfers = is1InchInvolvedInTransfers(cleanedTransfers);
+    if (OneInchInvolvedInTransfers) {
+        return "not an arb";
+    }
     const onlyToTransfers = filterTransfersByAddress(cleanedTransfers, to);
-    if (!onlyToTransfers.some((t) => t.position <= 5))
+    if (!onlyToTransfers) {
         return null;
-    if (onlyToTransfers.length <= 2)
-        return null;
-    if (hasMissmatchingForOriginLeafesToTo(onlyToTransfers, cleanedTransfers, from))
-        return null;
-    if (toHasInflowFromLeafOtherThanFrom(cleanedTransfers, from, to))
-        return null;
+    }
+    if (!onlyToTransfers.some((t) => t.position <= 5)) {
+        return "not an arb";
+    }
+    if (onlyToTransfers.length <= 2) {
+        return "not an arb";
+    }
+    const txWasDsProxy = wasDsProxy(cleanedTransfers);
+    if (txWasDsProxy) {
+        return "not an arb";
+    }
+    if (hasMissmatchingForOriginLeafesToTo(onlyToTransfers, cleanedTransfers, from)) {
+        return "not an arb";
+    }
+    if (toHasInflowFromLeafOtherThanFrom(cleanedTransfers, from, to)) {
+        return "not an arb";
+    }
+    cleanedTransfers = removeFalseDupes(cleanedTransfers, from);
     const balanceChangeFrom = await getBalanceChangeForAddressFromTransfers(from, cleanedTransfers);
-    // console.log("balanceChangeFrom (" + from + ")", balanceChangeFrom);
     const balanceChangeTo = await getBalanceChangeForAddressFromTransfers(to, cleanedTransfers);
-    // console.log("balanceChangeTo (" + to + ")", balanceChangeTo);
-    if (!hasEnoughSwaps(balanceChangeTo, cleanedTransfers))
-        return null;
+    if (!hasEnoughSwaps(balanceChangeTo, cleanedTransfers)) {
+        return "not an arb";
+    }
+    if (balanceChangeTo.length > 8) {
+        return "not an arb";
+    }
     if (to.toLowerCase() === CoWProtocolGPv2Settlement.toLowerCase()) {
-        // console.log("Not Atomic Arbitrage!");
-        return null;
+        return "not an arb";
     }
-    const blockPosition = transactionDetails.transactionIndex;
-    if (blockPosition > highestBlockPositionWorthChecking) {
-        // console.log("Not Atomic Arbitrage!");
-        return null;
-    }
-    if (hasExternalTokenInflow(onlyToTransfers, to, from))
-        return null;
     /*
     sandwichs' backrun can look like arb: 0x1a4f25133a15c5d226b291e9c5751d910ac1ca796c151f6bc917f3c65a69d340
     removing that, since its accounted for as sandwich.
@@ -899,8 +1095,21 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
     global check (which takes longer) happens later down the code, when the chances are higher we have an actual arb.
     */
     const isBackrunViaLocalCheck = await isActuallyBackrun(txId);
-    if (isBackrunViaLocalCheck)
+    if (isBackrunViaLocalCheck) {
+        return "not an arb";
+    }
+    if (hasExternalTokenInflow(onlyToTransfers, to, from)) {
+        return "not an arb";
+    }
+    const transactionDetails = await getTransactionDetailsByTxId(txId);
+    if (!transactionDetails) {
+        console.log("!transactionDetails in getTransactionDetailsByTxId in solveAtomicArb");
         return null;
+    }
+    const blockPosition = transactionDetails.transactionIndex;
+    if (blockPosition > highestBlockPositionWorthChecking) {
+        return "not an arb";
+    }
     // Case 1: checking for the atomic arb case in which the profit stays in the bot/bot-operator system
     // Case 2: as in: is not checking for the atomic arb case in which the profit gets forwarded to a 3rd address
     // checking case 1
@@ -934,11 +1143,10 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
     // if formattedArbitrage is empty after checking for both cases, it is not an atomic arbitrage.
     if (!formattedArbitrage) {
         // console.log("Not Atomic Arbitrage!");
-        return null;
+        return "not an arb";
     }
     if (!usdValuedArbitrageResult) {
-        console.log("Skipping usdValuedArbitrageResult due to failed price fetching.");
-        return null;
+        return "not an arb";
     }
     // checking for the case in which there was a bribe, and the rev went to an external address as well
     formattedArbitrage = testOtherBribePath(usdValuedArbitrageResult, cleanedTransfers, from, to, formattedArbitrage);
@@ -949,22 +1157,30 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
         usdValuedArbitrageResult = await augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(formattedArbitrage, block_unixtime);
     }
     else {
+        console.log("something funny with revenueStorageLocationCase");
         return null;
     }
     if (!usdValuedArbitrageResult) {
-        console.log("Skipping usdValuedArbitrageResult due to failed price fetching.");
-        return null;
+        // console.log("Skipping usdValuedArbitrageResult due to failed price fetching.");
+        return "not an arb";
     }
+    // 68 ms
+    if (await isMakerProxy(to)) {
+        return "not an arb";
+    }
+    // 600 ms
     const isBackrun = await isGlobalBackrun(transaction, txId);
     if (isBackrun) {
         // at this point we can be sure we found a sandwich, in which only the backrun went at some point through a curve pool,
         // , but the frontrun and the victim tx never did.
-        return null;
+        return "not an arb";
     }
     // console.log("\n\nusdValuedArbitrageResult:", usdValuedArbitrageResult, "\nid", txId, "\ntxHash", txHash);
     const profitDetails = calculateProfitDetails(usdValuedArbitrageResult, dollarValueInflowFromLeaf);
-    if (!profitDetails)
+    if (!profitDetails) {
+        console.log("!profitDetails in solveAtomicArb");
         return null;
+    }
     let validatorPayOffInEth = null;
     let validatorPayOffInUSD = null;
     if (profitDetails.bribe) {
@@ -973,11 +1189,12 @@ export async function solveAtomicArb(txId, txHash, cleanedTransfers, from, to) {
             validatorPayOffInUSD = validatorPayOffInEth * usdValuedArbitrageResult.ethPrice;
         }
     }
-    printProfitDetails(profitDetails, txHash);
+    // 57 ms
     const atomicArbDetails = await buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD);
-    if (!atomicArbDetails)
+    if (!atomicArbDetails) {
+        console.log("!atomicArbDetails in solveAtomicArb");
         return null;
-    // console.log("atomicArbDetails", atomicArbDetails);
+    }
     // const arbDetailsWithSpotPriceUpdate = await solveSpotPriceUpdate(atomicArbDetails); // on hold, since big
     return atomicArbDetails;
 }

@@ -30,5 +30,5 @@ export class TransactionCoins extends Model {
     type: DataType.ENUM,
     values: ["in", "out"],
   })
-  direction!: "in" | "out";
+  direction!: "in" | "out"; // out = SOLD, in = BOUGHT
 }

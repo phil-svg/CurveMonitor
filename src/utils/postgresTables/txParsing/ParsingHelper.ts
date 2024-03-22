@@ -1,6 +1,5 @@
 import { Transactions, TransactionData } from "../../../models/Transactions.js";
 import { TransactionCoins } from "../../../models/TransactionCoins.js";
-import eventEmitter from "../../goingLive/EventEmitter.js";
 
 export async function saveTransaction(transactionData: TransactionData): Promise<Transactions> {
   try {

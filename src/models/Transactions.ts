@@ -1,7 +1,10 @@
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany, Index, Unique } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo, AllowNull, AutoIncrement, HasMany, Index, Unique, HasOne } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 import { RawTxLogs } from "./RawTxLogs.js";
 import { TransactionCoins } from "./TransactionCoins.js";
+import { TransactionDetails } from "./TransactionDetails.js"; // Import TransactionDetails
+import { TransactionTrace } from "./TransactionTrace.js";
+import { Receipts } from "./Receipts.js";
 
 export enum TransactionType {
   Swap = "swap",
@@ -68,6 +71,18 @@ export class Transactions extends Model {
 
   @HasMany(() => TransactionCoins)
   transactionCoins!: TransactionCoins[];
+
+  @HasOne(() => TransactionDetails, "txId")
+  transactionDetails!: TransactionDetails;
+
+  @HasMany(() => TransactionTrace, "transactionHash")
+  transactionTraces!: TransactionTrace[];
+
+  @HasMany(() => Receipts, {
+    foreignKey: "tx_id",
+    sourceKey: "tx_id",
+  })
+  receipts!: Receipts[];
 }
 
 export type TransactionData = Pick<

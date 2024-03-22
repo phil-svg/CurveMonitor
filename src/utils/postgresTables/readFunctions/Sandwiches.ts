@@ -1,8 +1,9 @@
 import { Op, Sequelize } from "sequelize";
-import { Sandwiches } from "../../../models/Sandwiches.js";
+import { LossTransaction, Sandwiches } from "../../../models/Sandwiches.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { getIdByAddress } from "./Pools.js";
 import { getTimeframeTimestamp } from "../../api/utils/Timeframes.js";
+import { SandwichDetail, enrichSandwiches } from "./SandwichDetailEnrichments.js";
 
 export async function readSandwichesInBatches(batchSize: number = 100): Promise<{ id: number; loss_transactions: any }[][]> {
   let offset = 0;
@@ -236,6 +237,36 @@ export async function getIdsForFullSandwichTableForPool(timeDuration: string, po
   return { ids, totalSandwiches };
 }
 
+export async function getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCurve(poolId: number, startUnixtime: number, endUnixtime: number): Promise<number[]> {
+  const sandwiches = await Sandwiches.findAll({
+    include: [
+      {
+        model: Transactions,
+        as: "frontrunTransaction",
+        where: {
+          pool_id: poolId,
+          block_unixtime: {
+            [Op.gte]: startUnixtime,
+            [Op.lt]: endUnixtime,
+          },
+        },
+        required: true,
+      },
+    ],
+    order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+  });
+
+  const ids = sandwiches.map((sandwich) => sandwich.id);
+
+  return ids;
+}
+
+export async function getSandwichContentForPoolAndTime(poolId: number, startUnixtime: number, endUnixtime: number): Promise<SandwichDetail[]> {
+  const ids = await getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCurve(poolId, startUnixtime, endUnixtime);
+  const enrichedSandwiches = await enrichSandwiches(ids);
+  return enrichedSandwiches;
+}
+
 export interface TransactionLossDetail {
   unit: string;
   tx_id: number;
@@ -297,4 +328,31 @@ export async function isActuallyBackrun(txId: number): Promise<true | null> {
   }
 
   return null;
+}
+
+export async function getSandwichLossInfoArrForAll(): Promise<LossTransaction[]> {
+  const sandwichesWithLoss = await Sandwiches.findAll({
+    where: {
+      loss_transactions: {
+        [Op.not]: null,
+      },
+    },
+  });
+
+  const lossTransactions: LossTransaction[] = sandwichesWithLoss.flatMap((sandwich) => {
+    if (sandwich.loss_transactions) {
+      return sandwich.loss_transactions.map((loss) => ({
+        tx_id: loss.tx_id,
+        amount: loss.amount,
+        unit: loss.unit,
+        unitAddress: loss.unitAddress,
+        lossInPercentage: loss.lossInPercentage,
+        lossInUsd: loss.lossInUsd,
+      }));
+    } else {
+      return [];
+    }
+  });
+
+  return lossTransactions;
 }

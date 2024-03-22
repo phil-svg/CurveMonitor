@@ -79,6 +79,6 @@ export class Receipts extends Model {
   @Column(DataType.STRING)
   type!: string;
 
-  @BelongsTo(() => Transactions)
+  @BelongsTo(() => Transactions, "tx_id")
   transaction!: Transactions;
 }

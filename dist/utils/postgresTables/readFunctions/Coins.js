@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
 import { Coins } from "../../../models/Coins.js";
 import { getLpTokenBy } from "./Pools.js";
-export async function findCoinIdByAddress(address) {
+export async function getCoinIdByAddress(address) {
     try {
         const coin = await Coins.findOne({
             where: {
@@ -97,7 +97,7 @@ export const getLpTokenIdByPoolId = async (poolId) => {
     if (!lpTokenAddress) {
         return null;
     }
-    const lpTokenId = await findCoinIdByAddress(lpTokenAddress);
+    const lpTokenId = await getCoinIdByAddress(lpTokenAddress);
     return lpTokenId;
 };
 //# sourceMappingURL=Coins.js.map

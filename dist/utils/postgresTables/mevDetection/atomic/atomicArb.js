@@ -3,11 +3,16 @@ import { parseEventsFromReceiptForEntireTx } from "../../../txMap/Events.js";
 import { getTokenTransfersFromTransactionTrace, makeTransfersReadable, mergeAndFilterTransfers, removeDuplicatesAndUpdatePositions, updateTransferList, } from "../../../txMap/TransferOverview.js";
 import { extractTransactionAddresses, getTransactionDetails } from "../../readFunctions/TransactionDetails.js";
 import { getTransactionTraceFromDb } from "../../readFunctions/TransactionTrace.js";
-import { getTxHashByTxId, getTxIdByTxHash } from "../../readFunctions/Transactions.js";
+import { getAllTransactionIds, getTxHashByTxId, getTxIdByTxHash } from "../../readFunctions/Transactions.js";
 import { solveAtomicArb } from "./utils/atomicArbDetection.js";
-import { clearCaches } from "../../../helperFunctions/QualityOfLifeStuff.js";
-import { getTransactionTraceViaAlchemy } from "../../../web3Calls/generic.js";
+import { clearAbiCache, logProgress } from "../../../helperFunctions/QualityOfLifeStuff.js";
+import { getTransactionTraceViaWeb3Provider } from "../../../web3Calls/generic.js";
 import { saveTransactionTrace } from "../../TransactionTraces.js";
+import { getCleanedTransfersForTxIdFromTable } from "../../readFunctions/CleanedTransfers.js";
+import { filterUncheckedTransactionIds, getTxIdsWithAtomicArb } from "../../readFunctions/AtomicArbs.js";
+import { insertAtomicArbDetails } from "../../AtomicArbs.js";
+import { solveTransfersOnTheFlyFlag } from "../../../../App.js";
+import { isCexDexArb } from "../cexdex/utils/cexdexDetection.js";
 function filterForCorrectTransfers(transfers) {
     return transfers.filter((transfer) => {
         // Check if token is ETH or WETH
@@ -20,36 +25,36 @@ function filterForCorrectTransfers(transfers) {
 }
 export async function getCleanedTransfers(txHash, to) {
     let transactionTraces = await getTransactionTraceFromDb(txHash);
-    // console.log("transactionTraces", transactionTraces);
     if (transactionTraces.length <= 1) {
-        const traceFetchAttempt = await getTransactionTraceViaAlchemy(txHash);
+        const traceFetchAttempt = await getTransactionTraceViaWeb3Provider(txHash);
         if (traceFetchAttempt)
             await saveTransactionTrace(txHash, traceFetchAttempt);
+        transactionTraces = await getTransactionTraceFromDb(txHash);
     }
-    transactionTraces = await getTransactionTraceFromDb(txHash);
-    // console.log("transactionTraces", transactionTraces);
     if (transactionTraces.length <= 1) {
-        console.log("alchemy trace api bugged out for", txHash);
+        // console.log("alchemy trace api bugged out for", txHash);
         return null;
     }
-    // console.log("transactionTraces", transactionTraces);
     // making sure we have all ABIs which are relevant in this tx.
     await updateAbisFromTrace(transactionTraces);
     const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
     if (!tokenTransfersFromTransactionTraces)
         return null;
-    //console.log("tokenTransfersFromTransactionTraces", tokenTransfersFromTransactionTraces);
+    // console.log('tokenTransfersFromTransactionTraces', tokenTransfersFromTransactionTraces);
     const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash);
-    // console.log("parsedEventsFromReceipt", parsedEventsFromReceipt);
     if (!parsedEventsFromReceipt)
         return null;
+    // console.log('parsedEventsFromReceipt', parsedEventsFromReceipt);
     const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
     // console.log("mergedTransfers", mergedTransfers);
+    // const transfersFromReceipt = convertEventsToTransfers(parsedEventsFromReceipt);
+    // console.log(transfersFromReceipt);
     const readableTransfers = await makeTransfersReadable(mergedTransfers);
     // console.log("readableTransfers", readableTransfers);
     const updatedReadableTransfers = updateTransferList(readableTransfers, to);
     // console.log("updatedReadableTransfers", updatedReadableTransfers);
     const correctTrasfers = filterForCorrectTransfers(updatedReadableTransfers);
+    // console.log("correctTrasfers", correctTrasfers);
     const cleanedTransfers = removeDuplicatesAndUpdatePositions(correctTrasfers);
     // console.log("cleanedTransfers", cleanedTransfers);
     return cleanedTransfers;
@@ -62,50 +67,77 @@ export async function fetchDataThenDetectArb(txId) {
     }
     const transactionDetails = await getTransactionDetails(txId);
     if (!transactionDetails) {
-        console.log("transactionDetails are missing in fetchDataThenDetectArb for txId", txId);
+        // console.log("transactionDetails are missing in fetchDataThenDetectArb for txId", txId);
         return null;
     }
     const { from: from, to: to } = extractTransactionAddresses(transactionDetails);
     if (!from || !to) {
-        console.log(`Failed to fetch transactionDetails during arb detection for ${txHash} with ${transactionDetails},${from},${to}`);
+        // console.log("!from || !to in extractTransactionAddresses in fetchDataThenDetectArb");
         return null;
     }
-    const cleanedTransfers = await getCleanedTransfers(txHash, to);
-    if (!cleanedTransfers)
-        return null;
+    let cleanedTransfers = await getCleanedTransfersForTxIdFromTable(txId);
+    if (!cleanedTransfers || solveTransfersOnTheFlyFlag) {
+        cleanedTransfers = await getCleanedTransfers(txHash, to);
+        if (!cleanedTransfers) {
+            // console.log("!cleanedTransfers in getCleanedTransfers in fetchDataThenDetectArb");
+            return null;
+        }
+    }
     // console.log("cleanedTransfers", cleanedTransfers);
     const atomicArbDetails = await solveAtomicArb(txId, txHash, cleanedTransfers, from, to);
-    clearCaches();
+    clearAbiCache();
     return atomicArbDetails;
 }
-export async function updateAtomicArbDetection() {
-    // const txHash = "0x66a519ad66d33e5e343ac81d4246173e1ac0ec819c1d6b243b32522ee5a2fd12"; // guy withdrawing from pool, receives 3 Token, solved
-    // const txHash = "0x1c7e8861744c00a063295987b69bbb82e1bab9c1afd438219cfa5a8d3f98dbdf"; // Balancer, Uni v2, Uni v3, Curve, solved
-    // const txHash = "0xf0607901716acb0086a58e52464d4b481b386e348214bf8fae300c3fc3a6e423"; // arb, solved
-    // const txHash = "0xd602f90c5e9e60a1f55b7399a3226448a8b9c09f2d2a347bc88570827c7e157e"; // solved
-    // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // solved!
-    // const txHash = "0x76f2b5ccaa420ce744b5bfa015b3ba47b4ee0d6b89a0a1a5483c8576b90ba7ba"; // solved!
-    // const txHash = "0xa107f285c0e7f5f4453dd6e46fdf1d0b77f5b212446984af78b68bfad1fa872e"; // not entirely solved
-    // const txHash = "0x9221e0903d930d0e3d4909b9ba0ceab99fe11457dbccbd8f0f11d45b57149ba4"; // edge case: a deposit before the swap breaks the sim.
-    // const txHash = "0x4570e565dda18c4b03bf7c1a71336d30b66fd13b0b806f72c4d745c122908141"; // todo | case: tokenExchange
-    // const txHash = "0x0ec529f89f7b8c8c58d7b15af72959f309c753d71aeaebc743be5624edcb32e1"; // todo | cases: deposit + exchangeUnderlying
-    // const txHash = "0xbb998ff70dfed090136b924e3ab31f80000a7783a41ad5f5797b19eb76f2ff86"; // todo | cases: remove + exchangeUnderlying
-    // const txHash = "0x04b16d300b65f6196467b1070bb2da0d64bf6d59301c5c3aea975d36e48056b8"; // todo | case: 3x tokenExchange
-    // const txHash = "0x07580f7a4ace4af52c571e3f1395b0d94bbb25d82785876c60d98360ecccea84"; // todo | case: 4x tokenExchange
-    // const txHash = "0xebad444d82e872cc20d4e412f77c6c754ea96a4b185eda1daa23929bff3dfa63"; // todo | cases: tokenExchange, exchangeUnderlying, addLiquidity
-    const txHash = "0xdf5a20f208109918782fef861d99114c22115a4e29c91720a732823df11090ea";
-    const txId = await getTxIdByTxHash(txHash);
-    // console.time();
-    // const txId = 930;
-    await fetchDataThenDetectArb(txId);
-    // console.timeEnd();
-    // console.log("\ntxHash", txHash);
-    // console.time();
-    // for (let txId = 1; txId <= 1000; txId++) {
-    //   console.log("txId", txId);
+async function iterateOverPostiveAtomicArbsFromDb() {
+    const txIds = await getTxIdsWithAtomicArb();
+    // Variation 1: Stop after 5 iterations
+    const variation1Stopper = 150;
+    for (let i = 0; i < txIds.length && i < variation1Stopper; i++) {
+        const txId = txIds[i];
+        const txHash = await getTxHashByTxId(txId);
+        console.log("\ntxHash", txHash, "step:", i, "result:");
+        await fetchDataThenDetectArb(txId);
+    }
+    // Variation 2: Iterate over a range (from 10th to 20th entry)
+    // for (let i = 9; i < txIds.length && i < 20; i++) {
+    //   const txId = txIds[i];
     //   await fetchDataThenDetectArb(txId);
     // }
-    // console.timeEnd();
+}
+export async function checkSingleTxForArbForDebugging() {
+    // const txHash = "0x66a519ad66d33e5e343ac81d4246173e1ac0ec819c1d6b243b32522ee5a2fd12"; // solved, guy withdrawing from pool, receives 3 Token
+    // const txHash = "0x8e12959dc243c3ff24dfae0ea7cdad48f6cfc1117c349cdc1742df3ae3a3279b"; // milestone solved!
+    // const txHash = "1234567890abcdef";
+    const txHash = "0x0e2011368731996da961aad9539814cf353b0b55fc2da07c138f6f2c77414b2f";
+    const txId = await getTxIdByTxHash(txHash);
+    const arbDetails = await fetchDataThenDetectArb(txId);
+    console.log("atomic arbDetails", arbDetails);
+    const arbStatus = await isCexDexArb(txId);
+    console.log("cexdex arbStatus", arbStatus);
+    // await iterateOverPostiveAtomicArbsFromDb();
     process.exit();
+}
+export async function updateAtomicArbDetection() {
+    const transactionIds = await getAllTransactionIds();
+    const uncheckedTransactionIds = await filterUncheckedTransactionIds(transactionIds);
+    let totalTimeTaken = 0;
+    let counter = 0;
+    for (const txId of uncheckedTransactionIds) {
+        const start = new Date().getTime();
+        counter++;
+        const res = await fetchDataThenDetectArb(txId);
+        if (res) {
+            await insertAtomicArbDetails(txId, res);
+        }
+        else {
+            // this
+        }
+        const end = new Date().getTime();
+        totalTimeTaken += end - start;
+        if (counter > 500) {
+            logProgress("updateAtomicArbDetection", 100, counter, totalTimeTaken, uncheckedTransactionIds.length);
+        }
+    }
+    console.log(`[✓] atomic arb detection completed successfully.`);
 }
 //# sourceMappingURL=atomicArb.js.map

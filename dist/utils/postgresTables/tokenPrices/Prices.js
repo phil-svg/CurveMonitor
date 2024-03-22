@@ -1,5 +1,5 @@
 import { updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { findCoinIdByAddress, findCoinSymbolById } from "../readFunctions/Coins.js";
+import { getCoinIdByAddress, findCoinSymbolById } from "../readFunctions/Coins.js";
 import { getEarliestPoolInceptionByCoinId } from "../readFunctions/Pools.js";
 import { countNullDollarValueForCoin, findAllFullyPricedCoinsIds, findAndModifySwapTransactions, getAllCoinIds, getAllUniqueSwapCounterPartCoinIds, getTotalEntriesForCoin, } from "../readFunctions/TransactionCoins.js";
 import { getFirstCoinAppearanceOnDefillama, getHistoricalPriceChart, getHistoricalPriceOnce } from "./DefillamaAPI.js";
@@ -21,7 +21,7 @@ async function brainStormDefiLlama() {
     let coinAddress = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
     let historicalPriceOnce = await getHistoricalPriceOnce(coinAddress, 1661212800);
     console.log("historicalPriceOnce", historicalPriceOnce);
-    let id = await findCoinIdByAddress(coinAddress);
+    let id = await getCoinIdByAddress(coinAddress);
     let firstCoinApprearanceCurve = await getEarliestPoolInceptionByCoinId(id);
     console.log("firstCoinApprearanceCurve", firstCoinApprearanceCurve);
     let historicalPriceChart = await getHistoricalPriceChart([coinAddress], 1548896409, 1000, "1d", "600");
@@ -35,7 +35,7 @@ async function initiateMostStableDollarCoin() {
         console.log("Please provide ADDRESS_MOST_STABLE_DOLLAR_COIN in .env");
         return;
     }
-    const COIN_ID_MOST_STABLE_DOLLAR_COIN = await findCoinIdByAddress(ADDRESS_MOST_STABLE_DOLLAR_COIN);
+    const COIN_ID_MOST_STABLE_DOLLAR_COIN = await getCoinIdByAddress(ADDRESS_MOST_STABLE_DOLLAR_COIN);
     if (!COIN_ID_MOST_STABLE_DOLLAR_COIN)
         return;
     await updateMostStableDollarCoinPrices(COIN_ID_MOST_STABLE_DOLLAR_COIN);

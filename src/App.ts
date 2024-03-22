@@ -21,6 +21,14 @@ import { updateAtomicArbDetection } from "./utils/postgresTables/mevDetection/at
 import { updateTxTraces } from "./utils/postgresTables/TransactionTraces.js";
 import { updateReceipts } from "./utils/postgresTables/Receipts.js";
 import { updateContractCreations } from "./utils/postgresTables/ContractCreations.js";
+import { updatePriceMap } from "./utils/postgresTables/PriceMap.js";
+import { populateTransactionCoinsWithDollarValues } from "./utils/postgresTables/TransactionCoins.js";
+import { updateCexDexArbDetection } from "./utils/postgresTables/mevDetection/cexdex/CexDexArb.js";
+import { updateCleanedTransfers } from "./utils/postgresTables/CleanedTransfers.js";
+import { research } from "./utils/fiddyResearchTM/ResearchEntryPoint.js";
+import { bootWsProvider } from "./utils/web3Calls/generic.js";
+import { checkWsConnectionViaNewBlocks, eraseWebProvider, setupDeadWebsocketListener } from "./utils/goingLive/WebsocketConnectivityChecks.js";
+import eventEmitter from "./utils/goingLive/EventEmitter.js";
 
 export async function initDatabase() {
   try {
@@ -30,15 +38,25 @@ export async function initDatabase() {
     console.error("Error syncing database:", err);
   }
 }
-
-await initDatabase();
-
-// await updateAtomicArbDetection(); // it finally works!
+// await initDatabase();
 
 startAPI();
+export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.
+
+// await research(); // opening function for queries for a bunch of statistics
+
 // await startTestClient();
 
-async function main() {
+export async function main() {
+  eventFlags.canEmitGeneralTx = false;
+  eventFlags.canEmitAtomicArb = false;
+  eventFlags.canEmitCexDexArb = false;
+
+  await eraseWebProvider(); // cleaning all perhaps existing WS.
+  await bootWsProvider(); // starting new WS connection.
+  eventEmitter.removeAllListeners();
+  setupDeadWebsocketListener();
+
   await loadAddressProvider();
   await updatePools();
   await updateCoinTable();
@@ -53,10 +71,15 @@ async function main() {
 
   eventFlags.canEmitGeneralTx = true;
   eventFlags.canEmitAtomicArb = true;
+  eventFlags.canEmitCexDexArb = true;
 
   await updateBlockTimestamps();
   await updateContractCreations();
+  await updatePriceMap(); // has to run before updateAtomicArbDetection
+  await populateTransactionCoinsWithDollarValues();
+
   await parseEvents();
+
   await updateTransactionsDetails();
   await updateSandwichDetection();
 
@@ -66,15 +89,16 @@ async function main() {
   await updateTxTraces();
   await updateAddressCounts();
 
-  // await updateTokenDollarValues(); // muted until useful
+  await updateCleanedTransfers();
+  await updateAtomicArbDetection();
+  await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
 
-  // await updateAtomicArbDetection();
-  await updateLabels();
+  // await updateLabels(); // muted, only has to run when there are changes made to the labels-file
 
   // todo
 
   console.log(`\n[✓] Everything finished syncing successfully.`);
-
+  await checkWsConnectionViaNewBlocks(); // restarts main if WS dead for 30s.
   // process.exit();
 }
 

@@ -1,5 +1,5 @@
 import { updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { findCoinIdByAddress, findCoinSymbolById } from "../readFunctions/Coins.js";
+import { getCoinIdByAddress, findCoinSymbolById } from "../readFunctions/Coins.js";
 import { getEarliestPoolInceptionByCoinId } from "../readFunctions/Pools.js";
 import {
   countNullDollarValueForCoin,
@@ -30,7 +30,7 @@ async function brainStormDefiLlama(): Promise<void> {
   let historicalPriceOnce = await getHistoricalPriceOnce(coinAddress, 1661212800);
   console.log("historicalPriceOnce", historicalPriceOnce);
 
-  let id = await findCoinIdByAddress(coinAddress);
+  let id = await getCoinIdByAddress(coinAddress);
   let firstCoinApprearanceCurve = await getEarliestPoolInceptionByCoinId(id!);
   console.log("firstCoinApprearanceCurve", firstCoinApprearanceCurve);
 
@@ -48,7 +48,7 @@ async function initiateMostStableDollarCoin(): Promise<void> {
     return;
   }
 
-  const COIN_ID_MOST_STABLE_DOLLAR_COIN = await findCoinIdByAddress(ADDRESS_MOST_STABLE_DOLLAR_COIN);
+  const COIN_ID_MOST_STABLE_DOLLAR_COIN = await getCoinIdByAddress(ADDRESS_MOST_STABLE_DOLLAR_COIN);
   if (!COIN_ID_MOST_STABLE_DOLLAR_COIN) return;
 
   await updateMostStableDollarCoinPrices(COIN_ID_MOST_STABLE_DOLLAR_COIN);

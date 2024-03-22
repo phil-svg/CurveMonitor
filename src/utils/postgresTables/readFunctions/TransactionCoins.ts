@@ -307,3 +307,20 @@ export async function findAllFullyPricedCoinsIds(): Promise<number[]> {
 
   return fullyPricedCoinIds;
 }
+
+export async function fetchAllTransactionCoinData(txId: number): Promise<TransactionCoins[]> {
+  try {
+    const transactionCoinsData = await TransactionCoins.findAll({
+      where: { tx_id: txId },
+      include: [
+        { model: Transactions, as: "transaction" },
+        { model: Coins, as: "coin" },
+      ],
+    });
+
+    return transactionCoinsData;
+  } catch (error) {
+    console.error("Error fetching all transaction coin data:", error);
+    return [];
+  }
+}

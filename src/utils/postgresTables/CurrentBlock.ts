@@ -1,7 +1,7 @@
 import { CurrentBlock } from "../../models/CurrentBlock.js";
+import EventEmitter from "../goingLive/EventEmitter.js";
 import eventEmitter from "../goingLive/EventEmitter.js";
-import { getWeb3WsProvider } from "../helperFunctions/Web3.js";
-import { getBlockTimeStamp, getCurrentBlockNumber } from "../web3Calls/generic.js";
+import { WEB3_WS_PROVIDER, getBlockTimeStamp, getCurrentBlockNumber } from "../web3Calls/generic.js";
 import { writeBlock } from "./Blocks.js";
 
 // Function to get the current block number
@@ -27,28 +27,53 @@ async function init() {
   }
 }
 
-export async function subscribeToNewBlocks(): Promise<void> {
-  await init();
+export async function subscribeToNewBlocks(startTime = Date.now()): Promise<void> {
+  const RETRY_INTERVAL_MS = 10000; // Retry every 10 seconds
+  const MAX_RETRY_DURATION_MS = 120000; // Total retry duration of 2 minutes (120 seconds)
 
-  const web3 = getWeb3WsProvider();
+  try {
+    await init();
 
-  // Subscribe to new block headers
-  web3.eth
-    .subscribe("newBlockHeaders", async (error, blockHeader) => {
-      if (error) {
-        console.error(`Error subscribing to new block headers: ${error}`);
-        return;
-      }
+    // Subscribe to new block headers
+    WEB3_WS_PROVIDER.eth
+      .subscribe("newBlockHeaders", async (error, blockHeader) => {
+        if (error) {
+          console.error(`Error subscribing to new block headers: ${error}`);
+          if (error.message.includes("connection not open")) {
+            // Retry logic with timeout
+            const currentTime = Date.now();
+            if (currentTime - startTime < MAX_RETRY_DURATION_MS) {
+              console.log(`Retrying to subscribe in ${RETRY_INTERVAL_MS / 1000} seconds...`);
+              setTimeout(() => subscribeToNewBlocks(startTime), RETRY_INTERVAL_MS);
+            } else {
+              console.error("Failed to subscribe to new block headers after 2 minutes.");
+            }
+          }
+          return;
+        }
 
-      if (blockHeader.number !== null) {
-        await updateCurrentBlockNumber(blockHeader.number); // updating the latest block in the db
+        if (blockHeader.number !== null) {
+          await updateCurrentBlockNumber(blockHeader.number); // updating the latest block in the db
 
-        const timestamp = await getBlockTimeStamp(blockHeader.number); // fetching the timestamp of the new block
-        if (!timestamp) return;
-        await writeBlock(blockHeader.number, timestamp); // writing the timestamp to db
+          const timestamp = await getBlockTimeStamp(blockHeader.number); // fetching the timestamp of the new block
+          if (!timestamp) return;
+          await writeBlock(blockHeader.number, timestamp); // writing the timestamp to db
 
-        eventEmitter.emit("new block spotted", blockHeader.number); // emitting new block event for live-parser
-      }
-    })
-    .on("error", console.error);
+          eventEmitter.emit("new block spotted", blockHeader.number); // emitting new block event for live-parser
+        }
+      })
+      .on("error", console.error);
+  } catch (err: any) {
+    console.error(`An error occurred in subscribeToNewBlocks: ${err.message}`);
+    const currentTime = Date.now();
+    if (currentTime - startTime < MAX_RETRY_DURATION_MS) {
+      console.log(`Retrying to subscribe in ${RETRY_INTERVAL_MS / 1000} seconds...`);
+      setTimeout(() => subscribeToNewBlocks(startTime), RETRY_INTERVAL_MS);
+    } else {
+      console.error("Failed to subscribe to new block headers after 2 minutes.");
+    }
+  }
+  EventEmitter.on("dead websocket connection", async () => {
+    return;
+  });
 }

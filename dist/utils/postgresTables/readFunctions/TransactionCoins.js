@@ -255,4 +255,20 @@ export async function findAllFullyPricedCoinsIds() {
     const fullyPricedCoinIds = allCoins.map((transaction) => transaction.coin_id).filter((coin_id) => !partiallyPricedCoinIds.includes(coin_id));
     return fullyPricedCoinIds;
 }
+export async function fetchAllTransactionCoinData(txId) {
+    try {
+        const transactionCoinsData = await TransactionCoins.findAll({
+            where: { tx_id: txId },
+            include: [
+                { model: Transactions, as: "transaction" },
+                { model: Coins, as: "coin" },
+            ],
+        });
+        return transactionCoinsData;
+    }
+    catch (error) {
+        console.error("Error fetching all transaction coin data:", error);
+        return [];
+    }
+}
 //# sourceMappingURL=TransactionCoins.js.map

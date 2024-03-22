@@ -3,6 +3,7 @@ import { Sandwiches } from "../../../models/Sandwiches.js";
 import { Transactions } from "../../../models/Transactions.js";
 import { getIdByAddress } from "./Pools.js";
 import { getTimeframeTimestamp } from "../../api/utils/Timeframes.js";
+import { enrichSandwiches } from "./SandwichDetailEnrichments.js";
 export async function readSandwichesInBatches(batchSize = 100) {
     let offset = 0;
     const batches = [];
@@ -204,6 +205,32 @@ export async function getIdsForFullSandwichTableForPool(timeDuration, poolId, pa
     const ids = sandwiches.map((sandwich) => sandwich.id);
     return { ids, totalSandwiches };
 }
+export async function getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCurve(poolId, startUnixtime, endUnixtime) {
+    const sandwiches = await Sandwiches.findAll({
+        include: [
+            {
+                model: Transactions,
+                as: "frontrunTransaction",
+                where: {
+                    pool_id: poolId,
+                    block_unixtime: {
+                        [Op.gte]: startUnixtime,
+                        [Op.lt]: endUnixtime,
+                    },
+                },
+                required: true,
+            },
+        ],
+        order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+    });
+    const ids = sandwiches.map((sandwich) => sandwich.id);
+    return ids;
+}
+export async function getSandwichContentForPoolAndTime(poolId, startUnixtime, endUnixtime) {
+    const ids = await getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCurve(poolId, startUnixtime, endUnixtime);
+    const enrichedSandwiches = await enrichSandwiches(ids);
+    return enrichedSandwiches;
+}
 export async function getLossInUsdForSandwich(sandwichId) {
     try {
         const sandwich = await Sandwiches.findByPk(sandwichId);
@@ -253,5 +280,30 @@ export async function isActuallyBackrun(txId) {
         return true;
     }
     return null;
+}
+export async function getSandwichLossInfoArrForAll() {
+    const sandwichesWithLoss = await Sandwiches.findAll({
+        where: {
+            loss_transactions: {
+                [Op.not]: null,
+            },
+        },
+    });
+    const lossTransactions = sandwichesWithLoss.flatMap((sandwich) => {
+        if (sandwich.loss_transactions) {
+            return sandwich.loss_transactions.map((loss) => ({
+                tx_id: loss.tx_id,
+                amount: loss.amount,
+                unit: loss.unit,
+                unitAddress: loss.unitAddress,
+                lossInPercentage: loss.lossInPercentage,
+                lossInUsd: loss.lossInUsd,
+            }));
+        }
+        else {
+            return [];
+        }
+    });
+    return lossTransactions;
 }
 //# sourceMappingURL=Sandwiches.js.map

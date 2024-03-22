@@ -10,6 +10,7 @@ import { handleGeneralTxLivestream } from "./GeneralTxLivestream.js";
 import { handlePoolTxLivestream } from "./TxTablePoolSpecific.js";
 import { handlePoolLabel } from "./PoolLabels.js";
 import { handleAtomicArbLivestream } from "./AtomicArbLivestream.js";
+import { handleCexDexArbLivestream } from "./CexDexArbLivestream.js";
 
 export function startMainEndpoint(io: Server): void {
   const mainRoom = io.of("/main");
@@ -26,6 +27,7 @@ export function startMainEndpoint(io: Server): void {
     handlePoolSandwichRoom(socket);
     handleGeneralTxLivestream(mainRoom, socket);
     handleAtomicArbLivestream(mainRoom, socket);
+    handleCexDexArbLivestream(mainRoom, socket);
     handlePoolTxLivestream(socket);
     handlePoolLabel(socket);
   });

@@ -1,7 +1,7 @@
 import { saveTransaction, saveCoins } from "./ParsingHelper.js";
 import { TransactionType } from "../../../models/Transactions.js";
 import { getTxReceiptClassic } from "../../web3Calls/generic.js";
-import { findCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
+import { getCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
 import { decodeTransferEventFromReceipt } from "../../helperFunctions/Web3.js";
 import { retry } from "../../helperFunctions/Web3Retry.js";
 const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -19,8 +19,10 @@ const ETHER = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
  */
 async function getCoinAddressFromTxReceipt(event, POOL_COINS) {
     const RECEIPT = await getTxReceiptClassic(event.transactionHash);
-    if (!RECEIPT)
+    if (!RECEIPT) {
+        // console.log("failed to fetch receipt in getCoinAddressFromTxReceipt");
         return null;
+    }
     const TOKEN_TRANSFER_EVENTS = RECEIPT.logs.filter((log) => POOL_COINS.map((addr) => addr.toLowerCase()).includes(log.address.toLowerCase()));
     if (TOKEN_TRANSFER_EVENTS.length === 0)
         return null;
@@ -55,10 +57,10 @@ export async function parseRemoveLiquidityOne(event, BLOCK_UNIXTIME, POOL_COINS)
         }
     });
     if (!coinAddress) {
-        console.log(`\nNo CoinAddress was found for ${event.transactionHash}`);
+        // console.log(`\nNo CoinAddress was found for ${event.transactionHash}`);
         return;
     }
-    const COIN_ID = await findCoinIdByAddress(coinAddress);
+    const COIN_ID = await getCoinIdByAddress(coinAddress);
     if (!COIN_ID)
         return;
     const COIN_DECIMALS = await findCoinDecimalsById(COIN_ID);

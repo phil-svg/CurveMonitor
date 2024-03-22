@@ -65,12 +65,10 @@ __decorate([
     Column(DataType.STRING)
 ], TransactionDetails.prototype, "value", void 0);
 __decorate([
-    BelongsTo(() => Transactions)
+    BelongsTo(() => Transactions, "txId")
 ], TransactionDetails.prototype, "transaction", void 0);
 TransactionDetails = __decorate([
-    Table({
-        tableName: "transaction_details",
-    })
+    Table({ tableName: "transaction_details" })
 ], TransactionDetails);
 export { TransactionDetails };
 //# sourceMappingURL=TransactionDetails.js.map

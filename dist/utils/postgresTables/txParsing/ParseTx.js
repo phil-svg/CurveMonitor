@@ -82,12 +82,11 @@ async function parseEventsMain() {
     if (eventParsingFromBlock === null)
         eventParsingFromBlock = blockNumbers[0];
     await updateEventParsingFromBlock(eventParsingFromBlock);
-    let counter = 0;
+    let nowBlock = await getCurrentBlockNumber();
     for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
         let eventParsingToBlock = await getEventParsingToBlock();
         if (eventParsingToBlock === null)
             eventParsingToBlock = blockNumbers[Math.max(i, BATCH_SIZE)];
-        let nowBlock = await getCurrentBlockNumber();
         const startBlock = eventParsingToBlock + 1;
         const endBlock = Math.min(startBlock + BATCH_SIZE, nowBlock);
         // If we have parsing bounds, and the current batch of blocks is fully within these bounds, skip this batch.
@@ -100,9 +99,14 @@ async function parseEventsMain() {
         // Get pool coins
         const POOL_COINS = await getCoinsInBatchesByPools(EVENTS.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
         await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
+        const numParsedTx = await getTotalTransactionsCount();
+        const numParsedTxInK = Number((numParsedTx / 1e6).toFixed(3));
+        const daysToParse = Number((((nowBlock - endBlock) * 12) / (60 * 60 * 24)).toFixed(2));
         await updateEventParsingToBlock(endBlock);
-        counter += EVENTS.length;
-        console.log("Parsing in progress", nowBlock - endBlock, "blocks left, thats", Number((((nowBlock - endBlock) * 12) / (60 * 60 * 24)).toFixed(2)), "days in blockchain-time,", await getTotalTransactionsCount(), "parsed Tx stored.");
+        console.log(`${daysToParse} days in blockchain-time to parse, ${numParsedTxInK.toLocaleString()}m parsed Tx stored.`);
+        if (nowBlock === endBlock) {
+            break;
+        }
     }
 }
 export async function parseEvents() {

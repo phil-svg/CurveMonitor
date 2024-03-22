@@ -1,4 +1,4 @@
-import { Table, Column, Model, PrimaryKey, CreatedAt, UpdatedAt, DataType, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { Table, Column, Model, PrimaryKey, CreatedAt, UpdatedAt, DataType, ForeignKey, BelongsTo, Index } from "sequelize-typescript";
 import { Pool } from "./Pools.js";
 
 // Define a base model for AbisRelatedToAddressProvider with common properties
@@ -71,6 +71,7 @@ abstract class AbiModelEthereum extends Model {
 // Extend the base model for AbisEthereum
 @Table({ tableName: "abis_ethereum" })
 export class AbisEthereum extends AbiModelEthereum {
+  @Index
   @PrimaryKey
   @Column({ type: DataType.STRING, unique: true })
   declare contract_address: string;

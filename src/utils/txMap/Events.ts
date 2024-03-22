@@ -1,20 +1,19 @@
 import { ParsedEvent } from "../Interfaces.js";
 import { updateAbiIWithProxyCheck } from "../helperFunctions/ProxyCheck.js";
-import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { getImplementationAddressFromTable } from "../postgresTables/readFunctions/ProxyCheck.js";
 import { getShortenReceiptByTxHash } from "../postgresTables/readFunctions/Receipts.js";
 import { ethers } from "ethers";
+import { WEB3_HTTP_PROVIDER } from "../web3Calls/generic.js";
 
 export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise<(ParsedEvent | null | undefined)[] | null> {
   const receipt = await getShortenReceiptByTxHash(txHash);
 
   if (!receipt) {
-    console.log(`No receipt for ${txHash}`);
+    // console.log(`No receipt for ${txHash} in function parseEventsFromReceiptForEntireTx`);
     return null;
   }
 
-  const web3HttpProvider = await getWeb3HttpProvider();
-  const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP);
+  const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP_MAINNET);
 
   // This set will store topics we've already processed
   const processedTopics = new Set<string>();
@@ -23,9 +22,9 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
     let contractAddress = log.address;
 
     // If this topic has already been processed, skip processing it again
-    if (processedTopics.has(log.topics[0])) {
-      return null;
-    }
+    // if (processedTopics.has(log.topics[0])) {
+    // return null; // impactful
+    // }
 
     // Add the topic to the set of processed topics
     processedTopics.add(log.topics[0]);
@@ -36,7 +35,7 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
       contractAddress = implementationAddress; // using implementation address if it's a proxy
     }
 
-    const contractAbi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider, web3HttpProvider);
+    const contractAbi = await updateAbiIWithProxyCheck(contractAddress, JsonRpcProvider);
 
     if (!contractAbi) {
       // console.error(`No ABI found for contract address: ${contractAddress}`);
@@ -44,14 +43,14 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
     }
 
     try {
-      const eventAbi = contractAbi.find((abiItem: any) => abiItem.type === "event" && log.topics[0] === web3HttpProvider.eth.abi.encodeEventSignature(abiItem));
+      const eventAbi = contractAbi.find((abiItem: any) => abiItem.type === "event" && log.topics[0] === WEB3_HTTP_PROVIDER.eth.abi.encodeEventSignature(abiItem));
 
       if (!eventAbi) {
         // console.log("No matching eventABI found for topic:", log.topics[0], "contract:", contractAddress);
         return null;
       }
 
-      const decodedLog = web3HttpProvider.eth.abi.decodeLog(eventAbi.inputs, log.data, log.topics.slice(1));
+      const decodedLog = WEB3_HTTP_PROVIDER.eth.abi.decodeLog(eventAbi.inputs, log.data, log.topics.slice(1));
 
       for (const key in decodedLog) {
         if (!isNaN(Number(key)) || key === "__length__") {
@@ -64,6 +63,7 @@ export async function parseEventsFromReceiptForEntireTx(txHash: string): Promise
         contractAddress: log.address,
         eventName: eventAbi.name,
       };
+
       return parsedEvent;
     } catch (err) {
       // console.error(`Error in parseEventsForEntireTx ${err}`);

@@ -4,7 +4,8 @@ import { Transactions } from "../../../../models/Transactions.js";
 import { eventFlags } from "../../../api/utils/EventFlags.js";
 import eventEmitter from "../../../goingLive/EventEmitter.js";
 import { Sandwiches } from "../../../../models/Sandwiches.js";
-import { priceTransaction } from "../txValue/PriceTransaction.js";
+import { priceTransaction } from "../../../TokenPrices/txValue/PriceTransaction.js";
+import { updateSandwichFlagForSingleTx } from "./SandwichDetection.js";
 
 /**
  * Function: getBotTransactions
@@ -142,7 +143,10 @@ async function processSingleSandwich(botTransaction: ExtendedTransactionData[], 
 
   for (const potentialLossTransaction of potentialLossTransactions) {
     let lossInfo = await calcTheLossOfCurveUserFromSandwich(potentialLossTransaction);
-    if (!lossInfo) continue;
+    if (!lossInfo) {
+      await updateSandwichFlagForSingleTx(potentialLossTransaction.tx_id!, false);
+      continue;
+    }
     if (lossInfo.amount > 0) {
       const pricedTransaction = await priceTransaction(potentialLossTransaction);
       const lossInUsd = pricedTransaction ? (pricedTransaction * lossInfo.lossInPercentage) / 100 : null;
@@ -164,24 +168,31 @@ async function processSingleSandwich(botTransaction: ExtendedTransactionData[], 
 
   // Save sandwich with pool_id
   await saveSandwich(frontrunTransaction.pool_id, botTransaction[0].tx_id!, botTransaction[1].tx_id!, extractedFromCurve, lossTransactions);
-
-  const latestSandwich = await Sandwiches.findOne({
-    order: [["id", "DESC"]],
-    attributes: ["id"],
-    raw: true,
-  });
-
-  const latestSandwichId = latestSandwich ? latestSandwich.id : null;
+  await updateSandwichFlagForSingleTx(botTransaction[0].tx_id!, false);
+  await updateSandwichFlagForSingleTx(botTransaction[1].tx_id!, false);
 
   // If everything is up to date, we livestream new sandwiches to clients.
   if (eventFlags.canEmitSandwich) {
+    const latestSandwich = await Sandwiches.findOne({
+      order: [["id", "DESC"]],
+      attributes: ["id"],
+      raw: true,
+    });
+
+    const latestSandwichId = latestSandwich ? latestSandwich.id : null;
     eventEmitter.emit("New Sandwich for General-Sandwich-Livestream-Subscribers", latestSandwichId);
   }
 }
 
 export async function screenCandidate(candidate: ExtendedTransactionData[]): Promise<void> {
   let botTransactions = await getBotTransactions(candidate);
-  for (const botTransaction of botTransactions) {
-    await processSingleSandwich(botTransaction, candidate);
+  if (botTransactions.length === 0) {
+    for (let i = 0; i < candidate.length; i++) {
+      await updateSandwichFlagForSingleTx(candidate[i].tx_id!, false);
+    }
+  } else {
+    for (const botTransaction of botTransactions) {
+      await processSingleSandwich(botTransaction, candidate);
+    }
   }
 }

@@ -1,11 +1,10 @@
-import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
+import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 import { TransactionDetails } from "../../models/TransactionDetails.js";
 import { Contracts } from "../../models/Contracts.js";
 import axios from "axios";
-import { getTxWithLimiter } from "../web3Calls/generic.js";
+import { WEB3_HTTP_PROVIDER, getTxWithLimiter } from "../web3Calls/generic.js";
 import { ContractDetail } from "../Interfaces.js";
 import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
-import { getWeb3HttpProvider } from "../helperFunctions/Web3.js";
 import { getInceptionBlock } from "./Pools.js";
 import { Op } from "sequelize";
 
@@ -43,8 +42,7 @@ export async function fetchContractAgeInRealtime(txHash: string, calledContractA
 }
 
 async function fetchContractInception(txHash: string, calledContractAddress: string): Promise<{ blockNumber: number; timestamp: number }> {
-  const web3 = await getWeb3HttpProvider();
-  const highestBlock = await web3.eth.getBlockNumber();
+  const highestBlock = await WEB3_HTTP_PROVIDER.eth.getBlockNumber();
 
   const inceptionBlock: number | null = await getInceptionBlock(highestBlock, calledContractAddress);
 
@@ -52,7 +50,7 @@ async function fetchContractInception(txHash: string, calledContractAddress: str
     throw new Error("Failed to get the inception block.");
   }
 
-  const block = await web3.eth.getBlock(inceptionBlock);
+  const block = await WEB3_HTTP_PROVIDER.eth.getBlock(inceptionBlock);
 
   return {
     blockNumber: inceptionBlock,
@@ -61,20 +59,29 @@ async function fetchContractInception(txHash: string, calledContractAddress: str
 }
 
 export async function fetchContractDetailsFromEtherscan(contractAddresses: string[]): Promise<ContractDetail[]> {
-  const response = await axios.get("https://api.etherscan.io/api", {
-    params: {
-      module: "contract",
-      action: "getcontractcreation",
-      contractaddresses: contractAddresses.join(","),
-      apikey: process.env.ETHERSCAN_KEY,
-    },
-  });
+  try {
+    const response = await axios.get("https://api.etherscan.io/api", {
+      params: {
+        module: "contract",
+        action: "getcontractcreation",
+        contractaddresses: contractAddresses.join(","),
+        apikey: process.env.ETHERSCAN_KEY,
+      },
+    });
 
-  if (response.data.status !== "1") {
-    throw new Error(`Failed to fetch contract details from Etherscan: ${response.data.message || "Unknown error"}`);
+    if (response.data.status !== "1") {
+      throw new Error(`Failed to fetch contract details from Etherscan: ${response.data.message || "Unknown error"}`);
+    }
+
+    return response.data.result;
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response) {
+      console.error(`Axios error code: ${error.code}`);
+    } else {
+      console.error(`Error fetching contract details: ${error.message}`);
+    }
+    throw error;
   }
-
-  return response.data.result;
 }
 
 async function fetchMissingBlockNumbers(): Promise<void> {
@@ -150,8 +157,11 @@ async function solveMissingContracts(): Promise<void> {
   const BATCH_SIZE = 5;
   const totalToBeFetched = missingAddresses.length;
   let fetchedCount = 0;
+  let totalTimeTaken = 0;
 
   for (let i = 0; i < missingAddresses.length; i += BATCH_SIZE) {
+    const startTime = new Date().getTime();
+
     const batch = missingAddresses.slice(i, i + BATCH_SIZE);
 
     try {
@@ -164,10 +174,9 @@ async function solveMissingContracts(): Promise<void> {
         await delay(210);
       }
 
-      if (fetchedCount % 50 === 0) {
-        const percentComplete = (fetchedCount / totalToBeFetched) * 100;
-        console.log(`${percentComplete.toFixed(2)}% | ${fetchedCount}/${totalToBeFetched}`);
-      }
+      const endTime = new Date().getTime();
+      totalTimeTaken += endTime - startTime;
+      logProgress("solveMissingContracts", 50, fetchedCount, totalTimeTaken, totalToBeFetched);
     } catch (error) {
       console.error("Error processing missing contracts batch:", batch, (error as any).response?.data || error);
     }

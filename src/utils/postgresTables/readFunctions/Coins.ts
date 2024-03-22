@@ -2,7 +2,7 @@ import { Op } from "sequelize";
 import { Coins } from "../../../models/Coins.js";
 import { getLpTokenBy } from "./Pools.js";
 
-export async function findCoinIdByAddress(address: string): Promise<number | null> {
+export async function getCoinIdByAddress(address: string): Promise<number | null> {
   try {
     const coin = await Coins.findOne({
       where: {
@@ -104,6 +104,6 @@ export const getLpTokenIdByPoolId = async (poolId: number): Promise<number | nul
   if (!lpTokenAddress) {
     return null;
   }
-  const lpTokenId = await findCoinIdByAddress(lpTokenAddress);
+  const lpTokenId = await getCoinIdByAddress(lpTokenAddress);
   return lpTokenId;
 };

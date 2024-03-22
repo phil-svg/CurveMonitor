@@ -76,7 +76,7 @@ __decorate([
     Column(DataType.STRING)
 ], Receipts.prototype, "type", void 0);
 __decorate([
-    BelongsTo(() => Transactions)
+    BelongsTo(() => Transactions, "tx_id")
 ], Receipts.prototype, "transaction", void 0);
 Receipts = __decorate([
     Table({

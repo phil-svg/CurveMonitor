@@ -70,7 +70,7 @@ export async function chunkedAsync(arr, concurrency, worker) {
     const queue = arr.slice();
     while (queue.length > 0) {
         const tasks = queue.splice(0, concurrency).map((item) => worker(item).catch((e) => {
-            console.error(`Error processing item ${item}: ${e}`);
+            // console.error(`Error processing item ${item}: ${e}`);
             return null;
         }));
         const newResults = await Promise.all(tasks);

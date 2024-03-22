@@ -1,12 +1,14 @@
-import { getAllPoolAddresses, getIdByAddress } from "./readFunctions/Pools.js";
+import { getAddressesByPoolIds, getAllPoolIds, getIdByAddress, getRelevantPoolIdsForFastMode } from "./readFunctions/Pools.js";
 import { getContractByAddress } from "../helperFunctions/Web3.js";
 import { getPastEvents } from "../web3Calls/generic.js";
 import { RawTxLogs } from "../../models/RawTxLogs.js";
 import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
-import { getRawLogsFromBlock, getRawLogsToBlock, updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
+import { updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
 import { getCurrentBlockNumberFromLocalDB } from "./CurrentBlock.js";
 import eventEmitter from "../goingLive/EventEmitter.js";
 import { retry } from "../helperFunctions/Web3Retry.js";
+import { getHighestBlockNumberForPool } from "./readFunctions/RawLogs.js";
+import EventEmitter from "../goingLive/EventEmitter.js";
 export async function storeEvent(event, poolId) {
     const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw } = event;
     try {
@@ -32,10 +34,7 @@ export async function storeEvent(event, poolId) {
         }
     }
 }
-async function processPastEvents(pastEvents, poolId, poolAddress, fromBlock, toBlock, currentToBlock) {
-    const progressPercentage = ((currentToBlock - fromBlock) / (toBlock - fromBlock)) * 100;
-    const message = `Fetching Raw Logs for: ${poolAddress} ${progressPercentage.toFixed(0)}%`;
-    // updateConsoleOutput(message, 1);
+async function processPastEvents(pastEvents, poolId, toBlock, currentToBlock) {
     for (const event of pastEvents) {
         await storeEvent(event, poolId);
     }
@@ -63,7 +62,7 @@ export async function processAddress(poolAddress, fromBlock, toBlock) {
             currentToBlock = PAST_EVENTS.end;
         }
         else if (Array.isArray(PAST_EVENTS)) {
-            const { newFromBlock, newToBlock } = await processPastEvents(PAST_EVENTS, POOL_ID, poolAddress, fromBlock, toBlock, currentToBlock);
+            const { newFromBlock, newToBlock } = await processPastEvents(PAST_EVENTS, POOL_ID, toBlock, currentToBlock);
             currentFromBlock = newFromBlock;
             currentToBlock = newToBlock;
         }
@@ -93,37 +92,56 @@ async function processBlocksUntilCurrent(address, fromBlock) {
         }
     }
 }
-async function processAllAddressesSequentially(addresses) {
-    let fromBlock = 17307083;
+// export const dbInceptionBlock = 17307083;
+export const dbInceptionBlock = 9554040;
+async function processAllAddressesSequentially() {
+    const poolIdsFull = await getAllPoolIds();
+    console.log("Curve.fi has", poolIdsFull.length, "pools.");
+    const poolIdsWithoutVoided = await getRelevantPoolIdsForFastMode();
+    const poolAddresses = await getAddressesByPoolIds(poolIdsWithoutVoided); // insert poolIdsFull here to be 100%
     let nowBlock = await getCurrentBlockNumberFromLocalDB();
-    let smallestBlockNumberStored = await getRawLogsFromBlock();
-    let largestBlockNumberStored = await getRawLogsToBlock();
-    // Case: We have events fetched, but not as far back in time as fromBlock dictates, so we fetch the missing section.
-    if (smallestBlockNumberStored && fromBlock < smallestBlockNumberStored) {
-        for (let i = 0; i < addresses.length; i++) {
-            // displayProgressBar("Fetching Raw Logs:", i + 1, addresses.length);
-            await processAddress(addresses[i], fromBlock, smallestBlockNumberStored - 1);
-        }
-    }
-    for (let i = 0; i < addresses.length; i++) {
-        // displayProgressBar("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
-        console.log("Fetching Raw Logs and Subscribing:", i + 1, addresses.length);
+    // let totalTimeTaken = 0;
+    console.log("Fetching Raw Logs and Subscribing");
+    for (let i = 0; i < poolAddresses.length; i++) {
+        // const start = new Date().getTime();
+        // if (i > 300) continue;
+        // muting annoying console errors from these pools since they are unferified on etherscan (and dont have traffic)
+        const addressesToIgnore = [
+            "0x037164C912f9733A0973B18EE339FBeF66cfd2C2",
+            "0x38AB39c82BE45f660AFa4A74E85dAd4b4aDd0492",
+            "0x3921e2cb3Ac3bC009Fa4ec5Ea1ee0bc7FA4Be4C1",
+            "0x0816BC9CED716008c88BB8940C297E9c9167755e",
+            "0xAC4Abe9bD07F0ea3b3078880A73f5b3BC4B396e7",
+            "0x1a5C82B77cE33Cf5ce87efE5eCdb33f7591B35aa",
+        ].map((address) => address.toLowerCase());
+        if (addressesToIgnore.includes(poolAddresses[i].toLowerCase()))
+            continue;
+        let poolId = await getIdByAddress(poolAddresses[i]);
+        let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId);
         if (!largestBlockNumberStored)
-            largestBlockNumberStored = fromBlock;
-        await processBlocksUntilCurrent(addresses[i], largestBlockNumberStored);
+            largestBlockNumberStored = dbInceptionBlock;
+        await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
+        // const end = new Date().getTime();
+        // totalTimeTaken += end - start;
+        if (i % 50 === 0) {
+            console.log(i, "/", poolAddresses.length - 1);
+        }
+        // logProgress("Fetching Raw Logs and Subscribing", 25, i, totalTimeTaken, poolAddresses.length - 1);
     }
-    await updateRawLogsFromBlock(fromBlock);
+    await updateRawLogsFromBlock(dbInceptionBlock);
     if (nowBlock)
         await updateRawLogsToBlock(nowBlock);
 }
 export async function updateRawLogs() {
-    const ALL_POOL_ADDRESSES = await getAllPoolAddresses();
     try {
-        await processAllAddressesSequentially(ALL_POOL_ADDRESSES);
+        await processAllAddressesSequentially();
         updateConsoleOutput("[✓] Raw Logs updated successfully.\n");
     }
     catch (error) {
         console.error("Error processing addresses:", error);
     }
+    EventEmitter.on("dead websocket connection", async () => {
+        return;
+    });
 }
 //# sourceMappingURL=RawLogs.js.map
