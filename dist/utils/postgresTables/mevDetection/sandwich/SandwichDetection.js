@@ -26,7 +26,7 @@ export async function updateSandwichFlagForSingleTx(txID, isSandwich) {
 async function detectSandwichesInAllTransactions() {
     let totalTransactionsCount = await getTotalTransactionsCount();
     // const BATCH_SIZE = 4000000; // works locally, fries the server
-    const BATCH_SIZE = 400000; // works locally, fries the server
+    const BATCH_SIZE = 100000; // works locally, fries the server
     let offset = 0;
     let totalTimeTaken = 0;
     const sandwichFlags = await IsSandwich.findAll({
