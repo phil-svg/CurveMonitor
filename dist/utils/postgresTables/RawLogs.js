@@ -103,6 +103,10 @@ async function processAllAddressesSequentially() {
     // let totalTimeTaken = 0;
     console.log("Fetching Raw Logs and Subscribing");
     for (let i = 0; i < poolAddresses.length; i++) {
+        // if (i % 50 === 0) {
+        //   console.log(i, "/", poolAddresses.length - 1);
+        // }
+        console.log(i, "/", poolAddresses.length - 1);
         // const start = new Date().getTime();
         // if (i > 300) continue;
         // muting annoying console errors from these pools since they are unferified on etherscan (and dont have traffic)
@@ -116,7 +120,9 @@ async function processAllAddressesSequentially() {
         ].map((address) => address.toLowerCase());
         if (addressesToIgnore.includes(poolAddresses[i].toLowerCase()))
             continue;
+        console.log("getting poolId for", poolAddresses[i]);
         let poolId = await getIdByAddress(poolAddresses[i]);
+        console.log("poolId", poolId);
         console.log("getting highest block-number for pool..");
         let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId);
         console.log("largestBlockNumberStored", largestBlockNumberStored);
@@ -125,10 +131,6 @@ async function processAllAddressesSequentially() {
         await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
         // const end = new Date().getTime();
         // totalTimeTaken += end - start;
-        // if (i % 50 === 0) {
-        //   console.log(i, "/", poolAddresses.length - 1);
-        // }
-        console.log(i, "/", poolAddresses.length - 1);
         // logProgress("Fetching Raw Logs and Subscribing", 25, i, totalTimeTaken, poolAddresses.length - 1);
     }
     await updateRawLogsFromBlock(dbInceptionBlock);
