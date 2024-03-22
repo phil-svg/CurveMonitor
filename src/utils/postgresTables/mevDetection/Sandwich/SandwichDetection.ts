@@ -35,7 +35,7 @@ async function detectSandwichesInAllTransactions(): Promise<void> {
 
   console.log("collecting sandwichFlags..");
   const sandwichFlags = await IsSandwich.findAll({
-    attributes: ["tx_id", "is_sandwich"],
+    attributes: ["tx_id"],
   });
 
   console.log("entering while loop");

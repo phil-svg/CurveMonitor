@@ -31,7 +31,7 @@ async function detectSandwichesInAllTransactions() {
     let totalTimeTaken = 0;
     console.log("collecting sandwichFlags..");
     const sandwichFlags = await IsSandwich.findAll({
-        attributes: ["tx_id", "is_sandwich"],
+        attributes: ["tx_id"],
     });
     console.log("entering while loop");
     while (true) {
