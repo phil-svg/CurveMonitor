@@ -125,7 +125,6 @@ async function processAllAddressesSequentially() {
         console.log("poolId", poolId);
         console.log("getting highest block-number for pool..");
         let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId);
-        console.log("largestBlockNumberStored", largestBlockNumberStored);
         if (!largestBlockNumberStored)
             largestBlockNumberStored = dbInceptionBlock;
         await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);

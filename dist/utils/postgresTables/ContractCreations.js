@@ -73,12 +73,14 @@ export async function fetchContractDetailsFromEtherscan(contractAddresses) {
     }
 }
 async function fetchMissingBlockNumbers() {
+    console.log("getting contractsMissingBlocks");
     const contractsMissingBlocks = await Contracts.findAll({
         where: {
             contractCreationBlock: null,
         },
         raw: true,
     });
+    console.log("found", contractsMissingBlocks.length, "relevant contracts");
     for (let contract of contractsMissingBlocks) {
         const tx = await getTxWithLimiter(contract.creationTransactionHash);
         if (tx && tx.blockNumber) {

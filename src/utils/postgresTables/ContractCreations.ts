@@ -85,12 +85,14 @@ export async function fetchContractDetailsFromEtherscan(contractAddresses: strin
 }
 
 async function fetchMissingBlockNumbers(): Promise<void> {
+  console.log("getting contractsMissingBlocks");
   const contractsMissingBlocks = await Contracts.findAll({
     where: {
       contractCreationBlock: null,
     },
     raw: true,
   });
+  console.log("found", contractsMissingBlocks.length, "relevant contracts");
 
   for (let contract of contractsMissingBlocks) {
     const tx = await getTxWithLimiter(contract.creationTransactionHash);
