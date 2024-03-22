@@ -112,11 +112,9 @@ async function processAllAddressesSequentially(): Promise<void> {
   // let totalTimeTaken = 0;
   console.log("Fetching Raw Logs and Subscribing");
   for (let i = 0; i < poolAddresses.length; i++) {
-    // if (i % 50 === 0) {
-    //   console.log(i, "/", poolAddresses.length - 1);
-    // }
-
-    console.log(i, "/", poolAddresses.length - 1);
+    if (i % 50 === 0) {
+      console.log(i, "/", poolAddresses.length - 1);
+    }
 
     // const start = new Date().getTime();
     // if (i > 300) continue;
@@ -132,10 +130,7 @@ async function processAllAddressesSequentially(): Promise<void> {
     ].map((address) => address.toLowerCase());
     if (addressesToIgnore.includes(poolAddresses[i].toLowerCase())) continue;
 
-    console.log("getting poolId for", poolAddresses[i]);
     let poolId = await getIdByAddress(poolAddresses[i]);
-    console.log("poolId", poolId);
-    console.log("getting highest block-number for pool..");
     let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId!);
     if (!largestBlockNumberStored) largestBlockNumberStored = dbInceptionBlock;
     await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
