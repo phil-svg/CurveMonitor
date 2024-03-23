@@ -2,11 +2,21 @@ import { Op, Sequelize } from "sequelize";
 import { Pool } from "../../../models/Pools.js";
 import { findCoinAddressById, findCoinAddressesByIds } from "./Coins.js";
 import { getLatestTransactionTimeForAllPools } from "./Transactions.js";
+import { toChecksumAddress } from "web3-utils";
 export const getIdByAddress = async (poolAddress) => {
-    const pool = await Pool.findOne({
-        where: Sequelize.where(Sequelize.fn("lower", Sequelize.col("address")), Sequelize.fn("lower", poolAddress)),
-    });
-    return pool ? pool.id : null;
+    try {
+        const checksumAddress = toChecksumAddress(poolAddress);
+        const pool = await Pool.findOne({
+            where: {
+                address: checksumAddress,
+            },
+        });
+        return pool ? pool.id : null;
+    }
+    catch (error) {
+        console.error("Error fetching pool ID by address: ", error);
+        return null;
+    }
 };
 export const getIdByAddressCaseInsensitive = async (poolAddress) => {
     const pool = await Pool.findOne({

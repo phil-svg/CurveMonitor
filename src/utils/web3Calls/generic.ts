@@ -8,6 +8,7 @@ import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
 import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
 import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js";
 import axiosRetry from "axios-retry";
+import Web3 from "web3";
 
 export let WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
 export let WEB3_WS_PROVIDER = getWeb3WsProvider();
@@ -520,4 +521,8 @@ export async function getNonceWithLimiter(address: string): Promise<number | nul
     console.log(`Failed to get nonce for address ${address} after several attempts. Please check your connection and the status of the Ethereum node.`);
     return null;
   });
+}
+
+export function toChecksumAddress(address: string): string {
+  return Web3.utils.toChecksumAddress(address);
 }
