@@ -15,7 +15,7 @@ export async function getAbiFromAbisEthereumTable(contractAddress) {
     return await AbisEthereum.findOne({
         where: {
             contract_address: {
-                [Op.iLike]: contractAddress,
+                [Op.eq]: contractAddress.toLowerCase(),
             },
         },
     });

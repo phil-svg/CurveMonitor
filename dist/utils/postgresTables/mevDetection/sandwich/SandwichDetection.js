@@ -29,11 +29,9 @@ async function detectSandwichesInAllTransactions() {
     const BATCH_SIZE = 100000;
     let offset = 0;
     let totalTimeTaken = 0;
-    console.log("collecting sandwichFlags..");
     const sandwichFlags = await IsSandwich.findAll({
         attributes: ["tx_id"],
     });
-    console.log("entering while loop");
     while (true) {
         const start = new Date().getTime();
         const transactions = await fetchTransactionsBatch(offset, BATCH_SIZE);

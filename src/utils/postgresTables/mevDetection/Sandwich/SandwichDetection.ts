@@ -33,12 +33,10 @@ async function detectSandwichesInAllTransactions(): Promise<void> {
   let offset = 0;
   let totalTimeTaken = 0;
 
-  console.log("collecting sandwichFlags..");
   const sandwichFlags = await IsSandwich.findAll({
     attributes: ["tx_id"],
   });
 
-  console.log("entering while loop");
   while (true) {
     const start = new Date().getTime();
 
