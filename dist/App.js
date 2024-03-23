@@ -28,6 +28,7 @@ export async function initDatabase() {
     }
 }
 // await initDatabase();
+// await updateProxiesFromManualList()
 startAPI();
 export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.
 // await research(); // opening function for queries for a bunch of statistics

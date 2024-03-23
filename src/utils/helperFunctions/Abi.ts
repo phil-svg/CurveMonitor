@@ -1,10 +1,8 @@
-import { updateAbiIWithProxyCheck, updateProxiesFromManualList } from "./ProxyCheck.js";
+import { updateAbiIWithProxyCheck } from "./ProxyCheck.js";
 import { ITransactionTrace } from "../Interfaces.js";
 import { ethers } from "ethers";
 
 export async function updateAbisFromTrace(transactionTraces: ITransactionTrace[]): Promise<void> {
-  await updateProxiesFromManualList();
-
   const processedAddresses = new Set<string>();
   const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP_MAINNET);
 

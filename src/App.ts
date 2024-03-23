@@ -29,6 +29,7 @@ import { research } from "./utils/fiddyResearchTM/ResearchEntryPoint.js";
 import { bootWsProvider } from "./utils/web3Calls/generic.js";
 import { checkWsConnectionViaNewBlocks, eraseWebProvider, setupDeadWebsocketListener } from "./utils/goingLive/WebsocketConnectivityChecks.js";
 import eventEmitter from "./utils/goingLive/EventEmitter.js";
+import { updateProxiesFromManualList } from "./utils/helperFunctions/ProxyCheck.js";
 
 export async function initDatabase() {
   try {
@@ -39,6 +40,8 @@ export async function initDatabase() {
   }
 }
 // await initDatabase();
+
+// await updateProxiesFromManualList()
 
 startAPI();
 export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.
