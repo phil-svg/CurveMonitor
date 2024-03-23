@@ -188,24 +188,31 @@ export async function findBestMatchingBinanceTrade(enrichedTransaction) {
     // console.log("baseAsset", baseAsset);
     const quoteAsset = normalizeTokenName(coinEntering.name);
     // console.log("quoteAsset", quoteAsset);
-    const symbol = await getFlexibleSymbolForTradingPair(baseAsset, quoteAsset);
-    // console.log("symbol", symbol);
-    if (!symbol) {
-        console.log(`No symbol found for trading pair ${baseAsset}/${quoteAsset}`);
+    try {
+        const symbol = await getFlexibleSymbolForTradingPair(baseAsset, quoteAsset);
+        // console.log("symbol", symbol);
+        if (!symbol) {
+            console.log(`No symbol found for trading pair ${baseAsset}/${quoteAsset}`);
+            return null;
+        }
+        const recentTrades = await getRecentBinanceTrades(symbol);
+        // console.log("recentTrades", recentTrades);
+        const targetTimestamp = enrichedTransaction.block_unixtime * 1000;
+        // On-chain transaction is a buy if the coin is entering the wallet
+        const isOnChainBuy = coinEntering.name === baseAsset;
+        let targetVolume = coinLeaving.amount;
+        if (isOnChainBuy) {
+            targetVolume = coinEntering.amount;
+        }
+        // console.log("isOnChainBuy", isOnChainBuy);
+        const matchingTrade = findMatchingTrade(recentTrades, targetTimestamp, targetVolume, isOnChainBuy);
+        // console.log("matchingTrade", matchingTrade);
+        return matchingTrade;
+    }
+    catch (err) {
+        // console.log("err in findBestMatchingBinanceTrade,")
+        // most likely Error fetching symbol for trading pair ETH/LDO: Error: HTTP error! status: 451
         return null;
     }
-    const recentTrades = await getRecentBinanceTrades(symbol);
-    // console.log("recentTrades", recentTrades);
-    const targetTimestamp = enrichedTransaction.block_unixtime * 1000;
-    // On-chain transaction is a buy if the coin is entering the wallet
-    const isOnChainBuy = coinEntering.name === baseAsset;
-    let targetVolume = coinLeaving.amount;
-    if (isOnChainBuy) {
-        targetVolume = coinEntering.amount;
-    }
-    // console.log("isOnChainBuy", isOnChainBuy);
-    const matchingTrade = findMatchingTrade(recentTrades, targetTimestamp, targetVolume, isOnChainBuy);
-    // console.log("matchingTrade", matchingTrade);
-    return matchingTrade;
 }
 //# sourceMappingURL=BinanceAPI.js.map
