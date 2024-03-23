@@ -112,6 +112,18 @@ async function updateExistingProxyCheckStandards(existingRecord: any, standards:
   await existingRecord.save();
 }
 
+async function proxySearchWasDoneBefore(contractAddress: string): Promise<Boolean> {
+  const existingRecord = await ProxyCheck.findOne({
+    where: {
+      contractAddress: {
+        [Op.iLike]: contractAddress,
+      },
+    },
+  });
+  if (existingRecord) return true;
+  return false;
+}
+
 async function updateProxyCheckTable(contractAddress: string, isProxy: boolean, implementationAddress: string | null, standards: string[]) {
   // Find the record first
   const existingRecord = await ProxyCheck.findOne({
@@ -235,6 +247,9 @@ export async function fetchAbiFromEtherscanOnly(contractAddress: string): Promis
  * @returns The ABI as a JSON array.
  */
 export async function updateAbiIWithProxyCheck(contractAddress: string, JsonRpcProvider: any): Promise<any> {
+  let wasProcessed = await proxySearchWasDoneBefore(contractAddress);
+  if (wasProcessed) return;
+
   const contractAddressLower = contractAddress.toLowerCase(); // Convert contract address to lowercase
 
   const existingAbi = await readAbiFromDb(contractAddressLower);
