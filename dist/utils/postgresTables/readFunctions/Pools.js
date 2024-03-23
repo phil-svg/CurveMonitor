@@ -2,7 +2,7 @@ import { Op, Sequelize } from "sequelize";
 import { Pool } from "../../../models/Pools.js";
 import { findCoinAddressById, findCoinAddressesByIds } from "./Coins.js";
 import { getLatestTransactionTimeForAllPools } from "./Transactions.js";
-import { toChecksumAddress } from "web3-utils";
+import { toChecksumAddress } from "../../web3Calls/generic.js";
 export const getIdByAddress = async (poolAddress) => {
     try {
         const checksumAddress = toChecksumAddress(poolAddress);
