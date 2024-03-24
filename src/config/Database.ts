@@ -36,7 +36,7 @@ const __dirname = dirname(__filename);
 
 config({ path: resolve(__dirname, "..", "..", ".env") });
 
-const sequelize = new Sequelize({
+export const sequelize = new Sequelize({
   database: process.env.DATABASE_NAME,
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,

@@ -1,5 +1,5 @@
+import { sequelize } from "../../config/Database.js";
 import _ from "lodash";
-import { Transactions } from "../../models/Transactions.js";
 import { getTxFromTxHash } from "../web3Calls/generic.js";
 import { getTxHashByTxId } from "./readFunctions/Transactions.js";
 import { TransactionDetails } from "../../models/TransactionDetails.js";
@@ -33,26 +33,28 @@ export async function solveSingleTdId(txId) {
     };
 }
 async function getUnsolvedTransactions() {
-    // Fetch all transaction IDs from TransactionDetails
-    const existingCalls = await TransactionDetails.findAll({
-        attributes: ["txId"],
-        raw: true,
-    });
-    const existingTxIds = new Set(existingCalls.map((call) => call.txId));
-    // Fetch all transaction IDs from Transactions
-    const allTransactions = await Transactions.findAll({
-        attributes: ["tx_id"],
-        raw: true,
-    });
-    const allTxIds = allTransactions.map((transaction) => transaction.tx_id);
-    // Filter out transaction IDs that exist in existingCalls
-    const unsolvedTransactions = allTxIds.filter((txId) => !existingTxIds.has(txId));
+    const query = `
+    SELECT 
+      t."tx_id" 
+    FROM 
+      "transactions" AS t
+      LEFT JOIN "transaction_details" AS td ON t."tx_id" = td."tx_id"
+    WHERE 
+      td."tx_id" IS NULL;
+  `;
+    const [results, metadata] = await sequelize.query(query, { type: "SELECT" });
+    let unsolvedTransactions = [];
+    if (results && typeof results === "object" && "tx_id" in results) {
+        const txId = results.tx_id;
+        unsolvedTransactions.push(txId);
+    }
     return unsolvedTransactions;
 }
 export async function updateTransactionsDetails() {
-    const unsolvedTxIds = await getUnsolvedTransactions();
+    let unsolvedTxIds = await getUnsolvedTransactions();
     const chunkSize = 6;
     const transactionChunks = _.chunk(unsolvedTxIds, chunkSize);
+    unsolvedTxIds = [];
     let totalTimeTaken = 0;
     for (const [i, transactionChunk] of transactionChunks.entries()) {
         try {

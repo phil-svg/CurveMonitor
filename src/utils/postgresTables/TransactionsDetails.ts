@@ -1,10 +1,11 @@
 import { Optional } from "sequelize";
+import { sequelize } from "../../config/Database.js";
 import _ from "lodash";
 import { Transactions } from "../../models/Transactions.js";
 import { getTxFromTxHash } from "../web3Calls/generic.js";
 import { getTxHashByTxId } from "./readFunctions/Transactions.js";
 import { TransactionDetails } from "../../models/TransactionDetails.js";
-import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
+import { logMemoryUsage, logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
 
 export interface TransactionDetailsData {
   txId: number;
@@ -57,32 +58,35 @@ export async function solveSingleTdId(txId: number): Promise<TransactionDetailsC
   };
 }
 
-async function getUnsolvedTransactions() {
-  // Fetch all transaction IDs from TransactionDetails
-  const existingCalls = await TransactionDetails.findAll({
-    attributes: ["txId"],
-    raw: true,
-  });
-  const existingTxIds = new Set(existingCalls.map((call) => call.txId));
+async function getUnsolvedTransactions(): Promise<number[]> {
+  const query = `
+    SELECT 
+      t."tx_id" 
+    FROM 
+      "transactions" AS t
+      LEFT JOIN "transaction_details" AS td ON t."tx_id" = td."tx_id"
+    WHERE 
+      td."tx_id" IS NULL;
+  `;
 
-  // Fetch all transaction IDs from Transactions
-  const allTransactions = await Transactions.findAll({
-    attributes: ["tx_id"],
-    raw: true,
-  });
-  const allTxIds = allTransactions.map((transaction) => transaction.tx_id);
+  const [results, metadata] = await sequelize.query(query, { type: "SELECT" });
 
-  // Filter out transaction IDs that exist in existingCalls
-  const unsolvedTransactions = allTxIds.filter((txId) => !existingTxIds.has(txId));
+  let unsolvedTransactions: number[] = [];
+
+  if (results && typeof results === "object" && "tx_id" in results) {
+    const txId = (results as { tx_id: number }).tx_id;
+    unsolvedTransactions.push(txId);
+  }
 
   return unsolvedTransactions;
 }
 
 export async function updateTransactionsDetails() {
-  const unsolvedTxIds = await getUnsolvedTransactions();
+  let unsolvedTxIds = await getUnsolvedTransactions();
 
   const chunkSize = 6;
   const transactionChunks = _.chunk(unsolvedTxIds, chunkSize);
+  unsolvedTxIds = [];
 
   let totalTimeTaken = 0;
 
@@ -105,5 +109,6 @@ export async function updateTransactionsDetails() {
       console.error(`Error in chunk ${i + 1} of updateTransactionsDetails: ${error}`);
     }
   }
+
   updateConsoleOutput("[✓] TransactionsDetails parsed successfully.\n");
 }

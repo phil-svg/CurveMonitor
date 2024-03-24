@@ -146,3 +146,13 @@ export function estimateSizeInMB(object: any): number {
   const bytes = new TextEncoder().encode(jsonString).length;
   return bytes / 1024 / 1024;
 }
+
+export function logMemoryUsage() {
+  const memoryUsage = process.memoryUsage();
+  // console.log(`Memory Usage:
+  // RSS: ${(memoryUsage.rss / 1024 / 1024).toFixed(2)} MB,
+  // Heap Total: ${(memoryUsage.heapTotal / 1024 / 1024).toFixed(2)} MB,
+  // Heap Used: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)} MB,
+  // External: ${(memoryUsage.external / 1024 / 1024).toFixed(2)} MB`);
+  console.log(`Heap Used: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(0)} MB`);
+}

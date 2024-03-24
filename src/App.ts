@@ -30,6 +30,7 @@ import { bootWsProvider } from "./utils/web3Calls/generic.js";
 import { checkWsConnectionViaNewBlocks, eraseWebProvider, setupDeadWebsocketListener } from "./utils/goingLive/WebsocketConnectivityChecks.js";
 import eventEmitter from "./utils/goingLive/EventEmitter.js";
 import { updateProxiesFromManualList } from "./utils/helperFunctions/ProxyCheck.js";
+import { logMemoryUsage } from "./utils/helperFunctions/QualityOfLifeStuff.js";
 
 export async function initDatabase() {
   try {
@@ -80,10 +81,9 @@ export async function main() {
   await updateContractCreations();
   await updatePriceMap(); // has to run before updateAtomicArbDetection
   await populateTransactionCoinsWithDollarValues();
-
   await parseEvents();
-
   await updateTransactionsDetails();
+
   // await updateSandwichDetection();
 
   eventFlags.canEmitSandwich = true;
@@ -101,6 +101,7 @@ export async function main() {
   // todo
 
   console.log(`\n[✓] Everything finished syncing successfully.`);
+
   await checkWsConnectionViaNewBlocks(); // restarts main if WS dead for 30s.
   // process.exit();
 }
