@@ -18,6 +18,7 @@ import { populateTransactionCoinsWithDollarValues } from "./utils/postgresTables
 import { bootWsProvider } from "./utils/web3Calls/generic.js";
 import { checkWsConnectionViaNewBlocks, eraseWebProvider, setupDeadWebsocketListener } from "./utils/goingLive/WebsocketConnectivityChecks.js";
 import eventEmitter from "./utils/goingLive/EventEmitter.js";
+import { logMemoryUsage } from "./utils/helperFunctions/QualityOfLifeStuff.js";
 export async function initDatabase() {
     try {
         await db.sync();
@@ -69,6 +70,7 @@ export async function main() {
     // await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
     // await updateLabels(); // muted, only has to run when there are changes made to the labels-file
     // todo
+    logMemoryUsage();
     console.log(`\n[✓] Everything finished syncing successfully.`);
     await checkWsConnectionViaNewBlocks(); // restarts main if WS dead for 30s.
     // process.exit();

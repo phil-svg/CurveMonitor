@@ -100,6 +100,7 @@ export async function main() {
 
   // todo
 
+  logMemoryUsage();
   console.log(`\n[✓] Everything finished syncing successfully.`);
 
   await checkWsConnectionViaNewBlocks(); // restarts main if WS dead for 30s.

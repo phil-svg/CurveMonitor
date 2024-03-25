@@ -147,6 +147,7 @@ async function processBufferedEvents() {
 
   await addAddressesForLabelingForBlock(eventBlockNumbers[0]);
 
+  /*
   const processedTxHashes = new Set<string>();
 
   // waiting for traces to be available for pinging.
@@ -198,4 +199,5 @@ async function processBufferedEvents() {
 
     processedTxHashes.add(tx.tx_hash.toLowerCase());
   }
+  */
 }

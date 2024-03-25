@@ -2,6 +2,7 @@ import Web3 from "web3";
 import { main } from "../../App.js";
 import { WEB3_WS_PROVIDER } from "../web3Calls/generic.js";
 import EventEmitter from "./EventEmitter.js";
+import { logMemoryUsage } from "../helperFunctions/QualityOfLifeStuff.js";
 
 let subscription: any; // Holds the subscription object
 
@@ -11,6 +12,7 @@ export async function checkWsConnectionViaNewBlocks() {
   subscription = WEB3_WS_PROVIDER.eth.subscribe("newBlockHeaders", async (err, blockHeader) => {
     lastReveivedBlockNumber = blockHeader.number;
     // console.log("New block", blockHeader.number);
+    logMemoryUsage();
   });
   await new Promise((resolve) => setTimeout(resolve, 20000));
   while (true) {
