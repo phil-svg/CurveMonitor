@@ -13,7 +13,7 @@ import { startAPI } from './utils/api/Server.js';
 import { updateTransactionsDetails } from './utils/postgresTables/TransactionsDetails.js';
 import { updateAddressCounts } from './utils/postgresTables/CalledAddressCounts.js';
 import { eventFlags } from './utils/api/utils/EventFlags.js';
-import { updateSandwichDetection, } from './utils/postgresTables/mevDetection/sandwich/SandwichDetection.js';
+import { updateSandwichDetection } from './utils/postgresTables/mevDetection/sandwich/SandwichDetection.js';
 import { updateAtomicArbDetection } from './utils/postgresTables/mevDetection/atomic/atomicArb.js';
 import { updateTxTraces } from './utils/postgresTables/TransactionTraces.js';
 import { updateReceipts } from './utils/postgresTables/Receipts.js';
@@ -35,7 +35,7 @@ export async function initDatabase() {
         console.error('Error syncing database:', err);
     }
 }
-await initDatabase();
+// await initDatabase();
 // await updateProxiesFromManualList()
 startAPI();
 export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.

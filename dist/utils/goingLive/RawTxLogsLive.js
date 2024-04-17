@@ -162,7 +162,7 @@ async function processBufferedEvents() {
         const isCexDexArbitrage = await isCexDexArb(txId);
         if (isCexDexArbitrage && isCexDexArbitrage !== 'unable to fetch') {
             if (eventFlags.canEmitCexDexArb) {
-                eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId);
+                // eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId); muted for now
                 //saving to db:
                 await storeCexDexArbFlag(txId, isCexDexArbitrage);
                 await processSinglCexDexTxId(txId);

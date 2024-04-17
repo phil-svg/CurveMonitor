@@ -16,10 +16,7 @@ import { startTestClient } from './Client.js';
 import { updateTransactionsDetails } from './utils/postgresTables/TransactionsDetails.js';
 import { updateAddressCounts } from './utils/postgresTables/CalledAddressCounts.js';
 import { eventFlags } from './utils/api/utils/EventFlags.js';
-import {
-  getUncheckedTransactionCount,
-  updateSandwichDetection,
-} from './utils/postgresTables/mevDetection/sandwich/SandwichDetection.js';
+import { updateSandwichDetection } from './utils/postgresTables/mevDetection/sandwich/SandwichDetection.js';
 import { updateAtomicArbDetection } from './utils/postgresTables/mevDetection/atomic/atomicArb.js';
 import { updateTxTraces } from './utils/postgresTables/TransactionTraces.js';
 import { updateReceipts } from './utils/postgresTables/Receipts.js';
@@ -47,7 +44,7 @@ export async function initDatabase() {
   }
 }
 
-await initDatabase();
+// await initDatabase();
 
 // await updateProxiesFromManualList()
 
