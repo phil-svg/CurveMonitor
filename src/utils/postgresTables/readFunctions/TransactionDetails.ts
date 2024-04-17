@@ -1,5 +1,5 @@
-import { Op, Sequelize } from "sequelize";
-import { TransactionDetails } from "../../../models/TransactionDetails.js";
+import { Op, Sequelize } from 'sequelize';
+import { TransactionDetails } from '../../../models/TransactionDetails.js';
 
 export async function getFromAddress(txId: number): Promise<string | null> {
   const transactionDetails = await TransactionDetails.findByPk(txId);
@@ -27,11 +27,21 @@ export async function getTransactionDetailsByTxId(txId: number): Promise<Transac
   return transactionDetails || null;
 }
 
-export function extractTransactionAddresses(transactionDetails: TransactionDetails | null): { from: string | null; to: string | null } {
+export function extractTransactionAddresses(transactionDetails: TransactionDetails | null): {
+  from: string | null;
+  to: string | null;
+} {
   if (transactionDetails) {
     return { from: transactionDetails.from, to: transactionDetails.to };
   }
   return { from: null, to: null };
+}
+
+export async function getAllTxIdsPresentInTransactionsDetails(): Promise<number[]> {
+  const transactionDetails = await TransactionDetails.findAll({
+    attributes: ['txId'],
+  });
+  return transactionDetails.map((txDetail) => txDetail.txId);
 }
 
 export function extractGasPrice(transactionDetails: TransactionDetails | null): string | null {
@@ -65,7 +75,7 @@ export async function countTransactionsToAddress(address: string): Promise<numbe
 
 export async function getTxdsForRequestedToAddress(address: string): Promise<number[]> {
   const transactions = await TransactionDetails.findAll({
-    attributes: ["txId"],
+    attributes: ['txId'],
     where: {
       to: {
         [Op.iLike]: address,
@@ -80,19 +90,19 @@ export async function findAndCountUniqueCallesPlusCalledContracts(): Promise<{ a
   try {
     const addresses = await TransactionDetails.findAll({
       attributes: [
-        [Sequelize.fn("DISTINCT", Sequelize.col("from")), "address"],
-        [Sequelize.fn("COUNT", Sequelize.col("from")), "count"],
+        [Sequelize.fn('DISTINCT', Sequelize.col('from')), 'address'],
+        [Sequelize.fn('COUNT', Sequelize.col('from')), 'count'],
       ],
-      group: "from",
+      group: 'from',
       raw: true,
     });
 
     const toAddresses = await TransactionDetails.findAll({
       attributes: [
-        [Sequelize.fn("DISTINCT", Sequelize.col("to")), "address"],
-        [Sequelize.fn("COUNT", Sequelize.col("to")), "count"],
+        [Sequelize.fn('DISTINCT', Sequelize.col('to')), 'address'],
+        [Sequelize.fn('COUNT', Sequelize.col('to')), 'count'],
       ],
-      group: "to",
+      group: 'to',
       raw: true,
     });
 
@@ -111,7 +121,7 @@ export async function findAndCountUniqueCallesPlusCalledContracts(): Promise<{ a
     // Convert the object back into an array
     return Object.entries(addressCounts).map(([address, count]) => ({ address, count }));
   } catch (error) {
-    console.error("Error fetching address occurrence counts:", error);
+    console.error('Error fetching address occurrence counts:', error);
     return [];
   }
 }
@@ -120,19 +130,19 @@ export async function getAddressOccurrenceCounts(): Promise<{ address: string; c
   try {
     const addresses = await TransactionDetails.findAll({
       attributes: [
-        [Sequelize.fn("DISTINCT", Sequelize.col("from")), "address"],
-        [Sequelize.fn("COUNT", Sequelize.col("from")), "count"],
+        [Sequelize.fn('DISTINCT', Sequelize.col('from')), 'address'],
+        [Sequelize.fn('COUNT', Sequelize.col('from')), 'count'],
       ],
-      group: "from",
+      group: 'from',
       raw: true,
     });
 
     const toAddresses = await TransactionDetails.findAll({
       attributes: [
-        [Sequelize.fn("DISTINCT", Sequelize.col("to")), "address"],
-        [Sequelize.fn("COUNT", Sequelize.col("to")), "count"],
+        [Sequelize.fn('DISTINCT', Sequelize.col('to')), 'address'],
+        [Sequelize.fn('COUNT', Sequelize.col('to')), 'count'],
       ],
-      group: "to",
+      group: 'to',
       raw: true,
     });
 
@@ -151,7 +161,7 @@ export async function getAddressOccurrenceCounts(): Promise<{ address: string; c
     // Convert the object back into an array
     return Object.entries(addressCounts).map(([address, count]) => ({ address, count }));
   } catch (error) {
-    console.error("Error fetching address occurrence counts:", error);
+    console.error('Error fetching address occurrence counts:', error);
     return [];
   }
 }

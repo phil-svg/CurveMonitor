@@ -1,10 +1,20 @@
-import { TokenTransfers } from "../../models/CleanedTransfers.js";
-import { ReadableTokenTransfer } from "../Interfaces.js";
-import { getCleanedTransfers } from "./mevDetection/atomic/atomicArb.js";
-import { getAllTxIdsFromCleanedTransfers } from "./readFunctions/CleanedTransfers.js";
-import { extractTransactionAddresses, getTransactionDetails } from "./readFunctions/TransactionDetails.js";
-import { getAllTransactionIds, getTxHashByTxId } from "./readFunctions/Transactions.js";
-import { logProgress } from "../helperFunctions/QualityOfLifeStuff.js";
+import { TokenTransfers } from '../../models/CleanedTransfers.js';
+import { ReadableTokenTransfer } from '../Interfaces.js';
+import { filterForCorrectTransfers, getCleanedTransfers } from './mevDetection/atomic/atomicArb.js';
+import { getAllTxIdsFromCleanedTransfers } from './readFunctions/CleanedTransfers.js';
+import { extractTransactionAddresses, getTransactionDetails } from './readFunctions/TransactionDetails.js';
+import { getAllTransactionIds, getTxHashByTxId } from './readFunctions/Transactions.js';
+import { logProgress } from '../helperFunctions/QualityOfLifeStuff.js';
+import { getTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
+import { updateAbisFromTrace } from '../helperFunctions/Abi.js';
+import {
+  getTokenTransfersFromTransactionTrace,
+  makeTransfersReadable,
+  mergeAndFilterTransfers,
+  removeDuplicatesAndUpdatePositions,
+  updateTransferList,
+} from '../txMap/TransferOverview.js';
+import { parseEventsFromReceiptForEntireTx, parseEventsFromReceiptForEntireTxWithoutDbUsage } from '../txMap/Events.js';
 
 export async function insertTokenTransfers(txId: number, transfers: ReadableTokenTransfer[]): Promise<void> {
   try {
@@ -13,7 +23,7 @@ export async function insertTokenTransfers(txId: number, transfers: ReadableToke
       cleaned_transfers: transfers,
     });
   } catch (error) {
-    console.error("Error inserting token transfers:", error);
+    console.error('Error inserting token transfers:', error);
   }
 }
 
@@ -74,15 +84,58 @@ export async function updateCleanedTransfers() {
     totalTimeTaken += end - start;
 
     // Clear the cache if txId is divisible by 5000
-    if (counter % 1000 === 0) {
+    if (counter % 100 === 0) {
       for (let key in cleanedTransfersCache) {
         if (cleanedTransfersCache.hasOwnProperty(key)) {
           delete cleanedTransfersCache[key];
         }
       }
     }
-    logProgress("updateCleanedTransfers", 400, counter, totalTimeTaken, totalToBeProcessed);
+    logProgress('updateCleanedTransfers', 10, counter, totalTimeTaken, totalToBeProcessed);
   }
 
   console.log(`[✓] updateCleanedTransfers completed successfully.`);
+}
+
+export async function getCleanedTransfersFromTxHashWithoutDBUsage(
+  txHash: string,
+  to: string
+): Promise<ReadableTokenTransfer[] | null> {
+  let transactionTraces = await getTransactionTraceViaWeb3Provider(txHash);
+
+  if (!transactionTraces) {
+    console.log('alchemy trace api bugged out for', txHash);
+    return null;
+  }
+
+  // making sure we have all ABIs which are relevant in this tx.
+  await updateAbisFromTrace(transactionTraces);
+
+  const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
+  if (!tokenTransfersFromTransactionTraces) return null;
+  // console.log('tokenTransfersFromTransactionTraces', tokenTransfersFromTransactionTraces);
+
+  const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTxWithoutDbUsage(txHash);
+  if (!parsedEventsFromReceipt) return null;
+  // console.log('parsedEventsFromReceipt', parsedEventsFromReceipt);
+
+  const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
+  // console.log("mergedTransfers", mergedTransfers);
+
+  // const transfersFromReceipt = convertEventsToTransfers(parsedEventsFromReceipt);
+  // console.log(transfersFromReceipt);
+
+  const readableTransfers = await makeTransfersReadable(mergedTransfers);
+  // console.log("readableTransfers", readableTransfers);
+
+  const updatedReadableTransfers = updateTransferList(readableTransfers, to);
+  // console.log("updatedReadableTransfers", updatedReadableTransfers);
+
+  const correctTrasfers = filterForCorrectTransfers(updatedReadableTransfers);
+  // console.log("correctTrasfers", correctTrasfers);
+
+  const cleanedTransfers = removeDuplicatesAndUpdatePositions(correctTrasfers);
+  // console.log("cleanedTransfers", cleanedTransfers);
+
+  return cleanedTransfers;
 }

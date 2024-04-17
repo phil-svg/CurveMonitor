@@ -1,10 +1,17 @@
-import ExcelJS from "exceljs";
+import ExcelJS from 'exceljs';
 // Function to save search findings to an Excel file
 export async function saveJsonToExcel(jsonData, filename) {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Data");
+    const worksheet = workbook.addWorksheet('Data');
     // Add a header row dynamically based on the keys from the first object
-    const headerRow = ["Date", "Daily Volumes", "Sandwich Volumes", "Atomic Arb Volumes", "Cex Dex Arb Volumes", "Organic"];
+    const headerRow = [
+        'Date',
+        'Daily Volumes',
+        'Sandwich Volumes',
+        'Atomic Arb Volumes',
+        'Cex Dex Arb Volumes',
+        'Organic',
+    ];
     worksheet.addRow(headerRow);
     // Iterate over jsonData to add data rows
     for (const [date, volumes] of Object.entries(jsonData)) {
@@ -17,26 +24,26 @@ export async function saveJsonToExcel(jsonData, filename) {
 }
 export async function saveMostVolGeneratingToAddressesToExcel(data) {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("TopAddressesByVolume");
+    const worksheet = workbook.addWorksheet('TopAddressesByVolume');
     // Define columns
     worksheet.columns = [
-        { header: "Address", key: "address", width: 30 },
-        { header: "Total Volume", key: "volume", width: 20 },
+        { header: 'Address', key: 'address', width: 30 },
+        { header: 'Total Volume', key: 'volume', width: 20 },
     ];
     // Add data
     data.forEach(([address, volume]) => {
         worksheet.addRow({ address, volume });
     });
     // Write to file
-    await workbook.xlsx.writeFile("TopAddressesByVolume.xlsx");
-    console.log("Report saved as TopAddressesByVolume.xlsx");
+    await workbook.xlsx.writeFile('TopAddressesByVolume.xlsx');
+    console.log('Report saved as TopAddressesByVolume.xlsx');
 }
 export function savePriceImpactThingsToExcel(groupedSwaps, fileName) {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Swaps");
+    const worksheet = workbook.addWorksheet('Swaps');
     // Add headers
-    worksheet.getCell("A1").value = "USD";
-    worksheet.getCell("B1").value = "Price Impact";
+    worksheet.getCell('A1').value = 'USD';
+    worksheet.getCell('B1').value = 'Price Impact';
     // Start from row 2
     let row = 2;
     for (const pair in groupedSwaps) {
@@ -64,18 +71,18 @@ export function saveEnhancedSwapDetailsToExcel(groupedSwaps, fileName) {
     const workbook = new ExcelJS.Workbook();
     Object.entries(groupedSwaps).forEach(([pair, swaps]) => {
         // Create a new worksheet for each pair
-        const worksheet = workbook.addWorksheet(pair.replace("/", "-")); // Replace "/" with "-" to avoid issues in sheet names
+        const worksheet = workbook.addWorksheet(pair.replace('/', '-')); // Replace "/" with "-" to avoid issues in sheet names
         // Add headers to the worksheet
-        worksheet.addRow(["USD Volume", "Price Impact (%)", "TVL Percentage"]);
+        worksheet.addRow(['USD Volume', 'Price Impact (%)', 'TVL Percentage']);
         // Populate the worksheet with swap details for the pair
         swaps.forEach((swap) => {
             worksheet.addRow([swap.swapVolumeUSD, swap.priceImpactInPercentage, swap.tvlPercentage]);
         });
         // Optional: Format the worksheet columns for better readability
         worksheet.columns = [
-            { header: "USD Volume", key: "usdVolume", width: 15 },
-            { header: "Price Impact (%)", key: "priceImpact", width: 18 },
-            { header: "TVL Percentage", key: "tvlPercentage", width: 15 },
+            { header: 'USD Volume', key: 'usdVolume', width: 15 },
+            { header: 'Price Impact (%)', key: 'priceImpact', width: 18 },
+            { header: 'TVL Percentage', key: 'tvlPercentage', width: 15 },
         ];
     });
     // Save the Excel file
@@ -90,15 +97,15 @@ function getAllBrackets(brackets) {
     Object.values(brackets).forEach((functionBrackets) => {
         Object.keys(functionBrackets).forEach((bracket) => allBracketsSet.add(bracket));
     });
-    return Array.from(allBracketsSet).sort((a, b) => parseInt(a.split("-")[0]) - parseInt(b.split("-")[0]));
+    return Array.from(allBracketsSet).sort((a, b) => parseInt(a.split('-')[0]) - parseInt(b.split('-')[0]));
 }
 export async function saveGasUsagesByFunctionNamesAndPoolsAndTimeToExcel(gasUsageBrackets) {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Gas Usages");
-    const fileName = "gasUsages.xlsx"; // Ensure the path is correct
+    const worksheet = workbook.addWorksheet('Gas Usages');
+    const fileName = 'gasUsages.xlsx'; // Ensure the path is correct
     // Define a function to calculate the midpoint
     const calculateMidpointForBracket = (bracket) => {
-        const [start, end] = bracket.split("-").map(Number);
+        const [start, end] = bracket.split('-').map(Number);
         return (start + end) / 2;
     };
     // Prepare the headers and initial row index for data

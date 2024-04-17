@@ -1,8 +1,8 @@
-import Sequelize from "sequelize";
-import { Transactions } from "../../models/Transactions.js";
-import { TransactionTrace } from "../../models/TransactionTrace.js";
-import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
-import { getTransactionTraceViaWeb3Provider } from "../web3Calls/generic.js";
+import Sequelize from 'sequelize';
+import { TransactionTrace } from '../../models/TransactionTrace.js';
+import { logProgress, updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { getTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
+import { sequelize } from '../../config/Database.js';
 
 export async function saveTransactionTrace(txHash: string, transactionTrace: any[] | null) {
   if (transactionTrace) {
@@ -31,24 +31,27 @@ export async function saveTransactionTrace(txHash: string, transactionTrace: any
   }
 }
 
+export async function getTxTracesToBeFetchedSet(): Promise<string[]> {
+  const query = `
+    SELECT DISTINCT t.tx_hash
+    FROM transactions t
+    LEFT JOIN transaction_trace tt ON t.tx_hash = tt."transactionHash"
+    WHERE tt."transactionHash" IS NULL
+  `;
+
+  const result = await sequelize.query(query, {
+    type: Sequelize.QueryTypes.SELECT,
+    raw: true,
+  });
+  const toBeFetchedSet = result.map((item: any) => item.tx_hash as string);
+
+  return toBeFetchedSet;
+}
+
 export async function updateTxTraces() {
   try {
-    const transactions = await Transactions.findAll({
-      attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("tx_hash")), "tx_hash"]],
-      raw: true,
-    });
-
-    // Fetch all unique transaction hashes from TransactionTraces.
-    const existingTransactionTraces = await TransactionTrace.findAll({
-      attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("transactionHash")), "transactionHash"]],
-    });
-
-    // Create sets of hashes for easier comparison.
-    const transactionsSet = new Set(transactions.map((tx) => tx.tx_hash));
-    const existingTransactionTracesSet = new Set(existingTransactionTraces.map((trace) => trace.transactionHash));
-
     // Find the set of transaction hashes for which we need to fetch transaction traces.
-    const toBeFetchedSet = [...transactionsSet].filter((txHash) => !existingTransactionTracesSet.has(txHash));
+    const toBeFetchedSet = await getTxTracesToBeFetchedSet();
 
     const totalToBeFetched = toBeFetchedSet.length;
 
@@ -67,11 +70,11 @@ export async function updateTxTraces() {
 
       await saveTransactionTrace(txHash, transactionTrace);
 
-      logProgress("updateTxTraces", 50, fetchCount, totalTimeTaken, totalToBeFetched);
+      logProgress('updateTxTraces', 50, fetchCount, totalTimeTaken, totalToBeFetched);
     }
   } catch (error) {
     console.error(error);
   }
 
-  updateConsoleOutput("[✓] transaction_traces storing completed.\n");
+  updateConsoleOutput('[✓] transaction_traces storing completed.\n');
 }

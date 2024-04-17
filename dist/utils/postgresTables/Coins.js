@@ -1,40 +1,40 @@
-import { db } from "../../config/Database.js";
-import { Coins } from "../../models/Coins.js";
-import { Op, QueryTypes } from "sequelize";
-import { WEB3_WS_PROVIDER } from "../web3Calls/generic.js";
+import { db } from '../../config/Database.js';
+import { Coins } from '../../models/Coins.js';
+import { Op, QueryTypes } from 'sequelize';
+import { WEB3_HTTP_PROVIDER, WEB3_WS_PROVIDER } from '../web3Calls/generic.js';
 const ABI_SYMBOL = [
     {
-        name: "symbol",
+        name: 'symbol',
         outputs: [
             {
-                type: "string",
-                name: "",
+                type: 'string',
+                name: '',
             },
         ],
         inputs: [],
-        stateMutability: "view",
-        type: "function",
+        stateMutability: 'view',
+        type: 'function',
         gas: 6876,
     },
 ];
 const ABI_DECIMALS = [
     {
-        name: "decimals",
+        name: 'decimals',
         outputs: [
             {
-                type: "uint256",
-                name: "",
+                type: 'uint256',
+                name: '',
             },
         ],
         inputs: [],
-        stateMutability: "view",
-        type: "function",
+        stateMutability: 'view',
+        type: 'function',
         gas: 1481,
     },
 ];
-const ADDRESS_ETH = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const ADDRESS_MKR = "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2";
-const ADDRESS_REUSD = "0x6b8734ad31D42F5c05A86594314837C416ADA984";
+const ADDRESS_ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+const ADDRESS_MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
+const ADDRESS_REUSD = '0x6b8734ad31D42F5c05A86594314837C416ADA984';
 export async function addNewTokenToDbFromCoinAddress(coinAddress) {
     try {
         await Coins.create({ address: coinAddress });
@@ -42,7 +42,7 @@ export async function addNewTokenToDbFromCoinAddress(coinAddress) {
         await updateDecimals();
     }
     catch (error) {
-        console.error("Error adding coin address to table:", error);
+        console.error('Error adding coin address to table:', error);
     }
 }
 async function getAllUniqueCoinAddressesFromPoolTable() {
@@ -59,7 +59,7 @@ async function getAllUniqueCoinAddressesFromPoolTable() {
         return UNIQUE_ADDRESSES;
     }
     catch (error) {
-        console.error("Error fetching unique coin addresses:", error);
+        console.error('Error fetching unique coin addresses:', error);
         return [];
     }
 }
@@ -70,7 +70,7 @@ async function isCoinAddressInTable(address) {
         return coin !== null;
     }
     catch (error) {
-        console.error("Error checking coin address:", error);
+        console.error('Error checking coin address:', error);
         return false;
     }
 }
@@ -85,18 +85,18 @@ async function updateAddresses() {
             // console.log(`Coin address ${UNIQUE_ADDRESSE} added to table.`);
         }
         catch (error) {
-            console.error("Error adding coin address to table:", error);
+            console.error('Error adding coin address to table:', error);
         }
     }
 }
 /** *********************** Adding Symbol *********************** */
 export async function fetchSymbolFromChain(coinAddress) {
     if (coinAddress === ADDRESS_ETH)
-        return "ETH";
+        return 'ETH';
     if (coinAddress === ADDRESS_MKR)
-        return "MKR";
+        return 'MKR';
     if (coinAddress === ADDRESS_REUSD)
-        return "REUSD";
+        return 'REUSD';
     const CONTRACT = new WEB3_WS_PROVIDER.eth.Contract(ABI_SYMBOL, coinAddress);
     return CONTRACT.methods.symbol().call();
 }
@@ -123,9 +123,10 @@ export async function updateSymbols() {
             }
             catch (error) {
                 const notSetMessage = "Returned values aren't valid, did it run Out of Gas?";
-                const revertMessage = "execution reverted";
-                if (error instanceof Error && (error.message.includes(notSetMessage) || error.message.includes(revertMessage))) {
-                    coin.symbol = "Unknown";
+                const revertMessage = 'execution reverted';
+                if (error instanceof Error &&
+                    (error.message.includes(notSetMessage) || error.message.includes(revertMessage))) {
+                    coin.symbol = 'Unknown';
                     await coin.save();
                 }
                 else {
@@ -135,7 +136,7 @@ export async function updateSymbols() {
         }
     }
     catch (error) {
-        console.error("Error updating symbol:", error);
+        console.error('Error updating symbol:', error);
         throw error;
     }
 }
@@ -143,7 +144,7 @@ export async function updateSymbols() {
 export async function fetchDecimalsFromChain(coinAddress) {
     if (coinAddress === ADDRESS_ETH)
         return 18;
-    const CONTRACT = new WEB3_WS_PROVIDER.eth.Contract(ABI_DECIMALS, coinAddress);
+    const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI_DECIMALS, coinAddress);
     return CONTRACT.methods.decimals().call();
 }
 export async function updateDecimals() {
@@ -169,8 +170,9 @@ export async function updateDecimals() {
             }
             catch (error) {
                 const notSetMessage = "Returned values aren't valid, did it run Out of Gas?";
-                const revertMessage = "execution reverted";
-                if (error instanceof Error && (error.message.includes(notSetMessage) || error.message.includes(revertMessage))) {
+                const revertMessage = 'execution reverted';
+                if (error instanceof Error &&
+                    (error.message.includes(notSetMessage) || error.message.includes(revertMessage))) {
                     coin.decimals = 420; // will render mock coins to practically 0 when parsing
                     await coin.save();
                 }
@@ -181,7 +183,7 @@ export async function updateDecimals() {
         }
     }
     catch (error) {
-        console.error("Error updating decimal:", error);
+        console.error('Error updating decimal:', error);
         throw error;
     }
 }

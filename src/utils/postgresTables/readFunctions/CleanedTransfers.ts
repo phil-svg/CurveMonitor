@@ -1,4 +1,5 @@
 import { TokenTransfers } from "../../../models/CleanedTransfers.js";
+import { Coins } from "../../../models/Coins.js";
 import { ReadableTokenTransfer } from "../../Interfaces.js";
 import { getToAddress } from "./TransactionDetails.js";
 
@@ -42,7 +43,6 @@ export async function getCleanedTransfersForTxIdFromTable(txId: number): Promise
       where: { tx_id: txId },
       attributes: ["cleaned_transfers"],
     });
-
     return tokenTransferEntry ? tokenTransferEntry.cleaned_transfers : null;
   } catch (error) {
     console.error(`Error fetching cleaned transfers for txId ${txId}:`, error);

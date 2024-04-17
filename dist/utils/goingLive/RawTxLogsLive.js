@@ -1,24 +1,33 @@
-import { TransactionDetails } from "../../models/TransactionDetails.js";
-import { eventFlags } from "../api/utils/EventFlags.js";
-import { getContractByAddressWithWebsocket } from "../helperFunctions/Web3.js";
-import { fetchContractAgeInRealtime } from "../postgresTables/ContractCreations.js";
-import { storeEvent } from "../postgresTables/RawLogs.js";
-import { solveSingleTdId } from "../postgresTables/TransactionsDetails.js";
-import { findCandidatesInBatch } from "../postgresTables/mevDetection/sandwich/SandwichDetection.js";
-import { addAddressesForLabelingForBlock } from "../postgresTables/mevDetection/sandwich/SandwichUtils.js";
-import { getTimestampsByBlockNumbersFromLocalDatabase } from "../postgresTables/readFunctions/Blocks.js";
-import { getCoinsInBatchesByPools, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
-import { fetchEventsForChunkParsing } from "../postgresTables/readFunctions/RawLogs.js";
-import { fetchTransactionsForBlock } from "../postgresTables/readFunctions/Transactions.js";
-import { sortAndProcess } from "../postgresTables/txParsing/ParseTx.js";
-import eventEmitter from "./EventEmitter.js";
-import { getCurrentFormattedTime } from "../helperFunctions/QualityOfLifeStuff.js";
-import EventEmitter from "./EventEmitter.js";
+import { TransactionDetails } from '../../models/TransactionDetails.js';
+import { eventFlags } from '../api/utils/EventFlags.js';
+import { getContractByAddressWithWebsocket } from '../helperFunctions/Web3.js';
+import { insertAtomicArbDetails } from '../postgresTables/AtomicArbs.js';
+import { insertTokenTransfers, solveCleanTransfersForTx } from '../postgresTables/CleanedTransfers.js';
+import { fetchContractAgeInRealtime } from '../postgresTables/ContractCreations.js';
+import { storeCexDexArbFlag } from '../postgresTables/IsCexDexArb.js';
+import { storeEvent } from '../postgresTables/RawLogs.js';
+import { fetchAndSaveReceipt } from '../postgresTables/Receipts.js';
+import { saveTransactionTrace } from '../postgresTables/TransactionTraces.js';
+import { solveSingleTdId } from '../postgresTables/TransactionsDetails.js';
+import { fetchDataThenDetectArb } from '../postgresTables/mevDetection/atomic/atomicArb.js';
+import { processSinglCexDexTxId } from '../postgresTables/mevDetection/cexdex/CexDexArb.js';
+import { isCexDexArb } from '../postgresTables/mevDetection/cexdex/utils/cexdexDetection.js';
+import { findCandidatesInBatch } from '../postgresTables/mevDetection/sandwich/SandwichDetection.js';
+import { addAddressesForLabelingForBlock } from '../postgresTables/mevDetection/sandwich/SandwichUtils.js';
+import { getTimestampsByBlockNumbersFromLocalDatabase } from '../postgresTables/readFunctions/Blocks.js';
+import { getCoinsInBatchesByPools, getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
+import { fetchEventsForChunkParsing } from '../postgresTables/readFunctions/RawLogs.js';
+import { fetchTransactionsForBlock } from '../postgresTables/readFunctions/Transactions.js';
+import { sortAndProcess } from '../postgresTables/txParsing/ParseTx.js';
+import { retryGetTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
+import eventEmitter from './EventEmitter.js';
+import { getCurrentFormattedTime } from '../helperFunctions/QualityOfLifeStuff.js';
+import EventEmitter from './EventEmitter.js';
 // when histo-parsing is finished, subscribe to new events.
 export async function preparingLiveModeForRawEvents() {
-    eventEmitter.on("ready for subscription", subscribeToAddress);
-    eventEmitter.on("new block spotted", processBufferedEvents);
-    EventEmitter.on("dead websocket connection", async () => {
+    eventEmitter.on('ready for subscription', subscribeToAddress);
+    eventEmitter.on('new block spotted', processBufferedEvents);
+    EventEmitter.on('dead websocket connection', async () => {
         return;
     });
 }
@@ -38,6 +47,8 @@ function bufferEvent(address, event) {
 }
 // buffers events, and processes them in block-chunks (waits for block to be done before parsing.)
 export async function subscribeToAddress(address) {
+    // console.log('called subscribeToAddress, voiding for clean debugging purposes');
+    // return;
     const contract = await getContractByAddressWithWebsocket(address);
     const poolId = await getIdByAddress(address);
     if (!contract)
@@ -45,14 +56,14 @@ export async function subscribeToAddress(address) {
     if (!poolId)
         return;
     const subscription = contract.events
-        .allEvents({ fromBlock: "latest" })
-        .on("data", async (event) => {
+        .allEvents({ fromBlock: 'latest' })
+        .on('data', async (event) => {
         console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
         // lastEventTime = Date.now();
         await storeEvent(event, poolId);
         bufferEvent(address, event);
     })
-        .on("error", (error) => {
+        .on('error', (error) => {
         console.log(`Subscription error: ${error}`);
     });
 }
@@ -71,7 +82,7 @@ async function saveParsedEventInLiveMode(parsedTx) {
             if (!existingTransaction) {
                 await TransactionDetails.upsert(data);
                 if (eventFlags.canEmitGeneralTx) {
-                    eventEmitter.emit("New Transaction for General-Transaction-Livestream", data.txId);
+                    eventEmitter.emit('New Transaction for General-Transaction-Livestream', data.txId);
                 }
             }
         }
@@ -96,7 +107,7 @@ export function getUniqueTransactions(transactions) {
 async function processBufferedEvents() {
     if (eventBuffer.length === 0)
         return;
-    const eventBlockNumbers = eventBuffer.flatMap((event) => (event.event.blockNumber !== undefined ? [event.event.blockNumber] : []));
+    const eventBlockNumbers = eventBuffer.flatMap((event) => event.event.blockNumber !== undefined ? [event.event.blockNumber] : []);
     const EVENTS = await fetchEventsForChunkParsing(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
     const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
     const POOL_COINS = await getPoolCoinsForLiveMode();
@@ -114,58 +125,50 @@ async function processBufferedEvents() {
     // Sandwich Detection In live-mode
     await findCandidatesInBatch(PARSED_TX);
     await addAddressesForLabelingForBlock(eventBlockNumbers[0]);
-    /*
-    const processedTxHashes = new Set<string>();
-  
+    const processedTxHashes = new Set();
     // waiting for traces to be available for pinging.
     await new Promise((resolve) => setTimeout(resolve, 18069));
-  
     // trace + receipt + building out live-arb-detection
     const uniqueTransactions = getUniqueTransactions(PARSED_TX);
     for (const tx of uniqueTransactions) {
-      const txId = tx.tx_id;
-      if (!txId || processedTxHashes.has(tx.tx_hash.toLowerCase())) continue;
-  
-      // fetching and saving of the transaction-trace
-      const transactionTrace = await retryGetTransactionTraceViaWeb3Provider(tx.tx_hash);
-      if (!transactionTrace) {
-        console.log("failed to fetch transaction-trace during live-mode for", tx.tx_hash);
-        continue;
-      }
-      await saveTransactionTrace(tx.tx_hash, transactionTrace);
-  
-      const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
-      if (!receipt) {
-        console.log("failed to fetch transaction-receipt during live-mode for", tx.tx_hash);
-        continue;
-      }
-  
-      // parsing the entire tx:
-      const cleanedTransfers = await solveCleanTransfersForTx(txId);
-      if (!cleanedTransfers) continue;
-      await insertTokenTransfers(txId, cleanedTransfers);
-  
-      const atomicArbInfo = await fetchDataThenDetectArb(txId);
-      if (eventFlags.canEmitAtomicArb) {
-        if (atomicArbInfo && atomicArbInfo !== "not an arb") {
-          // creates or updates table entry:
-          await insertAtomicArbDetails(txId, atomicArbInfo);
-          eventEmitter.emit("New Transaction for Atomic-Arb-Livestream", atomicArbInfo);
+        const txId = tx.tx_id;
+        if (!txId || processedTxHashes.has(tx.tx_hash.toLowerCase()))
+            continue;
+        // fetching and saving of the transaction-trace
+        const transactionTrace = await retryGetTransactionTraceViaWeb3Provider(tx.tx_hash);
+        if (!transactionTrace) {
+            console.log('failed to fetch transaction-trace during live-mode for', tx.tx_hash);
+            continue;
         }
-      }
-  
-      const isCexDexArbitrage = await isCexDexArb(txId);
-      if (isCexDexArbitrage && isCexDexArbitrage !== "unable to fetch") {
-        if (eventFlags.canEmitCexDexArb) {
-          eventEmitter.emit("New Transaction for CexDex-Arb-Livestream", txId);
-          //saving to db:
-          await storeCexDexArbFlag(txId, isCexDexArbitrage);
-          await processSinglCexDexTxId(txId);
+        await saveTransactionTrace(tx.tx_hash, transactionTrace);
+        const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
+        if (!receipt) {
+            console.log('failed to fetch transaction-receipt during live-mode for', tx.tx_hash);
+            continue;
         }
-      }
-  
-      processedTxHashes.add(tx.tx_hash.toLowerCase());
+        // parsing the entire tx:
+        const cleanedTransfers = await solveCleanTransfersForTx(txId);
+        if (!cleanedTransfers)
+            continue;
+        await insertTokenTransfers(txId, cleanedTransfers);
+        const atomicArbInfo = await fetchDataThenDetectArb(txId);
+        if (eventFlags.canEmitAtomicArb) {
+            if (atomicArbInfo && atomicArbInfo !== 'not an arb') {
+                // creates or updates table entry:
+                await insertAtomicArbDetails(txId, atomicArbInfo);
+                eventEmitter.emit('New Transaction for Atomic-Arb-Livestream', atomicArbInfo);
+            }
+        }
+        const isCexDexArbitrage = await isCexDexArb(txId);
+        if (isCexDexArbitrage && isCexDexArbitrage !== 'unable to fetch') {
+            if (eventFlags.canEmitCexDexArb) {
+                eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId);
+                //saving to db:
+                await storeCexDexArbFlag(txId, isCexDexArbitrage);
+                await processSinglCexDexTxId(txId);
+            }
+        }
+        processedTxHashes.add(tx.tx_hash.toLowerCase());
     }
-    */
 }
 //# sourceMappingURL=RawTxLogsLive.js.map

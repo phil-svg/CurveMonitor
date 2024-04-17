@@ -1,18 +1,36 @@
-import { getAddressesByPoolIds, getAllPoolIds, getIdByAddress, getRelevantPoolIdsForFastMode } from "./readFunctions/Pools.js";
-import { getContractByAddress } from "../helperFunctions/Web3.js";
-import { getPastEvents } from "../web3Calls/generic.js";
-import { RawTxLogs } from "../../models/RawTxLogs.js";
-import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
-import { EventObject } from "../Interfaces.js";
-import { updateRawLogsFromBlock, updateRawLogsToBlock } from "./readFunctions/BlockScanningData.js";
-import { getCurrentBlockNumberFromLocalDB } from "./CurrentBlock.js";
-import eventEmitter from "../goingLive/EventEmitter.js";
-import { retry } from "../helperFunctions/Web3Retry.js";
-import { getHighestBlockNumberForPool } from "./readFunctions/RawLogs.js";
-import EventEmitter from "../goingLive/EventEmitter.js";
+import {
+  getAddressesByPoolIds,
+  getAllPoolIds,
+  getIdByAddress,
+  getRelevantPoolIdsForFastMode,
+} from './readFunctions/Pools.js';
+import { getContractByAddress } from '../helperFunctions/Web3.js';
+import { getPastEvents } from '../web3Calls/generic.js';
+import { RawTxLogs } from '../../models/RawTxLogs.js';
+import { updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { EventObject } from '../Interfaces.js';
+import { updateRawLogsFromBlock, updateRawLogsToBlock } from './readFunctions/BlockScanningData.js';
+import { getCurrentBlockNumberFromLocalDB } from './CurrentBlock.js';
+import eventEmitter from '../goingLive/EventEmitter.js';
+import { retry } from '../helperFunctions/Web3Retry.js';
+import { getHighestBlockNumberForPool } from './readFunctions/RawLogs.js';
+import EventEmitter from '../goingLive/EventEmitter.js';
 
 export async function storeEvent(event: EventObject, poolId: number): Promise<void> {
-  const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw } = event;
+  const {
+    address,
+    blockHash,
+    blockNumber,
+    logIndex,
+    removed,
+    transactionHash,
+    transactionIndex,
+    id,
+    returnValues,
+    event: eventName,
+    signature,
+    raw,
+  } = event;
 
   try {
     await RawTxLogs.create({
@@ -31,13 +49,18 @@ export async function storeEvent(event: EventObject, poolId: number): Promise<vo
       raw,
     });
   } catch (error) {
-    if ((error as Error).name !== "SequelizeUniqueConstraintError") {
+    if ((error as Error).name !== 'SequelizeUniqueConstraintError') {
       throw error;
     }
   }
 }
 
-async function processPastEvents(pastEvents: EventObject[], poolId: number, toBlock: number, currentToBlock: number): Promise<{ newFromBlock: number; newToBlock: number }> {
+async function processPastEvents(
+  pastEvents: EventObject[],
+  poolId: number,
+  toBlock: number,
+  currentToBlock: number
+): Promise<{ newFromBlock: number; newToBlock: number }> {
   for (const event of pastEvents) {
     await storeEvent(event, poolId);
   }
@@ -59,19 +82,24 @@ export async function processAddress(poolAddress: string, fromBlock: number, toB
   let currentToBlock = toBlock;
 
   while (currentFromBlock < currentToBlock) {
-    const PAST_EVENTS = await retry(() => getPastEvents(CONTRACT, "allEvents", currentFromBlock, currentToBlock));
+    const PAST_EVENTS = await retry(() => getPastEvents(CONTRACT, 'allEvents', currentFromBlock, currentToBlock));
 
     if (PAST_EVENTS === null) {
-      console.error("Invalid block range");
+      console.error('Invalid block range');
       return;
-    } else if ("start" in PAST_EVENTS) {
+    } else if ('start' in PAST_EVENTS) {
       currentToBlock = PAST_EVENTS.end;
     } else if (Array.isArray(PAST_EVENTS)) {
-      const { newFromBlock, newToBlock } = await processPastEvents(PAST_EVENTS as EventObject[], POOL_ID, toBlock, currentToBlock);
+      const { newFromBlock, newToBlock } = await processPastEvents(
+        PAST_EVENTS as EventObject[],
+        POOL_ID,
+        toBlock,
+        currentToBlock
+      );
       currentFromBlock = newFromBlock;
       currentToBlock = newToBlock;
     } else {
-      console.log("Err in processing Address.");
+      console.log('Err in processing Address.');
     }
   }
 }
@@ -80,7 +108,7 @@ async function processBlocksUntilCurrent(address: string, fromBlock: number) {
   while (true) {
     let currentBlockNumber = await getCurrentBlockNumberFromLocalDB();
     if (currentBlockNumber === null) {
-      console.error("Failed to fetch current block number");
+      console.error('Failed to fetch current block number');
       return;
     }
 
@@ -93,7 +121,7 @@ async function processBlocksUntilCurrent(address: string, fromBlock: number) {
     if (updatedBlockNumber === null || updatedBlockNumber !== currentBlockNumber) {
       continue;
     } else {
-      eventEmitter.emit("ready for subscription", address);
+      eventEmitter.emit('ready for subscription', address);
       return;
     }
   }
@@ -104,16 +132,16 @@ export const dbInceptionBlock = 9554040;
 
 async function processAllAddressesSequentially(): Promise<void> {
   const poolIdsFull = await getAllPoolIds();
-  console.log("Curve.fi has", poolIdsFull.length, "pools.");
+  console.log('Curve.fi has', poolIdsFull.length, 'pools.');
   const poolIdsWithoutVoided = await getRelevantPoolIdsForFastMode();
   const poolAddresses = await getAddressesByPoolIds(poolIdsWithoutVoided); // insert poolIdsFull here to be 100%
   let nowBlock = await getCurrentBlockNumberFromLocalDB();
 
   // let totalTimeTaken = 0;
-  console.log("Fetching Raw Logs and Subscribing");
+  console.log('Fetching Raw Logs and Subscribing');
   for (let i = 0; i < poolAddresses.length; i++) {
     if (i % 50 === 0) {
-      console.log(i, "/", poolAddresses.length - 1);
+      console.log(i, '/', poolAddresses.length - 1);
     }
 
     // const start = new Date().getTime();
@@ -121,12 +149,12 @@ async function processAllAddressesSequentially(): Promise<void> {
 
     // muting annoying console errors from these pools since they are unferified on etherscan (and dont have traffic)
     const addressesToIgnore = [
-      "0x037164C912f9733A0973B18EE339FBeF66cfd2C2",
-      "0x38AB39c82BE45f660AFa4A74E85dAd4b4aDd0492",
-      "0x3921e2cb3Ac3bC009Fa4ec5Ea1ee0bc7FA4Be4C1",
-      "0x0816BC9CED716008c88BB8940C297E9c9167755e",
-      "0xAC4Abe9bD07F0ea3b3078880A73f5b3BC4B396e7",
-      "0x1a5C82B77cE33Cf5ce87efE5eCdb33f7591B35aa",
+      '0x037164C912f9733A0973B18EE339FBeF66cfd2C2',
+      '0x38AB39c82BE45f660AFa4A74E85dAd4b4aDd0492',
+      '0x3921e2cb3Ac3bC009Fa4ec5Ea1ee0bc7FA4Be4C1',
+      '0x0816BC9CED716008c88BB8940C297E9c9167755e',
+      '0xAC4Abe9bD07F0ea3b3078880A73f5b3BC4B396e7',
+      '0x1a5C82B77cE33Cf5ce87efE5eCdb33f7591B35aa',
     ].map((address) => address.toLowerCase());
     if (addressesToIgnore.includes(poolAddresses[i].toLowerCase())) continue;
 
@@ -147,11 +175,11 @@ async function processAllAddressesSequentially(): Promise<void> {
 export async function updateRawLogs(): Promise<void> {
   try {
     await processAllAddressesSequentially();
-    updateConsoleOutput("[✓] Raw Logs updated successfully.\n");
+    updateConsoleOutput('[✓] Raw Logs updated successfully.\n');
   } catch (error) {
-    console.error("Error processing addresses:", error);
+    console.error('Error processing addresses:', error);
   }
-  EventEmitter.on("dead websocket connection", async () => {
+  EventEmitter.on('dead websocket connection', async () => {
     return;
   });
 }

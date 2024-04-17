@@ -1,13 +1,13 @@
-import { convertDateToUnixTime } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { getAllPoolIds, getIdByAddress, getPoolsBySourceAddress } from "../../postgresTables/readFunctions/Pools.js";
-import { saveJsonToExcel } from "../utils/Excel.js";
-import { calculateDailySandwichVolumes, calculateDailyVolumes, calculateDailyAtomicArbVolumes, calculateDailyCexDexArbVolumes, formatVolumeDataToJson, } from "../utils/Volume.js";
+import { convertDateToUnixTime } from '../../helperFunctions/QualityOfLifeStuff.js';
+import { getAllPoolIds, getIdByAddress, getPoolsBySourceAddress } from '../../postgresTables/readFunctions/Pools.js';
+import { saveJsonToExcel } from '../utils/Excel.js';
+import { calculateDailySandwichVolumes, calculateDailyVolumes, calculateDailyAtomicArbVolumes, calculateDailyCexDexArbVolumes, formatVolumeDataToJson, } from '../utils/Volume.js';
 export async function generateVolumeReportForSinglePool(poolAddress, startDate, endDate) {
     const startUnixTime = new Date(startDate).getTime() / 1000;
     const endUnixTime = new Date(endDate).getTime() / 1000;
     const poolId = await getIdByAddress(poolAddress);
     if (!poolId) {
-        console.log("could not find poolId for", poolAddress, "in generateVolumeReportForSinglePool");
+        console.log('could not find poolId for', poolAddress, 'in generateVolumeReportForSinglePool');
         return;
     }
     const dailyVolumes = await calculateDailyVolumes(poolId, startUnixTime, endUnixTime);
@@ -15,8 +15,10 @@ export async function generateVolumeReportForSinglePool(poolAddress, startDate, 
     const dailyAtomicArbVolumes = await calculateDailyAtomicArbVolumes(poolId, startUnixTime, endUnixTime);
     const dailyCexDexArbVolumes = await calculateDailyCexDexArbVolumes(poolId, startUnixTime, endUnixTime);
     const resultJson = formatVolumeDataToJson(dailyVolumes, sandwichDailyVolumes, dailyAtomicArbVolumes, dailyCexDexArbVolumes);
-    await saveJsonToExcel(resultJson, "resultJson.xlsx");
-    console.log("Research step complete!");
+    await saveJsonToExcel(resultJson, 'resultJson.xlsx');
+    // const data = JSON.stringify(resultJson, null, 2); // Pretty print with 2 spaces
+    // fs.writeFileSync("result.json", data, "utf8");
+    console.log('Research step complete!');
 }
 // Utility function to aggregate volumes across pools
 function aggregateVolumes(aggregate, dailyVolumes) {
@@ -30,12 +32,12 @@ function aggregateVolumes(aggregate, dailyVolumes) {
     });
 }
 export async function generateVolumeReportForPoolArr() {
-    const ADDRESS_STABESWAP = "0xB9fC157394Af804a3578134A6585C0dc9cc990d4";
-    const ADDRESS_STABESWAP_NG = "0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf";
+    const ADDRESS_STABESWAP = '0xB9fC157394Af804a3578134A6585C0dc9cc990d4';
+    const ADDRESS_STABESWAP_NG = '0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf';
     const stableswapPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP);
     const stableswapNGPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP_NG);
-    const startDate = "2024-03-01";
-    const endDate = "2024-03-18";
+    const startDate = '2024-03-01';
+    const endDate = '2024-03-18';
     const startUnixTime = new Date(startDate).getTime() / 1000;
     const endUnixTime = new Date(endDate).getTime() / 1000;
     let aggregateDailyVolumes = {};
@@ -65,8 +67,8 @@ export async function generateVolumeReportForPoolArr() {
     }
     // Format and save aggregated data
     const resultJson = formatVolumeDataToJson(aggregateDailyVolumes, aggregateSandwichDailyVolumes, aggregateDailyAtomicArbVolumes, aggregateDailyCexDexArbVolumes);
-    await saveJsonToExcel(resultJson, "resultJson.xlsx");
-    console.log("Volume report generated for all pools.");
+    await saveJsonToExcel(resultJson, 'volFetch.xlsx');
+    console.log('Volume report generated for all pools.');
 }
 export async function calculateAndSaveDailyAggregateVolumeReport(startDate, endDate) {
     const startUnixtime = convertDateToUnixTime(startDate);
@@ -79,7 +81,7 @@ export async function calculateAndSaveDailyAggregateVolumeReport(startDate, endD
     let counter = 0;
     for (const poolId of poolIds) {
         counter++;
-        console.log("Processing Pools:", counter, poolIds.length);
+        console.log('Processing Pools:', counter, poolIds.length);
         const dailyVolumes = await calculateDailyVolumes(poolId, startUnixtime, endUnixtime);
         const sandwichDailyVolumes = await calculateDailySandwichVolumes(poolId, startUnixtime, endUnixtime);
         const dailyAtomicArbVolumes = await calculateDailyAtomicArbVolumes(poolId, startUnixtime, endUnixtime);
@@ -90,8 +92,8 @@ export async function calculateAndSaveDailyAggregateVolumeReport(startDate, endD
         aggregateCexDexArbVolumes = sumUpVolumes(aggregateCexDexArbVolumes, dailyCexDexArbVolumes);
     }
     const resultJson = formatVolumeDataToJson(aggregateDailyVolumes, aggregateSandwichVolumes, aggregateAtomicArbVolumes, aggregateCexDexArbVolumes);
-    await saveJsonToExcel(resultJson, "resultJson.xlsx");
-    console.log("done");
+    await saveJsonToExcel(resultJson, 'resultJson.xlsx');
+    console.log('done');
 }
 function sumUpVolumes(aggregate, newVolumes) {
     const result = Object.assign({}, aggregate);
@@ -150,8 +152,8 @@ export async function calculateAndSaveAggregateWeeklyVolumeReport(startUnixtime,
     sortedSummary.forEach(([week, data]) => {
         reformattedData[week] = data;
     });
-    await saveJsonToExcel(reformattedData, "resultJsonWeekly.xlsx");
-    console.log("Weekly aggregate report generated.");
+    await saveJsonToExcel(reformattedData, 'resultJsonWeekly.xlsx');
+    console.log('Weekly aggregate report generated.');
 }
 function sortWeeklyData(data) {
     return Object.entries(data).sort((a, b) => {

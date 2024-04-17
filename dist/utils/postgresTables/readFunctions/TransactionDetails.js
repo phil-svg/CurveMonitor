@@ -1,5 +1,5 @@
-import { Op, Sequelize } from "sequelize";
-import { TransactionDetails } from "../../../models/TransactionDetails.js";
+import { Op, Sequelize } from 'sequelize';
+import { TransactionDetails } from '../../../models/TransactionDetails.js';
 export async function getFromAddress(txId) {
     const transactionDetails = await TransactionDetails.findByPk(txId);
     if (transactionDetails) {
@@ -28,6 +28,12 @@ export function extractTransactionAddresses(transactionDetails) {
     }
     return { from: null, to: null };
 }
+export async function getAllTxIdsPresentInTransactionsDetails() {
+    const transactionDetails = await TransactionDetails.findAll({
+        attributes: ['txId'],
+    });
+    return transactionDetails.map((txDetail) => txDetail.txId);
+}
 export function extractGasPrice(transactionDetails) {
     if (transactionDetails) {
         return transactionDetails.gasPrice;
@@ -53,7 +59,7 @@ export async function countTransactionsToAddress(address) {
 }
 export async function getTxdsForRequestedToAddress(address) {
     const transactions = await TransactionDetails.findAll({
-        attributes: ["txId"],
+        attributes: ['txId'],
         where: {
             to: {
                 [Op.iLike]: address,
@@ -66,18 +72,18 @@ export async function findAndCountUniqueCallesPlusCalledContracts() {
     try {
         const addresses = await TransactionDetails.findAll({
             attributes: [
-                [Sequelize.fn("DISTINCT", Sequelize.col("from")), "address"],
-                [Sequelize.fn("COUNT", Sequelize.col("from")), "count"],
+                [Sequelize.fn('DISTINCT', Sequelize.col('from')), 'address'],
+                [Sequelize.fn('COUNT', Sequelize.col('from')), 'count'],
             ],
-            group: "from",
+            group: 'from',
             raw: true,
         });
         const toAddresses = await TransactionDetails.findAll({
             attributes: [
-                [Sequelize.fn("DISTINCT", Sequelize.col("to")), "address"],
-                [Sequelize.fn("COUNT", Sequelize.col("to")), "count"],
+                [Sequelize.fn('DISTINCT', Sequelize.col('to')), 'address'],
+                [Sequelize.fn('COUNT', Sequelize.col('to')), 'count'],
             ],
-            group: "to",
+            group: 'to',
             raw: true,
         });
         // Combine and reduce the arrays to sum up counts for each address
@@ -92,7 +98,7 @@ export async function findAndCountUniqueCallesPlusCalledContracts() {
         return Object.entries(addressCounts).map(([address, count]) => ({ address, count }));
     }
     catch (error) {
-        console.error("Error fetching address occurrence counts:", error);
+        console.error('Error fetching address occurrence counts:', error);
         return [];
     }
 }
@@ -100,18 +106,18 @@ export async function getAddressOccurrenceCounts() {
     try {
         const addresses = await TransactionDetails.findAll({
             attributes: [
-                [Sequelize.fn("DISTINCT", Sequelize.col("from")), "address"],
-                [Sequelize.fn("COUNT", Sequelize.col("from")), "count"],
+                [Sequelize.fn('DISTINCT', Sequelize.col('from')), 'address'],
+                [Sequelize.fn('COUNT', Sequelize.col('from')), 'count'],
             ],
-            group: "from",
+            group: 'from',
             raw: true,
         });
         const toAddresses = await TransactionDetails.findAll({
             attributes: [
-                [Sequelize.fn("DISTINCT", Sequelize.col("to")), "address"],
-                [Sequelize.fn("COUNT", Sequelize.col("to")), "count"],
+                [Sequelize.fn('DISTINCT', Sequelize.col('to')), 'address'],
+                [Sequelize.fn('COUNT', Sequelize.col('to')), 'count'],
             ],
-            group: "to",
+            group: 'to',
             raw: true,
         });
         // Combine and reduce the arrays to sum up counts for each address
@@ -126,7 +132,7 @@ export async function getAddressOccurrenceCounts() {
         return Object.entries(addressCounts).map(([address, count]) => ({ address, count }));
     }
     catch (error) {
-        console.error("Error fetching address occurrence counts:", error);
+        console.error('Error fetching address occurrence counts:', error);
         return [];
     }
 }

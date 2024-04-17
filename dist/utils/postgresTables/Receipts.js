@@ -1,7 +1,8 @@
-import { Receipts } from "../../models/Receipts.js";
-import { Transactions } from "../../models/Transactions.js";
-import { WEB3_HTTP_PROVIDER, getTxReceiptClassic } from "../web3Calls/generic.js";
-import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
+import { Receipts } from '../../models/Receipts.js';
+import { WEB3_HTTP_PROVIDER, getTxReceiptClassic } from '../web3Calls/generic.js';
+import { logProgress, updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { sequelize } from '../../config/Database.js';
+import { QueryTypes } from 'sequelize';
 function convertHexReceiptToDecimal(hexTxReceipt) {
     return {
         transactionHash: hexTxReceipt.transactionHash,
@@ -54,40 +55,34 @@ export async function fetchAndSaveReceipt(txHash, txId) {
         console.log(`No receipt found for hash: ${txHash} in fetchAndSaveReceipt`);
     }
 }
+async function getTxHashesToFetch() {
+    const toBeFetchedSet = await sequelize.query(`
+    SELECT t.tx_hash AS "txHash", t.tx_id AS "txId"
+    FROM transactions t
+    LEFT JOIN receipts r ON t.tx_hash = r."transactionHash"
+    WHERE r."transactionHash" IS NULL
+  `, {
+        type: QueryTypes.SELECT,
+        raw: true,
+    });
+    return toBeFetchedSet;
+}
 export async function updateReceipts() {
     try {
-        // Fetch all unique transaction hashes and their IDs from Transactions.
-        const transactions = await Transactions.findAll({
-            attributes: ["tx_hash", "tx_id"],
-            raw: true,
-        });
-        // Create a map of transaction hashes to their IDs.
-        const transactionsMap = new Map();
-        transactions.forEach((tx) => {
-            transactionsMap.set(tx.tx_hash, tx.tx_id);
-        });
-        // Fetch all unique transaction hashes from Receipts.
-        const existingReceipts = await Receipts.findAll({
-            attributes: ["transactionHash"],
-            group: "transactionHash",
-            raw: true,
-        });
-        // Create a set of existing receipt transaction hashes for comparison.
-        const existingReceiptsSet = new Set(existingReceipts.map((rcpt) => rcpt.transactionHash));
-        // Find the set of transaction hashes for which we need to fetch receipts.
-        const toBeFetchedSet = [...transactionsMap.keys()].filter((txHash) => !existingReceiptsSet.has(txHash));
+        const toBeFetchedSet = await getTxHashesToFetch();
         const totalToBeFetched = toBeFetchedSet.length;
         let count = 0;
         let totalTimeTaken = 0;
         // For each transaction hash in toBeFetchedSet.
-        for (const txHash of toBeFetchedSet) {
-            if (txHash === "0x1cb373281a6aa3c161eb073b5f49f38f5c2a2a6e8ed9dcb637c941ede601daff")
+        for (const entry of toBeFetchedSet) {
+            const txHash = entry.txHash;
+            const txId = entry.txId;
+            if (txHash === '0x1cb373281a6aa3c161eb073b5f49f38f5c2a2a6e8ed9dcb637c941ede601daff')
                 continue;
-            if (txHash === "0xd67ec9e7a7c5bc4b2b7ee12ffb3a1a3c182d5d83a03df1d750663340d11af4fd")
+            if (txHash === '0xd67ec9e7a7c5bc4b2b7ee12ffb3a1a3c182d5d83a03df1d750663340d11af4fd')
                 continue;
-            const txId = transactionsMap.get(txHash);
             if (!txId) {
-                console.log("no txId found for txHash", txHash, "in updateReceipts");
+                console.log('no txId found for txHash', txHash, 'in updateReceipts');
                 process.exit();
             }
             try {
@@ -96,7 +91,7 @@ export async function updateReceipts() {
                 count++;
                 const end = new Date().getTime();
                 totalTimeTaken += end - start;
-                logProgress("Fetching Receipts", 100, count, totalTimeTaken, totalToBeFetched);
+                logProgress('Fetching Receipts', 100, count, totalTimeTaken, totalToBeFetched);
             }
             catch (err) {
                 console.warn(`Failed to fetch and save receipt for hash: ${txHash}`);
@@ -107,6 +102,6 @@ export async function updateReceipts() {
     catch (error) {
         console.error(error);
     }
-    updateConsoleOutput("[✓] Receipts stored successfully.\n");
+    updateConsoleOutput('[✓] Receipts stored successfully.\n');
 }
 //# sourceMappingURL=Receipts.js.map

@@ -3,19 +3,32 @@ import {
   getGasUsedArrayForAllTxForAddressAndPoolAndTimeRange,
   getTxHashExampleArrayForGasUsedForAddressAndPoolAndTimeRange,
   getTxIdsForAddressAndPoolAndTimeRange,
-} from "../helperFunctions/CrossQueries.js";
-import { saveChunkedDataToExcel } from "../helperFunctions/Excel.js";
-import { getElementCountChunkedForArrayAndChunksize } from "../helperFunctions/QualityOfLifeStuff.js";
-import { getTvlForPoolArrFromChain } from "../postgresTables/Tvl.js";
-import { getIdByAddress, getPoolsBySourceAddress } from "../postgresTables/readFunctions/Pools.js";
-import { aggregateCexDexBotVolumeOverTime, writeDBotVolOverTimeataToExcel } from "./cexdex/BotVolOverTime.js";
-import { calculateTotalVolumeAndVolumePerBot } from "./cexdex/GlobalVolume.js";
-import { barChartRace } from "./curvefi/BarChartRace.js";
-import { gasUsageThings, getGasUsageFromCsvFile } from "./curvefi/GasUsage.js";
-import { priceImpactThings } from "./curvefi/PriceImpact.js";
-import { tvlThings } from "./curvefi/Tvl.js";
-import { calculateTotalVolumeForTransactionsInDb, generateTopFromVolAddresses, generateTopToVolAddresses, generateTopToVolAddressesForSelectedPools } from "./curvefi/Volume.js";
-import { profitableSandwichThings } from "./sandwiches/GoodSandwiches.js";
+} from '../helperFunctions/CrossQueries.js';
+import { saveChunkedDataToExcel } from '../helperFunctions/Excel.js';
+import { getElementCountChunkedForArrayAndChunksize } from '../helperFunctions/QualityOfLifeStuff.js';
+import { getTvlForPoolArrFromChain } from '../postgresTables/Tvl.js';
+import { getIdByAddress, getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
+import { getTxIdByTxHash } from '../postgresTables/readFunctions/Transactions.js';
+import { oneInchVolThings, whatWasSwappedAnalytics } from './DefiMonitooor/DexAggregators/1Inch/oneInch.js';
+import { uniswapV3EntryPoint } from './DefiMonitooor/DexAggregators/uniswapV3/UniV3EntryPoint.js';
+import { aggregateCexDexBotVolumeOverTime, writeDBotVolOverTimeataToExcel } from './cexdex/BotVolOverTime.js';
+import { countCoinSwapsForBotAndPool } from './cexdex/ClusteredTxCoins.js';
+import { calculateTotalVolumeAndVolumePerBot } from './cexdex/GlobalVolume.js';
+import { barChartRace } from './curvefi/BarChartRace.js';
+import { gasUsageThings, getGasUsageFromCsvFile } from './curvefi/GasUsage.js';
+import { priceImpactThings } from './curvefi/PriceImpact.js';
+import { tvlThings } from './curvefi/Tvl.js';
+import {
+  calculateTotalVolumeForTransactionsInDb,
+  generateTopFromVolAddresses,
+  generateTopFromVolAddressesForSpecificToAddress,
+  generateTopToVolAddresses,
+  generateTopToVolAddressesForSelectedPools,
+  getSwapVolumeBucketsForPoolAndToAddress,
+  getSwapVolumeForPoolAndToAddressForEachSwapDirection,
+  getToAddressVolDistributionPerPools,
+} from './curvefi/Volume.js';
+import { profitableSandwichThings } from './sandwiches/GoodSandwiches.js';
 import {
   calculateLossStatistics,
   createSandwichLossInUsdJsonFile,
@@ -25,13 +38,14 @@ import {
   fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriod,
   fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriodAndCalledContract,
   mosRequest_SandwichVolShareDueToMisconfigRouters,
-} from "./sandwiches/Sandwiches.js";
+} from './sandwiches/Sandwiches.js';
 import {
   calculateAndSaveAggregateWeeklyVolumeReport,
   calculateAndSaveDailyAggregateVolumeReport,
   generateVolumeReportForPoolArr,
   generateVolumeReportForSinglePool,
-} from "./tricryptoVariations/VolFetch.js";
+} from './tricryptoVariations/VolFetch.js';
+import { generateVolumeReportForSinglePoolHighRes } from './tricryptoVariations/VolFetchHighRes.js';
 
 /*
 0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7 3Pool
@@ -47,46 +61,65 @@ import {
 */
 
 export async function research() {
-  const _3Pool = "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7";
-  const tricrypto2 = "0xd51a44d3fae010294c616388b506acda1bfaae46";
-  const tricryptoUSDT = "0xf5f5b97624542d72a9e06f04804bf81baa15e2b4";
-  const tricryptoUSDC = "0x7f86bf177dd4f3494b841a37e810a34dd56c829b";
-  const mkUSDUSDC_stableswap_ng = "0xF980B4A4194694913Af231De69AB4593f5E0fCDc";
-  const _210 = "0x0f3159811670c117c372428d4e69ac32325e4d0f";
-  const _52 = "0x9efe1a1cbd6ca51ee8319afc4573d253c3b732af";
+  const _3Pool = '0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7';
+  const tricrypto2 = '0xd51a44d3fae010294c616388b506acda1bfaae46';
+  const tricryptoUSDT = '0xf5f5b97624542d72a9e06f04804bf81baa15e2b4';
+  const tricryptoUSDC = '0x7f86bf177dd4f3494b841a37e810a34dd56c829b';
+  const mkUSDUSDC_stableswap_ng = '0xF980B4A4194694913Af231De69AB4593f5E0fCDc';
+  const _210 = '0x0f3159811670c117c372428d4e69ac32325e4d0f';
+  const _52 = '0x9efe1a1cbd6ca51ee8319afc4573d253c3b732af';
 
-  const ADDRESS_STABESWAP = "0xB9fC157394Af804a3578134A6585C0dc9cc990d4";
-  const ADDRESS_STABESWAP_NG = "0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf";
+  const _1InchV5 = '0x1111111254EEB25477B68fb85Ed929f73A960582';
+  const _1InchV6 = '0x111111125421cA6dc452d289314280a0f8842A65';
+  const curveRouterV1 = '0xF0d4c12A5768D806021F80a262B4d39d26C58b8D';
+  const CoWProtocolGPv2Settlement = '0x9008D19f58AAbD9eD0D60971565AA8510560ab41';
+
+  const ADDRESS_STABESWAP = '0xB9fC157394Af804a3578134A6585C0dc9cc990d4';
+  const ADDRESS_STABESWAP_NG = '0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf';
   const stableswapPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP);
   const stableswapNGPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP_NG);
 
-  const bitgetRouter = "0x1A8f43e01B78979EB4Ef7feBEC60F32c9A72f58E";
+  const bitgetRouter = '0x1A8f43e01B78979EB4Ef7feBEC60F32c9A72f58E';
 
-  const startDate = "2024-02-01";
-  const endDate = "2024-03-07";
+  const startDate = '2023-11-01';
+  const endDate = '2024-04-01';
 
-  console.log("conducting research");
+  const startBlockNumber = 19620526;
+  const endBlockNumber = 19625525;
 
+  // const startDate = "2021-01-01";
+  // const endDate = "2022-07-31";
+
+  console.log('conducting research');
+
+  // await uniswapV3EntryPoint()
+  // await oneInchVolThings();
+  // await whatWasSwappedAnalytics(_3Pool, CoWProtocolGPv2Settlement, startDate, endDate);
+  // await getSwapVolumeBucketsForPoolAndToAddress(_3Pool, _1InchV5, startDate, endDate);
+  // await getSwapVolumeForPoolAndToAddressForEachSwapDirection(_3Pool, _1InchV5, startDate, endDate);
+  // await getToAddressVolDistributionPerPools(_1InchV5, startDate, endDate);
   // await getTvlForPoolArrFromChain(stableswapNGPoolAddressArr, 19319850);
-  await generateVolumeReportForPoolArr();
+  // await generateVolumeReportForPoolArr();
   // await getGasUsageFromCsvFile();
   // await fetchSandwichUserLossForSomePoolsForTimePeriod(stableswapPoolAddressArr, startDate, endDate);
   // await profitableSandwichThings();
   // await gasUsageThings();
   // await createSandwichLossInUsdJsonFileFor2023();
   // await generateVolumeReportForSinglePool(_3Pool, startDate, endDate);
+  await generateVolumeReportForSinglePoolHighRes(_3Pool, startBlockNumber, endBlockNumber);
   // await barChartRace();
   // await priceImpactThings();
   // await tvlThings();
   // await fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriodAndCalledContract(tricrypto2, "2023-12-31", "2024-02-01", bitgetRouter);
   // await fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriod(tricrypto2, "2023-12-31", "2024-02-01");
   // await fetchSandwichUserLossForAllPoolsForTimePeriod("2023-12-31", "2024-02-01");
-  // await calculateAndSaveDailyAggregateVolumeReport("2023-12-31", "2024-02-01");
+  // await calculateAndSaveDailyAggregateVolumeReport(startDate, endDate);
   // await calculateAndSaveAggregateWeeklyVolumeReport(1692099809, 1703335409);
-  // await generateTopToVolAddressesForSelectedPools(stableswapNGPoolAddressArr, startDate, endDate);
+  // await generateTopToVolAddressesForSelectedPools([_3Pool], startDate, endDate);
   // await calculateLossStatistics();
   // await createSandwichLossInUsdJsonFile();
-  // await generateTopToVolAddresses(1692099809, 1703335409);
+  // await generateTopFromVolAddressesForSpecificToAddress(startDate, endDate, curveRouterV1);
+  // await generateTopToVolAddresses(startDate, endDate);
   // await generateTopFromVolAddresses(1692099809, 1703335409);
   // await calculateTotalVolumeAndVolumePerBot();
   // await calculateTotalVolumeForTransactionsInDb();
@@ -141,7 +174,7 @@ export async function research() {
 
   ///***///***///***///***///*** */ */ */ */ */
 
-  // await printSortedVolumeSummary();9
+  // await printSortedVolumeSummary();
   // await printCexDexPoolDistribution();
 
   // const cexdexbots = await countAndSortUniqueBotAddresses();

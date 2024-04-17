@@ -79,7 +79,7 @@ export async function countUniquePoolsForBot(botAddress: string): Promise<{ [poo
 }
 
 // Function to find the pool ID using the pool address (case insensitive)
-async function findPoolId(poolAddress: string): Promise<number | null> {
+export async function findPoolId(poolAddress: string): Promise<number | null> {
   const pool = await Pool.findOne({
     where: { address: { [Op.iLike]: poolAddress.toLowerCase() } },
   });

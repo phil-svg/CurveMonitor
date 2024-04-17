@@ -67,7 +67,7 @@ export async function countUniquePoolsForBot(botAddress) {
     return formattedAndSortedPoolNameCount;
 }
 // Function to find the pool ID using the pool address (case insensitive)
-async function findPoolId(poolAddress) {
+export async function findPoolId(poolAddress) {
     const pool = await Pool.findOne({
         where: { address: { [Op.iLike]: poolAddress.toLowerCase() } },
     });

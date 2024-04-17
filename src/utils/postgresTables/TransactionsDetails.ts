@@ -1,11 +1,12 @@
-import { Optional } from "sequelize";
-import { sequelize } from "../../config/Database.js";
-import _ from "lodash";
-import { Transactions } from "../../models/Transactions.js";
-import { getTxFromTxHash } from "../web3Calls/generic.js";
-import { getTxHashByTxId } from "./readFunctions/Transactions.js";
-import { TransactionDetails } from "../../models/TransactionDetails.js";
-import { logMemoryUsage, logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
+import { Optional } from 'sequelize';
+import { sequelize } from '../../config/Database.js';
+import _ from 'lodash';
+import { Transactions } from '../../models/Transactions.js';
+import { getTxFromTxHash } from '../web3Calls/generic.js';
+import { getAllTransactionIds, getTxHashByTxId } from './readFunctions/Transactions.js';
+import { TransactionDetails } from '../../models/TransactionDetails.js';
+import { logMemoryUsage, logProgress, updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { getAllTxIdsPresentInTransactionsDetails } from './readFunctions/TransactionDetails.js';
 
 export interface TransactionDetailsData {
   txId: number;
@@ -59,26 +60,10 @@ export async function solveSingleTdId(txId: number): Promise<TransactionDetailsC
 }
 
 async function getUnsolvedTransactions(): Promise<number[]> {
-  const query = `
-    SELECT 
-      t."tx_id" 
-    FROM 
-      "transactions" AS t
-      LEFT JOIN "transaction_details" AS td ON t."tx_id" = td."tx_id"
-    WHERE 
-      td."tx_id" IS NULL;
-  `;
+  const txIdsInTransactionsDetails = await getAllTxIdsPresentInTransactionsDetails();
+  const allTxIds = await getAllTransactionIds();
 
-  const [results, metadata] = await sequelize.query(query, { type: "SELECT" });
-
-  let unsolvedTransactions: number[] = [];
-
-  if (results && typeof results === "object" && "tx_id" in results) {
-    const txId = (results as { tx_id: number }).tx_id;
-    unsolvedTransactions.push(txId);
-  }
-
-  return unsolvedTransactions;
+  return _.difference(allTxIds, txIdsInTransactionsDetails);
 }
 
 export async function updateTransactionsDetails() {
@@ -104,11 +89,11 @@ export async function updateTransactionsDetails() {
       const end = new Date().getTime();
       totalTimeTaken += end - start;
 
-      logProgress("updating TransactionsDetails", 40, counter, totalTimeTaken, totalToBeProcessed);
+      logProgress('updating TransactionsDetails', 40, counter, totalTimeTaken, totalToBeProcessed);
     } catch (error) {
       console.error(`Error in chunk ${i + 1} of updateTransactionsDetails: ${error}`);
     }
   }
 
-  updateConsoleOutput("[✓] TransactionsDetails parsed successfully.\n");
+  updateConsoleOutput('[✓] TransactionsDetails parsed successfully.\n');
 }

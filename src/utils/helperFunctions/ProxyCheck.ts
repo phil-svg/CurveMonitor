@@ -1,20 +1,27 @@
-import { Op } from "sequelize";
-import { AbisEthereum } from "../../models/Abi.js";
-import { ProxyCheck } from "../../models/ProxyCheck.js";
-import { WEB3_HTTP_PROVIDER, web3Call, web3CallLogFree } from "../web3Calls/generic.js";
-import { fetchAbiFromEtherscan } from "../postgresTables/Abi.js";
-import { manualLaborProxyContracts } from "./ProxyContracts.js";
-import { getAbiFromAbisEthereumTable, readAbiFromAbisEthereumTable, storeAbiInDb } from "../postgresTables/readFunctions/Abi.js";
-import { NULL_ADDRESS } from "./Constants.js";
-import { createProxyCheckRecord, findContractInProxyCheck } from "../postgresTables/readFunctions/ProxyCheck.js";
-import { UnverifiedContracts } from "../../models/UnverifiedContracts.js";
-import { AbiItem } from "web3-utils";
+import { Op } from 'sequelize';
+import { AbisEthereum } from '../../models/Abi.js';
+import { ProxyCheck } from '../../models/ProxyCheck.js';
+import { WEB3_HTTP_PROVIDER, web3Call, web3CallLogFree } from '../web3Calls/generic.js';
+import { fetchAbiFromEtherscan } from '../postgresTables/Abi.js';
+import { manualLaborProxyContracts } from './ProxyContracts.js';
+import {
+  getAbiFromAbisEthereumTable,
+  readAbiFromAbisEthereumTable,
+  storeAbiInDb,
+} from '../postgresTables/readFunctions/Abi.js';
+import { NULL_ADDRESS } from './Constants.js';
+import { createProxyCheckRecord, findContractInProxyCheck } from '../postgresTables/readFunctions/ProxyCheck.js';
+import { UnverifiedContracts } from '../../models/UnverifiedContracts.js';
+import { AbiItem } from 'web3-utils';
 
-export async function getImplementationContractAddressErc1967(proxyAddress: string, JsonRpcProvider: any): Promise<string> {
-  const storagePosition = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
+export async function getImplementationContractAddressErc1967(
+  proxyAddress: string,
+  JsonRpcProvider: any
+): Promise<string> {
+  const storagePosition = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
   try {
     const implementationContractSlot = await JsonRpcProvider.getStorage(proxyAddress, storagePosition);
-    const implementationContractAddress = "0x" + implementationContractSlot.slice(26);
+    const implementationContractAddress = '0x' + implementationContractSlot.slice(26);
     return implementationContractAddress;
   } catch (err) {
     return NULL_ADDRESS;
@@ -25,20 +32,24 @@ export async function getImplementationContractAddressErc897(proxyAddress: strin
   const ERCProxyABI: AbiItem[] = [
     {
       inputs: [],
-      name: "implementation",
-      outputs: [{ internalType: "address", name: "", type: "address" }],
-      stateMutability: "view",
-      type: "function",
+      name: 'implementation',
+      outputs: [{ internalType: 'address', name: '', type: 'address' }],
+      stateMutability: 'view',
+      type: 'function',
     },
   ];
   const proxyContract = new WEB3_HTTP_PROVIDER.eth.Contract(ERCProxyABI, proxyAddress);
   // const implementationContractAddress = await web3Call(proxyContract, "implementation", []);
-  const implementationContractAddress = await web3CallLogFree(proxyContract, "implementation", []);
+  const implementationContractAddress = await web3CallLogFree(proxyContract, 'implementation', []);
 
   return implementationContractAddress;
 }
 
-async function updateExistingProxyRecordFromManualList(existingProxyRecord: any, implementationAddress: string, standardsToCheck: string[]) {
+async function updateExistingProxyRecordFromManualList(
+  existingProxyRecord: any,
+  implementationAddress: string,
+  standardsToCheck: string[]
+) {
   if (existingProxyRecord.implementation_address !== implementationAddress) {
     // Update the record if the implementation address is different
     existingProxyRecord.implementation_address = implementationAddress;
@@ -80,7 +91,7 @@ export async function updateProxiesFromManualList(): Promise<void> {
     const { proxyAddress, implementationAddress } = entry;
 
     const existingProxyRecord = await ProxyCheck.findOne({ where: { contractAddress: proxyAddress } });
-    const standardsToCheck = ["EIP_1967", "EIP_897", "IMPLEMENTATION_FUNCTION"];
+    const standardsToCheck = ['EIP_1967', 'EIP_897', 'IMPLEMENTATION_FUNCTION'];
 
     if (existingProxyRecord) {
       updateExistingProxyRecordFromManualList(existingProxyRecord, implementationAddress, standardsToCheck);
@@ -124,7 +135,12 @@ async function proxySearchWasDoneBefore(contractAddress: string): Promise<Boolea
   return false;
 }
 
-async function updateProxyCheckTable(contractAddress: string, isProxy: boolean, implementationAddress: string | null, standards: string[]) {
+async function updateProxyCheckTable(
+  contractAddress: string,
+  isProxy: boolean,
+  implementationAddress: string | null,
+  standards: string[]
+) {
   // Find the record first
   const existingRecord = await ProxyCheck.findOne({
     where: {
@@ -141,7 +157,7 @@ async function updateProxyCheckTable(contractAddress: string, isProxy: boolean, 
     try {
       await createProxyCheckRecord(contractAddress, isProxy, implementationAddress, standards);
     } catch (err) {
-      console.log("error in createProxyCheckRecord", err);
+      console.log('error in createProxyCheckRecord', err);
     }
   }
 }
@@ -149,7 +165,7 @@ async function updateProxyCheckTable(contractAddress: string, isProxy: boolean, 
 async function handleEIP1967(contractAddress: string, JsonRpcProvider: any): Promise<any | null> {
   const implementationAddress = await getImplementationContractAddressErc1967(contractAddress, JsonRpcProvider);
   if (implementationAddress !== NULL_ADDRESS) {
-    await updateProxyCheckTable(contractAddress, true, implementationAddress, ["EIP_1967"]);
+    await updateProxyCheckTable(contractAddress, true, implementationAddress, ['EIP_1967']);
     return fetchAbiFromEtherscan(implementationAddress);
   }
   return null;
@@ -158,7 +174,7 @@ async function handleEIP1967(contractAddress: string, JsonRpcProvider: any): Pro
 async function handleEIP897(contractAddress: string): Promise<any | null> {
   const implementationAddress = await getImplementationContractAddressErc897(contractAddress);
   if (implementationAddress) {
-    await updateProxyCheckTable(contractAddress, true, implementationAddress, ["EIP_1967", "EIP_897"]);
+    await updateProxyCheckTable(contractAddress, true, implementationAddress, ['EIP_1967', 'EIP_897']);
     return fetchAbiFromEtherscan(implementationAddress);
   }
   return null;
@@ -181,17 +197,23 @@ async function handleImplementationFunction(contractAddress: string): Promise<an
   if (!abi) return null;
 
   // Check if the ABI contains a function named "implementation"
-  const hasImplementationFunction = abi.some((entry: any) => entry.type === "function" && entry.name === "implementation");
+  const hasImplementationFunction = abi.some(
+    (entry: any) => entry.type === 'function' && entry.name === 'implementation'
+  );
 
   if (!hasImplementationFunction) return null;
 
   const contract = new WEB3_HTTP_PROVIDER.eth.Contract(abi, contractAddress);
 
   try {
-    const implementationAddress = await web3Call(contract, "implementation", []);
+    const implementationAddress = await web3Call(contract, 'implementation', []);
 
     if (implementationAddress) {
-      await updateProxyCheckTable(contractAddress, true, implementationAddress, ["EIP_1967", "EIP_897", "IMPLEMENTATION_FUNCTION"]);
+      await updateProxyCheckTable(contractAddress, true, implementationAddress, [
+        'EIP_1967',
+        'EIP_897',
+        'IMPLEMENTATION_FUNCTION',
+      ]);
       return fetchAbiFromEtherscan(implementationAddress);
     }
   } catch (err) {
@@ -212,7 +234,7 @@ async function handleNewProxyScan(contractAddress: string, JsonRpcProvider: any)
   result = await handleImplementationFunction(contractAddress);
   if (result) return result; // proxy spotted
 
-  await updateProxyCheckTable(contractAddress, false, null, ["EIP_1967", "EIP_897", "IMPLEMENTATION_FUNCTION"]);
+  await updateProxyCheckTable(contractAddress, false, null, ['EIP_1967', 'EIP_897', 'IMPLEMENTATION_FUNCTION']);
 }
 
 async function readAbiFromDb(contractAddress: string): Promise<any | null> {

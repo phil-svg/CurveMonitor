@@ -1,9 +1,9 @@
-import { sequelize } from "../../config/Database.js";
-import _ from "lodash";
-import { getTxFromTxHash } from "../web3Calls/generic.js";
-import { getTxHashByTxId } from "./readFunctions/Transactions.js";
-import { TransactionDetails } from "../../models/TransactionDetails.js";
-import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
+import _ from 'lodash';
+import { getTxFromTxHash } from '../web3Calls/generic.js';
+import { getAllTransactionIds, getTxHashByTxId } from './readFunctions/Transactions.js';
+import { TransactionDetails } from '../../models/TransactionDetails.js';
+import { logProgress, updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { getAllTxIdsPresentInTransactionsDetails } from './readFunctions/TransactionDetails.js';
 export async function solveSingleTdId(txId) {
     const txHash = await getTxHashByTxId(txId);
     if (!txHash)
@@ -33,22 +33,9 @@ export async function solveSingleTdId(txId) {
     };
 }
 async function getUnsolvedTransactions() {
-    const query = `
-    SELECT 
-      t."tx_id" 
-    FROM 
-      "transactions" AS t
-      LEFT JOIN "transaction_details" AS td ON t."tx_id" = td."tx_id"
-    WHERE 
-      td."tx_id" IS NULL;
-  `;
-    const [results, metadata] = await sequelize.query(query, { type: "SELECT" });
-    let unsolvedTransactions = [];
-    if (results && typeof results === "object" && "tx_id" in results) {
-        const txId = results.tx_id;
-        unsolvedTransactions.push(txId);
-    }
-    return unsolvedTransactions;
+    const txIdsInTransactionsDetails = await getAllTxIdsPresentInTransactionsDetails();
+    const allTxIds = await getAllTransactionIds();
+    return _.difference(allTxIds, txIdsInTransactionsDetails);
 }
 export async function updateTransactionsDetails() {
     let unsolvedTxIds = await getUnsolvedTransactions();
@@ -66,12 +53,12 @@ export async function updateTransactionsDetails() {
             let totalToBeProcessed = transactionChunks.length;
             const end = new Date().getTime();
             totalTimeTaken += end - start;
-            logProgress("updating TransactionsDetails", 40, counter, totalTimeTaken, totalToBeProcessed);
+            logProgress('updating TransactionsDetails', 40, counter, totalTimeTaken, totalToBeProcessed);
         }
         catch (error) {
             console.error(`Error in chunk ${i + 1} of updateTransactionsDetails: ${error}`);
         }
     }
-    updateConsoleOutput("[✓] TransactionsDetails parsed successfully.\n");
+    updateConsoleOutput('[✓] TransactionsDetails parsed successfully.\n');
 }
 //# sourceMappingURL=TransactionsDetails.js.map
