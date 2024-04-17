@@ -1,4 +1,4 @@
-import { Optional } from 'sequelize';
+import { Optional, QueryTypes } from 'sequelize';
 import { sequelize } from '../../config/Database.js';
 import _ from 'lodash';
 import { Transactions } from '../../models/Transactions.js';
@@ -59,15 +59,26 @@ export async function solveSingleTdId(txId: number): Promise<TransactionDetailsC
   };
 }
 
-async function getUnsolvedTransactions(): Promise<number[]> {
-  const txIdsInTransactionsDetails = await getAllTxIdsPresentInTransactionsDetails();
-  const allTxIds = await getAllTransactionIds();
+export async function getUnsolvedTransactionsForTxDetails(): Promise<number[]> {
+  const query = `
+        SELECT t.tx_id
+        FROM transactions t
+        LEFT JOIN transaction_details td ON t.tx_id = td.tx_id
+        WHERE td.tx_id IS NULL
+        ORDER BY t.tx_id ASC;
+    `;
 
-  return _.difference(allTxIds, txIdsInTransactionsDetails);
+  const result = await sequelize.query(query, {
+    type: QueryTypes.SELECT,
+    raw: true,
+  });
+
+  // Map the result to return an array of transaction IDs only
+  return result.map((row: any) => row.tx_id);
 }
 
 export async function updateTransactionsDetails() {
-  let unsolvedTxIds = await getUnsolvedTransactions();
+  let unsolvedTxIds = await getUnsolvedTransactionsForTxDetails();
 
   const chunkSize = 6;
   const transactionChunks = _.chunk(unsolvedTxIds, chunkSize);

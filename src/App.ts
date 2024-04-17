@@ -87,7 +87,6 @@ export async function main() {
   await populateTransactionCoinsWithDollarValues();
   await parseEvents();
   await updateTransactionsDetails();
-
   await updateSandwichDetection();
 
   eventFlags.canEmitSandwich = true;
