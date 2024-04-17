@@ -1,16 +1,27 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey, AutoIncrement, AllowNull } from "sequelize-typescript";
-import { Transactions } from "./Transactions.js";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+  PrimaryKey,
+  AutoIncrement,
+  AllowNull,
+  Index,
+} from 'sequelize-typescript';
+import { Transactions } from './Transactions.js';
 
 @Table({
-  tableName: "receipts",
+  tableName: 'receipts',
   indexes: [
     {
-      fields: ["transactionHash"],
-      name: "transactionHash_idx",
+      fields: ['transactionHash'],
+      name: 'transactionHash_idx',
     },
   ],
 })
-@Table({ tableName: "receipts" })
+@Table({ tableName: 'receipts' })
 export class Receipts extends Model {
   @AutoIncrement
   @PrimaryKey
@@ -18,6 +29,7 @@ export class Receipts extends Model {
   receipt_id!: number;
 
   @ForeignKey(() => Transactions)
+  @Index
   @Column(DataType.INTEGER)
   tx_id!: number;
 
@@ -27,6 +39,7 @@ export class Receipts extends Model {
   @Column(DataType.STRING)
   blockHash!: string;
 
+  @Index
   @Column(DataType.STRING)
   blockNumber!: string;
 
@@ -79,6 +92,6 @@ export class Receipts extends Model {
   @Column(DataType.STRING)
   type!: string;
 
-  @BelongsTo(() => Transactions, "tx_id")
+  @BelongsTo(() => Transactions, 'tx_id')
   transaction!: Transactions;
 }

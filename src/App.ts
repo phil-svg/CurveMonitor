@@ -37,7 +37,6 @@ import {
 } from './utils/goingLive/WebsocketConnectivityChecks.js';
 import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
-import { countEvents } from './utils/postgresTables/readFunctions/RawLogs.js';
 
 export async function initDatabase() {
   try {
@@ -47,7 +46,8 @@ export async function initDatabase() {
     console.error('Error syncing database:', err);
   }
 }
-// await initDatabase();
+
+await initDatabase();
 
 // await updateProxiesFromManualList()
 

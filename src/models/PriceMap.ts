@@ -1,14 +1,14 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Index } from "sequelize-typescript";
-import { Coins } from "./Coins.js";
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Index } from 'sequelize-typescript';
+import { Coins } from './Coins.js';
 
 @Table({
-  tableName: "price_map",
+  tableName: 'price_map',
 })
 export class PriceMap extends Model {
   @Index
   @ForeignKey(() => Coins)
   @Column({
-    field: "coin_id",
+    field: 'coin_id',
     type: DataType.INTEGER,
     allowNull: false,
   })
@@ -18,13 +18,13 @@ export class PriceMap extends Model {
   coin!: Coins;
 
   @Column({
-    field: "coin_price_usd",
+    field: 'coin_price_usd',
     type: DataType.DECIMAL(20, 10),
     allowNull: false,
     validate: {
       isLessThanOneBillion(value: number) {
         if (value >= 1e9) {
-          throw new Error("coinPriceUsd must be less than 1 billion USD");
+          throw new Error('coinPriceUsd must be less than 1 billion USD');
         }
       },
     },
@@ -32,7 +32,7 @@ export class PriceMap extends Model {
   coinPriceUsd!: number;
 
   @Column({
-    field: "price_timestamp",
+    field: 'price_timestamp',
     type: DataType.INTEGER,
     allowNull: false,
   })

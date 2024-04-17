@@ -4,8 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey, AutoIncrement, AllowNull } from "sequelize-typescript";
-import { Transactions } from "./Transactions.js";
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey, AutoIncrement, AllowNull, Index, } from 'sequelize-typescript';
+import { Transactions } from './Transactions.js';
 let Receipts = class Receipts extends Model {
 };
 __decorate([
@@ -15,6 +15,7 @@ __decorate([
 ], Receipts.prototype, "receipt_id", void 0);
 __decorate([
     ForeignKey(() => Transactions),
+    Index,
     Column(DataType.INTEGER)
 ], Receipts.prototype, "tx_id", void 0);
 __decorate([
@@ -24,6 +25,7 @@ __decorate([
     Column(DataType.STRING)
 ], Receipts.prototype, "blockHash", void 0);
 __decorate([
+    Index,
     Column(DataType.STRING)
 ], Receipts.prototype, "blockNumber", void 0);
 __decorate([
@@ -76,19 +78,19 @@ __decorate([
     Column(DataType.STRING)
 ], Receipts.prototype, "type", void 0);
 __decorate([
-    BelongsTo(() => Transactions, "tx_id")
+    BelongsTo(() => Transactions, 'tx_id')
 ], Receipts.prototype, "transaction", void 0);
 Receipts = __decorate([
     Table({
-        tableName: "receipts",
+        tableName: 'receipts',
         indexes: [
             {
-                fields: ["transactionHash"],
-                name: "transactionHash_idx",
+                fields: ['transactionHash'],
+                name: 'transactionHash_idx',
             },
         ],
     }),
-    Table({ tableName: "receipts" })
+    Table({ tableName: 'receipts' })
 ], Receipts);
 export { Receipts };
 //# sourceMappingURL=Receipts.js.map

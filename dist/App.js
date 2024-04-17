@@ -35,7 +35,7 @@ export async function initDatabase() {
         console.error('Error syncing database:', err);
     }
 }
-// await initDatabase();
+await initDatabase();
 // await updateProxiesFromManualList()
 startAPI();
 export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.

@@ -1,12 +1,12 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey } from "sequelize-typescript";
-import { Transactions } from "./Transactions.js";
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey, Index } from 'sequelize-typescript';
+import { Transactions } from './Transactions.js';
 
-@Table({ tableName: "transaction_details" })
+@Table({ tableName: 'transaction_details' })
 export class TransactionDetails extends Model {
   @PrimaryKey
   @ForeignKey(() => Transactions)
   @Column({
-    field: "tx_id",
+    field: 'tx_id',
     type: DataType.INTEGER,
   })
   txId!: number;
@@ -14,15 +14,18 @@ export class TransactionDetails extends Model {
   @Column(DataType.STRING)
   blockHash!: string;
 
+  @Index
   @Column(DataType.INTEGER)
   blockNumber!: number;
 
+  @Index
   @Column(DataType.STRING)
   hash!: string;
 
   @Column(DataType.STRING)
   chainId!: string;
 
+  @Index
   @Column(DataType.STRING)
   from!: string;
 
@@ -44,6 +47,7 @@ export class TransactionDetails extends Model {
   @Column(DataType.STRING)
   s!: string;
 
+  @Index
   @Column(DataType.STRING)
   to!: string;
 
@@ -56,9 +60,10 @@ export class TransactionDetails extends Model {
   @Column(DataType.STRING)
   v!: string;
 
+  @Index
   @Column(DataType.STRING)
   value!: string;
 
-  @BelongsTo(() => Transactions, "txId")
+  @BelongsTo(() => Transactions, 'txId')
   transaction!: Transactions;
 }
