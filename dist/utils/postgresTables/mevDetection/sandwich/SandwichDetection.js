@@ -1,8 +1,8 @@
-import { fetchTransactionsBatch, getTotalTransactionsCount } from "../../readFunctions/Transactions.js";
-import { addAddressesForLabeling, enrichCandidateWithCoinInfo, removeProcessedTransactions } from "./SandwichUtils.js";
-import { screenCandidate } from "./SandwichCandidateScreening.js";
-import { logProgress, updateConsoleOutput } from "../../../helperFunctions/QualityOfLifeStuff.js";
-import { IsSandwich } from "../../../../models/IsSandwich.js";
+import { fetchTransactionsBatch, getTotalTransactionsCount } from '../../readFunctions/Transactions.js';
+import { addAddressesForLabeling, enrichCandidateWithCoinInfo, removeProcessedTransactions } from './SandwichUtils.js';
+import { screenCandidate } from './SandwichCandidateScreening.js';
+import { logProgress, updateConsoleOutput } from '../../../helperFunctions/QualityOfLifeStuff.js';
+import { IsSandwich } from '../../../../models/IsSandwich.js';
 export async function updateSandwichFlagForSingleTx(txID, isSandwich) {
     try {
         await IsSandwich.upsert({
@@ -25,12 +25,12 @@ export async function updateSandwichFlagForSingleTx(txID, isSandwich) {
 // queries the db, and runs the parsed tx in batches through the detection process.
 async function detectSandwichesInAllTransactions() {
     let totalTransactionsCount = await getTotalTransactionsCount();
-    const BATCH_SIZE = 4000000; // works locally, fries the server
-    // const BATCH_SIZE = 100000;
+    // const BATCH_SIZE = 4000000; // works locally, fries the server
+    const BATCH_SIZE = 100000;
     let offset = 0;
     let totalTimeTaken = 0;
     const sandwichFlags = await IsSandwich.findAll({
-        attributes: ["tx_id"],
+        attributes: ['tx_id'],
     });
     while (true) {
         const start = new Date().getTime();
@@ -42,7 +42,7 @@ async function detectSandwichesInAllTransactions() {
         offset += BATCH_SIZE;
         const end = new Date().getTime();
         totalTimeTaken += end - start;
-        logProgress("Sandwich-Detection", 1, offset, totalTimeTaken, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
+        logProgress('Sandwich-Detection', 1, offset, totalTimeTaken, BATCH_SIZE * Math.ceil(totalTransactionsCount / BATCH_SIZE));
     }
 }
 // filters the batches for multiple tx in the same pool in the same block. Runs the filtered data further down the detection process.
@@ -73,7 +73,7 @@ async function searchInCandidatesClusterForSandwiches(groups) {
 export async function scanCandidate(candidate) {
     let enrichedCandidate = await enrichCandidateWithCoinInfo(candidate);
     if (!enrichedCandidate) {
-        console.log("Failed to enrich Condidate", candidate);
+        console.log('Failed to enrich Condidate', candidate);
         return;
     }
     await screenCandidate(enrichedCandidate);
@@ -81,6 +81,6 @@ export async function scanCandidate(candidate) {
 export async function updateSandwichDetection() {
     await detectSandwichesInAllTransactions();
     await addAddressesForLabeling();
-    updateConsoleOutput("[✓] Sandwich-Detection completed successfully.\n");
+    updateConsoleOutput('[✓] Sandwich-Detection completed successfully.\n');
 }
 //# sourceMappingURL=SandwichDetection.js.map
