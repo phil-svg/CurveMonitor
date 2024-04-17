@@ -1,28 +1,41 @@
-import { Blocks } from "../../models/Blocks.js";
-import { fetchAllDistinctBlockNumbers } from "../postgresTables/readFunctions/RawLogs.js";
-import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
-import { fetchBlockNumbers } from "../postgresTables/readFunctions/Blocks.js";
-import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
+import { Blocks } from '../../models/Blocks.js';
+import { fetchAllDistinctBlockNumbers } from '../postgresTables/readFunctions/RawLogs.js';
+import { updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { fetchBlockNumbers } from '../postgresTables/readFunctions/Blocks.js';
+import { getBlockTimestamps } from '../subgraph/Blocktimestamps.js';
+import { sequelize } from '../../config/Database.js';
 
 export async function writeBlock(block_number: number, timestamp: number): Promise<void> {
   await Blocks.upsert({ block_number, timestamp });
 }
 
 export async function writeBlocks(blocks: { block_number: number; timestamp: number }[]): Promise<void> {
-  const uniqueBlocks = Array.from(new Map(blocks.map((item) => [item["block_number"], item])).values());
+  const uniqueBlocks = Array.from(new Map(blocks.map((item) => [item['block_number'], item])).values());
   await Blocks.bulkCreate(uniqueBlocks, {
-    updateOnDuplicate: ["timestamp"],
+    updateOnDuplicate: ['timestamp'],
   });
 }
 
+export async function getAllBlockNumbersToFetchForTimestamps() {
+  const query = `
+        SELECT DISTINCT r.block_number
+        FROM raw_tx_logs AS r
+        LEFT JOIN blocks AS b ON r.block_number = b.block_number
+        WHERE b.block_number IS NULL
+        ORDER BY r.block_number ASC;
+    `;
+
+  const [result] = await sequelize.query(query);
+
+  // Map the result to return an array of block numbers only
+  return result.map((row: any) => row.block_number);
+}
+
 async function main() {
-  const storedBlockNumbers = await fetchBlockNumbers();
-  const allBlockNumbers = await fetchAllDistinctBlockNumbers();
-  const storedBlockNumbersSet = new Set(storedBlockNumbers);
-  const BLOCK_NUMBERS = allBlockNumbers.filter((blockNumber) => !storedBlockNumbersSet.has(blockNumber));
+  const blockNumbersToFetch = await getAllBlockNumbersToFetchForTimestamps();
 
   // Fetch the block timestamps from The Graph
-  const blocks = await getBlockTimestamps(BLOCK_NUMBERS);
+  const blocks = await getBlockTimestamps(blockNumbersToFetch);
 
   // Prepare the data for bulk insertion
   const blocksForInsertion = blocks.map((block) => ({
@@ -36,5 +49,5 @@ async function main() {
 
 export async function updateBlockTimestamps(): Promise<void> {
   await main();
-  updateConsoleOutput("[✓] Timestamps synced successfully.\n");
+  updateConsoleOutput('[✓] Timestamps synced successfully.\n');
 }
