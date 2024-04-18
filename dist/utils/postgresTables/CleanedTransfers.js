@@ -1,13 +1,14 @@
 import { TokenTransfers } from '../../models/CleanedTransfers.js';
 import { filterForCorrectTransfers, getCleanedTransfers } from './mevDetection/atomic/atomicArb.js';
-import { getAllTxIdsFromCleanedTransfers } from './readFunctions/CleanedTransfers.js';
 import { extractTransactionAddresses, getTransactionDetails } from './readFunctions/TransactionDetails.js';
-import { getAllTransactionIds, getTxHashByTxId } from './readFunctions/Transactions.js';
+import { getTxHashByTxId } from './readFunctions/Transactions.js';
 import { logProgress } from '../helperFunctions/QualityOfLifeStuff.js';
 import { getTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
 import { updateAbisFromTrace } from '../helperFunctions/Abi.js';
 import { getTokenTransfersFromTransactionTrace, makeTransfersReadable, mergeAndFilterTransfers, removeDuplicatesAndUpdatePositions, updateTransferList, } from '../txMap/TransferOverview.js';
 import { parseEventsFromReceiptForEntireTxWithoutDbUsage } from '../txMap/Events.js';
+import { sequelize } from '../../config/Database.js';
+import { QueryTypes } from 'sequelize';
 export async function insertTokenTransfers(txId, transfers) {
     try {
         await TokenTransfers.upsert({
@@ -34,11 +35,22 @@ export async function solveCleanTransfersForTx(txId) {
         return null;
     return cleanedTransfers;
 }
+async function getToDoTxIdsForCleanTransfers() {
+    const query = `
+    SELECT t.tx_id
+    FROM transactions t
+    LEFT JOIN token_transfers tt ON t.tx_id = tt.tx_id
+    WHERE tt.tx_id IS NULL
+    ORDER BY t.tx_id ASC;
+  `;
+    const result = await sequelize.query(query, {
+        type: QueryTypes.SELECT,
+        raw: true,
+    });
+    return result.map((item) => item.tx_id);
+}
 export async function updateCleanedTransfers() {
-    const transactionIds = await getAllTransactionIds();
-    const allSolvedTransferTxIds = await getAllTxIdsFromCleanedTransfers();
-    const solvedTransferTxIdsSet = new Set(allSolvedTransferTxIds);
-    const todoTransactionIds = transactionIds.filter((txId) => !solvedTransferTxIdsSet.has(txId));
+    const todoTransactionIds = await getToDoTxIdsForCleanTransfers();
     let counter = 0;
     let totalTimeTaken = 0;
     const totalToBeProcessed = todoTransactionIds.length;

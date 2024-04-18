@@ -68,7 +68,7 @@ export async function subscribeToAddress(address: string) {
   const subscription = contract.events
     .allEvents({ fromBlock: 'latest' })
     .on('data', async (event: any) => {
-      console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
+      // console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
       // lastEventTime = Date.now();
       await storeEvent(event, poolId);
       bufferEvent(address, event);

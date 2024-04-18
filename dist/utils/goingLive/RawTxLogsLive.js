@@ -21,7 +21,6 @@ import { fetchTransactionsForBlock } from '../postgresTables/readFunctions/Trans
 import { sortAndProcess } from '../postgresTables/txParsing/ParseTx.js';
 import { retryGetTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
 import eventEmitter from './EventEmitter.js';
-import { getCurrentFormattedTime } from '../helperFunctions/QualityOfLifeStuff.js';
 import EventEmitter from './EventEmitter.js';
 // when histo-parsing is finished, subscribe to new events.
 export async function preparingLiveModeForRawEvents() {
@@ -58,7 +57,7 @@ export async function subscribeToAddress(address) {
     const subscription = contract.events
         .allEvents({ fromBlock: 'latest' })
         .on('data', async (event) => {
-        console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
+        // console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
         // lastEventTime = Date.now();
         await storeEvent(event, poolId);
         bufferEvent(address, event);

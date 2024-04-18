@@ -15,6 +15,8 @@ import {
   updateTransferList,
 } from '../txMap/TransferOverview.js';
 import { parseEventsFromReceiptForEntireTx, parseEventsFromReceiptForEntireTxWithoutDbUsage } from '../txMap/Events.js';
+import { sequelize } from '../../config/Database.js';
+import { QueryTypes } from 'sequelize';
 
 export async function insertTokenTransfers(txId: number, transfers: ReadableTokenTransfer[]): Promise<void> {
   try {
@@ -43,11 +45,25 @@ export async function solveCleanTransfersForTx(txId: number): Promise<ReadableTo
   return cleanedTransfers;
 }
 
+async function getToDoTxIdsForCleanTransfers(): Promise<number[]> {
+  const query = `
+    SELECT t.tx_id
+    FROM transactions t
+    LEFT JOIN token_transfers tt ON t.tx_id = tt.tx_id
+    WHERE tt.tx_id IS NULL
+    ORDER BY t.tx_id ASC;
+  `;
+
+  const result = await sequelize.query(query, {
+    type: QueryTypes.SELECT,
+    raw: true,
+  });
+
+  return result.map((item: any) => item.tx_id);
+}
+
 export async function updateCleanedTransfers() {
-  const transactionIds = await getAllTransactionIds();
-  const allSolvedTransferTxIds = await getAllTxIdsFromCleanedTransfers();
-  const solvedTransferTxIdsSet = new Set(allSolvedTransferTxIds);
-  const todoTransactionIds = transactionIds.filter((txId) => !solvedTransferTxIdsSet.has(txId));
+  const todoTransactionIds = await getToDoTxIdsForCleanTransfers();
 
   let counter = 0;
   let totalTimeTaken = 0;
