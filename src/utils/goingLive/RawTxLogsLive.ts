@@ -180,6 +180,8 @@ async function processBufferedEvents() {
       continue;
     }
 
+    /*
+
     // parsing the entire tx:
     const cleanedTransfers = await solveCleanTransfersForTx(txId, tx.tx_hash);
     if (!cleanedTransfers) continue;
@@ -203,6 +205,8 @@ async function processBufferedEvents() {
         await processSinglCexDexTxId(txId);
       }
     }
+
+    */
 
     processedTxHashes.add(tx.tx_hash.toLowerCase());
   }
