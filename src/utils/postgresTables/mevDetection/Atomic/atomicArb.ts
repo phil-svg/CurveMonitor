@@ -11,7 +11,7 @@ import { extractTransactionAddresses, getTransactionDetails } from '../../readFu
 import { getTransactionTraceFromDb } from '../../readFunctions/TransactionTrace.js';
 import { getAllTransactionIds, getTxHashByTxId, getTxIdByTxHash } from '../../readFunctions/Transactions.js';
 import { solveAtomicArb } from './utils/atomicArbDetection.js';
-import { clearAbiCache, logProgress } from '../../../helperFunctions/QualityOfLifeStuff.js';
+import { logProgress } from '../../../helperFunctions/QualityOfLifeStuff.js';
 import { ReadableTokenTransfer, TransactionDetailsForAtomicArbs } from '../../../Interfaces.js';
 import { getTransactionTraceViaWeb3Provider } from '../../../web3Calls/generic.js';
 import { saveTransactionTrace } from '../../TransactionTraces.js';
@@ -100,8 +100,6 @@ export async function fetchDataThenDetectArb(
   // console.log("cleanedTransfers", cleanedTransfers);
 
   const atomicArbDetails = await solveAtomicArb(txId, txHash!, cleanedTransfers, from, to);
-
-  clearAbiCache();
 
   return atomicArbDetails;
 }

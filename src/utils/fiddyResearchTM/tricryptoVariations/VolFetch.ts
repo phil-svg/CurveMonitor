@@ -51,14 +51,11 @@ function aggregateVolumes(aggregate: { [day: string]: number }, dailyVolumes: { 
   });
 }
 
-export async function generateVolumeReportForPoolArr(): Promise<void> {
+export async function generateVolumeReportForPoolArr(startDate: string, endDate: string): Promise<void> {
   const ADDRESS_STABESWAP = '0xB9fC157394Af804a3578134A6585C0dc9cc990d4';
   const ADDRESS_STABESWAP_NG = '0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf';
   const stableswapPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP);
   const stableswapNGPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP_NG);
-
-  const startDate = '2024-03-01';
-  const endDate = '2024-03-18';
 
   const startUnixTime = new Date(startDate).getTime() / 1000;
   const endUnixTime = new Date(endDate).getTime() / 1000;

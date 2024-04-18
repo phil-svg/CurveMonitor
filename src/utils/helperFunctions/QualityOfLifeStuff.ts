@@ -1,6 +1,5 @@
 import { addMinutes, differenceInMinutes, format } from 'date-fns';
 import * as readline from 'readline';
-import { abiCache } from './MethodID.js';
 
 export function updateConsoleOutput(message: string, yOffset: number = 0): void {
   readline.moveCursor(process.stdout, 0, yOffset);
@@ -91,12 +90,6 @@ export class RateLimiter {
     this.callsThisInterval++;
     return await fn();
   }
-}
-
-export function clearAbiCache() {
-  Object.keys(abiCache).forEach((key) => {
-    delete abiCache[key];
-  });
 }
 
 export function getCurrentFormattedTime(): string {

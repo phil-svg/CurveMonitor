@@ -1,7 +1,6 @@
 import { TokenTransfers } from '../../models/CleanedTransfers.js';
 import { filterForCorrectTransfers, getCleanedTransfers } from './mevDetection/atomic/atomicArb.js';
-import { getToAddressByTxId } from './readFunctions/TransactionDetails.js';
-import { getTxHashByTxId } from './readFunctions/Transactions.js';
+import { getToAddressByTxId, getTxIdsWhereToIsNull } from './readFunctions/TransactionDetails.js';
 import { logProgress } from '../helperFunctions/QualityOfLifeStuff.js';
 import { getTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
 import { updateAbisFromTrace } from '../helperFunctions/Abi.js';
@@ -31,7 +30,7 @@ export async function solveCleanTransfersForTx(txId, txHash) {
 }
 async function getToDoTxIdsForCleanTransfers() {
     const query = `
-    SELECT t.tx_id
+    SELECT t.tx_id, t.tx_hash
     FROM transactions t
     LEFT JOIN token_transfers tt ON t.tx_id = tt.tx_id
     WHERE tt.tx_id IS NULL
@@ -41,21 +40,26 @@ async function getToDoTxIdsForCleanTransfers() {
         type: QueryTypes.SELECT,
         raw: true,
     });
-    return result.map((item) => item.tx_id);
+    // Map the result to return an array of objects with txId and txHash
+    return result.map((item) => ({
+        txId: item.tx_id,
+        txHash: item.tx_hash,
+    }));
 }
 export async function updateCleanedTransfers() {
-    const todoTransactionIds = await getToDoTxIdsForCleanTransfers();
+    const todoTransactions = await getToDoTxIdsForCleanTransfers();
+    const txIdsWhereToIsNull = await getTxIdsWhereToIsNull();
+    const txIdsSet = new Set(txIdsWhereToIsNull.map((tx) => tx.txId));
+    const filteredTodoTx = todoTransactions.filter((transaction) => !txIdsSet.has(transaction.txId));
     let counter = 0;
     let totalTimeTaken = 0;
-    const totalToBeProcessed = todoTransactionIds.length;
+    const totalToBeProcessed = filteredTodoTx.length;
     let cleanedTransfersCache = {};
-    // console.log("Solving", totalToBeProcessed, "Transfers");
-    for (const txId of todoTransactionIds) {
+    for (const transaction of filteredTodoTx) {
+        const txId = transaction.txId;
+        const txHash = transaction.txHash;
         counter++;
         const start = new Date().getTime();
-        const txHash = await getTxHashByTxId(txId);
-        if (!txHash)
-            continue;
         let cleanedTransfers;
         // Check if the txHash already has cleanedTransfers in cache
         if (cleanedTransfersCache[txHash]) {

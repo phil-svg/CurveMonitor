@@ -1,5 +1,6 @@
-import { Op, Sequelize } from 'sequelize';
+import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { TransactionDetails } from '../../../models/TransactionDetails.js';
+import { sequelize } from '../../../config/Database.js';
 export async function getFromAddress(txId) {
     const transactionDetails = await TransactionDetails.findByPk(txId);
     if (transactionDetails) {
@@ -156,6 +157,31 @@ export async function getAddressOccurrenceCounts() {
     }
     catch (error) {
         console.error('Error fetching address occurrence counts:', error);
+        return [];
+    }
+}
+/**
+ * Fetches all transaction IDs from TransactionDetails where the 'to' field is null.
+ * @returns A Promise resolving to an array of objects containing txIds.
+ */
+export async function getTxIdsWhereToIsNull() {
+    const query = `
+    SELECT tx_id
+    FROM transaction_details
+    WHERE "to" IS NULL
+    ORDER BY tx_id ASC;
+  `;
+    try {
+        const result = await sequelize.query(query, {
+            type: QueryTypes.SELECT,
+            raw: true,
+        });
+        return result.map((item) => ({
+            txId: item.tx_id,
+        }));
+    }
+    catch (error) {
+        console.error(`Error fetching transaction IDs where 'to' is null: ${error}`);
         return [];
     }
 }

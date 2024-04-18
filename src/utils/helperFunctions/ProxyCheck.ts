@@ -269,9 +269,6 @@ export async function fetchAbiFromEtherscanOnly(contractAddress: string): Promis
  * @returns The ABI as a JSON array.
  */
 export async function updateAbiIWithProxyCheck(contractAddress: string, JsonRpcProvider: any): Promise<any> {
-  let wasProcessed = await proxySearchWasDoneBefore(contractAddress);
-  if (wasProcessed) return;
-
   const contractAddressLower = contractAddress.toLowerCase(); // Convert contract address to lowercase
 
   const existingAbi = await readAbiFromDb(contractAddressLower);
@@ -279,19 +276,14 @@ export async function updateAbiIWithProxyCheck(contractAddress: string, JsonRpcP
     return existingAbi;
   }
 
+  let wasProcessed = await proxySearchWasDoneBefore(contractAddress);
+  if (wasProcessed) return;
+
   const contractRecord = await findContractInProxyCheck(contractAddressLower);
   if (contractRecord && contractRecord.is_proxy_contract) {
     let abi = await handleExistingProxyContract(contractRecord);
     return abi;
   }
-  // if (contractRecord) {
-  //   if (contractRecord.is_proxy_contract) {
-  //     let abi = await handleExistingProxyContract(contractRecord);
-  //     return abi;
-  //   } else {
-  //     return null;
-  //   }
-  // }
 
   // Check if contractAddress exists in the UnverifiedContracts table, case insensitively
   const unverifiedContract = await UnverifiedContracts.findOne({

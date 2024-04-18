@@ -2,7 +2,6 @@ import { ETH_ADDRESS, NULL_ADDRESS, WETH_ADDRESS } from '../helperFunctions/Cons
 import { getMethodId } from '../helperFunctions/MethodID.js';
 import { checkTokensInDatabase } from './TransferCategories.js';
 import { findCoinDecimalsById, getCoinIdByAddress, findCoinSymbolById } from '../postgresTables/readFunctions/Coins.js';
-import { ethers } from 'ethers';
 import { ERC20_METHODS } from '../helperFunctions/Erc20Abis.js';
 export function updateTransferList(readableTransfers, to) {
     // console.log("readableTransfers", readableTransfers);
@@ -304,7 +303,6 @@ function handleDepositMethod(action, trace, tokenTransfers) {
 }
 export async function getTokenTransfersFromTransactionTrace(transactionTraces) {
     const tokenTransfers = [];
-    const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP_MAINNET);
     const localMethodIdCache = {};
     const uniqueContractAddresses = new Set(transactionTraces
         .filter((trace) => trace.action.input !== '0x' || trace.action.value !== '0x0' || (trace.result && trace.result.output !== '0x'))
@@ -312,7 +310,7 @@ export async function getTokenTransfersFromTransactionTrace(transactionTraces) {
         .filter((address) => address !== null));
     for (const contractAddress of uniqueContractAddresses) {
         if (!localMethodIdCache[contractAddress]) {
-            const fetchedMethodIds = await getMethodId(contractAddress, JsonRpcProvider);
+            const fetchedMethodIds = await getMethodId(contractAddress);
             localMethodIdCache[contractAddress] = fetchedMethodIds || [];
         }
     }
@@ -320,12 +318,12 @@ export async function getTokenTransfersFromTransactionTrace(transactionTraces) {
         const contractAddress = txTrace.action.to ? txTrace.action.to.toLowerCase() : null;
         if (contractAddress) {
             const methodIds = localMethodIdCache[contractAddress] || [];
-            await extractTokenTransfers(txTrace, tokenTransfers, JsonRpcProvider, methodIds);
+            await extractTokenTransfers(txTrace, tokenTransfers, methodIds);
         }
     }
     return tokenTransfers;
 }
-async function extractTokenTransfers(trace, tokenTransfers, JsonRpcProvider, methodIds) {
+async function extractTokenTransfers(trace, tokenTransfers, methodIds) {
     const contractAddress = trace.action.to ? trace.action.to.toLowerCase() : null;
     if (!contractAddress)
         return;
@@ -349,7 +347,7 @@ async function extractTokenTransfers(trace, tokenTransfers, JsonRpcProvider, met
     // Recursively extract token transfers from subtraces
     if (trace.subtraces && Array.isArray(trace.subtraces)) {
         for (const subtrace of trace.subtraces) {
-            await extractTokenTransfers(subtrace, tokenTransfers, JsonRpcProvider, methodIds);
+            await extractTokenTransfers(subtrace, tokenTransfers, methodIds);
         }
     }
 }

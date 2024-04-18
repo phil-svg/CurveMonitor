@@ -24,7 +24,7 @@ import { updateContractCreations } from './utils/postgresTables/ContractCreation
 import { updatePriceMap } from './utils/postgresTables/PriceMap.js';
 import { populateTransactionCoinsWithDollarValues } from './utils/postgresTables/TransactionCoins.js';
 import { updateCexDexArbDetection } from './utils/postgresTables/mevDetection/cexdex/CexDexArb.js';
-import { updateCleanedTransfers } from './utils/postgresTables/CleanedTransfers.js';
+import { solveCleanTransfersForTx, updateCleanedTransfers } from './utils/postgresTables/CleanedTransfers.js';
 import { research } from './utils/fiddyResearchTM/ResearchEntryPoint.js';
 import { bootWsProvider } from './utils/web3Calls/generic.js';
 import {
@@ -34,6 +34,8 @@ import {
 } from './utils/goingLive/WebsocketConnectivityChecks.js';
 import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
+import { getTxIdsWhereToIsNull } from './utils/postgresTables/readFunctions/TransactionDetails.js';
+import { getAbiFromDbClean } from './utils/postgresTables/readFunctions/Abi.js';
 
 export async function initDatabase() {
   try {

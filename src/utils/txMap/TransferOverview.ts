@@ -393,7 +393,6 @@ export async function getTokenTransfersFromTransactionTrace(
   transactionTraces: ITransactionTrace[]
 ): Promise<TokenTransfer[] | null> {
   const tokenTransfers: TokenTransfer[] = [];
-  const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP_MAINNET);
   const localMethodIdCache: { [address: string]: any[] } = {};
 
   const uniqueContractAddresses = new Set(
@@ -408,7 +407,7 @@ export async function getTokenTransfersFromTransactionTrace(
 
   for (const contractAddress of uniqueContractAddresses) {
     if (!localMethodIdCache[contractAddress]) {
-      const fetchedMethodIds = await getMethodId(contractAddress, JsonRpcProvider);
+      const fetchedMethodIds = await getMethodId(contractAddress);
       localMethodIdCache[contractAddress] = fetchedMethodIds || [];
     }
   }
@@ -417,7 +416,7 @@ export async function getTokenTransfersFromTransactionTrace(
     const contractAddress = txTrace.action.to ? txTrace.action.to.toLowerCase() : null;
     if (contractAddress) {
       const methodIds = localMethodIdCache[contractAddress] || [];
-      await extractTokenTransfers(txTrace, tokenTransfers, JsonRpcProvider, methodIds);
+      await extractTokenTransfers(txTrace, tokenTransfers, methodIds);
     }
   }
 
@@ -427,7 +426,6 @@ export async function getTokenTransfersFromTransactionTrace(
 async function extractTokenTransfers(
   trace: ITransactionTrace,
   tokenTransfers: TokenTransfer[],
-  JsonRpcProvider: any,
   methodIds: any[]
 ): Promise<void> {
   const contractAddress = trace.action.to ? trace.action.to.toLowerCase() : null;
@@ -455,7 +453,7 @@ async function extractTokenTransfers(
   // Recursively extract token transfers from subtraces
   if (trace.subtraces && Array.isArray(trace.subtraces)) {
     for (const subtrace of trace.subtraces) {
-      await extractTokenTransfers(subtrace, tokenTransfers, JsonRpcProvider, methodIds);
+      await extractTokenTransfers(subtrace, tokenTransfers, methodIds);
     }
   }
 }

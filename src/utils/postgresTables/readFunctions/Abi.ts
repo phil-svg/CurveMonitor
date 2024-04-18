@@ -1,5 +1,7 @@
-import { Op } from "sequelize";
-import { AbisEthereum } from "../../../models/Abi.js";
+import { Op, QueryTypes } from 'sequelize';
+import { AbisEthereum } from '../../../models/Abi.js';
+import { ProxyCheck } from '../../../models/ProxyCheck.js';
+import { sequelize } from '../../../config/Database.js';
 
 export async function readAbiFromAbisEthereumTable(contractAddress: string): Promise<any[] | null> {
   const record = await AbisEthereum.findOne({
@@ -45,4 +47,57 @@ export async function storeAbiInDb(contractAddress: string, abi: any): Promise<v
   } catch (err) {
     console.log(`Error storing Abi in AbisEthereum ${err}`);
   }
+}
+
+interface ProxyCheckResult {
+  contractAddress: string;
+  is_proxy_contract: boolean | null;
+  implementation_address: string | null;
+}
+
+/**
+ * Fetches the ABI for a contract, considering whether it's a proxy.
+ * @param contractAddress The address of the contract to fetch ABI for.
+ * @returns A Promise resolving to the ABI or null if not found or not applicable.
+ */
+export async function getAbiFromDbClean(contractAddress: string): Promise<any[] | null> {
+  contractAddress = contractAddress.toLowerCase();
+
+  // SQL to check if the contract address is a proxy
+  const proxyCheckQuery = `
+    SELECT "contractAddress", "is_proxy_contract", "implementation_address"
+    FROM proxy_checks 
+    WHERE "contractAddress" = :contractAddress;
+  `;
+  const proxyChecks = await sequelize.query<ProxyCheckResult>(proxyCheckQuery, {
+    replacements: { contractAddress },
+    type: QueryTypes.SELECT,
+    raw: true,
+  });
+
+  // Handle no entry found
+  const proxyCheck = proxyChecks[0];
+  if (!proxyCheck) return null;
+
+  // Determine the correct address to query the ABI from
+  const addressToQuery = proxyCheck.is_proxy_contract ? proxyCheck.implementation_address : contractAddress;
+
+  // Return null if no implementation address is provided for proxy contracts
+  if (proxyCheck.is_proxy_contract && !addressToQuery) return null;
+
+  // SQL to query the ABI from the abis_ethereum table using the correct address
+  const abiQuery = `
+    SELECT "abi"
+    FROM abis_ethereum 
+    WHERE "contract_address" = :addressToQuery;
+  `;
+  const abiResults = await sequelize.query<{ abi: any[] | null }>(abiQuery, {
+    replacements: { addressToQuery },
+    type: QueryTypes.SELECT,
+    raw: true,
+  });
+
+  // Return the ABI or null if not found
+  const abiEntry = abiResults[0];
+  return abiEntry ? abiEntry.abi : null;
 }
