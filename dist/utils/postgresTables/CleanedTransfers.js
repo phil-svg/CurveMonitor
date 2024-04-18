@@ -1,6 +1,6 @@
 import { TokenTransfers } from '../../models/CleanedTransfers.js';
 import { filterForCorrectTransfers, getCleanedTransfers } from './mevDetection/atomic/atomicArb.js';
-import { extractTransactionAddresses, getTransactionDetails } from './readFunctions/TransactionDetails.js';
+import { getToAddressByTxId } from './readFunctions/TransactionDetails.js';
 import { getTxHashByTxId } from './readFunctions/Transactions.js';
 import { logProgress } from '../helperFunctions/QualityOfLifeStuff.js';
 import { getTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
@@ -20,15 +20,9 @@ export async function insertTokenTransfers(txId, transfers) {
         console.error('Error inserting token transfers:', error);
     }
 }
-export async function solveCleanTransfersForTx(txId) {
-    const txHash = await getTxHashByTxId(txId);
-    if (!txHash)
-        return null;
-    const transactionDetails = await getTransactionDetails(txId);
-    if (!transactionDetails)
-        return null;
-    const { from: from, to: to } = extractTransactionAddresses(transactionDetails);
-    if (!from || !to)
+export async function solveCleanTransfersForTx(txId, txHash) {
+    const to = await getToAddressByTxId(txId);
+    if (!to)
         return null;
     const cleanedTransfers = await getCleanedTransfers(txHash, to);
     if (!cleanedTransfers)
@@ -69,7 +63,7 @@ export async function updateCleanedTransfers() {
         }
         else {
             // Solve cleanedTransfers and cache it
-            cleanedTransfers = await solveCleanTransfersForTx(txId);
+            cleanedTransfers = await solveCleanTransfersForTx(txId, txHash);
             if (cleanedTransfers) {
                 cleanedTransfersCache[txHash] = cleanedTransfers;
             }

@@ -1,9 +1,8 @@
 import { TokenTransfers } from '../../models/CleanedTransfers.js';
 import { ReadableTokenTransfer } from '../Interfaces.js';
 import { filterForCorrectTransfers, getCleanedTransfers } from './mevDetection/atomic/atomicArb.js';
-import { getAllTxIdsFromCleanedTransfers } from './readFunctions/CleanedTransfers.js';
-import { extractTransactionAddresses, getTransactionDetails } from './readFunctions/TransactionDetails.js';
-import { getAllTransactionIds, getTxHashByTxId } from './readFunctions/Transactions.js';
+import { getToAddressByTxId } from './readFunctions/TransactionDetails.js';
+import { getTxHashByTxId } from './readFunctions/Transactions.js';
 import { logProgress } from '../helperFunctions/QualityOfLifeStuff.js';
 import { getTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
 import { updateAbisFromTrace } from '../helperFunctions/Abi.js';
@@ -14,7 +13,7 @@ import {
   removeDuplicatesAndUpdatePositions,
   updateTransferList,
 } from '../txMap/TransferOverview.js';
-import { parseEventsFromReceiptForEntireTx, parseEventsFromReceiptForEntireTxWithoutDbUsage } from '../txMap/Events.js';
+import { parseEventsFromReceiptForEntireTxWithoutDbUsage } from '../txMap/Events.js';
 import { sequelize } from '../../config/Database.js';
 import { QueryTypes } from 'sequelize';
 
@@ -29,15 +28,9 @@ export async function insertTokenTransfers(txId: number, transfers: ReadableToke
   }
 }
 
-export async function solveCleanTransfersForTx(txId: number): Promise<ReadableTokenTransfer[] | null> {
-  const txHash = await getTxHashByTxId(txId);
-  if (!txHash) return null;
-
-  const transactionDetails = await getTransactionDetails(txId);
-  if (!transactionDetails) return null;
-
-  const { from: from, to: to } = extractTransactionAddresses(transactionDetails);
-  if (!from || !to) return null;
+export async function solveCleanTransfersForTx(txId: number, txHash: string): Promise<ReadableTokenTransfer[] | null> {
+  const to = await getToAddressByTxId(txId);
+  if (!to) return null;
 
   const cleanedTransfers = await getCleanedTransfers(txHash, to);
   if (!cleanedTransfers) return null;
@@ -86,7 +79,7 @@ export async function updateCleanedTransfers() {
       cleanedTransfers = cleanedTransfersCache[txHash];
     } else {
       // Solve cleanedTransfers and cache it
-      cleanedTransfers = await solveCleanTransfersForTx(txId);
+      cleanedTransfers = await solveCleanTransfersForTx(txId, txHash);
       if (cleanedTransfers) {
         cleanedTransfersCache[txHash] = cleanedTransfers;
       }

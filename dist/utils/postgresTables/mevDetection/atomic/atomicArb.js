@@ -36,28 +36,19 @@ export async function getCleanedTransfers(txHash, to) {
         return null;
     }
     // making sure we have all ABIs which are relevant in this tx.
-    // await updateAbisFromTrace(transactionTraces);
     await updateAbisFromTrace(transactionTraces);
     const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
     if (!tokenTransfersFromTransactionTraces)
         return null;
-    // console.log('tokenTransfersFromTransactionTraces', tokenTransfersFromTransactionTraces);
     const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash);
     if (!parsedEventsFromReceipt)
         return null;
     // console.log('parsedEventsFromReceipt', parsedEventsFromReceipt);
     const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
-    // console.log("mergedTransfers", mergedTransfers);
-    // const transfersFromReceipt = convertEventsToTransfers(parsedEventsFromReceipt);
-    // console.log(transfersFromReceipt);
     const readableTransfers = await makeTransfersReadable(mergedTransfers);
-    // console.log("readableTransfers", readableTransfers);
     const updatedReadableTransfers = updateTransferList(readableTransfers, to);
-    // console.log("updatedReadableTransfers", updatedReadableTransfers);
     const correctTrasfers = filterForCorrectTransfers(updatedReadableTransfers);
-    // console.log("correctTrasfers", correctTrasfers);
     const cleanedTransfers = removeDuplicatesAndUpdatePositions(correctTrasfers);
-    // console.log("cleanedTransfers", cleanedTransfers);
     return cleanedTransfers;
 }
 export async function fetchDataThenDetectArb(txId) {

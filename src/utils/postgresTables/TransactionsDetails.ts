@@ -1,12 +1,10 @@
 import { Optional, QueryTypes } from 'sequelize';
 import { sequelize } from '../../config/Database.js';
 import _ from 'lodash';
-import { Transactions } from '../../models/Transactions.js';
 import { getTxFromTxHash } from '../web3Calls/generic.js';
-import { getAllTransactionIds, getTxHashByTxId } from './readFunctions/Transactions.js';
+import { getTxHashByTxId } from './readFunctions/Transactions.js';
 import { TransactionDetails } from '../../models/TransactionDetails.js';
-import { logMemoryUsage, logProgress, updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
-import { getAllTxIdsPresentInTransactionsDetails } from './readFunctions/TransactionDetails.js';
+import { logProgress, updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
 
 export interface TransactionDetailsData {
   txId: number;

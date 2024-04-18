@@ -146,7 +146,7 @@ async function processBufferedEvents() {
             continue;
         }
         // parsing the entire tx:
-        const cleanedTransfers = await solveCleanTransfersForTx(txId);
+        const cleanedTransfers = await solveCleanTransfersForTx(txId, tx.tx_hash);
         if (!cleanedTransfers)
             continue;
         await insertTokenTransfers(txId, cleanedTransfers);

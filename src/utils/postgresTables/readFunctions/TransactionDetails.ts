@@ -22,6 +22,29 @@ export async function getTransactionDetails(txId: number): Promise<TransactionDe
   return transactionDetails || null;
 }
 
+/**
+ * Retrieves the 'to' address of a transaction by its ID.
+ * @param txId The ID of the transaction.
+ * @returns The 'to' address as a string or null if not found or on error.
+ */
+export async function getToAddressByTxId(txId: number): Promise<string | null> {
+  try {
+    const transactionDetails = await TransactionDetails.findByPk(txId, {
+      attributes: ['to'], // Fetch only the 'to' field
+    });
+
+    if (transactionDetails && transactionDetails.to) {
+      return transactionDetails.to;
+    } else {
+      console.log(`Transaction with txId ${txId} not found or missing 'to' address.`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching transaction details for txId ${txId}: ${error}`);
+    return null;
+  }
+}
+
 export async function getTransactionDetailsByTxId(txId: number): Promise<TransactionDetails | null> {
   const transactionDetails = await TransactionDetails.findByPk(txId);
   return transactionDetails || null;

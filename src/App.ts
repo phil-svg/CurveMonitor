@@ -4,7 +4,7 @@ import { db } from './config/Database.js';
 import { loadAddressProvider } from './utils/AddressProviderEntryPoint.js';
 import { updatePools } from './utils/postgresTables/Pools.js';
 import { updateCoinTable } from './utils/postgresTables/Coins.js';
-import { updatePoolAbis } from './utils/postgresTables/Abi.js';
+import { updateAbisFromTxTraces, updatePoolAbis } from './utils/postgresTables/Abi.js';
 import { updateBlockTimestamps } from './utils/postgresTables/Blocks.js';
 import { updateRawLogs } from './utils/postgresTables/RawLogs.js';
 import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';

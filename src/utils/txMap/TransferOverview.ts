@@ -1,10 +1,10 @@
-import { ITransactionTrace, ParsedEvent, ReadableTokenTransfer, TokenTransfer } from "../Interfaces.js";
-import { ETH_ADDRESS, NULL_ADDRESS, WETH_ADDRESS } from "../helperFunctions/Constants.js";
-import { getMethodId } from "../helperFunctions/MethodID.js";
-import { checkTokensInDatabase } from "./TransferCategories.js";
-import { findCoinDecimalsById, getCoinIdByAddress, findCoinSymbolById } from "../postgresTables/readFunctions/Coins.js";
-import { ethers } from "ethers";
-import { ERC20_METHODS } from "../helperFunctions/Erc20Abis.js";
+import { ITransactionTrace, ParsedEvent, ReadableTokenTransfer, TokenTransfer } from '../Interfaces.js';
+import { ETH_ADDRESS, NULL_ADDRESS, WETH_ADDRESS } from '../helperFunctions/Constants.js';
+import { getMethodId } from '../helperFunctions/MethodID.js';
+import { checkTokensInDatabase } from './TransferCategories.js';
+import { findCoinDecimalsById, getCoinIdByAddress, findCoinSymbolById } from '../postgresTables/readFunctions/Coins.js';
+import { ethers } from 'ethers';
+import { ERC20_METHODS } from '../helperFunctions/Erc20Abis.js';
 
 export function updateTransferList(readableTransfers: ReadableTokenTransfer[], to: string): ReadableTokenTransfer[] {
   // console.log("readableTransfers", readableTransfers);
@@ -19,12 +19,19 @@ export function updateTransferList(readableTransfers: ReadableTokenTransfer[], t
 }
 
 // finds token transfers from "to" to elsewhere, where the token came out of nowhere (no inflow). Used to complete transfer list.
-export function findUnaccountedOutgoingTransfers(updatedReadableTransfers: ReadableTokenTransfer[], to: string): ReadableTokenTransfer[] {
-  const toAddressLower = to?.toLowerCase() ?? "";
+export function findUnaccountedOutgoingTransfers(
+  updatedReadableTransfers: ReadableTokenTransfer[],
+  to: string
+): ReadableTokenTransfer[] {
+  const toAddressLower = to?.toLowerCase() ?? '';
 
-  const outgoingTransfers = updatedReadableTransfers.filter((transfer) => transfer.from && transfer.from.toLowerCase() === toAddressLower);
+  const outgoingTransfers = updatedReadableTransfers.filter(
+    (transfer) => transfer.from && transfer.from.toLowerCase() === toAddressLower
+  );
 
-  const incomingTransfers = updatedReadableTransfers.filter((transfer) => transfer.to && transfer.to.toLowerCase() === toAddressLower);
+  const incomingTransfers = updatedReadableTransfers.filter(
+    (transfer) => transfer.to && transfer.to.toLowerCase() === toAddressLower
+  );
 
   const unaccountedOutgoings = outgoingTransfers.filter(
     (outgoingTransfer) =>
@@ -32,14 +39,19 @@ export function findUnaccountedOutgoingTransfers(updatedReadableTransfers: Reada
       outgoingTransfer.tokenAddress.toLowerCase() !== WETH_ADDRESS.toLowerCase() && // Exclude WETH
       !incomingTransfers.some(
         (incomingTransfer) =>
-          incomingTransfer.tokenAddress && outgoingTransfer.tokenAddress && incomingTransfer.tokenAddress.toLowerCase() === outgoingTransfer.tokenAddress.toLowerCase()
+          incomingTransfer.tokenAddress &&
+          outgoingTransfer.tokenAddress &&
+          incomingTransfer.tokenAddress.toLowerCase() === outgoingTransfer.tokenAddress.toLowerCase()
       )
   );
 
   return unaccountedOutgoings;
 }
 
-export function addMissingMintsToTransfers(updatedReadableTransfers: ReadableTokenTransfer[], to: string): ReadableTokenTransfer[] {
+export function addMissingMintsToTransfers(
+  updatedReadableTransfers: ReadableTokenTransfer[],
+  to: string
+): ReadableTokenTransfer[] {
   const unaccountedOutgoings = findUnaccountedOutgoingTransfers(updatedReadableTransfers, to);
 
   let modifiedTransfers = [...updatedReadableTransfers];
@@ -82,12 +94,12 @@ export function addMissingETHWETHTransfers(transfers: ReadableTokenTransfer[]): 
       continue;
     }
 
-    if (transfer.tokenSymbol === "ETH" && transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
+    if (transfer.tokenSymbol === 'ETH' && transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
       const correspondingWETHTransfer = {
         from: WETH_ADDRESS,
         to: transfer.from,
         tokenAddress: WETH_ADDRESS,
-        tokenSymbol: "WETH",
+        tokenSymbol: 'WETH',
         parsedAmount: transfer.parsedAmount,
         position: transfer.position !== undefined ? transfer.position + 1 : undefined,
       };
@@ -98,12 +110,12 @@ export function addMissingETHWETHTransfers(transfers: ReadableTokenTransfer[]): 
       }
     }
 
-    if (transfer.tokenSymbol === "WETH" && transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
+    if (transfer.tokenSymbol === 'WETH' && transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
       const correspondingETHTransfer = {
         from: WETH_ADDRESS,
         to: transfer.from,
         tokenAddress: ETH_ADDRESS,
-        tokenSymbol: "ETH",
+        tokenSymbol: 'ETH',
         parsedAmount: transfer.parsedAmount,
         position: transfer.position !== undefined ? transfer.position + 1 : undefined,
       };
@@ -148,23 +160,27 @@ export function removeDuplicatesAndUpdatePositions(transfers: ReadableTokenTrans
     // Check for fake transfers
     const exampleFakeTransfer = [
       {
-        from: "0x74de5d4fcbf63e00296fd95d33236b9794016631",
-        to: "0x2acf35c9a3f4c5c3f4c78ef5fb64c3ee82f07c45",
-        tokenAddress: "0x0000000000085d4780b73119b644ae5ecd22b376", // real
-        tokenSymbol: "TUSD",
+        from: '0x74de5d4fcbf63e00296fd95d33236b9794016631',
+        to: '0x2acf35c9a3f4c5c3f4c78ef5fb64c3ee82f07c45',
+        tokenAddress: '0x0000000000085d4780b73119b644ae5ecd22b376', // real
+        tokenSymbol: 'TUSD',
         parsedAmount: 237.97344971942732,
         position: 9,
       },
       {
-        from: "0x0000000000085d4780b73119b644ae5ecd22b376",
-        to: "0x2acf35c9a3f4c5c3f4c78ef5fb64c3ee82f07c45",
-        tokenAddress: "0xb650eb28d35691dd1bd481325d40e65273844f9b", // fake
-        tokenSymbol: "TUSD",
+        from: '0x0000000000085d4780b73119b644ae5ecd22b376',
+        to: '0x2acf35c9a3f4c5c3f4c78ef5fb64c3ee82f07c45',
+        tokenAddress: '0xb650eb28d35691dd1bd481325d40e65273844f9b', // fake
+        tokenSymbol: 'TUSD',
         parsedAmount: 237.97344971942732,
         position: 10,
       },
     ];
-    if (nextTransfer.position === currentTransfer.position! + 1 && currentTransfer.to === nextTransfer.to && currentTransfer.tokenAddress === nextTransfer.from) {
+    if (
+      nextTransfer.position === currentTransfer.position! + 1 &&
+      currentTransfer.to === nextTransfer.to &&
+      currentTransfer.tokenAddress === nextTransfer.from
+    ) {
       // Remove the nextTransfer from the filtered list
       filtered.splice(i + 1, 1);
       i--; // Adjust index due to removal
@@ -194,7 +210,9 @@ export function removeDuplicatesAndUpdatePositions(transfers: ReadableTokenTrans
 }
 
 export function filterNullSymbols(readableTransfersRaw: ReadableTokenTransfer[]): ReadableTokenTransfer[] {
-  return readableTransfersRaw.filter((transfer) => transfer.tokenSymbol !== null && transfer.tokenSymbol !== "" && transfer.tokenSymbol !== " ");
+  return readableTransfersRaw.filter(
+    (transfer) => transfer.tokenSymbol !== null && transfer.tokenSymbol !== '' && transfer.tokenSymbol !== ' '
+  );
 }
 
 function addPositionField(readableTransfers: ReadableTokenTransfer[]): ReadableTokenTransfer[] {
@@ -244,9 +262,9 @@ export async function makeTransfersReadable(tokenTransfers: TokenTransfer[]): Pr
 function handleTransferMethod(action: any, tokenTransfers: TokenTransfer[]): void {
   const sender = action.from;
   const tokenAddress = action.to;
-  const receiver = "0x" + action.input.slice(34, 74);
-  const amountHex = "0x" + action.input.slice(74, 138);
-  const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
+  const receiver = '0x' + action.input.slice(34, 74);
+  const amountHex = '0x' + action.input.slice(74, 138);
+  const value = amountHex === '0x' ? BigInt(0) : BigInt(amountHex);
 
   tokenTransfers.push({
     from: sender,
@@ -258,10 +276,10 @@ function handleTransferMethod(action: any, tokenTransfers: TokenTransfer[]): voi
 
 function handleTransferFromMethod(action: any, tokenTransfers: TokenTransfer[]): void {
   const tokenAddress = action.to;
-  const sender = "0x" + action.input.slice(34, 74);
-  const receiver = "0x" + action.input.slice(98, 138);
-  const amountHex = "0x" + action.input.slice(162, 202);
-  const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
+  const sender = '0x' + action.input.slice(34, 74);
+  const receiver = '0x' + action.input.slice(98, 138);
+  const amountHex = '0x' + action.input.slice(162, 202);
+  const value = amountHex === '0x' ? BigInt(0) : BigInt(amountHex);
 
   tokenTransfers.push({
     from: sender,
@@ -273,8 +291,8 @@ function handleTransferFromMethod(action: any, tokenTransfers: TokenTransfer[]):
 
 function handleUnwrapWethMethod(action: any, tokenTransfers: TokenTransfer[]): void {
   const from = action.from;
-  const amountHex = "0x" + action.input.slice(10, 74);
-  const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
+  const amountHex = '0x' + action.input.slice(10, 74);
+  const value = amountHex === '0x' ? BigInt(0) : BigInt(amountHex);
 
   tokenTransfers.push({
     from: from,
@@ -288,7 +306,7 @@ function handleWrapMethod(action: any, tokenTransfers: TokenTransfer[]): void {
   return; // voiding for now
   const from = action.from;
   const amountHex = action.input;
-  const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
+  const value = amountHex === '0x' ? BigInt(0) : BigInt(amountHex);
 
   tokenTransfers.push({
     from: from,
@@ -308,13 +326,13 @@ function handleWrapMethod(action: any, tokenTransfers: TokenTransfer[]): void {
 function handleMintMethod(action: any, tokenTransfers: TokenTransfer[]): void {
   return; // voiding for now.
   const tokenAddress = action.to;
-  const receiver = "0x" + action.input.slice(34, 74);
-  const hasHexPrefix = action.input.slice(0, 2) === "0x";
+  const receiver = '0x' + action.input.slice(34, 74);
+  const hasHexPrefix = action.input.slice(0, 2) === '0x';
   const relevantSlice = hasHexPrefix ? action.input.slice(2) : action.input;
   const amountHex = relevantSlice.slice(-64);
 
-  const trimmedAmountHex = amountHex.replace(/^0+/, "");
-  const value = trimmedAmountHex === "" ? BigInt(0) : BigInt("0x" + trimmedAmountHex);
+  const trimmedAmountHex = amountHex.replace(/^0+/, '');
+  const value = trimmedAmountHex === '' ? BigInt(0) : BigInt('0x' + trimmedAmountHex);
 
   tokenTransfers.push({
     from: NULL_ADDRESS,
@@ -326,9 +344,9 @@ function handleMintMethod(action: any, tokenTransfers: TokenTransfer[]): void {
 
 function handleBurnMethod(action: any, tokenTransfers: TokenTransfer[]): void {
   const tokenAddress = action.to;
-  const fromAddress = "0x" + action.input.slice(34, 74);
-  const amountHex = "0x" + action.input.slice(-64);
-  const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
+  const fromAddress = '0x' + action.input.slice(34, 74);
+  const amountHex = '0x' + action.input.slice(-64);
+  const value = amountHex === '0x' ? BigInt(0) : BigInt(amountHex);
 
   tokenTransfers.push({
     from: fromAddress,
@@ -342,7 +360,7 @@ function handleAddLiquidityMethod(action: any, trace: ITransactionTrace, tokenTr
   const tokenAddress = action.to;
   const amountHex = trace.result.output;
   const receiver = trace.action.from;
-  const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
+  const value = amountHex === '0x' ? BigInt(0) : BigInt(amountHex);
 
   // catching not real lp transfers, see trace of 0x31a8c4bf5a4c22a782129f0760d68d2db372aa6584d8e0afecb6cf0f22eff514
   if (/0{10,}$/.test(amountHex)) {
@@ -361,7 +379,7 @@ function handleDepositMethod(action: any, trace: ITransactionTrace, tokenTransfe
   const tokenAddress = action.to;
   const amountHex = trace.result.output;
   const receiver = trace.action.from;
-  const value = amountHex === "0x" ? BigInt(0) : BigInt(amountHex);
+  const value = amountHex === '0x' ? BigInt(0) : BigInt(amountHex);
 
   tokenTransfers.push({
     from: NULL_ADDRESS,
@@ -371,14 +389,19 @@ function handleDepositMethod(action: any, trace: ITransactionTrace, tokenTransfe
   });
 }
 
-export async function getTokenTransfersFromTransactionTrace(transactionTraces: ITransactionTrace[]): Promise<TokenTransfer[] | null> {
+export async function getTokenTransfersFromTransactionTrace(
+  transactionTraces: ITransactionTrace[]
+): Promise<TokenTransfer[] | null> {
   const tokenTransfers: TokenTransfer[] = [];
   const JsonRpcProvider = new ethers.JsonRpcProvider(process.env.WEB3_HTTP_MAINNET);
   const localMethodIdCache: { [address: string]: any[] } = {};
 
   const uniqueContractAddresses = new Set(
     transactionTraces
-      .filter((trace) => trace.action.input !== "0x" || trace.action.value !== "0x0" || (trace.result && trace.result.output !== "0x"))
+      .filter(
+        (trace) =>
+          trace.action.input !== '0x' || trace.action.value !== '0x0' || (trace.result && trace.result.output !== '0x')
+      )
       .map((trace) => (trace.action.to ? trace.action.to.toLowerCase() : null))
       .filter((address): address is string => address !== null)
   );
@@ -401,7 +424,12 @@ export async function getTokenTransfersFromTransactionTrace(transactionTraces: I
   return tokenTransfers;
 }
 
-async function extractTokenTransfers(trace: ITransactionTrace, tokenTransfers: TokenTransfer[], JsonRpcProvider: any, methodIds: any[]): Promise<void> {
+async function extractTokenTransfers(
+  trace: ITransactionTrace,
+  tokenTransfers: TokenTransfer[],
+  JsonRpcProvider: any,
+  methodIds: any[]
+): Promise<void> {
   const contractAddress = trace.action.to ? trace.action.to.toLowerCase() : null;
   if (!contractAddress) return;
 
@@ -432,39 +460,44 @@ async function extractTokenTransfers(trace: ITransactionTrace, tokenTransfers: T
   }
 }
 
-function handleDynamicMethod(methodName: string, action: any, tokenTransfers: TokenTransfer[], trace: ITransactionTrace) {
+function handleDynamicMethod(
+  methodName: string,
+  action: any,
+  tokenTransfers: TokenTransfer[],
+  trace: ITransactionTrace
+) {
   switch (methodName) {
-    case "transfer":
+    case 'transfer':
       handleTransferMethod(action, tokenTransfers);
       break;
 
-    case "transferFrom":
+    case 'transferFrom':
       handleTransferFromMethod(action, tokenTransfers);
       break;
 
-    case "withdraw":
+    case 'withdraw':
       handleUnwrapWethMethod(action, tokenTransfers);
       break;
 
-    case "wrap":
+    case 'wrap':
       handleWrapMethod(action, tokenTransfers);
       break;
 
-    case "mint":
+    case 'mint':
       handleMintMethod(action, tokenTransfers);
       break;
 
-    case "burn":
-    case "customBurn":
-    case "burnFrom":
+    case 'burn':
+    case 'customBurn':
+    case 'burnFrom':
       handleBurnMethod(action, tokenTransfers);
       break;
 
-    case "add_liquidity":
+    case 'add_liquidity':
       handleAddLiquidityMethod(action, trace, tokenTransfers);
       break;
 
-    case "deposit":
+    case 'deposit':
       // console.log("deposit", trace);
       break;
 
@@ -480,9 +513,12 @@ function handleDynamicMethod(methodName: string, action: any, tokenTransfers: To
  * @param parsedEventsFromReceipt - Array of parsed events (possibly including null or undefined elements).
  * @returns Array of TokenTransfer objects after merging and filtering.
  */
-export function mergeAndFilterTransfers(tokenTransfersFromTransactionTraces: TokenTransfer[], parsedEventsFromReceipt: (ParsedEvent | null | undefined)[]): TokenTransfer[] {
+export function mergeAndFilterTransfers(
+  tokenTransfersFromTransactionTraces: TokenTransfer[],
+  parsedEventsFromReceipt: (ParsedEvent | null | undefined)[]
+): TokenTransfer[] {
   // Filter out only transfer events from the parsed events
-  const transferEventsFromReceipt = parsedEventsFromReceipt.filter((event) => event?.eventName === "Transfer");
+  const transferEventsFromReceipt = parsedEventsFromReceipt.filter((event) => event?.eventName === 'Transfer');
 
   // Iterate over each transfer event from the receipt
   transferEventsFromReceipt.forEach((event, index) => {
@@ -524,7 +560,7 @@ export function mergeAndFilterTransfers(tokenTransfersFromTransactionTraces: Tok
 
 export function convertEventsToTransfers(parsedEventsFromReceipt: (ParsedEvent | null | undefined)[]): TokenTransfer[] {
   return parsedEventsFromReceipt
-    .filter((event): event is ParsedEvent => !!event && event.eventName === "Transfer")
+    .filter((event): event is ParsedEvent => !!event && event.eventName === 'Transfer')
     .map((event) => {
       const keys = Object.keys(event);
 
