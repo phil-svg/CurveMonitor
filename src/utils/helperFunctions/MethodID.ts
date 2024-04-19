@@ -1,6 +1,4 @@
 import pkg from 'js-sha3';
-import { getImplementationAddressFromTable } from '../postgresTables/readFunctions/ProxyCheck.js';
-import { updateAbiIWithProxyCheck } from './ProxyCheck.js';
 import { getAbiByForPools } from '../postgresTables/Abi.js';
 import { getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
 import { getAbiFromDbClean } from '../postgresTables/readFunctions/Abi.js';

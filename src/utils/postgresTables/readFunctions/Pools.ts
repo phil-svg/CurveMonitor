@@ -1,8 +1,8 @@
-import { Op, Sequelize } from "sequelize";
-import { Pool } from "../../../models/Pools.js";
-import { findCoinAddressById, findCoinAddressesByIds } from "./Coins.js";
-import { getLatestTransactionTimeForAllPools } from "./Transactions.js";
-import { toChecksumAddress } from "../../web3Calls/generic.js";
+import { Op, Sequelize } from 'sequelize';
+import { Pool } from '../../../models/Pools.js';
+import { findCoinAddressById, findCoinAddressesByIds } from './Coins.js';
+import { getLatestTransactionTimeForAllPools } from './Transactions.js';
+import { toChecksumAddress } from '../../helperFunctions/Web3.js';
 
 export const getIdByAddress = async (poolAddress: string): Promise<number | null> => {
   try {
@@ -15,14 +15,14 @@ export const getIdByAddress = async (poolAddress: string): Promise<number | null
 
     return pool ? pool.id : null;
   } catch (error) {
-    console.error("Error fetching pool ID by address: ", error);
+    console.error('Error fetching pool ID by address: ', error);
     return null;
   }
 };
 
 export const getIdByAddressCaseInsensitive = async (poolAddress: string): Promise<number | null> => {
   const pool = await Pool.findOne({
-    where: Sequelize.where(Sequelize.fn("lower", Sequelize.col("address")), Sequelize.fn("lower", poolAddress)),
+    where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('address')), Sequelize.fn('lower', poolAddress)),
   });
   return pool ? pool.id : null;
 };
@@ -39,7 +39,7 @@ export const getPoolBy = async (options: { id?: number; address?: string }): Pro
       },
     });
   } else {
-    throw new Error("You must provide either id or address");
+    throw new Error('You must provide either id or address');
   }
 };
 
@@ -61,13 +61,13 @@ export const getAddressById = async (id: number): Promise<string | null> => {
 };
 
 export const getV1PoolAddresses = async (): Promise<string[]> => {
-  const pools = await Pool.findAll({ where: { version: "v1" } });
+  const pools = await Pool.findAll({ where: { version: 'v1' } });
   const poolAddresses = pools.map((pool) => pool.address);
   return poolAddresses;
 };
 
 export const getV2PoolAddresses = async (): Promise<string[]> => {
-  const pools = await Pool.findAll({ where: { version: "v2" } });
+  const pools = await Pool.findAll({ where: { version: 'v2' } });
   const poolAddresses = pools.map((pool) => pool.address);
   return poolAddresses;
 };
@@ -186,7 +186,7 @@ export async function getCoinPositionInPoolByCoinAddress(poolId: number, coinAdd
 
     return null;
   } catch (error) {
-    console.error("Error getting coin position in pool:", error);
+    console.error('Error getting coin position in pool:', error);
     throw error;
   }
 }
@@ -209,7 +209,7 @@ export async function getPoolIdsOlderThan180Days(numberOfDays: number): Promise<
         [Op.lte]: oneHundredEightyDaysAgo, // Sequelize Op.lte for "less than or equal to"
       },
     },
-    attributes: ["id"],
+    attributes: ['id'],
   });
 
   return olderPools.map((pool) => pool.id);
@@ -249,7 +249,9 @@ export async function getRelevantPoolIdsForFastMode(): Promise<number[]> {
 
   const recentActivityThreshold = Date.now() - DAYS_FOR_RECENT_ACTIVITY * 24 * 60 * 60 * 1000;
   const poolIdsWithRecentTransactions = new Set(
-    latestTransactionTimeForAllPools.filter(({ latestBlockUnixtime }) => latestBlockUnixtime * 1000 >= recentActivityThreshold).map(({ pool_id }) => pool_id)
+    latestTransactionTimeForAllPools
+      .filter(({ latestBlockUnixtime }) => latestBlockUnixtime * 1000 >= recentActivityThreshold)
+      .map(({ pool_id }) => pool_id)
   );
 
   const poolAgeThreshold = Date.now() - DAYS_FOR_POOL_AGE * 24 * 60 * 60 * 1000; // Convert days to milliseconds
@@ -302,7 +304,7 @@ export async function getPoolsBySourceAddress(poolSourceAddress: string): Promis
     const poolAddresses = matchingPools.map((pool) => pool.address);
     return poolAddresses;
   } catch (error) {
-    console.error("Error fetching pools by source address:", error);
+    console.error('Error fetching pools by source address:', error);
     throw error;
   }
 }

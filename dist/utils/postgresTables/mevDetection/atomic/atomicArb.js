@@ -1,18 +1,13 @@
-import { updateAbisFromTrace } from '../../../helperFunctions/Abi.js';
-import { parseEventsFromReceiptForEntireTx } from '../../../txMap/Events.js';
-import { getTokenTransfersFromTransactionTrace, makeTransfersReadable, mergeAndFilterTransfers, removeDuplicatesAndUpdatePositions, updateTransferList, } from '../../../txMap/TransferOverview.js';
 import { extractTransactionAddresses, getTransactionDetails } from '../../readFunctions/TransactionDetails.js';
-import { getTransactionTraceFromDb } from '../../readFunctions/TransactionTrace.js';
 import { getAllTransactionIds, getTxHashByTxId, getTxIdByTxHash } from '../../readFunctions/Transactions.js';
 import { solveAtomicArb } from './utils/atomicArbDetection.js';
 import { logProgress } from '../../../helperFunctions/QualityOfLifeStuff.js';
-import { getTransactionTraceViaWeb3Provider } from '../../../web3Calls/generic.js';
-import { saveTransactionTrace } from '../../TransactionTraces.js';
 import { getCleanedTransfersForTxIdFromTable } from '../../readFunctions/CleanedTransfers.js';
 import { filterUncheckedTransactionIds, getTxIdsWithAtomicArb } from '../../readFunctions/AtomicArbs.js';
 import { insertAtomicArbDetails } from '../../AtomicArbs.js';
 import { solveTransfersOnTheFlyFlag } from '../../../../App.js';
 import { isCexDexArb } from '../cexdex/utils/cexdexDetection.js';
+import { getCleanedTransfers } from '../../CleanedTransfers.js';
 export function filterForCorrectTransfers(transfers) {
     return transfers.filter((transfer) => {
         // Check if token is ETH or WETH
@@ -22,34 +17,6 @@ export function filterForCorrectTransfers(transfers) {
         // Return transfers that don't meet both conditions
         return !(isEthOrWeth && isAmountGreaterThanBillion);
     });
-}
-export async function getCleanedTransfers(txHash, to) {
-    let transactionTraces = await getTransactionTraceFromDb(txHash);
-    if (transactionTraces.length <= 1) {
-        const traceFetchAttempt = await getTransactionTraceViaWeb3Provider(txHash);
-        if (traceFetchAttempt)
-            await saveTransactionTrace(txHash, traceFetchAttempt);
-        transactionTraces = await getTransactionTraceFromDb(txHash);
-    }
-    if (transactionTraces.length <= 1) {
-        // console.log("alchemy trace api bugged out for", txHash);
-        return null;
-    }
-    // making sure we have all ABIs which are relevant in this tx.
-    await updateAbisFromTrace(transactionTraces);
-    const tokenTransfersFromTransactionTraces = await getTokenTransfersFromTransactionTrace(transactionTraces);
-    if (!tokenTransfersFromTransactionTraces)
-        return null;
-    const parsedEventsFromReceipt = await parseEventsFromReceiptForEntireTx(txHash);
-    if (!parsedEventsFromReceipt)
-        return null;
-    // console.log('parsedEventsFromReceipt', parsedEventsFromReceipt);
-    const mergedTransfers = mergeAndFilterTransfers(tokenTransfersFromTransactionTraces, parsedEventsFromReceipt);
-    const readableTransfers = await makeTransfersReadable(mergedTransfers);
-    const updatedReadableTransfers = updateTransferList(readableTransfers, to);
-    const correctTrasfers = filterForCorrectTransfers(updatedReadableTransfers);
-    const cleanedTransfers = removeDuplicatesAndUpdatePositions(correctTrasfers);
-    return cleanedTransfers;
 }
 export async function fetchDataThenDetectArb(txId) {
     const txHash = await getTxHashByTxId(txId);
@@ -117,12 +84,8 @@ export async function updateAtomicArbDetection() {
         const start = new Date().getTime();
         counter++;
         const res = await fetchDataThenDetectArb(txId);
-        if (res) {
+        if (res)
             await insertAtomicArbDetails(txId, res);
-        }
-        else {
-            // this
-        }
         const end = new Date().getTime();
         totalTimeTaken += end - start;
         if (counter > 500) {

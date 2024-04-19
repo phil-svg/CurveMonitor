@@ -1,14 +1,16 @@
-import { addNewTokenToDbFromCoinAddress } from "../postgresTables/Coins.js";
-import { getCoinIdByAddress } from "../postgresTables/readFunctions/Coins.js";
-import { NULL_ADDRESS, WETH_ADDRESS } from "../helperFunctions/Constants.js";
-import { getTokenTransfersFromTransactionTrace, makeTransfersReadable } from "./TransferOverview.js";
+import { addNewTokenToDbFromCoinAddress } from '../postgresTables/Coins.js';
+import { coinExistsByAddress } from '../postgresTables/readFunctions/Coins.js';
+import { NULL_ADDRESS, WETH_ADDRESS } from '../helperFunctions/Constants.js';
+import { getTokenTransfersFromTransactionTrace, makeTransfersReadable } from './TransferOverview.js';
 // checking if a token, transferred in the tx, is stored in the db, if not, adding it.
 export async function checkTokensInDatabase(tokenTransfers) {
-    for (let transfer of tokenTransfers) {
-        const coinId = await getCoinIdByAddress(transfer.token);
-        if (coinId !== null)
+    const uniqueTokens = new Set(tokenTransfers.map((transfer) => transfer.token));
+    const uniqueTokenArray = Array.from(uniqueTokens);
+    for (let token of uniqueTokenArray) {
+        const coinExists = await coinExistsByAddress(token);
+        if (coinExists)
             continue;
-        await addNewTokenToDbFromCoinAddress(transfer.token);
+        await addNewTokenToDbFromCoinAddress(token);
     }
 }
 // Helper function to identify swap pairs
@@ -19,7 +21,8 @@ function identifySwapPairs(transfers) {
         for (let j = i + 1; j < remainingTransfers.length; j++) {
             const currentTransfer = remainingTransfers[i];
             const potentialPairTransfer = remainingTransfers[j];
-            if (currentTransfer.from.toLowerCase() === potentialPairTransfer.to.toLowerCase() && currentTransfer.to.toLowerCase() === potentialPairTransfer.from.toLowerCase()) {
+            if (currentTransfer.from.toLowerCase() === potentialPairTransfer.to.toLowerCase() &&
+                currentTransfer.to.toLowerCase() === potentialPairTransfer.from.toLowerCase()) {
                 swapPairs.push([currentTransfer, potentialPairTransfer]);
                 remainingTransfers = remainingTransfers.filter((_, index) => index !== i && index !== j);
                 i--;
@@ -39,14 +42,18 @@ function categorizeEthFlows(transfers, from, to) {
     const inflowingETH = [];
     const outflowingETH = [];
     const remainingTransfers = transfers.filter((transfer) => {
-        const isETHTransfer = transfer.tokenSymbol === "ETH";
+        const isETHTransfer = transfer.tokenSymbol === 'ETH';
         // For inflowing ETH
-        if (isETHTransfer && (transfer.to.toLowerCase() === from.toLowerCase() || transfer.to.toLowerCase() === to.toLowerCase()) && addressesCount[transfer.from] === 1) {
+        if (isETHTransfer &&
+            (transfer.to.toLowerCase() === from.toLowerCase() || transfer.to.toLowerCase() === to.toLowerCase()) &&
+            addressesCount[transfer.from] === 1) {
             inflowingETH.push(transfer);
             return false;
         }
         // For outflowing ETH
-        if (isETHTransfer && (transfer.from.toLowerCase() === from.toLowerCase() || transfer.from.toLowerCase() === to.toLowerCase()) && addressesCount[transfer.to] === 1) {
+        if (isETHTransfer &&
+            (transfer.from.toLowerCase() === from.toLowerCase() || transfer.from.toLowerCase() === to.toLowerCase()) &&
+            addressesCount[transfer.to] === 1) {
             outflowingETH.push(transfer);
             return false;
         }
@@ -131,7 +138,8 @@ function removeMultiStepSwaps(transfers, swaps) {
     return transfers.filter((transfer) => !swaps.flat().includes(transfer));
 }
 function identifyEtherWrapsAndUnwraps(transfers) {
-    const potentialWrapsAndUnwraps = transfers.filter((transfer) => transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase() || transfer.from.toLowerCase() === WETH_ADDRESS.toLowerCase());
+    const potentialWrapsAndUnwraps = transfers.filter((transfer) => transfer.to.toLowerCase() === WETH_ADDRESS.toLowerCase() ||
+        transfer.from.toLowerCase() === WETH_ADDRESS.toLowerCase());
     const etherWrapsAndUnwraps = [];
     let remainingTransfers = [...transfers];
     for (let i = 0; i < potentialWrapsAndUnwraps.length - 1; i++) {
@@ -154,7 +162,9 @@ function identifyLiquidityEvents(transfers) {
     const liquidityEvents = [];
     for (let i = 0; i < remainingTransfers.length - 1; i++) {
         const currentTransfer = remainingTransfers[i];
-        const returnTransfers = remainingTransfers.filter((transfer) => transfer.from === currentTransfer.to && transfer.to === currentTransfer.from && transfer.tokenAddress !== currentTransfer.tokenAddress);
+        const returnTransfers = remainingTransfers.filter((transfer) => transfer.from === currentTransfer.to &&
+            transfer.to === currentTransfer.from &&
+            transfer.tokenAddress !== currentTransfer.tokenAddress);
         const uniqueTokens = new Set(returnTransfers.map((t) => t.tokenAddress));
         if (returnTransfers.length > 1 && uniqueTokens.size === returnTransfers.length) {
             liquidityEvents.push([currentTransfer, returnTransfers]);
@@ -168,7 +178,7 @@ export function categorizeTransfers(transfers, from, to) {
     // Identify Wraps and Unwraps first
     const { etherWrapsAndUnwraps, remainingTransfers: postWrapAndUnwrapTransfers } = identifyEtherWrapsAndUnwraps(transfers);
     const { liquidityEvents, remainingTransfers: postLiquidityEventTransfers } = identifyLiquidityEvents(postWrapAndUnwrapTransfers);
-    const { inflowingETH, outflowingETH, remainingTransfers: postEthFlowTransfers } = categorizeEthFlows(postLiquidityEventTransfers, from, to);
+    const { inflowingETH, outflowingETH, remainingTransfers: postEthFlowTransfers, } = categorizeEthFlows(postLiquidityEventTransfers, from, to);
     const { liquidityPairs, remainingTransfers: postliquidityPairsTransfers } = identifyLiquidityPairs(postEthFlowTransfers);
     const { swapPairs, remainingTransfers: postSwapTransfers } = identifySwapPairs(postliquidityPairsTransfers);
     const { isolatedTransfers, remainingTransfers: postIsolatedTransfers } = identifyIsolatedTransfers(postSwapTransfers);

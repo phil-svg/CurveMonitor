@@ -4,7 +4,7 @@ import { db } from './config/Database.js';
 import { loadAddressProvider } from './utils/AddressProviderEntryPoint.js';
 import { updatePools } from './utils/postgresTables/Pools.js';
 import { updateCoinTable } from './utils/postgresTables/Coins.js';
-import { updateAbisFromTxTraces, updatePoolAbis } from './utils/postgresTables/Abi.js';
+import { updatePoolAbis } from './utils/postgresTables/Abi.js';
 import { updateBlockTimestamps } from './utils/postgresTables/Blocks.js';
 import { updateRawLogs } from './utils/postgresTables/RawLogs.js';
 import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
@@ -24,7 +24,7 @@ import { updateContractCreations } from './utils/postgresTables/ContractCreation
 import { updatePriceMap } from './utils/postgresTables/PriceMap.js';
 import { populateTransactionCoinsWithDollarValues } from './utils/postgresTables/TransactionCoins.js';
 import { updateCexDexArbDetection } from './utils/postgresTables/mevDetection/cexdex/CexDexArb.js';
-import { solveCleanTransfersForTx, updateCleanedTransfers } from './utils/postgresTables/CleanedTransfers.js';
+import { updateCleanedTransfers } from './utils/postgresTables/CleanedTransfers.js';
 import { research } from './utils/fiddyResearchTM/ResearchEntryPoint.js';
 import { bootWsProvider } from './utils/web3Calls/generic.js';
 import {
@@ -34,8 +34,6 @@ import {
 } from './utils/goingLive/WebsocketConnectivityChecks.js';
 import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
-import { getTxIdsWhereToIsNull } from './utils/postgresTables/readFunctions/TransactionDetails.js';
-import { getAbiFromDbClean } from './utils/postgresTables/readFunctions/Abi.js';
 
 export async function initDatabase() {
   try {
@@ -94,10 +92,10 @@ export async function main() {
 
   eventFlags.canEmitSandwich = true;
 
-  // await updateReceipts();
-  // await updateTxTraces();
-  // await updateAddressCounts();
-  // await updateCleanedTransfers();
+  await updateReceipts();
+  await updateTxTraces();
+  await updateAddressCounts();
+  await updateCleanedTransfers();
   // await updateAtomicArbDetection();
   // await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
 

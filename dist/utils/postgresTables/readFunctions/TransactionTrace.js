@@ -1,19 +1,37 @@
-import { TransactionTrace } from "../../../models/TransactionTrace.js";
+import Sequelize from 'sequelize';
+import { sequelize } from '../../../config/Database.js';
+import { TransactionTrace } from '../../../models/TransactionTrace.js';
 export async function getTransactionTraceFromDb(txHash) {
-    const dbTraces = await TransactionTrace.findAll({ where: { transactionHash: txHash } });
-    // Function to compare trace addresses
-    function compareTraceAddress(a, b) {
-        for (let i = 0; i < Math.min(a.length, b.length); i++) {
-            if (a[i] !== b[i]) {
-                return a[i] - b[i];
-            }
-        }
-        return a.length - b.length; // Shorter array comes first if all previous elements are equal
-    }
-    // Sort the traces based on traceAddress
-    dbTraces.sort((a, b) => compareTraceAddress(a.traceAddress, b.traceAddress));
+    const query = `
+    SELECT 
+      "transactionHash",
+      "traceAddress",
+      "type",
+      "subtraces",
+      "blockNumber",
+      "blockHash",
+      "actionCallType",
+      "actionFrom",
+      "actionTo",
+      "actionGas",
+      "actionInput",
+      "actionValue",
+      "resultGasUsed",
+      "resultOutput"
+    FROM transaction_trace
+    WHERE "transactionHash" = :txHash
+    ORDER BY "traceAddress"
+  `;
+    const dbTraces = await sequelize.query(query, {
+        replacements: { txHash },
+        type: Sequelize.QueryTypes.SELECT,
+        raw: true,
+        model: TransactionTrace,
+        mapToModel: true,
+    });
     // Filter out duplicates based on subtrace and traceAddress
-    const uniqueTraces = dbTraces.filter((trace, index, self) => index === self.findIndex((t) => t.subtraces === trace.subtraces && compareTraceAddress(t.traceAddress, trace.traceAddress) === 0));
+    const uniqueTraces = dbTraces.filter((trace, index, self) => index ===
+        self.findIndex((t) => t.subtraces === trace.subtraces && compareTraceAddress(t.traceAddress, trace.traceAddress) === 0));
     // Map the unique traces to the ITransactionTrace shape
     return uniqueTraces.map((dbTrace) => ({
         action: {
@@ -35,5 +53,14 @@ export async function getTransactionTraceFromDb(txHash) {
         transactionHash: dbTrace.transactionHash,
         type: dbTrace.type,
     }));
+}
+// Function to compare trace addresses
+function compareTraceAddress(a, b) {
+    for (let i = 0; i < Math.min(a.length, b.length); i++) {
+        if (a[i] !== b[i]) {
+            return a[i] - b[i];
+        }
+    }
+    return a.length - b.length; // Shorter array comes first if all previous elements are equal
 }
 //# sourceMappingURL=TransactionTrace.js.map

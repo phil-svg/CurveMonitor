@@ -228,7 +228,6 @@ import { base58btc } from 'multiformats/bases/base58';
 async function getContractABIfromMetadata(contractAddress: string): Promise<any> {
   try {
     // Step 1: Retrieve the contract bytecode
-    console.time();
     const response = await axios.post(
       `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY!}`,
       {
@@ -241,7 +240,6 @@ async function getContractABIfromMetadata(contractAddress: string): Promise<any>
         timeout: 1000,
       }
     );
-    console.timeEnd();
 
     const bytecode = response.data.result;
 
@@ -257,9 +255,7 @@ async function getContractABIfromMetadata(contractAddress: string): Promise<any>
     // Step 3: Retrieve the metadata file from IPFS
 
     console.log(`https://ipfs.io/ipfs/${metadataHash}`);
-    console.time();
     const metadataResponse = await axios.get<{ output: { abi: any } }>(`https://ipfs.io/ipfs/${metadataHash}`);
-    console.timeEnd();
     const metadata = metadataResponse.data;
 
     // Step 4: Extract the ABI from the metadata

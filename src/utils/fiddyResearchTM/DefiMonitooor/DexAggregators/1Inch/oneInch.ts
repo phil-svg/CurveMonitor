@@ -9,7 +9,7 @@ import { getTxIdByTxHash, getUnixTimestampByTxId } from '../../../../postgresTab
 import { getCoinIdByAddress } from '../../../../postgresTables/readFunctions/Coins.js';
 import { getTokenPriceWithTimestampFromDb } from '../../../../postgresTables/readFunctions/PriceMap.js';
 import { getCleanedTransfersForTxIdFromTable } from '../../../../postgresTables/readFunctions/CleanedTransfers.js';
-import { getCleanedTransfersFromTxHashWithoutDBUsage } from '../../../../postgresTables/CleanedTransfers.js';
+import { getCleanedTransfersFor1inch } from '../../../../postgresTables/CleanedTransfers.js';
 import { WEB3_HTTP_PROVIDER, getPastEvents, getTxFromTxHash } from '../../../../web3Calls/generic.js';
 import fs from 'fs';
 import { retry } from '../../../../helperFunctions/Web3Retry.js';
@@ -362,7 +362,7 @@ async function getJsonFor1Inch() {
 
   for (const { txHash, blockNumber } of txHashesAndBlockNumbers) {
     console.log(`Processing txHash ${++processedTxHashes} of ${totalTxHashes}: ${txHash}`);
-    const cleanedTransfers = await getCleanedTransfersFromTxHashWithoutDBUsage(txHash, _1InchV6);
+    const cleanedTransfers = await getCleanedTransfersFor1inch(txHash, _1InchV6);
     if (!cleanedTransfers) continue;
 
     data.push({ txHash, blockNumber, cleanedTransfers });

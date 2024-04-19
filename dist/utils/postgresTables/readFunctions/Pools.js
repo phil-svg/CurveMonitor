@@ -1,8 +1,8 @@
-import { Op, Sequelize } from "sequelize";
-import { Pool } from "../../../models/Pools.js";
-import { findCoinAddressById, findCoinAddressesByIds } from "./Coins.js";
-import { getLatestTransactionTimeForAllPools } from "./Transactions.js";
-import { toChecksumAddress } from "../../web3Calls/generic.js";
+import { Op, Sequelize } from 'sequelize';
+import { Pool } from '../../../models/Pools.js';
+import { findCoinAddressById, findCoinAddressesByIds } from './Coins.js';
+import { getLatestTransactionTimeForAllPools } from './Transactions.js';
+import { toChecksumAddress } from '../../helperFunctions/Web3.js';
 export const getIdByAddress = async (poolAddress) => {
     try {
         const checksumAddress = toChecksumAddress(poolAddress);
@@ -14,13 +14,13 @@ export const getIdByAddress = async (poolAddress) => {
         return pool ? pool.id : null;
     }
     catch (error) {
-        console.error("Error fetching pool ID by address: ", error);
+        console.error('Error fetching pool ID by address: ', error);
         return null;
     }
 };
 export const getIdByAddressCaseInsensitive = async (poolAddress) => {
     const pool = await Pool.findOne({
-        where: Sequelize.where(Sequelize.fn("lower", Sequelize.col("address")), Sequelize.fn("lower", poolAddress)),
+        where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('address')), Sequelize.fn('lower', poolAddress)),
     });
     return pool ? pool.id : null;
 };
@@ -38,7 +38,7 @@ export const getPoolBy = async (options) => {
         });
     }
     else {
-        throw new Error("You must provide either id or address");
+        throw new Error('You must provide either id or address');
     }
 };
 export const getAllPoolIds = async () => {
@@ -57,12 +57,12 @@ export const getAddressById = async (id) => {
     return (_a = pool === null || pool === void 0 ? void 0 : pool.address) !== null && _a !== void 0 ? _a : null;
 };
 export const getV1PoolAddresses = async () => {
-    const pools = await Pool.findAll({ where: { version: "v1" } });
+    const pools = await Pool.findAll({ where: { version: 'v1' } });
     const poolAddresses = pools.map((pool) => pool.address);
     return poolAddresses;
 };
 export const getV2PoolAddresses = async () => {
-    const pools = await Pool.findAll({ where: { version: "v2" } });
+    const pools = await Pool.findAll({ where: { version: 'v2' } });
     const poolAddresses = pools.map((pool) => pool.address);
     return poolAddresses;
 };
@@ -165,7 +165,7 @@ export async function getCoinPositionInPoolByCoinAddress(poolId, coinAddress) {
         return null;
     }
     catch (error) {
-        console.error("Error getting coin position in pool:", error);
+        console.error('Error getting coin position in pool:', error);
         throw error;
     }
 }
@@ -185,7 +185,7 @@ export async function getPoolIdsOlderThan180Days(numberOfDays) {
                 [Op.lte]: oneHundredEightyDaysAgo, // Sequelize Op.lte for "less than or equal to"
             },
         },
-        attributes: ["id"],
+        attributes: ['id'],
     });
     return olderPools.map((pool) => pool.id);
 }
@@ -214,7 +214,9 @@ export async function getRelevantPoolIdsForFastMode() {
     const allPoolIds = await getAllPoolIds();
     const latestTransactionTimeForAllPools = await getLatestTransactionTimeForAllPools();
     const recentActivityThreshold = Date.now() - DAYS_FOR_RECENT_ACTIVITY * 24 * 60 * 60 * 1000;
-    const poolIdsWithRecentTransactions = new Set(latestTransactionTimeForAllPools.filter(({ latestBlockUnixtime }) => latestBlockUnixtime * 1000 >= recentActivityThreshold).map(({ pool_id }) => pool_id));
+    const poolIdsWithRecentTransactions = new Set(latestTransactionTimeForAllPools
+        .filter(({ latestBlockUnixtime }) => latestBlockUnixtime * 1000 >= recentActivityThreshold)
+        .map(({ pool_id }) => pool_id));
     const poolAgeThreshold = Date.now() - DAYS_FOR_POOL_AGE * 24 * 60 * 60 * 1000; // Convert days to milliseconds
     // Filter pool IDs based on the age and recent activity
     const relevantPoolIds = await Promise.all(allPoolIds.map(async (poolId) => {
@@ -257,7 +259,7 @@ export async function getPoolsBySourceAddress(poolSourceAddress) {
         return poolAddresses;
     }
     catch (error) {
-        console.error("Error fetching pools by source address:", error);
+        console.error('Error fetching pools by source address:', error);
         throw error;
     }
 }

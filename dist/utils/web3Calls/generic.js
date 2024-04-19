@@ -1,21 +1,20 @@
-import { getWeb3HttpProvider, getWeb3WsProvider } from "../helperFunctions/Web3.js";
-import axios from "axios";
-import Bottleneck from "bottleneck";
-import { ABI_TRANSFER } from "../helperFunctions/Erc20Abis.js";
-import { findCoinAddressById } from "../postgresTables/readFunctions/Coins.js";
-import { getTxHashByTxId } from "../postgresTables/readFunctions/Transactions.js";
-import axiosRetry from "axios-retry";
-import Web3 from "web3";
+import { getWeb3HttpProvider, getWeb3WsProvider } from '../helperFunctions/Web3.js';
+import axios from 'axios';
+import Bottleneck from 'bottleneck';
+import { ABI_TRANSFER } from '../helperFunctions/Erc20Abis.js';
+import { findCoinAddressById } from '../postgresTables/readFunctions/Coins.js';
+import { getTxHashByTxId } from '../postgresTables/readFunctions/Transactions.js';
+import axiosRetry from 'axios-retry';
 export let WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
 export let WEB3_WS_PROVIDER = getWeb3WsProvider();
 // export const WEB3_HTTP_PROVIDER = "no internet";
 // export const WEB3_WS_PROVIDER = "no internet";
 export async function bootWsProvider() {
     WEB3_WS_PROVIDER = getWeb3WsProvider();
-    console.log("WebSocket Provider connected.");
+    console.log('WebSocket Provider connected.');
 }
 function isCupsErr(err) {
-    return err.message.includes("compute units per second capacity");
+    return err.message.includes('compute units per second capacity');
 }
 function isError(err) {
     return err instanceof Error;
@@ -41,10 +40,10 @@ export async function getCurrentBlockNumber() {
             }
             else {
                 if (isError(error)) {
-                    console.log("Error in getCurrentBlockNumber", blockNumber, error.message);
+                    console.log('Error in getCurrentBlockNumber', blockNumber, error.message);
                 }
                 else {
-                    console.log("Error in getCurrentBlockNumber", blockNumber, "Unknown error");
+                    console.log('Error in getCurrentBlockNumber', blockNumber, 'Unknown error');
                 }
                 shouldContinue = false;
             }
@@ -77,13 +76,13 @@ export async function getPastEvents(CONTRACT, eventName, fromBlock, toBlock) {
             }
             else {
                 const errorString = error.toString();
-                if (errorString.includes("Log response size exceeded.")) {
+                if (errorString.includes('Log response size exceeded.')) {
                     const matchResult = errorString.match(/\[.*\]/g);
                     if (matchResult) {
                         const recommendedBlockRange = matchResult[0];
                         const [start, end] = recommendedBlockRange
                             .slice(1, -1)
-                            .split(", ")
+                            .split(', ')
                             .map((x) => parseInt(x, 16));
                         return { start, end };
                     }
@@ -101,9 +100,9 @@ export async function getPastEvents(CONTRACT, eventName, fromBlock, toBlock) {
 export async function getTokenTransferEvents(WEB3_HTTP_PROVIDER, coinID, blockNumber) {
     const COIN_ADDRESS = await findCoinAddressById(coinID);
     const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI_TRANSFER, COIN_ADDRESS);
-    return await getPastEvents(CONTRACT, "Transfer", blockNumber, blockNumber);
+    return await getPastEvents(CONTRACT, 'Transfer', blockNumber, blockNumber);
 }
-export async function web3Call(CONTRACT, method, params, blockNumber = { block: "latest" }) {
+export async function web3Call(CONTRACT, method, params, blockNumber = { block: 'latest' }) {
     let shouldContinue = true;
     let retries = 0;
     while (shouldContinue && retries < 12) {
@@ -125,7 +124,7 @@ export async function web3Call(CONTRACT, method, params, blockNumber = { block: 
         }
     }
 }
-export async function web3CallLogFree(CONTRACT, method, params, blockNumber = { block: "latest" }) {
+export async function web3CallLogFree(CONTRACT, method, params, blockNumber = { block: 'latest' }) {
     let shouldContinue = true;
     let retries = 0;
     while (shouldContinue && retries < 12) {
@@ -158,10 +157,10 @@ export async function getBlockTimeStamp(blockNumber) {
         catch (error) {
             if (error instanceof Error) {
                 const err = error;
-                if (err.code === "ECONNABORTED") {
+                if (err.code === 'ECONNABORTED') {
                     console.log(`getBlockTimeStamp connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                 }
-                else if (err.message && err.message.includes("CONNECTION ERROR")) {
+                else if (err.message && err.message.includes('CONNECTION ERROR')) {
                     if (retries > 3) {
                         console.log(`getBlockTimeStamp connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                     }
@@ -174,7 +173,7 @@ export async function getBlockTimeStamp(blockNumber) {
             }
         }
     }
-    console.log("Failed to get block timestamp after several attempts. Please check your connection and the status of the Ethereum node.");
+    console.log('Failed to get block timestamp after several attempts. Please check your connection and the status of the Ethereum node.');
     return null;
 }
 export async function getBlockTimeStampsInBatches(blockNumbers) {
@@ -193,10 +192,10 @@ export async function getBlockTimeStampsInBatches(blockNumbers) {
             catch (error) {
                 if (error instanceof Error) {
                     const err = error;
-                    if (err.code === "ECONNABORTED") {
+                    if (err.code === 'ECONNABORTED') {
                         console.log(`getBlockTimeStampsInBatches connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                     }
-                    else if (err.message && err.message.includes("CONNECTION ERROR")) {
+                    else if (err.message && err.message.includes('CONNECTION ERROR')) {
                         console.log(`getBlockTimeStampsInBatches connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                     }
                     else {
@@ -235,15 +234,15 @@ export async function getTxReceipt(txHash) {
             return retryCount * 2000;
         },
         retryCondition: (error) => {
-            return error.code === "ECONNABORTED" || error.code === "ERR_SOCKET_CONNECTION_TIMEOUT";
+            return error.code === 'ECONNABORTED' || error.code === 'ERR_SOCKET_CONNECTION_TIMEOUT';
         },
     });
     return limiter.schedule(async () => {
         try {
             const response = await axios.post(`https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY}`, {
                 id: 1,
-                jsonrpc: "2.0",
-                method: "eth_getTransactionReceipt",
+                jsonrpc: '2.0',
+                method: 'eth_getTransactionReceipt',
                 params: [txHash],
             }, {
                 timeout: 1000,
@@ -257,7 +256,7 @@ export async function getTxReceipt(txHash) {
         }
         catch (error) {
             const axiosError = error;
-            if (axiosError.code !== "ECONNABORTED" && axiosError.code !== "ERR_SOCKET_CONNECTION_TIMEOUT") {
+            if (axiosError.code !== 'ECONNABORTED' && axiosError.code !== 'ERR_SOCKET_CONNECTION_TIMEOUT') {
                 console.log(axiosError);
             }
             return null;
@@ -287,10 +286,10 @@ export async function getTxFromTxHash(txHash) {
         catch (error) {
             if (error instanceof Error) {
                 const err = error;
-                if (err.code === "ECONNABORTED") {
+                if (err.code === 'ECONNABORTED') {
                     console.log(`getTxFromTxId connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                 }
-                else if (err.message && err.message.includes("CONNECTION ERROR")) {
+                else if (err.message && err.message.includes('CONNECTION ERROR')) {
                     if (retries > 3) {
                         console.log(`getTxFromTxId connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                     }
@@ -317,7 +316,7 @@ export async function getTxWithLimiter(txHash) {
             return retryCount * 2000;
         },
         retryCondition: (error) => {
-            return error.code === "ECONNABORTED" || error.code === "ERR_SOCKET_CONNECTION_TIMEOUT";
+            return error.code === 'ECONNABORTED' || error.code === 'ERR_SOCKET_CONNECTION_TIMEOUT';
         },
     });
     return limiter.schedule(async () => {
@@ -332,10 +331,10 @@ export async function getTxWithLimiter(txHash) {
             catch (error) {
                 if (error instanceof Error) {
                     const err = error;
-                    if (err.code === "ECONNABORTED") {
+                    if (err.code === 'ECONNABORTED') {
                         console.log(`getTxWithLimiter connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                     }
-                    else if (err.message && err.message.includes("CONNECTION ERROR")) {
+                    else if (err.message && err.message.includes('CONNECTION ERROR')) {
                         console.log(`getTxWithLimiter connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                     }
                     else {
@@ -366,7 +365,7 @@ export async function retryGetTransactionTraceViaWeb3Provider(txHash, maxRetries
         return null;
     }
     catch (err) {
-        console.log("err in retrygetTransactionTraceViaWeb3Provider for txHash", txHash, "err:", err);
+        console.log('err in retrygetTransactionTraceViaWeb3Provider for txHash', txHash, 'err:', err);
         return null;
     }
 }
@@ -375,15 +374,15 @@ export async function getTransactionTraceViaWeb3Provider(txHash, attempt = 0) {
     const maxAttempts = 3;
     try {
         const response = await fetch(url, {
-            method: "POST",
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                method: "trace_transaction",
+                method: 'trace_transaction',
                 params: [txHash],
                 id: 1,
-                jsonrpc: "2.0",
+                jsonrpc: '2.0',
             }),
         });
         if (response.status !== 200) {
@@ -394,7 +393,7 @@ export async function getTransactionTraceViaWeb3Provider(txHash, attempt = 0) {
     }
     catch (error) {
         const err = error;
-        if (err.code === "ECONNRESET" && attempt < maxAttempts) {
+        if (err.code === 'ECONNRESET' && attempt < maxAttempts) {
             console.log(`Retry attempt ${attempt + 1} for ${txHash}`);
             // Wait for a second before retrying
             await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -417,7 +416,7 @@ export async function getLastTxValue(blockNumber) {
         return 0;
     }
     catch (err) {
-        console.log("err in getLastTxValue", err);
+        console.log('err in getLastTxValue', err);
         return null;
     }
 }
@@ -432,7 +431,7 @@ export async function getBlockBuilderFromBlockNumber(blockNumber) {
         return null;
     }
     catch (err) {
-        console.log("err in getLastTxValue", err);
+        console.log('err in getLastTxValue', err);
         return null;
     }
 }
@@ -446,7 +445,7 @@ export async function getTxHashAtBlockPosition(blockNumber, position) {
         return null;
     }
     catch (err) {
-        console.error("Error in getTxHashAtPosition:", err);
+        console.error('Error in getTxHashAtPosition:', err);
         return null;
     }
 }
@@ -461,7 +460,7 @@ export async function getNonceWithLimiter(address) {
             return retryCount * 2000;
         },
         retryCondition: (error) => {
-            return error.code === "ECONNABORTED" || error.code === "ERR_SOCKET_CONNECTION_TIMEOUT";
+            return error.code === 'ECONNABORTED' || error.code === 'ERR_SOCKET_CONNECTION_TIMEOUT';
         },
     });
     return limiter.schedule(async () => {
@@ -485,8 +484,5 @@ export async function getNonceWithLimiter(address) {
         console.log(`Failed to get nonce for address ${address} after several attempts. Please check your connection and the status of the Ethereum node.`);
         return null;
     });
-}
-export function toChecksumAddress(address) {
-    return Web3.utils.toChecksumAddress(address);
 }
 //# sourceMappingURL=generic.js.map

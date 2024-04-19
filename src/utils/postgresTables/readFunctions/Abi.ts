@@ -1,6 +1,5 @@
 import { Op, QueryTypes } from 'sequelize';
 import { AbisEthereum } from '../../../models/Abi.js';
-import { ProxyCheck } from '../../../models/ProxyCheck.js';
 import { sequelize } from '../../../config/Database.js';
 
 export async function readAbiFromAbisEthereumTable(contractAddress: string): Promise<any[] | null> {
@@ -100,4 +99,37 @@ export async function getAbiFromDbClean(contractAddress: string): Promise<any[] 
   // Return the ABI or null if not found
   const abiEntry = abiResults[0];
   return abiEntry ? abiEntry.abi : null;
+}
+
+interface ExistsResult {
+  exists: boolean; // PostgreSQL will return this as boolean
+}
+
+/**
+ * Checks if an ABI exists for a given contract address in the abis_ethereum table.
+ * @param contractAddress The address of the contract to check for an ABI.
+ * @returns A Promise resolving to true if the ABI exists, otherwise false.
+ */
+export async function contractAbiExistsInTable(contractAddress: string): Promise<boolean> {
+  const query = `
+    SELECT EXISTS (
+      SELECT 1
+      FROM abis_ethereum
+      WHERE contract_address = :contractAddress
+    ) AS exists;
+  `;
+
+  try {
+    const results = await sequelize.query<ExistsResult>(query, {
+      replacements: { contractAddress },
+      type: QueryTypes.SELECT,
+      raw: true,
+    });
+
+    // Since the query uses EXISTS, it will return an array with one object containing the exists key
+    return results[0].exists;
+  } catch (error) {
+    console.error(`Error checking ABI existence for contract address ${contractAddress}: ${error}`);
+    return false; // Return false on error
+  }
 }

@@ -1,6 +1,7 @@
 import { TransactionDetails } from '../../models/TransactionDetails.js';
 import { eventFlags } from '../api/utils/EventFlags.js';
 import { getContractByAddressWithWebsocket } from '../helperFunctions/Web3.js';
+import { insertTokenTransfers, solveCleanTransfersForTx } from '../postgresTables/CleanedTransfers.js';
 import { fetchContractAgeInRealtime } from '../postgresTables/ContractCreations.js';
 import { storeEvent } from '../postgresTables/RawLogs.js';
 import { fetchAndSaveReceipt } from '../postgresTables/Receipts.js';
@@ -139,32 +140,24 @@ async function processBufferedEvents() {
             console.log('failed to fetch transaction-receipt during live-mode for', tx.tx_hash);
             continue;
         }
-        /*
-    
         // parsing the entire tx:
         const cleanedTransfers = await solveCleanTransfersForTx(txId, tx.tx_hash);
-        if (!cleanedTransfers) continue;
+        if (!cleanedTransfers)
+            continue;
         await insertTokenTransfers(txId, cleanedTransfers);
-    
+        /*
         const atomicArbInfo = await fetchDataThenDetectArb(txId);
-        if (eventFlags.canEmitAtomicArb) {
-          if (atomicArbInfo && atomicArbInfo !== 'not an arb') {
-            // creates or updates table entry:
-            await insertAtomicArbDetails(txId, atomicArbInfo);
-            eventEmitter.emit('New Transaction for Atomic-Arb-Livestream', atomicArbInfo);
-          }
+        if (atomicArbInfo && atomicArbInfo !== 'not an arb') {
+          await insertAtomicArbDetails(txId, atomicArbInfo);
+          if (eventFlags.canEmitAtomicArb) eventEmitter.emit('New Transaction for Atomic-Arb-Livestream', atomicArbInfo);
         }
     
         const isCexDexArbitrage = await isCexDexArb(txId);
         if (isCexDexArbitrage && isCexDexArbitrage !== 'unable to fetch') {
-          if (eventFlags.canEmitCexDexArb) {
-            // eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId); muted for now
-            //saving to db:
-            await storeCexDexArbFlag(txId, isCexDexArbitrage);
-            await processSinglCexDexTxId(txId);
-          }
+          await storeCexDexArbFlag(txId, isCexDexArbitrage);
+          await processSinglCexDexTxId(txId);
+          // if (eventFlags.canEmitCexDexArb) eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId); // muted for now
         }
-    
         */
         processedTxHashes.add(tx.tx_hash.toLowerCase());
     }

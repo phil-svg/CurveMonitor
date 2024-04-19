@@ -1,24 +1,24 @@
-import Web3 from "web3";
-import { Contract } from "web3-eth-contract";
-import { getAbiBy } from "../postgresTables/Abi.js";
-import { getAddressById, getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
-import { Log } from "web3-core";
-import { readAbiFromAbisEthereumTable } from "../postgresTables/readFunctions/Abi.js";
-import { WEB3_HTTP_PROVIDER, WEB3_WS_PROVIDER } from "../web3Calls/generic.js";
+import Web3 from 'web3';
+import { Contract } from 'web3-eth-contract';
+import { getAbiBy } from '../postgresTables/Abi.js';
+import { getAddressById, getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
+import { Log } from 'web3-core';
+import { readAbiFromAbisEthereumTable } from '../postgresTables/readFunctions/Abi.js';
+import { WEB3_HTTP_PROVIDER, WEB3_WS_PROVIDER } from '../web3Calls/generic.js';
 
 export function getWeb3WsProvider(): Web3 {
   let web3WsProvider: Web3 | null = null;
   const wsProvider = new Web3.providers.WebsocketProvider(process.env.WEB_WS_MAINNET!);
 
   // Attach 'end' event listener
-  wsProvider.on("end", (err?: Error) => {
-    console.log("WS connection ended, reconnecting...", err);
+  wsProvider.on('end', (err?: Error) => {
+    console.log('WS connection ended, reconnecting...', err);
     web3WsProvider = null; // Clear instance so that it can be recreated.
     getWeb3WsProvider(); // Recursive call to recreate the provider.
   });
 
-  wsProvider.on("error", () => {
-    console.error("WS encountered an error");
+  wsProvider.on('error', () => {
+    console.error('WS encountered an error');
   });
 
   web3WsProvider = new Web3(wsProvider);
@@ -41,12 +41,18 @@ export async function getWeb3HttpProvider(): Promise<Web3> {
     } catch (error: unknown) {
       if (error instanceof Error) {
         const err = error as any;
-        if (err.code === "ECONNABORTED") {
-          console.log(`HTTP Provider connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
-        } else if (err.message && err.message.includes("CONNECTION ERROR")) {
-          console.log(`HTTP Provider connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+        if (err.code === 'ECONNABORTED') {
+          console.log(
+            `HTTP Provider connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`
+          );
+        } else if (err.message && err.message.includes('CONNECTION ERROR')) {
+          console.log(
+            `HTTP Provider connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`
+          );
         } else {
-          console.log(`Failed to connect to Ethereum node. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+          console.log(
+            `Failed to connect to Ethereum node. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`
+          );
         }
         retries++;
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
@@ -54,7 +60,9 @@ export async function getWeb3HttpProvider(): Promise<Web3> {
     }
   }
 
-  throw new Error("Failed to connect to Ethereum node after several attempts. Please check your connection and the status of the Ethereum node.");
+  throw new Error(
+    'Failed to connect to Ethereum node after several attempts. Please check your connection and the status of the Ethereum node.'
+  );
 }
 
 export async function getContractByAddress(poolAddress: string): Promise<Contract | void> {
@@ -81,7 +89,7 @@ export async function getContractByAddressWithWebsocket(poolAddress: string): Pr
 
 export async function getContractByPoolIDWithWebsocket(poolId: number): Promise<Contract | void> {
   try {
-    const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
+    const POOL_ABI = await getAbiBy('AbisPools', { id: poolId });
     if (!POOL_ABI) {
       // console.log(`Err fetching ABI for pool ${poolId} in getContractByPoolIDWithWebsocket`);
       return;
@@ -109,7 +117,7 @@ export async function getContractByPoolID(poolId: number): Promise<Contract | vo
       return;
     }
 
-    const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
+    const POOL_ABI = await getAbiBy('AbisPools', { id: poolId });
     if (!POOL_ABI) {
       // console.log(`Err fetching ABI for pool ${poolId} ${POOL_ADDRESS} in getContractByPoolID_1`);
       return;
@@ -135,9 +143,9 @@ export async function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS: Log[
   for (const log of TOKEN_TRANSFER_EVENTS) {
     if (log.topics.length < 3) continue;
 
-    const fromAddress = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("address", log.topics[1]);
-    const toAddress = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("address", log.topics[2]);
-    const value = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter("uint256", log.data);
+    const fromAddress = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter('address', log.topics[1]);
+    const toAddress = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter('address', log.topics[2]);
+    const value = WEB3_HTTP_PROVIDER.eth.abi.decodeParameter('uint256', log.data);
 
     decodedLogs.push({
       tokenAddress: log.address,
@@ -148,4 +156,8 @@ export async function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS: Log[
   }
 
   return decodedLogs;
+}
+
+export function toChecksumAddress(address: string): string {
+  return Web3.utils.toChecksumAddress(address);
 }

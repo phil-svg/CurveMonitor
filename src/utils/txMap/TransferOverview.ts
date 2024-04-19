@@ -2,8 +2,7 @@ import { ITransactionTrace, ParsedEvent, ReadableTokenTransfer, TokenTransfer } 
 import { ETH_ADDRESS, NULL_ADDRESS, WETH_ADDRESS } from '../helperFunctions/Constants.js';
 import { getMethodId } from '../helperFunctions/MethodID.js';
 import { checkTokensInDatabase } from './TransferCategories.js';
-import { findCoinDecimalsById, getCoinIdByAddress, findCoinSymbolById } from '../postgresTables/readFunctions/Coins.js';
-import { ethers } from 'ethers';
+import { getTokenDetailsForTokenArray, CoinDetails } from '../postgresTables/readFunctions/Coins.js';
 import { ERC20_METHODS } from '../helperFunctions/Erc20Abis.js';
 
 export function updateTransferList(readableTransfers: ReadableTokenTransfer[], to: string): ReadableTokenTransfer[] {
@@ -224,21 +223,33 @@ function addPositionField(readableTransfers: ReadableTokenTransfer[]): ReadableT
   });
 }
 
+function findTokenDetails(
+  tokenAddress: string,
+  tokenDetailsArray: CoinDetails[]
+): { symbol: string | null; decimals: number | null } | null {
+  const addressLowerCase = tokenAddress.toLowerCase();
+  const details = tokenDetailsArray.find((detail) => detail.address.toLowerCase() === addressLowerCase);
+  return details ? { symbol: details.symbol, decimals: details.decimals } : null;
+}
+
 export async function makeTransfersReadable(tokenTransfers: TokenTransfer[]): Promise<ReadableTokenTransfer[]> {
   await checkTokensInDatabase(tokenTransfers);
 
   let readableTransfers: ReadableTokenTransfer[] = [];
 
+  const uniqueTokens = new Set(tokenTransfers.map((transfer) => transfer.token));
+  const uniqueTokenArray = Array.from(uniqueTokens);
+  const tokenDetailsArray = await getTokenDetailsForTokenArray(uniqueTokenArray);
+
   for (let transfer of tokenTransfers) {
-    const coinId = await getCoinIdByAddress(transfer.token);
-    let tokenSymbol: string | null = null;
-    let tokenDecimals: number | null = null;
+    const details = findTokenDetails(transfer.token, tokenDetailsArray);
+    const tokenSymbol = details?.symbol;
+    const tokenDecimals = details?.decimals;
+
+    if (!tokenDecimals || tokenDecimals === 0 || tokenDecimals === 420) continue;
+    if (!tokenSymbol) continue;
+
     let parsedAmount = 0;
-
-    if (coinId === null) continue;
-
-    tokenSymbol = await findCoinSymbolById(coinId);
-    tokenDecimals = await findCoinDecimalsById(coinId);
 
     if (tokenDecimals !== null) {
       const rawAmountBigInt = BigInt(transfer.value);
@@ -256,7 +267,8 @@ export async function makeTransfersReadable(tokenTransfers: TokenTransfer[]): Pr
   }
 
   readableTransfers = filterNullSymbols(readableTransfers);
-  return addPositionField(readableTransfers);
+  const res = addPositionField(readableTransfers);
+  return res;
 }
 
 function handleTransferMethod(action: any, tokenTransfers: TokenTransfer[]): void {
