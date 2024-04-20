@@ -96,8 +96,8 @@ export async function main() {
   await updateTxTraces();
   await updateAddressCounts();
   await updateCleanedTransfers();
-  await updateAtomicArbDetection();
-  await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
+  // await updateAtomicArbDetection();
+  // await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
 
   // await updateLabels(); // muted, only has to run when there are changes made to the labels-file
 
