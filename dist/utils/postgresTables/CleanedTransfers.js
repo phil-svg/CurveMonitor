@@ -106,7 +106,7 @@ export async function updateCleanedTransfers() {
         }
         if (!cleanedTransfers)
             continue;
-        // await insertTokenTransfers(txId, cleanedTransfers);
+        await insertTokenTransfers(txId, cleanedTransfers);
         const end = new Date().getTime();
         totalTimeTaken += end - start;
         // Clear the cache if txId is divisible by 5000
