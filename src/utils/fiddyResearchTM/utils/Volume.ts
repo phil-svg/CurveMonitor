@@ -1,19 +1,30 @@
-import { TransactionType, Transactions } from "../../../models/Transactions.js";
-import { TransactionCoins } from "../../../models/TransactionCoins.js";
-import { getSandwichContentForPoolAndTime } from "../../postgresTables/readFunctions/Sandwiches.js";
-import { fetchAtomicArbsForPoolAndTime } from "../../postgresTables/readFunctions/AtomicArbs.js";
-import { fetchTransactionsForPoolAndTime, fetchTransactionsWithCoinsByTxIds, getTxHashByTxId } from "../../postgresTables/readFunctions/Transactions.js";
-import { fetchCexDexArbTxIdsForPoolAndTime } from "../../postgresTables/readFunctions/CexDexArbs.js";
-import { solveRevenueLowerBoundInUSD } from "../../postgresTables/mevDetection/cexdex/utils/revenueProfitThings/LowerBoundSolver.js";
+import { TransactionType, Transactions } from '../../../models/Transactions.js';
+import { TransactionCoins } from '../../../models/TransactionCoins.js';
+import { getSandwichContentForPoolAndTime } from '../../postgresTables/readFunctions/Sandwiches.js';
+import { fetchAtomicArbsForPoolAndTime } from '../../postgresTables/readFunctions/AtomicArbs.js';
+import {
+  fetchTransactionsForPoolAndTime,
+  fetchTransactionsWithCoinsByTxIds,
+  getTxHashByTxId,
+} from '../../postgresTables/readFunctions/Transactions.js';
+import { fetchCexDexArbTxIdsForPoolAndTime } from '../../postgresTables/readFunctions/CexDexArbs.js';
+import { solveRevenueLowerBoundInUSD } from '../../postgresTables/mevDetection/cexdex/utils/revenueProfitThings/LowerBoundSolver.js';
 
 export type DailyVolumes = {
   [day: string]: number;
 };
 
-export function formatVolumeDataToJson(dailyVolumes: DailyVolumes, sandwichDailyVolumes: DailyVolumes, dailyAtomicArbVolumes: DailyVolumes, dailyCexDexArbVolumes: DailyVolumes) {
+export function formatVolumeDataToJson(
+  dailyVolumes: DailyVolumes,
+  sandwichDailyVolumes: DailyVolumes,
+  dailyAtomicArbVolumes: DailyVolumes,
+  dailyCexDexArbVolumes: DailyVolumes
+) {
   // Combine all dates from all volume data sets into a Set to ensure uniqueness
   const uniqueDates = new Set<string>();
-  [dailyVolumes, sandwichDailyVolumes, dailyAtomicArbVolumes, dailyCexDexArbVolumes].forEach((data) => Object.keys(data).forEach((date) => uniqueDates.add(date)));
+  [dailyVolumes, sandwichDailyVolumes, dailyAtomicArbVolumes, dailyCexDexArbVolumes].forEach((data) =>
+    Object.keys(data).forEach((date) => uniqueDates.add(date))
+  );
 
   // Sort the dates
   const sortedDates = Array.from(uniqueDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
@@ -26,9 +37,15 @@ export function formatVolumeDataToJson(dailyVolumes: DailyVolumes, sandwichDaily
     const rounder = 1;
     const prec = 0;
     const dv = dailyVolumes[date] ? Number((Number(dailyVolumes[date].toFixed(0)) / rounder).toFixed(prec)) : 0;
-    const sdv = sandwichDailyVolumes[date] ? Number((Number(sandwichDailyVolumes[date].toFixed(0)) / rounder).toFixed(prec)) : 0;
-    const aav = dailyAtomicArbVolumes[date] ? Number((Number(dailyAtomicArbVolumes[date].toFixed(0)) / rounder).toFixed(prec)) : 0;
-    const cdav = dailyCexDexArbVolumes[date] ? Number((Number(dailyCexDexArbVolumes[date].toFixed(0)) / rounder).toFixed(prec)) : 0;
+    const sdv = sandwichDailyVolumes[date]
+      ? Number((Number(sandwichDailyVolumes[date].toFixed(0)) / rounder).toFixed(prec))
+      : 0;
+    const aav = dailyAtomicArbVolumes[date]
+      ? Number((Number(dailyAtomicArbVolumes[date].toFixed(0)) / rounder).toFixed(prec))
+      : 0;
+    const cdav = dailyCexDexArbVolumes[date]
+      ? Number((Number(dailyCexDexArbVolumes[date].toFixed(0)) / rounder).toFixed(prec))
+      : 0;
 
     // Calculate the gap
     const gap = dv - (sdv + aav + cdav);
@@ -40,12 +57,15 @@ export function formatVolumeDataToJson(dailyVolumes: DailyVolumes, sandwichDaily
   return consolidatedData;
 }
 
-export async function calculateDailyVolumes(poolId: number, startUnixtime: number, endUnixtime: number): Promise<DailyVolumes> {
+export async function calculateDailyVolumes(
+  poolId: number,
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<DailyVolumes> {
   const transactions = await fetchTransactionsForPoolAndTime(poolId, startUnixtime, endUnixtime);
-
   // Calculate the volume for each transaction
   const dailyVolumes = transactions.reduce((acc: DailyVolumes, transaction) => {
-    const day = new Date(transaction.block_unixtime * 1000).toISOString().split("T")[0];
+    const day = new Date(transaction.block_unixtime * 1000).toISOString().split('T')[0];
 
     acc[day] = acc[day] || 0;
 
@@ -53,14 +73,14 @@ export async function calculateDailyVolumes(poolId: number, startUnixtime: numbe
       if (coin.dollar_value != null) {
         const valueToAdd = Number(coin.dollar_value);
         if (valueToAdd < 50 * 1e9) {
-          if (transaction.transaction_type === TransactionType.Swap && coin.direction === "out") {
+          if (transaction.transaction_type === TransactionType.Swap && coin.direction === 'out') {
             // if (valueToAdd > 1000000) {
             //   console.log(valueToAdd, transaction.tx_hash);
             // }
             acc[day] += valueToAdd;
-          } else if (transaction.transaction_type === TransactionType.Deposit && coin.direction === "in") {
+          } else if (transaction.transaction_type === TransactionType.Deposit && coin.direction === 'in') {
             acc[day] += valueToAdd;
-          } else if (transaction.transaction_type === TransactionType.Remove && coin.direction === "out") {
+          } else if (transaction.transaction_type === TransactionType.Remove && coin.direction === 'out') {
             acc[day] += valueToAdd;
           }
         }
@@ -73,7 +93,11 @@ export async function calculateDailyVolumes(poolId: number, startUnixtime: numbe
   return dailyVolumes;
 }
 
-export async function calculateDailySandwichVolumes(poolId: number, startUnixtime: number, endUnixtime: number): Promise<DailyVolumes> {
+export async function calculateDailySandwichVolumes(
+  poolId: number,
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<DailyVolumes> {
   const dailyVolumes: DailyVolumes = {};
 
   const data = await getSandwichContentForPoolAndTime(poolId, startUnixtime, endUnixtime);
@@ -84,7 +108,7 @@ export async function calculateDailySandwichVolumes(poolId: number, startUnixtim
 
     const totalVolume = Number(frontrunVolume) + Number(backrunVolume);
 
-    const day = new Date(sandwich.frontrun.block_unixtime * 1000).toISOString().split("T")[0];
+    const day = new Date(sandwich.frontrun.block_unixtime * 1000).toISOString().split('T')[0];
 
     // Ensure the accumulator for the day is initialized as a number
     dailyVolumes[day] = (Number(dailyVolumes[day]) || 0) + totalVolume;
@@ -104,11 +128,11 @@ export async function getTransactionVolume(txId: number): Promise<number> {
       if (coin.dollar_value != null) {
         const valueToAdd = Number(coin.dollar_value);
         if (valueToAdd < 50 * 1e9) {
-          if (transaction.transaction_type === TransactionType.Swap && coin.direction === "out") {
+          if (transaction.transaction_type === TransactionType.Swap && coin.direction === 'out') {
             volume += valueToAdd;
-          } else if (transaction.transaction_type === TransactionType.Deposit && coin.direction === "in") {
+          } else if (transaction.transaction_type === TransactionType.Deposit && coin.direction === 'in') {
             volume += valueToAdd;
-          } else if (transaction.transaction_type === TransactionType.Remove && coin.direction === "out") {
+          } else if (transaction.transaction_type === TransactionType.Remove && coin.direction === 'out') {
             volume += valueToAdd;
           }
         }
@@ -119,13 +143,17 @@ export async function getTransactionVolume(txId: number): Promise<number> {
   return volume; // Return volume as a number
 }
 
-export async function calculateDailyAtomicArbVolumes(poolId: number, startUnixtime: number, endUnixtime: number): Promise<DailyVolumes> {
+export async function calculateDailyAtomicArbVolumes(
+  poolId: number,
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<DailyVolumes> {
   const atomicTxIds = await fetchAtomicArbsForPoolAndTime(poolId, startUnixtime, endUnixtime);
 
   const transactions = await fetchTransactionsWithCoinsByTxIds(atomicTxIds);
 
   const dailyVolumes = transactions.reduce((acc: DailyVolumes, transaction) => {
-    const day = new Date(transaction.block_unixtime * 1000).toISOString().split("T")[0];
+    const day = new Date(transaction.block_unixtime * 1000).toISOString().split('T')[0];
 
     acc[day] = acc[day] || 0;
 
@@ -133,11 +161,11 @@ export async function calculateDailyAtomicArbVolumes(poolId: number, startUnixti
       if (coin.dollar_value != null) {
         const valueToAdd = Number(coin.dollar_value);
         if (valueToAdd < 50 * 1e9) {
-          if (transaction.transaction_type === TransactionType.Swap && coin.direction === "out") {
+          if (transaction.transaction_type === TransactionType.Swap && coin.direction === 'out') {
             acc[day] += valueToAdd;
-          } else if (transaction.transaction_type === TransactionType.Deposit && coin.direction === "in") {
+          } else if (transaction.transaction_type === TransactionType.Deposit && coin.direction === 'in') {
             acc[day] += valueToAdd;
-          } else if (transaction.transaction_type === TransactionType.Remove && coin.direction === "out") {
+          } else if (transaction.transaction_type === TransactionType.Remove && coin.direction === 'out') {
             acc[day] += valueToAdd;
           }
         }
@@ -150,12 +178,16 @@ export async function calculateDailyAtomicArbVolumes(poolId: number, startUnixti
   return dailyVolumes;
 }
 
-export async function calculateDailyCexDexArbVolumes(poolId: number, startUnixtime: number, endUnixtime: number): Promise<DailyVolumes> {
+export async function calculateDailyCexDexArbVolumes(
+  poolId: number,
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<DailyVolumes> {
   const arbTxIds = await fetchCexDexArbTxIdsForPoolAndTime(poolId, startUnixtime, endUnixtime);
   const transactions = await fetchTransactionsWithCoinsByTxIds(arbTxIds);
 
   const dailyVolumes = transactions.reduce((acc: DailyVolumes, transaction) => {
-    const day = new Date(transaction.block_unixtime * 1000).toISOString().split("T")[0];
+    const day = new Date(transaction.block_unixtime * 1000).toISOString().split('T')[0];
     acc[day] = acc[day] || 0;
 
     for (const coin of transaction.transactionCoins) {
@@ -171,7 +203,11 @@ export async function calculateDailyCexDexArbVolumes(poolId: number, startUnixti
   return dailyVolumes;
 }
 
-export async function calculateDailyCexDexArbLowerBoundaryRevenue(poolId: number, startUnixtime: number, endUnixtime: number): Promise<DailyVolumes> {
+export async function calculateDailyCexDexArbLowerBoundaryRevenue(
+  poolId: number,
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<DailyVolumes> {
   const arbTxIds = await fetchCexDexArbTxIdsForPoolAndTime(poolId, startUnixtime, endUnixtime);
   const transactions = await fetchTransactionsWithCoinsByTxIds(arbTxIds);
 
@@ -179,7 +215,7 @@ export async function calculateDailyCexDexArbLowerBoundaryRevenue(poolId: number
 
   const dailyRevenues = await transactions.reduce(async (accPromise: Promise<DailyVolumes>, transaction) => {
     const acc = await accPromise;
-    const day = new Date(transaction.block_unixtime * 1000).toISOString().split("T")[0];
+    const day = new Date(transaction.block_unixtime * 1000).toISOString().split('T')[0];
     acc[day] = acc[day] || 0;
 
     const revenueLowerBound = await solveRevenueLowerBoundInUSD(transaction.tx_id);

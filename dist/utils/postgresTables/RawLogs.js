@@ -94,11 +94,12 @@ async function processBlocksUntilCurrent(address, fromBlock) {
 }
 // export const dbInceptionBlock = 17307083;
 export const dbInceptionBlock = 9554040;
-async function processAllAddressesSequentially() {
+export async function processAllAddressesSequentially() {
     const poolIdsFull = await getAllPoolIds();
     console.log('Curve.fi has', poolIdsFull.length, 'pools.');
     const poolIdsWithoutVoided = await getRelevantPoolIdsForFastMode();
-    const poolAddresses = await getAddressesByPoolIds(poolIdsWithoutVoided); // insert poolIdsFull here to be 100%
+    const poolIds = poolIdsWithoutVoided;
+    const poolAddresses = await getAddressesByPoolIds(poolIds); // insert poolIdsFull here to be 100%
     let nowBlock = await getCurrentBlockNumberFromLocalDB();
     // let totalTimeTaken = 0;
     console.log('Fetching Raw Logs and Subscribing');
@@ -106,8 +107,6 @@ async function processAllAddressesSequentially() {
         if (i % 50 === 0) {
             console.log(i, '/', poolAddresses.length - 1);
         }
-        // const start = new Date().getTime();
-        // if (i > 300) continue;
         // muting annoying console errors from these pools since they are unferified on etherscan (and dont have traffic)
         const addressesToIgnore = [
             '0x037164C912f9733A0973B18EE339FBeF66cfd2C2',
@@ -132,7 +131,7 @@ async function processAllAddressesSequentially() {
     if (nowBlock)
         await updateRawLogsToBlock(nowBlock);
 }
-export async function updateRawLogs() {
+export async function updateRawLogsForLiveMode() {
     try {
         await processAllAddressesSequentially();
         updateConsoleOutput('[✓] Raw Logs updated successfully.\n');
@@ -143,5 +142,36 @@ export async function updateRawLogs() {
     EventEmitter.on('dead websocket connection', async () => {
         return;
     });
+}
+export async function updateRawLogs() {
+    // runs every 10th run a full fetch, to make sure we are not leaving any ressurrected pools behind.
+    const randomNumber = Math.floor(Math.random() * 10);
+    if (randomNumber !== 0)
+        return;
+    const allPoolIds = await getAllPoolIds();
+    const poolAddresses = await getAddressesByPoolIds(allPoolIds); // insert poolIdsFull here to be 100%
+    // let totalTimeTaken = 0;
+    console.log('Fetching Raw Logs full Fetch (all Pools)');
+    for (let i = 0; i < poolAddresses.length; i++) {
+        if (i % 50 === 0) {
+            console.log(i, '/', poolAddresses.length - 1);
+        }
+        // muting annoying console errors from these pools since they are unferified on etherscan (and dont have traffic)
+        const addressesToIgnore = [
+            '0x037164C912f9733A0973B18EE339FBeF66cfd2C2',
+            '0x38AB39c82BE45f660AFa4A74E85dAd4b4aDd0492',
+            '0x3921e2cb3Ac3bC009Fa4ec5Ea1ee0bc7FA4Be4C1',
+            '0x0816BC9CED716008c88BB8940C297E9c9167755e',
+            '0xAC4Abe9bD07F0ea3b3078880A73f5b3BC4B396e7',
+            '0x1a5C82B77cE33Cf5ce87efE5eCdb33f7591B35aa',
+        ].map((address) => address.toLowerCase());
+        if (addressesToIgnore.includes(poolAddresses[i].toLowerCase()))
+            continue;
+        let poolId = await getIdByAddress(poolAddresses[i]);
+        let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId);
+        if (!largestBlockNumberStored)
+            largestBlockNumberStored = dbInceptionBlock;
+        await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
+    }
 }
 //# sourceMappingURL=RawLogs.js.map

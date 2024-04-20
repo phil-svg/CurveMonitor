@@ -74,6 +74,7 @@ export async function research() {
   const _1InchV6 = '0x111111125421cA6dc452d289314280a0f8842A65';
   const curveRouterV1 = '0xF0d4c12A5768D806021F80a262B4d39d26C58b8D';
   const CoWProtocolGPv2Settlement = '0x9008D19f58AAbD9eD0D60971565AA8510560ab41';
+  const pyusdFxusdPool = '0xd6982da59f1d26476e259559508f4135135cf9b8';
 
   const ADDRESS_STABESWAP = '0xB9fC157394Af804a3578134A6585C0dc9cc990d4';
   const ADDRESS_STABESWAP_NG = '0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf';
@@ -82,8 +83,8 @@ export async function research() {
 
   const bitgetRouter = '0x1A8f43e01B78979EB4Ef7feBEC60F32c9A72f58E';
 
-  const startDate = '2024-03-17';
-  const endDate = '2024-04-17';
+  const startDate = '2023-03-20';
+  const endDate = '2024-04-20';
 
   const startBlockNumber = 19620526;
   const endBlockNumber = 19625525;
@@ -100,13 +101,13 @@ export async function research() {
   // await getSwapVolumeForPoolAndToAddressForEachSwapDirection(_3Pool, _1InchV5, startDate, endDate);
   // await getToAddressVolDistributionPerPools(_1InchV5, startDate, endDate);
   // await getTvlForPoolArrFromChain(stableswapNGPoolAddressArr, 19319850);
-  await generateVolumeReportForPoolArr(startDate, endDate);
+  // await generateVolumeReportForPoolArr(startDate, endDate);
   // await getGasUsageFromCsvFile();
   // await fetchSandwichUserLossForSomePoolsForTimePeriod(stableswapPoolAddressArr, startDate, endDate);
   // await profitableSandwichThings();
   // await gasUsageThings();
   // await createSandwichLossInUsdJsonFileFor2023();
-  // await generateVolumeReportForSinglePool(payPool, startDate, endDate);
+  await generateVolumeReportForSinglePool(pyusdFxusdPool, startDate, endDate);
   // await generateVolumeReportForSinglePoolHighRes(payPool, startBlockNumber, endBlockNumber);
   // await barChartRace();
   // await priceImpactThings();

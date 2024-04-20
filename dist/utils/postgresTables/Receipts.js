@@ -52,7 +52,7 @@ export async function fetchAndSaveReceipt(txHash, txId) {
         return true;
     }
     else {
-        console.log(`No receipt found for hash: ${txHash} in fetchAndSaveReceipt`);
+        console.log(`No receipt found for ${txHash}`);
     }
 }
 async function getTxHashesToFetch() {

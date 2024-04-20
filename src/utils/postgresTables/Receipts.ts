@@ -128,7 +128,7 @@ export async function fetchAndSaveReceipt(txHash: string, txId: number): Promise
     }
     return true;
   } else {
-    console.log(`No receipt found for hash: ${txHash} in fetchAndSaveReceipt`);
+    console.log(`No receipt found for ${txHash}`);
   }
 }
 

@@ -5,7 +5,7 @@ import { updatePools } from './utils/postgresTables/Pools.js';
 import { updateCoinTable } from './utils/postgresTables/Coins.js';
 import { updatePoolAbis } from './utils/postgresTables/Abi.js';
 import { updateBlockTimestamps } from './utils/postgresTables/Blocks.js';
-import { updateRawLogs } from './utils/postgresTables/RawLogs.js';
+import { updateRawLogs, updateRawLogsForLiveMode, } from './utils/postgresTables/RawLogs.js';
 import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
 import { preparingLiveModeForRawEvents } from './utils/goingLive/RawTxLogsLive.js';
@@ -55,8 +55,9 @@ export async function main() {
     await subscribeToNewBlocks();
     // await updateInitialPoolParams(); // muted until useful
     // await updatePoolParamsEvents(); // muted until useful
-    await preparingLiveModeForRawEvents();
     await updateRawLogs();
+    await preparingLiveModeForRawEvents();
+    await updateRawLogsForLiveMode();
     eventFlags.canEmitGeneralTx = true;
     eventFlags.canEmitAtomicArb = true;
     eventFlags.canEmitCexDexArb = true;
