@@ -130,6 +130,12 @@ export async function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS) {
     return decodedLogs;
 }
 export function toChecksumAddress(address) {
-    return Web3.utils.toChecksumAddress(address);
+    try {
+        return Web3.utils.toChecksumAddress(address);
+    }
+    catch (err) {
+        console.log('err in toChecksumAddress', err);
+        return address;
+    }
 }
 //# sourceMappingURL=Web3.js.map

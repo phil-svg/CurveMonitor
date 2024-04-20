@@ -159,5 +159,10 @@ export async function decodeTransferEventFromReceipt(TOKEN_TRANSFER_EVENTS: Log[
 }
 
 export function toChecksumAddress(address: string): string {
-  return Web3.utils.toChecksumAddress(address);
+  try {
+    return Web3.utils.toChecksumAddress(address);
+  } catch (err) {
+    console.log('err in toChecksumAddress', err);
+    return address;
+  }
 }
