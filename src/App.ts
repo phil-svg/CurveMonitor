@@ -100,7 +100,7 @@ export async function main() {
   await updateReceipts();
   await updateTxTraces();
   await updateAddressCounts();
-  await updateCleanedTransfers();
+  // await updateCleanedTransfers();
   // await updateAtomicArbDetection();
   // await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
 
