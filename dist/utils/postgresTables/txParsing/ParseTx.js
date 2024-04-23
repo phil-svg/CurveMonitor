@@ -1,18 +1,20 @@
-import { getCoinsInBatchesByPools } from "../readFunctions/Pools.js";
-import { fetchEventsForChunkParsing, fetchDistinctBlockNumbers } from "../readFunctions/RawLogs.js";
-import { parseAddLiquidity } from "./ParseAddLiquidity.js";
-import { parseRemoveLiquidity } from "./ParseRemoveLiquidity.js";
-import { parseRemoveLiquidityImbalance } from "./ParseRemoveLiquidityImbalance.js";
-import { parseRemoveLiquidityOne } from "./ParseRemoveLiquidityOne.js";
-import { parseTokenExchange } from "./ParseTokenExchange.js";
-import { parseTokenExchangeUnderlying } from "./ParseTokenExchangeUnderlying.js";
-import { updateConsoleOutput } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { getTimestampsByBlockNumbersFromLocalDatabase } from "../readFunctions/Blocks.js";
-import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock } from "../readFunctions/BlockScanningData.js";
-import Bottleneck from "bottleneck";
-import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from "../../../config/Alchemy.js";
-import { getCurrentBlockNumber } from "../../web3Calls/generic.js";
-import { getTotalTransactionsCount } from "../readFunctions/Transactions.js";
+import { getCoinsInBatchesByPools } from '../readFunctions/Pools.js';
+import { fetchEventsForChunkParsing, fetchDistinctBlockNumbers, fetchRawEventsByTransactionHashes, } from '../readFunctions/RawLogs.js';
+import { parseAddLiquidity } from './ParseAddLiquidity.js';
+import { parseRemoveLiquidity } from './ParseRemoveLiquidity.js';
+import { parseRemoveLiquidityImbalance } from './ParseRemoveLiquidityImbalance.js';
+import { parseRemoveLiquidityOne } from './ParseRemoveLiquidityOne.js';
+import { parseTokenExchange } from './ParseTokenExchange.js';
+import { parseTokenExchangeUnderlying } from './ParseTokenExchangeUnderlying.js';
+import { logProgress, updateConsoleOutput } from '../../helperFunctions/QualityOfLifeStuff.js';
+import { getTimestampsByBlockNumbersFromLocalDatabase } from '../readFunctions/Blocks.js';
+import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock, } from '../readFunctions/BlockScanningData.js';
+import Bottleneck from 'bottleneck';
+import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from '../../../config/Alchemy.js';
+import { getCurrentBlockNumber } from '../../web3Calls/generic.js';
+import { getTotalTransactionsCount } from '../readFunctions/Transactions.js';
+import { sequelize } from '../../../config/Database.js';
+import { QueryTypes } from 'sequelize';
 export async function sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS) {
     const functions = {
         RemoveLiquidity: parseRemoveLiquidity,
@@ -24,10 +26,10 @@ export async function sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS) {
     const removeLiquidityOneEvents = [];
     const otherEvents = [];
     EVENTS.forEach((EVENT) => {
-        if (EVENT.event === "TokenExchangeUnderlying") {
+        if (EVENT.event === 'TokenExchangeUnderlying') {
             tokenExchangeUnderlyingEvents.push(EVENT);
         }
-        else if (EVENT.event === "RemoveLiquidityOne") {
+        else if (EVENT.event === 'RemoveLiquidityOne') {
             removeLiquidityOneEvents.push(EVENT);
         }
         else {
@@ -75,23 +77,63 @@ export async function sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS) {
         console.error(error);
     }
 }
+async function sortAndProcess2(events, blockUnixtimes, poolCoins, typesUpForParsing) {
+    let fetchCount = 0;
+    let totalTimeTaken = 0;
+    for (const event of events) {
+        const eventName = event.event;
+        if (!eventName)
+            continue;
+        if (!typesUpForParsing.toLowerCase().includes(eventName.toLowerCase())) {
+            continue;
+        }
+        const start = new Date().getTime();
+        if (event.blockNumber === undefined)
+            continue;
+        const eventUnixtime = blockUnixtimes[event.blockNumber];
+        if (!eventUnixtime)
+            continue;
+        if (event.pool_id === undefined)
+            continue;
+        const poolCoin = poolCoins[event.pool_id];
+        if (!poolCoin)
+            continue;
+        // RemoveLiquidityOne', 'TokenExchangeUnderlying', 'RemoveLiquidity', 'TokenExchange', 'RemoveLiquidityImbalance'
+        const eventParsers = {
+            RemoveLiquidityOne: parseRemoveLiquidityOne,
+            TokenExchangeUnderlying: parseTokenExchangeUnderlying,
+            RemoveLiquidity: parseRemoveLiquidity,
+            TokenExchange: parseTokenExchange,
+            RemoveLiquidityImbalance: parseRemoveLiquidityImbalance,
+        };
+        const parseEvent = eventParsers[eventName];
+        await parseEvent(event, eventUnixtime, poolCoin);
+        const end = new Date().getTime();
+        totalTimeTaken += end - start;
+        logProgress(`parsing events ${typesUpForParsing}`, 2, fetchCount, totalTimeTaken, events.length);
+    }
+}
 async function parseEventsMain() {
-    const BATCH_SIZE = 1000;
     const blockNumbers = await fetchDistinctBlockNumbers();
     let eventParsingFromBlock = await getEventParsingFromBlock();
     if (eventParsingFromBlock === null)
         eventParsingFromBlock = blockNumbers[0];
     await updateEventParsingFromBlock(eventParsingFromBlock);
     let nowBlock = await getCurrentBlockNumber();
+    let eventParsingToBlock = await getEventParsingToBlock();
+    const BATCH_SIZE = 1000;
     for (let i = 0; i <= blockNumbers.length; i += BATCH_SIZE) {
-        let eventParsingToBlock = await getEventParsingToBlock();
         if (eventParsingToBlock === null)
             eventParsingToBlock = blockNumbers[Math.max(i, BATCH_SIZE)];
         const startBlock = eventParsingToBlock + 1;
         const endBlock = Math.min(startBlock + BATCH_SIZE, nowBlock);
         // If we have parsing bounds, and the current batch of blocks is fully within these bounds, skip this batch.
-        if (eventParsingFromBlock && eventParsingToBlock && startBlock >= eventParsingFromBlock && endBlock <= eventParsingToBlock)
+        if (eventParsingFromBlock &&
+            eventParsingToBlock &&
+            startBlock >= eventParsingFromBlock &&
+            endBlock <= eventParsingToBlock) {
             continue;
+        }
         const EVENTS = await fetchEventsForChunkParsing(startBlock, endBlock);
         // Get block timestamps
         const eventBlockNumbers = EVENTS.flatMap((event) => (event.blockNumber !== undefined ? [event.blockNumber] : []));
@@ -110,8 +152,67 @@ async function parseEventsMain() {
     }
 }
 export async function parseEvents() {
-    await parseEventsMain();
-    updateConsoleOutput("[✓] Events parsed successfully.\n");
+    // await parseEventsMain();
+    await processMissingTransactions();
+    updateConsoleOutput('[✓] Events parsed successfully.\n');
+}
+/**
+ * Fetches batches of txHashes from RawTxLogs that are not in Transactions and processes them.
+ */
+async function processMissingTransactions() {
+    let query = `
+SELECT r.transaction_hash, r.pool_id
+FROM raw_tx_logs r
+LEFT JOIN transactions t ON r.transaction_hash = t.tx_hash AND r.pool_id = t.pool_id
+WHERE t.tx_hash IS NULL AND t.pool_id IS NULL
+  AND r.event IN ('RemoveLiquidity', 'TokenExchange', 'RemoveLiquidityImbalance')
+LIMIT :batchSize OFFSET :offset;
+    `;
+    await processEvents(query, 'RemoveLiquidity, TokenExchange, RemoveLiquidityImbalance');
+    query = `
+SELECT r.transaction_hash, r.pool_id
+FROM raw_tx_logs r
+LEFT JOIN transactions t ON r.transaction_hash = t.tx_hash AND r.pool_id = t.pool_id
+WHERE t.tx_hash IS NULL AND t.pool_id IS NULL
+  AND r.event IN ('RemoveLiquidityOne')
+LIMIT :batchSize OFFSET :offset;
+    `;
+    await processEvents(query, 'RemoveLiquidityOne');
+    query = `
+SELECT r.transaction_hash, r.pool_id
+FROM raw_tx_logs r
+LEFT JOIN transactions t ON r.transaction_hash = t.tx_hash AND r.pool_id = t.pool_id
+WHERE t.tx_hash IS NULL AND t.pool_id IS NULL
+  AND r.event IN ('TokenExchangeUnderlying')
+LIMIT :batchSize OFFSET :offset;
+    `;
+    await processEvents(query, 'TokenExchangeUnderlying');
+}
+async function processEvents(query, typesUpForParsing) {
+    const batchSize = 100000;
+    let offset = 0;
+    let batchCount;
+    do {
+        const missingTxHashesWithPoolIds = await sequelize.query(query, {
+            replacements: { batchSize, offset },
+            type: QueryTypes.SELECT,
+        });
+        batchCount = missingTxHashesWithPoolIds.length;
+        if (batchCount > 0) {
+            console.log(batchCount, 'tx to parse', typesUpForParsing);
+            await processTxHashesBatchOfRawLogs(missingTxHashesWithPoolIds, typesUpForParsing);
+        }
+        offset += batchSize; // Prepare the offset for the next batch
+    } while (batchCount === batchSize); // Continue until a batch returns fewer than batchSize records
+}
+async function processTxHashesBatchOfRawLogs(missingTxHashesWithPoolIds, typesUpForParsing) {
+    const rawEvents = await fetchRawEventsByTransactionHashes(missingTxHashesWithPoolIds);
+    // Get block timestamps
+    const eventBlockNumbers = rawEvents.flatMap((event) => (event.blockNumber !== undefined ? [event.blockNumber] : []));
+    const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
+    // Get pool coins
+    const POOL_COINS = await getCoinsInBatchesByPools(rawEvents.flatMap((event) => (event.pool_id !== undefined ? [event.pool_id] : [])));
+    await sortAndProcess2(rawEvents, BLOCK_UNIXTIMES, POOL_COINS, typesUpForParsing);
 }
 /**
 Event Examples

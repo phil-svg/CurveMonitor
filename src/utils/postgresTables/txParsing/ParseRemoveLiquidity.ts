@@ -1,8 +1,8 @@
-import { saveCoins, saveTransaction, transactionExists } from "./ParsingHelper.js";
-import { TransactionType } from "../../../models/Transactions.js";
-import { getCoinsBy } from "../readFunctions/Pools.js";
-import { getCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
-import { Coin } from "../../Interfaces.js";
+import { saveCoins, saveTransaction } from './ParsingHelper.js';
+import { TransactionType } from '../../../models/Transactions.js';
+import { getCoinsBy } from '../readFunctions/Pools.js';
+import { getCoinIdByAddress, findCoinDecimalsById } from '../readFunctions/Coins.js';
+import { Coin } from '../../Interfaces.js';
 
 export async function parseRemoveLiquidity(event: any, BLOCK_UNIXTIME: any, POOL_COINS: any): Promise<void> {
   // if (await transactionExists(event.eventId)) return;
@@ -49,10 +49,10 @@ export async function parseRemoveLiquidity(event: any, BLOCK_UNIXTIME: any, POOL
           tx_id: transaction.tx_id,
           COIN_ID: coin.COIN_ID,
           coinAmount: coin.amount,
-          direction: "out",
+          direction: 'out',
         }))
     );
   } catch (error) {
-    console.error("Error saving transaction:", error);
+    console.error('Error saving transaction:', error);
   }
 }

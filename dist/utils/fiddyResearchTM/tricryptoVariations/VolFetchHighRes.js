@@ -28,14 +28,22 @@ export async function saveJsonToExcel(jsonData, filename) {
     await workbook.xlsx.writeFile(filename);
     console.log(`JSON data has been saved to ${filename}`);
 }
-export async function generateVolumeReportForSinglePoolHighRes(poolAddress, startBlockNumber, endBlockNumber) {
+export async function generateVolumeReportForSinglePoolHighRes(poolAddress, startBlockNumber, endBlockNumber, startDate, endDate) {
     const poolId = await getIdByAddress(poolAddress);
     if (!poolId) {
         console.log('could not find poolId for', poolAddress, 'in generateVolumeReportForSinglePool');
         return;
     }
-    const startUnixTime = await getBlockTimeStamp(startBlockNumber);
-    const endUnixTime = await getBlockTimeStamp(endBlockNumber);
+    let startUnixTime;
+    let endUnixTime;
+    if (startDate && endDate) {
+        startUnixTime = new Date(startDate).getTime() / 1000;
+        endUnixTime = new Date(endDate).getTime() / 1000;
+    }
+    else {
+        startUnixTime = await getBlockTimeStamp(startBlockNumber);
+        endUnixTime = await getBlockTimeStamp(endBlockNumber);
+    }
     if (!startUnixTime || !endUnixTime)
         return;
     const dailyVolumes = await calculateMinutelyVolumes(poolId, startUnixTime, endUnixTime);

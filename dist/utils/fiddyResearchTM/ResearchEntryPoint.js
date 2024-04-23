@@ -1,5 +1,5 @@
 import { getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
-import { generateVolumeReportForSinglePool, } from './tricryptoVariations/VolFetch.js';
+import { fxThings } from './atomicArb/fxArbs.js';
 /*
 0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7 3Pool
 0xdc24316b9ae028f1497c275eb9192a3ea0f67022 stETH
@@ -38,6 +38,7 @@ export async function research() {
     // const startDate = "2021-01-01";
     // const endDate = "2022-07-31";
     console.log('conducting research');
+    await fxThings();
     // await uniswapV3EntryPoint()
     // await oneInchVolThings();
     // await whatWasSwappedAnalytics(_3Pool, CoWProtocolGPv2Settlement, startDate, endDate);
@@ -51,8 +52,8 @@ export async function research() {
     // await profitableSandwichThings();
     // await gasUsageThings();
     // await createSandwichLossInUsdJsonFileFor2023();
-    await generateVolumeReportForSinglePool(pyusdFxusdPool, startDate, endDate);
-    // await generateVolumeReportForSinglePoolHighRes(payPool, startBlockNumber, endBlockNumber);
+    // await generateVolumeReportForSinglePool(pyusdFxusdPool, startDate, endDate);
+    // await generateVolumeReportForSinglePoolHighRes(pyusdFxusdPool, startBlockNumber, endBlockNumber, startDate, endDate);
     // await barChartRace();
     // await priceImpactThings();
     // await tvlThings();

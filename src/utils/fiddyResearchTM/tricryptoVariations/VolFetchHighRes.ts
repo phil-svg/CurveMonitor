@@ -40,7 +40,9 @@ export async function saveJsonToExcel(jsonData: Record<string, number[]>, filena
 export async function generateVolumeReportForSinglePoolHighRes(
   poolAddress: string,
   startBlockNumber: number,
-  endBlockNumber: number
+  endBlockNumber: number,
+  startDate?: string,
+  endDate?: string
 ) {
   const poolId = await getIdByAddress(poolAddress);
   if (!poolId) {
@@ -48,8 +50,16 @@ export async function generateVolumeReportForSinglePoolHighRes(
     return;
   }
 
-  const startUnixTime = await getBlockTimeStamp(startBlockNumber);
-  const endUnixTime = await getBlockTimeStamp(endBlockNumber);
+  let startUnixTime: number | null;
+  let endUnixTime: number | null;
+
+  if (startDate && endDate) {
+    startUnixTime = new Date(startDate).getTime() / 1000;
+    endUnixTime = new Date(endDate).getTime() / 1000;
+  } else {
+    startUnixTime = await getBlockTimeStamp(startBlockNumber);
+    endUnixTime = await getBlockTimeStamp(endBlockNumber);
+  }
   if (!startUnixTime || !endUnixTime) return;
 
   const dailyVolumes = await calculateMinutelyVolumes(poolId, startUnixTime, endUnixTime);

@@ -1,14 +1,14 @@
-import { Op, fn, col, literal } from "sequelize";
-import { RawTxLogs } from "../../../models/RawTxLogs.js";
-import pkg from "lodash";
+import { Op, fn, col, literal } from 'sequelize';
+import { RawTxLogs } from '../../../models/RawTxLogs.js';
+import pkg from 'lodash';
 const { pick, isNaN } = pkg;
 export async function getHighestBlockNumberForPool(poolId) {
     try {
-        const result = await RawTxLogs.max("blockNumber", { where: { pool_id: poolId } });
-        return typeof result === "number" ? result : null;
+        const result = await RawTxLogs.max('blockNumber', { where: { pool_id: poolId } });
+        return typeof result === 'number' ? result : null;
     }
     catch (error) {
-        console.error("Error fetching highest block number: ", error);
+        console.error('Error fetching highest block number: ', error);
         return null;
     }
 }
@@ -28,32 +28,32 @@ export async function getEntriesByBlockNumberAndPoolId(blockNumber, poolId) {
         }
     }
     catch (error) {
-        console.error("Error retrieving entries:", error);
+        console.error('Error retrieving entries:', error);
         return null;
     }
 }
 export async function fetchDistinctBlockNumbers() {
     const distinctBlockNumbers = await RawTxLogs.findAll({
-        attributes: [[fn("DISTINCT", col("block_number")), "block_number"]],
-        order: [["block_number", "ASC"]],
+        attributes: [[fn('DISTINCT', col('block_number')), 'block_number']],
+        order: [['block_number', 'ASC']],
     });
-    return distinctBlockNumbers.map((row) => row.getDataValue("block_number"));
+    return distinctBlockNumbers.map((row) => row.getDataValue('block_number'));
 }
 export async function fetchDistinctBlockNumbersInBatch(offset, batchSize) {
     const distinctBlockNumbers = await RawTxLogs.findAll({
-        attributes: [[fn("DISTINCT", col("block_number")), "block_number"]],
-        order: [["block_number", "ASC"]],
+        attributes: [[fn('DISTINCT', col('block_number')), 'block_number']],
+        order: [['block_number', 'ASC']],
         offset: offset,
         limit: batchSize,
     });
-    return distinctBlockNumbers.map((row) => row.getDataValue("block_number"));
+    return distinctBlockNumbers.map((row) => row.getDataValue('block_number'));
 }
 export async function fetchAllDistinctBlockNumbers() {
     const distinctBlockNumbers = await RawTxLogs.findAll({
-        attributes: [[fn("DISTINCT", col("block_number")), "block_number"]],
-        order: [["block_number", "ASC"]],
+        attributes: [[fn('DISTINCT', col('block_number')), 'block_number']],
+        order: [['block_number', 'ASC']],
     });
-    return distinctBlockNumbers.map((row) => row.getDataValue("block_number"));
+    return distinctBlockNumbers.map((row) => row.getDataValue('block_number'));
 }
 // works faster, but less safe
 export async function fetchEventsForChunkParsing(startBlock, endBlock) {
@@ -64,22 +64,57 @@ export async function fetchEventsForChunkParsing(startBlock, endBlock) {
                 [Op.lte]: endBlock,
             },
         },
-        order: [["block_number", "ASC"]],
+        order: [['block_number', 'ASC']],
     });
     return events.map((event) => {
         const plainEvent = event.get();
         const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));
         return pick(Object.assign(Object.assign({}, plainEvent), { returnValues }), [
-            "eventId",
-            "pool_id",
-            "address",
-            "blockNumber",
-            "transactionHash",
-            "transactionIndex",
-            "logIndex",
-            "removed",
-            "event",
-            "returnValues",
+            'eventId',
+            'pool_id',
+            'address',
+            'blockNumber',
+            'transactionHash',
+            'transactionIndex',
+            'logIndex',
+            'removed',
+            'event',
+            'returnValues',
+        ]);
+    });
+}
+/**
+ * Fetches raw transaction log events based on an array of transaction hash and pool id combinations.
+ * @param transactionHashesWithPoolIds Array of objects containing transaction hashes and pool ids.
+ * @returns A promise that resolves to an array of partial RawTxLogs entries.
+ */
+export async function fetchRawEventsByTransactionHashes(transactionHashesWithPoolIds) {
+    // Extract transaction hashes and pool ids from the input array
+    const transactionHashes = transactionHashesWithPoolIds.map((t) => t.transaction_hash);
+    const poolIds = transactionHashesWithPoolIds.map((t) => t.pool_id);
+    // Find all entries that match both transaction hash and pool id
+    const events = await RawTxLogs.findAll({
+        where: {
+            transaction_hash: { [Op.in]: transactionHashes },
+            pool_id: { [Op.in]: poolIds },
+        },
+        order: [['block_number', 'ASC']],
+    });
+    // Map the raw events to a simplified format
+    return events.map((event) => {
+        const plainEvent = event.get({ plain: true });
+        const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));
+        return pick(plainEvent, [
+            'eventId',
+            'pool_id',
+            'address',
+            'blockNumber',
+            'transactionHash',
+            'transactionIndex',
+            'logIndex',
+            'removed',
+            'event',
+            'returnValues',
         ]);
     });
 }
@@ -92,29 +127,29 @@ export async function fetchEventsForChunkParsingForPoolId(startBlock, endBlock, 
             },
             pool_id: poolId,
         },
-        order: [["block_number", "ASC"]],
+        order: [['block_number', 'ASC']],
     });
     return events.map((event) => {
         const plainEvent = event.get({ plain: true }); // Ensure to get plain object
         const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));
         return pick(Object.assign(Object.assign({}, plainEvent), { returnValues }), [
-            "eventId",
-            "pool_id",
-            "address",
-            "blockNumber",
-            "transactionHash",
-            "transactionIndex",
-            "logIndex",
-            "removed",
-            "event",
-            "returnValues",
+            'eventId',
+            'pool_id',
+            'address',
+            'blockNumber',
+            'transactionHash',
+            'transactionIndex',
+            'logIndex',
+            'removed',
+            'event',
+            'returnValues',
         ]);
     });
 }
 export async function fetchPoolEventsInBatches(poolId, offset, BATCH_SIZE) {
     const events = await RawTxLogs.findAll({
         where: { pool_id: poolId },
-        order: [["block_number", "ASC"]],
+        order: [['block_number', 'ASC']],
         limit: BATCH_SIZE,
         offset: offset,
     });
@@ -123,13 +158,13 @@ export async function fetchPoolEventsInBatches(poolId, offset, BATCH_SIZE) {
 export async function getEntriesByBlockNumberIndex(index) {
     try {
         const distinctBlockNumbers = await RawTxLogs.findAll({
-            attributes: [[fn("DISTINCT", col("block_number")), "block_number"]],
-            order: [literal("block_number ASC")],
+            attributes: [[fn('DISTINCT', col('block_number')), 'block_number']],
+            order: [literal('block_number ASC')],
         });
         if (index < 1 || index > distinctBlockNumbers.length) {
             throw new Error(`Index out of range. Valid range is 1 to ${distinctBlockNumbers.length}.`);
         }
-        const blockNumber = distinctBlockNumbers[index - 1].getDataValue("block_number");
+        const blockNumber = distinctBlockNumbers[index - 1].getDataValue('block_number');
         const entries = await RawTxLogs.findAll({
             where: {
                 block_number: blockNumber,
@@ -140,16 +175,16 @@ export async function getEntriesByBlockNumberIndex(index) {
                 const plainEntry = entry.get();
                 const returnValues = Object.fromEntries(Object.entries(plainEntry.returnValues).filter(([key]) => isNaN(Number(key))));
                 return pick(Object.assign(Object.assign({}, plainEntry), { returnValues }), [
-                    "eventId",
-                    "pool_id",
-                    "address",
-                    "blockNumber",
-                    "transactionHash",
-                    "transactionIndex",
-                    "logIndex",
-                    "removed",
-                    "event",
-                    "returnValues",
+                    'eventId',
+                    'pool_id',
+                    'address',
+                    'blockNumber',
+                    'transactionHash',
+                    'transactionIndex',
+                    'logIndex',
+                    'removed',
+                    'event',
+                    'returnValues',
                 ]);
             });
         }
@@ -158,7 +193,7 @@ export async function getEntriesByBlockNumberIndex(index) {
         }
     }
     catch (error) {
-        console.error("Error retrieving entries:", error);
+        console.error('Error retrieving entries:', error);
         return null;
     }
 }
@@ -166,22 +201,22 @@ export async function getEntriesByBlockNumberIndex(index) {
 export async function countEvents() {
     try {
         const counts = await RawTxLogs.findAll({
-            attributes: ["event", [fn("COUNT", col("event")), "count"]],
+            attributes: ['event', [fn('COUNT', col('event')), 'count']],
             where: {
                 event: {
-                    [Op.notIn]: ["ClaimAdminFee", "Approval", "Transfer"],
+                    [Op.notIn]: ['ClaimAdminFee', 'Approval', 'Transfer'],
                 },
             },
-            group: ["event"],
+            group: ['event'],
         });
         const eventCounts = {};
         for (const count of counts) {
-            eventCounts[count.get("event")] = Number(count.get("count"));
+            eventCounts[count.get('event')] = Number(count.get('count'));
         }
         return eventCounts;
     }
     catch (error) {
-        console.error("Error counting events:", error);
+        console.error('Error counting events:', error);
         return {};
     }
 }
@@ -197,16 +232,16 @@ export async function getEntriesByTransactionHash(transactionHash) {
                 const plainEntry = entry.get();
                 const returnValues = Object.fromEntries(Object.entries(plainEntry.returnValues).filter(([key]) => isNaN(Number(key))));
                 return pick(Object.assign(Object.assign({}, plainEntry), { returnValues }), [
-                    "id",
-                    "pool_id",
-                    "address",
-                    "blockNumber",
-                    "transactionHash",
-                    "transactionIndex",
-                    "logIndex",
-                    "removed",
-                    "event",
-                    "returnValues",
+                    'id',
+                    'pool_id',
+                    'address',
+                    'blockNumber',
+                    'transactionHash',
+                    'transactionIndex',
+                    'logIndex',
+                    'removed',
+                    'event',
+                    'returnValues',
                 ]);
             });
         }
@@ -215,7 +250,7 @@ export async function getEntriesByTransactionHash(transactionHash) {
         }
     }
     catch (error) {
-        console.error("Error retrieving entries:", error);
+        console.error('Error retrieving entries:', error);
         return null;
     }
 }
@@ -245,15 +280,15 @@ export async function getReturnValuesByEventId(eventId) {
     return logEntry.returnValues;
 }
 export async function getSmallestBlockNumber() {
-    const minBlockNumber = await RawTxLogs.min("blockNumber");
-    if (typeof minBlockNumber === "number") {
+    const minBlockNumber = await RawTxLogs.min('blockNumber');
+    if (typeof minBlockNumber === 'number') {
         return minBlockNumber;
     }
     return null;
 }
 export async function getLargestBlockNumber() {
-    const maxBlockNumber = await RawTxLogs.max("blockNumber");
-    if (typeof maxBlockNumber === "number") {
+    const maxBlockNumber = await RawTxLogs.max('blockNumber');
+    if (typeof maxBlockNumber === 'number') {
         return maxBlockNumber;
     }
     return null;
@@ -264,13 +299,13 @@ export async function getAllEventIdsByTxHash(txHash) {
             where: {
                 transactionHash: txHash,
             },
-            attributes: ["eventId"],
+            attributes: ['eventId'],
         });
         const eventIds = rawTxLogs.map((txLog) => txLog.eventId);
         return eventIds;
     }
     catch (error) {
-        console.error("Error fetching event IDs by transaction hash:", error);
+        console.error('Error fetching event IDs by transaction hash:', error);
         return [];
     }
 }

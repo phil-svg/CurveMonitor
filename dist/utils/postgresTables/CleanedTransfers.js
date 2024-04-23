@@ -117,7 +117,7 @@ export async function updateCleanedTransfers() {
                 }
             }
         }
-        logProgress('updateCleanedTransfers', 10, counter, totalTimeTaken, totalToBeProcessed);
+        logProgress('updateCleanedTransfers', 200, counter, totalTimeTaken, totalToBeProcessed);
     }
     console.log(`[✓] updateCleanedTransfers completed successfully.`);
 }

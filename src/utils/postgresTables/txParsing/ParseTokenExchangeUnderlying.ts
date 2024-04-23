@@ -1,18 +1,24 @@
-import { saveCoins, saveTransaction } from "./ParsingHelper.js";
-import { TransactionType } from "../../../models/Transactions.js";
-import { getCoinsBy, getIdByAddress, getBasePoolBy } from "../readFunctions/Pools.js";
-import { getCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
-import { findTransactionsByPoolIdAndHash } from "../readFunctions/Transactions.js";
-import { findTransactionCoinsByTxIds } from "../readFunctions/TransactionCoins.js";
-import { Decimal } from "decimal.js";
-import { CoinMovement } from "../../Interfaces.js";
+import { saveCoins, saveTransaction } from './ParsingHelper.js';
+import { TransactionType } from '../../../models/Transactions.js';
+import { getCoinsBy, getIdByAddress, getBasePoolBy } from '../readFunctions/Pools.js';
+import { getCoinIdByAddress, findCoinDecimalsById } from '../readFunctions/Coins.js';
+import { findTransactionsByPoolIdAndHash } from '../readFunctions/Transactions.js';
+import { findTransactionCoinsByTxIds } from '../readFunctions/TransactionCoins.js';
+import { Decimal } from 'decimal.js';
+import { CoinMovement } from '../../Interfaces.js';
 
-function findNearestCoinMovementAmount(LP_TRANSFER_AMOUNT: string, COIN_MOVEMENTS_IN_BASEPOOL: CoinMovement[], SOLD_COIN_ADDRESS: string): string | null {
+function findNearestCoinMovementAmount(
+  LP_TRANSFER_AMOUNT: string,
+  COIN_MOVEMENTS_IN_BASEPOOL: CoinMovement[],
+  SOLD_COIN_ADDRESS: string
+): string | null {
   // Convert LP_TRANSFER_AMOUNT to a Decimal
   const transferAmount = new Decimal(LP_TRANSFER_AMOUNT).dividedBy(new Decimal(10).pow(18));
 
   // Filter out the movements that match the SOLD_COIN_ADDRESS
-  const soldCoinMovements = COIN_MOVEMENTS_IN_BASEPOOL.filter((movement) => movement.coin.address === SOLD_COIN_ADDRESS);
+  const soldCoinMovements = COIN_MOVEMENTS_IN_BASEPOOL.filter(
+    (movement) => movement.coin.address === SOLD_COIN_ADDRESS
+  );
 
   // Sort the movements by the absolute difference between the transfer amount and the movement amount
   soldCoinMovements.sort((a, b) => {
@@ -27,10 +33,23 @@ function findNearestCoinMovementAmount(LP_TRANSFER_AMOUNT: string, COIN_MOVEMENT
   return soldCoinMovements[0]?.amount;
 }
 
-export async function parseTokenExchangeUnderlying(event: any, BLOCK_UNIXTIME: any, POOL_COINS: string[] | null): Promise<void> {
-  if (!event) return;
-  if (!POOL_COINS) return;
+export async function parseTokenExchangeUnderlying(
+  event: any,
+  BLOCK_UNIXTIME: any,
+  POOL_COINS: string[] | null
+): Promise<void> {
+  if (!event) {
+    console.error('!event', event.transactionHash);
+    return;
+  }
 
+  if (!POOL_COINS) {
+    console.error('!POOL_COINS', event.transactionHash);
+    return;
+  }
+
+  const poolIdsToExclude = [2, 4, 5, 8, 10, 12, 16, 17, 18];
+  if (poolIdsToExclude.includes(event.pool_id)) return; // Pools with underlying coins but no basepool, needs further work if relevant tx.
   let soldCoinEventID = parseInt(event.returnValues.sold_id);
   let soldCoinAmount = event.returnValues.tokens_sold;
 
@@ -72,7 +91,11 @@ export async function parseTokenExchangeUnderlying(event: any, BLOCK_UNIXTIME: a
     const TX_IDS_FROM_TRANSFERS = TRANSFERS_IN_BASEPOOL.map((transfer) => (transfer as any).tx_id);
     const COIN_MOVEMENTS_IN_BASEPOOL = await findTransactionCoinsByTxIds(TX_IDS_FROM_TRANSFERS);
     const LP_AMOUNT = event.returnValues.tokens_sold;
-    const NEAREST_COIN_MOVEMENT_AMOUNT = findNearestCoinMovementAmount(LP_AMOUNT, COIN_MOVEMENTS_IN_BASEPOOL, SOLD_COIN_ADDRESS);
+    const NEAREST_COIN_MOVEMENT_AMOUNT = findNearestCoinMovementAmount(
+      LP_AMOUNT,
+      COIN_MOVEMENTS_IN_BASEPOOL,
+      SOLD_COIN_ADDRESS
+    );
     soldCoinAmount = NEAREST_COIN_MOVEMENT_AMOUNT;
   }
 
@@ -89,13 +112,17 @@ export async function parseTokenExchangeUnderlying(event: any, BLOCK_UNIXTIME: a
     const TX_IDS_FROM_TRANSFERS = TRANSFERS_IN_BASEPOOL.map((transfer) => (transfer as any).tx_id);
     const COIN_MOVEMENTS_IN_BASEPOOL = await findTransactionCoinsByTxIds(TX_IDS_FROM_TRANSFERS);
     const LP_AMOUNT = event.returnValues.tokens_bought;
-    const NEAREST_COIN_MOVEMENT_AMOUNT = findNearestCoinMovementAmount(LP_AMOUNT, COIN_MOVEMENTS_IN_BASEPOOL, BOUGHT_COIN_ADDRESS);
+    const NEAREST_COIN_MOVEMENT_AMOUNT = findNearestCoinMovementAmount(
+      LP_AMOUNT,
+      COIN_MOVEMENTS_IN_BASEPOOL,
+      BOUGHT_COIN_ADDRESS
+    );
     boughtCoinAmount = NEAREST_COIN_MOVEMENT_AMOUNT;
   }
 
   const coinAmounts = [
-    { COIN_ID: soldCoinID, amount: Number(soldCoinAmount), direction: "out" },
-    { COIN_ID: boughtCoinID, amount: Number(boughtCoinAmount), direction: "in" },
+    { COIN_ID: soldCoinID, amount: Number(soldCoinAmount), direction: 'out' },
+    { COIN_ID: boughtCoinID, amount: Number(boughtCoinAmount), direction: 'in' },
   ];
 
   const transactionData = {
@@ -114,13 +141,23 @@ export async function parseTokenExchangeUnderlying(event: any, BLOCK_UNIXTIME: a
 
   try {
     const transaction = await saveTransaction(transactionData);
-    const coinsWithTxId = coinAmounts.map((coin) => ({ tx_id: transaction.tx_id, COIN_ID: coin.COIN_ID, coinAmount: coin.amount, direction: coin.direction }));
-    const validCoins = coinsWithTxId.filter((coin) => coin.COIN_ID !== null) as { tx_id: number; COIN_ID: number; coinAmount: number; direction: string }[];
+    const coinsWithTxId = coinAmounts.map((coin) => ({
+      tx_id: transaction.tx_id,
+      COIN_ID: coin.COIN_ID,
+      coinAmount: coin.amount,
+      direction: coin.direction,
+    }));
+    const validCoins = coinsWithTxId.filter((coin) => coin.COIN_ID !== null) as {
+      tx_id: number;
+      COIN_ID: number;
+      coinAmount: number;
+      direction: string;
+    }[];
 
     if (validCoins.length < 2) return;
 
     await saveCoins(validCoins);
   } catch (error) {
-    console.error("Error saving transaction:", error);
+    console.error('Error saving transaction:', error);
   }
 }

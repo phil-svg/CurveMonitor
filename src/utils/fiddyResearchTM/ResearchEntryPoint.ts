@@ -6,11 +6,14 @@ import {
 } from '../helperFunctions/CrossQueries.js';
 import { saveChunkedDataToExcel } from '../helperFunctions/Excel.js';
 import { getElementCountChunkedForArrayAndChunksize } from '../helperFunctions/QualityOfLifeStuff.js';
+import { getCleanedTransfers } from '../postgresTables/CleanedTransfers.js';
 import { getTvlForPoolArrFromChain } from '../postgresTables/Tvl.js';
+import { getCleanedTransfersForTxHashFromTable } from '../postgresTables/readFunctions/CleanedTransfers.js';
 import { getIdByAddress, getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
 import { getTxIdByTxHash } from '../postgresTables/readFunctions/Transactions.js';
 import { oneInchVolThings, whatWasSwappedAnalytics } from './DefiMonitooor/DexAggregators/1Inch/oneInch.js';
 import { uniswapV3EntryPoint } from './DefiMonitooor/DexAggregators/uniswapV3/UniV3EntryPoint.js';
+import { fxThings } from './atomicArb/fxArbs.js';
 import { aggregateCexDexBotVolumeOverTime, writeDBotVolOverTimeataToExcel } from './cexdex/BotVolOverTime.js';
 import { countCoinSwapsForBotAndPool } from './cexdex/ClusteredTxCoins.js';
 import { calculateTotalVolumeAndVolumePerBot } from './cexdex/GlobalVolume.js';
@@ -94,6 +97,7 @@ export async function research() {
 
   console.log('conducting research');
 
+  await fxThings();
   // await uniswapV3EntryPoint()
   // await oneInchVolThings();
   // await whatWasSwappedAnalytics(_3Pool, CoWProtocolGPv2Settlement, startDate, endDate);
@@ -107,8 +111,8 @@ export async function research() {
   // await profitableSandwichThings();
   // await gasUsageThings();
   // await createSandwichLossInUsdJsonFileFor2023();
-  await generateVolumeReportForSinglePool(pyusdFxusdPool, startDate, endDate);
-  // await generateVolumeReportForSinglePoolHighRes(payPool, startBlockNumber, endBlockNumber);
+  // await generateVolumeReportForSinglePool(pyusdFxusdPool, startDate, endDate);
+  // await generateVolumeReportForSinglePoolHighRes(pyusdFxusdPool, startBlockNumber, endBlockNumber, startDate, endDate);
   // await barChartRace();
   // await priceImpactThings();
   // await tvlThings();

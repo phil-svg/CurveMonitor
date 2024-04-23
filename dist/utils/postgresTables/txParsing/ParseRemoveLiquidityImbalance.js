@@ -1,7 +1,7 @@
-import { saveCoins, saveTransaction } from "./ParsingHelper.js";
-import { TransactionType } from "../../../models/Transactions.js";
-import { getCoinsBy } from "../readFunctions/Pools.js";
-import { getCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
+import { saveCoins, saveTransaction } from './ParsingHelper.js';
+import { TransactionType } from '../../../models/Transactions.js';
+import { getCoinsBy } from '../readFunctions/Pools.js';
+import { getCoinIdByAddress, findCoinDecimalsById } from '../readFunctions/Coins.js';
 export async function parseRemoveLiquidityImbalance(event, BLOCK_UNIXTIME, POOL_COINS) {
     // if (await transactionExists(event.eventId)) return;
     if (!POOL_COINS)
@@ -43,11 +43,11 @@ export async function parseRemoveLiquidityImbalance(event, BLOCK_UNIXTIME, POOL_
             tx_id: transaction.tx_id,
             COIN_ID: coin.COIN_ID,
             coinAmount: coin.amount,
-            direction: "out",
+            direction: 'out',
         })));
     }
     catch (error) {
-        console.error("Error saving transaction:", error);
+        console.error('Error saving transaction:', error);
     }
 }
 //# sourceMappingURL=ParseRemoveLiquidityImbalance.js.map

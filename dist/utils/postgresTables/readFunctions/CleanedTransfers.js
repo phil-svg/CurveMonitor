@@ -1,16 +1,17 @@
-import { TokenTransfers } from "../../../models/CleanedTransfers.js";
-import { getToAddress } from "./TransactionDetails.js";
+import { TokenTransfers } from '../../../models/CleanedTransfers.js';
+import { getToAddress } from './TransactionDetails.js';
+import { getTxIdByTxHash } from './Transactions.js';
 export async function getAllTxIdsFromCleanedTransfers() {
     try {
         const tokenTransfers = await TokenTransfers.findAll({
-            attributes: ["tx_id"],
+            attributes: ['tx_id'],
             raw: true,
         });
         const txIds = tokenTransfers.map((transfer) => transfer.tx_id);
         return txIds;
     }
     catch (error) {
-        console.error("Error retrieving tx_ids:", error);
+        console.error('Error retrieving tx_ids:', error);
         return [];
     }
 }
@@ -18,7 +19,7 @@ export async function getTransferArrLengthForTxId(txId) {
     try {
         const tokenTransferEntry = await TokenTransfers.findOne({
             where: { tx_id: txId },
-            attributes: ["cleaned_transfers"],
+            attributes: ['cleaned_transfers'],
             raw: true,
         });
         if (tokenTransferEntry && tokenTransferEntry.cleaned_transfers) {
@@ -29,7 +30,7 @@ export async function getTransferArrLengthForTxId(txId) {
         }
     }
     catch (error) {
-        console.error("Error retrieving cleaned_transfers length:", error);
+        console.error('Error retrieving cleaned_transfers length:', error);
         return null;
     }
 }
@@ -37,7 +38,24 @@ export async function getCleanedTransfersForTxIdFromTable(txId) {
     try {
         const tokenTransferEntry = await TokenTransfers.findOne({
             where: { tx_id: txId },
-            attributes: ["cleaned_transfers"],
+            attributes: ['cleaned_transfers'],
+        });
+        return tokenTransferEntry ? tokenTransferEntry.cleaned_transfers : null;
+    }
+    catch (error) {
+        console.error(`Error fetching cleaned transfers for txId ${txId}:`, error);
+        return null;
+    }
+}
+export async function getCleanedTransfersForTxHashFromTable(txHash) {
+    const txId = await getTxIdByTxHash(txHash);
+    if (!txId) {
+        return null;
+    }
+    try {
+        const tokenTransferEntry = await TokenTransfers.findOne({
+            where: { tx_id: txId },
+            attributes: ['cleaned_transfers'],
         });
         return tokenTransferEntry ? tokenTransferEntry.cleaned_transfers : null;
     }
@@ -66,12 +84,12 @@ export async function sumOutgoingTransfersByToken(txIds) {
         const outgoingTransfers = tokenTransferEntry.cleaned_transfers.filter((transfer) => transfer.from.toLowerCase() === toAddress.toLowerCase());
         if (outgoingTransfers.length === 2) {
             // Find the transfer with the lower amount
-            const lowerAmountTransfer = outgoingTransfers.reduce((prev, current) => (prev.parsedAmount < current.parsedAmount ? prev : current));
-            const tokenSymbol = lowerAmountTransfer.tokenSymbol || "Unknown";
+            const lowerAmountTransfer = outgoingTransfers.reduce((prev, current) => prev.parsedAmount < current.parsedAmount ? prev : current);
+            const tokenSymbol = lowerAmountTransfer.tokenSymbol || 'Unknown';
             const amount = lowerAmountTransfer.parsedAmount;
             tokenSums[tokenSymbol] = (tokenSums[tokenSymbol] || 0) + amount;
             // Check for ETH transfers greater than 0.5
-            if (tokenSymbol === "ETH" && amount > 0.5) {
+            if (tokenSymbol === 'ETH' && amount > 0.5) {
                 console.log(`Transaction with more than 0.5 ETH: TxHash - ${tokenTransferEntry.transaction.tx_hash}`);
             }
         }

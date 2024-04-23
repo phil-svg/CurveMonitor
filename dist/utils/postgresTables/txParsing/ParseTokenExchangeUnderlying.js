@@ -1,10 +1,10 @@
-import { saveCoins, saveTransaction } from "./ParsingHelper.js";
-import { TransactionType } from "../../../models/Transactions.js";
-import { getCoinsBy, getIdByAddress, getBasePoolBy } from "../readFunctions/Pools.js";
-import { getCoinIdByAddress, findCoinDecimalsById } from "../readFunctions/Coins.js";
-import { findTransactionsByPoolIdAndHash } from "../readFunctions/Transactions.js";
-import { findTransactionCoinsByTxIds } from "../readFunctions/TransactionCoins.js";
-import { Decimal } from "decimal.js";
+import { saveCoins, saveTransaction } from './ParsingHelper.js';
+import { TransactionType } from '../../../models/Transactions.js';
+import { getCoinsBy, getIdByAddress, getBasePoolBy } from '../readFunctions/Pools.js';
+import { getCoinIdByAddress, findCoinDecimalsById } from '../readFunctions/Coins.js';
+import { findTransactionsByPoolIdAndHash } from '../readFunctions/Transactions.js';
+import { findTransactionCoinsByTxIds } from '../readFunctions/TransactionCoins.js';
+import { Decimal } from 'decimal.js';
 function findNearestCoinMovementAmount(LP_TRANSFER_AMOUNT, COIN_MOVEMENTS_IN_BASEPOOL, SOLD_COIN_ADDRESS) {
     var _a;
     // Convert LP_TRANSFER_AMOUNT to a Decimal
@@ -22,10 +22,17 @@ function findNearestCoinMovementAmount(LP_TRANSFER_AMOUNT, COIN_MOVEMENTS_IN_BAS
     return (_a = soldCoinMovements[0]) === null || _a === void 0 ? void 0 : _a.amount;
 }
 export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_COINS) {
-    if (!event)
+    if (!event) {
+        console.error('!event', event.transactionHash);
         return;
-    if (!POOL_COINS)
+    }
+    if (!POOL_COINS) {
+        console.error('!POOL_COINS', event.transactionHash);
         return;
+    }
+    const poolIdsToExclude = [2, 4, 5, 8, 10, 12, 16, 17, 18];
+    if (poolIdsToExclude.includes(event.pool_id))
+        return; // Pools with underlying coins but no basepool, needs further work if relevant tx.
     let soldCoinEventID = parseInt(event.returnValues.sold_id);
     let soldCoinAmount = event.returnValues.tokens_sold;
     let boughtCoinEventID = parseInt(event.returnValues.bought_id);
@@ -94,8 +101,8 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
         boughtCoinAmount = NEAREST_COIN_MOVEMENT_AMOUNT;
     }
     const coinAmounts = [
-        { COIN_ID: soldCoinID, amount: Number(soldCoinAmount), direction: "out" },
-        { COIN_ID: boughtCoinID, amount: Number(boughtCoinAmount), direction: "in" },
+        { COIN_ID: soldCoinID, amount: Number(soldCoinAmount), direction: 'out' },
+        { COIN_ID: boughtCoinID, amount: Number(boughtCoinAmount), direction: 'in' },
     ];
     const transactionData = {
         pool_id: event.pool_id,
@@ -112,14 +119,19 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
     };
     try {
         const transaction = await saveTransaction(transactionData);
-        const coinsWithTxId = coinAmounts.map((coin) => ({ tx_id: transaction.tx_id, COIN_ID: coin.COIN_ID, coinAmount: coin.amount, direction: coin.direction }));
+        const coinsWithTxId = coinAmounts.map((coin) => ({
+            tx_id: transaction.tx_id,
+            COIN_ID: coin.COIN_ID,
+            coinAmount: coin.amount,
+            direction: coin.direction,
+        }));
         const validCoins = coinsWithTxId.filter((coin) => coin.COIN_ID !== null);
         if (validCoins.length < 2)
             return;
         await saveCoins(validCoins);
     }
     catch (error) {
-        console.error("Error saving transaction:", error);
+        console.error('Error saving transaction:', error);
     }
 }
 //# sourceMappingURL=ParseTokenExchangeUnderlying.js.map

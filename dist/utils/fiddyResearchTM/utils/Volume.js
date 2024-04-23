@@ -45,8 +45,8 @@ export async function calculateDailyVolumes(poolId, startUnixtime, endUnixtime) 
                 const valueToAdd = Number(coin.dollar_value);
                 if (valueToAdd < 50 * 1e9) {
                     if (transaction.transaction_type === TransactionType.Swap && coin.direction === 'out') {
-                        // if (valueToAdd > 1000000) {
-                        //   console.log(valueToAdd, transaction.tx_hash);
+                        // if (valueToAdd > 100000) {
+                        //   console.log(Number(valueToAdd.toFixed(0)), transaction.tx_hash);
                         // }
                         acc[day] += valueToAdd;
                     }

@@ -145,9 +145,8 @@ export async function updateRawLogsForLiveMode() {
 }
 export async function updateRawLogs() {
     // runs every 10th run a full fetch, to make sure we are not leaving any ressurrected pools behind.
-    const randomNumber = Math.floor(Math.random() * 10);
-    if (randomNumber !== 0)
-        return;
+    // const randomNumber = Math.floor(Math.random() * 10);
+    // if (randomNumber !== 0) return;
     const allPoolIds = await getAllPoolIds();
     const poolAddresses = await getAddressesByPoolIds(allPoolIds); // insert poolIdsFull here to be 100%
     // let totalTimeTaken = 0;
@@ -156,7 +155,7 @@ export async function updateRawLogs() {
         if (i % 50 === 0) {
             console.log(i, '/', poolAddresses.length - 1);
         }
-        // muting annoying console errors from these pools since they are unferified on etherscan (and dont have traffic)
+        // muting console errors from these pools since they are unferified on etherscan (and dont have traffic)
         const addressesToIgnore = [
             '0x037164C912f9733A0973B18EE339FBeF66cfd2C2',
             '0x38AB39c82BE45f660AFa4A74E85dAd4b4aDd0492',
