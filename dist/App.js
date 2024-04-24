@@ -7,6 +7,7 @@ import { updatePoolAbis } from './utils/postgresTables/Abi.js';
 import { updateBlockTimestamps } from './utils/postgresTables/Blocks.js';
 import { updateRawLogs, updateRawLogsForLiveMode } from './utils/postgresTables/RawLogs.js';
 import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
+import { updateLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
 import { preparingLiveModeForRawEvents } from './utils/goingLive/RawTxLogsLive.js';
 import { startAPI } from './utils/api/Server.js';
@@ -75,7 +76,7 @@ export async function main() {
     await updateCleanedTransfers();
     // await updateAtomicArbDetection();
     // await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
-    // await updateLabels(); // muted, only has to run when there are changes made to the labels-file
+    await updateLabels(); // muted, only has to run when there are changes made to the labels-file
     // todo
     console.log(`\n[✓] Everything finished syncing successfully.`);
     console.timeEnd('booting main');
