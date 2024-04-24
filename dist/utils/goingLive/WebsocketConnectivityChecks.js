@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import { main } from '../../App.js';
 import { WEB3_WS_PROVIDER } from '../web3Calls/generic.js';
-import EventEmitter from './EventEmitter.js';
+import eventEmitter from './EventEmitter.js';
 import { logMemoryUsage } from '../helperFunctions/QualityOfLifeStuff.js';
 let subscription; // Holds the subscription object
 export async function checkWsConnectionViaNewBlocks() {
@@ -19,11 +19,11 @@ export async function checkWsConnectionViaNewBlocks() {
             break;
         lastSavedBlockNumber = lastReveivedBlockNumber;
     }
-    EventEmitter.emit('dead websocket connection');
+    eventEmitter.emit('dead websocket connection');
     return;
 }
 export function setupDeadWebsocketListener() {
-    EventEmitter.on('dead websocket connection', async () => {
+    eventEmitter.on('dead websocket connection', async () => {
         console.log('Dead WebSocket connection detected, restarting in 3 seconds...');
         await new Promise((resolve) => setTimeout(resolve, 3000));
         await main();

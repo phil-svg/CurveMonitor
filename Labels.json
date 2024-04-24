@@ -1578,5 +1578,1761 @@
   {
     "Address": "0xf7364e230ea0e5cc41e6cd4e2a30a26ca1850b73",
     "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x01d3aa4c9a61f5fb4b3ef5ad90c0e02ccf861842",
+    "Label": "TimelockController"
+  },
+  {
+    "Address": "0x4c4af8dbc524681930a27b2f1af5bcc8062e6fb7",
+    "Label": "WooRouterV2"
+  },
+  {
+    "Address": "0x3441da64c1aa383f94d6d48c64cbd2a3b5c12ff1",
+    "Label": "DSProxy #221,649"
+  },
+  {
+    "Address": "0x9ffdf407cde9a93c47611799da23924af3ef764f",
+    "Label": "ether.fi: Vampire"
+  },
+  {
+    "Address": "0x9ab55e5c894238812295a31bdb415f00f7626792",
+    "Label": "CreditFacadeV3"
+  },
+  {
+    "Address": "0xcba8e52ab11b3209ab55e28622371d9877058d30",
+    "Label": "BLUSDLPZap"
+  },
+  {
+    "Address": "0x95d69f35547f169639e0f5969b746d9b634d3571",
+    "Label": "DSProxy #217,401"
+  },
+  {
+    "Address": "0xe4f02accc88a3000f11afec71c04896127a3aeb5",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0xaaecf92bee252ad8a31fdb66aa80e733aa7de609",
+    "Label": "Contract Address 0xaaecf92bee252ad8a31fdb66aa80e733aa7de609"
+  },
+  {
+    "Address": "0xc30141b657f4216252dc59af2e7cdb9d8792e1b0",
+    "Label": "Socket: Registry"
+  },
+  {
+    "Address": "0x6c24a3230e12ead3dd7e44b65c5393a6732198ff",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xcb91f4521fc43d4b51586e69f7145606b926b8d4",
+    "Label": "GearLiquidityBootstrapper"
+  },
+  {
+    "Address": "0xb3c8ce1ee157b0dcaa96897c9170aee6281706c9",
+    "Label": "CurveStableSwapNG"
+  },
+  {
+    "Address": "0x00000000005bbb0ef59571e58418f9a4357b68a0",
+    "Label": "Pendle: Router V3"
+  },
+  {
+    "Address": "0xb5599f568d3f3e6113b286d010d2bca40a7745aa",
+    "Label": "AdminUpgradeabilityProxy"
+  },
+  {
+    "Address": "0x4b5bd07bde7deb9e9d6369f0bbaa64a9969a082c",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x9e0d4450e5e80a91376b981ea6b94d60dd133d30",
+    "Label": "DSProxy #216,830"
+  },
+  {
+    "Address": "0xc89570207c5ba1b0e3cd372172ccaefb173db270",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xb657b895b265c38c53fff00166cf7f6a3c70587d",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xea925bc8ebddca6cf6968dec567d88c71582d168",
+    "Label": "DSProxy #156,937"
+  },
+  {
+    "Address": "0x0000000000007f150bd6f54c40a34d7c3d5e9f56",
+    "Label": "MEV Bot: 0x000...f56"
+  },
+  {
+    "Address": "0x1b1ec70f5d16cab5f8d24306c0b9c99dcd75fc97",
+    "Label": "DSProxy #195,344"
+  },
+  {
+    "Address": "0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1",
+    "Label": "Curve.fi: USDN Metapool"
+  },
+  {
+    "Address": "0xc2c171bd6fc3b5885b589ed8b4d135f31085e973",
+    "Label": "YearnPartnerPortalIn"
+  },
+  {
+    "Address": "0x0000005ac28de2cbda005a8500a9578921fdb7da",
+    "Label": "SimpleProxy"
+  },
+  {
+    "Address": "0xf178c0b5bb7e7abf4e12a4838c7b7c5ba2c623c0",
+    "Label": "Curve.fi: LINK/sLINK Pool"
+  },
+  {
+    "Address": "0xe01abe170cd5f4508cac7e1c77c257b750e2c601",
+    "Label": "Contract Address 0xe01abe170cd5f4508cac7e1c77c257b750e2c601"
+  },
+  {
+    "Address": "0x57a580a806390777e5f60287c64cafc3059e457f",
+    "Label": "DSProxy #212,452"
+  },
+  {
+    "Address": "0x08c10dfdb8f47beede284b7fcaae1de756508296",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xa1f8a6807c402e4a15ef4eba36528a3fed24e577",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x0415a55d163086c728a90aa018e921632594fdc7",
+    "Label": "CurveV1Adapter2Assets"
+  },
+  {
+    "Address": "0x5fae7e604fc3e24fd43a72867cebac94c65b404a",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789",
+    "Label": "ERC-4337 Entry Point 0.6.0"
+  },
+  {
+    "Address": "0x5228f2bcc31c66ebb0f9ad697d1481080f1ba00f",
+    "Label": "DSProxy #217,479"
+  },
+  {
+    "Address": "0xcbee89bd5794330ebcdaf71f0f989f02c66df07f",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xb60598cd27fb881b92a34afce93aa1ee647b4a93",
+    "Label": "MevEthRouter"
+  },
+  {
+    "Address": "0xcbc6d074e11e99ce5cd5de116c94b7cef7ab5511",
+    "Label": "DSProxy #219,796"
+  },
+  {
+    "Address": "0x0cd6f267b2086bea681e922e19d40512511be538",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xd1ca1f4dbb645710f5d5a9917aa984a47524f49a",
+    "Label": "Bitget Wallet：Swap Router v2"
+  },
+  {
+    "Address": "0x75fbf206019ec52a4a7dc57dcaac9613a07d0816",
+    "Label": "Contract Address 0x75fbf206019ec52a4a7dc57dcaac9613a07d0816"
+  },
+  {
+    "Address": "0x0cd672eaa44f654ab5d1329f229917ec3e10d2bb",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xe0eb63b4e18ff1e646ab7e37510e6eaf287ade3d",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xaac342767070cfed12556a374eee951ecfdce005",
+    "Label": "DSProxy #205,782"
+  },
+  {
+    "Address": "0xa6a147946facac9e0b99824870b36088764f969f",
+    "Label": "ERC1967Proxy"
+  },
+  {
+    "Address": "0x89dc3e9d493512f6cfb923e15369ebfdde591988",
+    "Label": "ConicPool"
+  },
+  {
+    "Address": "0x1014b8a7cb6811b5e68250cb9256be3b1fafe17b",
+    "Label": "DefiEdgeStrategy"
+  },
+  {
+    "Address": "0x094d12e5b541784701fd8d65f11fc0598fbc6332",
+    "Label": "Curve.fi: Deposit USDN"
+  },
+  {
+    "Address": "0x1f409ec6f395493ad39f5b27945f1a6658a23908",
+    "Label": "stkCvxFxsZaps"
+  },
+  {
+    "Address": "0x6ec38b3228251a0c5d491faf66858e2e23d7728b",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xa7f469590eefa4d30b4cc71f9016bee84f86057f",
+    "Label": "CompoundMonitor"
+  },
+  {
+    "Address": "0x82e075129a96812a9430664fb0c6c4063cb84ccc",
+    "Label": "Contract Address 0x82e075129a96812a9430664fb0c6c4063cb84ccc"
+  },
+  {
+    "Address": "0xf3456e8061461e144b3f252e69dcd5b6070fdee0",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x34c277b0c690936168cf436b904b2242a11e7eea",
+    "Label": "GearboxRootVault"
+  },
+  {
+    "Address": "0xd60cd4ad7a2d6bf4ec9fccbcaeec769b52726dfd",
+    "Label": "TreasuryManagerPrisma"
+  },
+  {
+    "Address": "0x228060f0804abc05fa94dc5b97c39aa1844d4028",
+    "Label": "DSProxy #219,214"
+  },
+  {
+    "Address": "0xce16f69375520ab01377ce7b88f5ba8c48f8d666",
+    "Label": "Squid: Router"
+  },
+  {
+    "Address": "0xdca549e3456d447079b3983cfaebe8b46c11d78c",
+    "Label": "DSProxy #218,869"
+  },
+  {
+    "Address": "0x4d38ede3f6e3e0c53f82db0652dd893b71d9ec6b",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x43011cd5c84f6578466ec62d892c77d6d2fc6a23",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0xecb4290fedddb8354094b35e4b77f988f27cf4f7",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xa52fd396891e7a74b641a2cb1a6999fcf56b077e",
+    "Label": "Redacted Cartel: Multisig"
+  },
+  {
+    "Address": "0x5f7241f29d944385f412adea98f070db973a393b",
+    "Label": "Contract Address 0x5f7241f29d944385f412adea98f070db973a393b"
+  },
+  {
+    "Address": "0x5e4df1887d853e167479d43b901617de9b3aa7be",
+    "Label": "DSProxy #217,019"
+  },
+  {
+    "Address": "0x67e5dbe8b910b307adfee1c119c63f417101300b",
+    "Label": "DSProxy #216,777"
+  },
+  {
+    "Address": "0x14756a5ed229265f86990e749285bdd39fe0334f",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x0fb5d60bee470a848d2689f82fdf3271a72c6dfd",
+    "Label": "DSProxy #219,265"
+  },
+  {
+    "Address": "0x788e2960770bb26fe1c7c22cb2886f306a2de2ef",
+    "Label": "DSProxy #221,347"
+  },
+  {
+    "Address": "0x324c5dc1fc42c7a4d43d92df1eba58a54d13bf2d",
+    "Label": "FluidVaultFactory"
+  },
+  {
+    "Address": "0xc30e3ea7a98accd25d0113a5183a42dfe5284adf",
+    "Label": "DSProxy #220,862"
+  },
+  {
+    "Address": "0xdece9258d84b7a2d5e408251669a988227870a0f",
+    "Label": "DSProxy #220,809"
+  },
+  {
+    "Address": "0xf404749df976481723e6d03af1a9673148787d69",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x2eff1bdf88b411ad4f57167c8cc810ee6055ab03",
+    "Label": "DSProxy #216,992"
+  },
+  {
+    "Address": "0x36756db0feb879f2f9ade7df3006df5c2dbaf5de",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x0c2e336e148b59318b11611c1af6527fb2ab614f",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0xab28863cec150f95184f653df853870f49142ca2",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x0000000000a84d1a9b0063a910315c7ffa9cd248",
+    "Label": "MEV Bot: 0x000...248"
+  },
+  {
+    "Address": "0xaa88e25e63a843ec92b78597608e023210b6382d",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xdf388f1155e621e21764988289def81da92f3284",
+    "Label": "Contract Address 0xdf388f1155e621e21764988289def81da92f3284"
+  },
+  {
+    "Address": "0xa927c81cc214cc991613cb695751bc932f042501",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x9e6326d9c9219be58e8ecde651ef180d231b1e87",
+    "Label": "DSProxy #216,933"
+  },
+  {
+    "Address": "0x7c0d189e1fecb124487226dcba3748bd758f98e4",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x73fd92237dd006057a6e4cd81a98628069baedb5",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xc59135f449bb623501145443c70a30ee648fa304",
+    "Label": "CreditFacade"
+  },
+  {
+    "Address": "0x1f974a368270d805b49c37853a28464d62d70a73",
+    "Label": "DSProxy #204,180"
+  },
+  {
+    "Address": "0x624f570c24d61ba5bf8fbff17aa39bfc0a7b05d8",
+    "Label": "ERC1967Proxy"
+  },
+  {
+    "Address": "0x91c442ac238d548c96597b552261a856bb49b079",
+    "Label": "DSProxy #215,386"
+  },
+  {
+    "Address": "0x28c9f3117921264b646a573df96ebf6ef543c1d5",
+    "Label": "DSProxy #217,831"
+  },
+  {
+    "Address": "0x98f6dd5b1123f04ee72b66b724b16695f4986bb5",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x58a3c68e2d3aaf316239c003779f71acb870ee47",
+    "Label": "Curve Finance: SynthSwap"
+  },
+  {
+    "Address": "0xaa57b4d752aaf969ab53d75528a96729f2cc9af2",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x6fbf1b6a681307f86c2d212f0f6ad72621309ef1",
+    "Label": "Contract Address 0x6fbf1b6a681307f86c2d212f0f6ad72621309ef1"
+  },
+  {
+    "Address": "0x9d48acb8415a8e3be4b7c09fb71182791dab1251",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x94b17476a93b3262d87b9a326965d1e91f9c13e7",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xcb43812d4526e0a855c70ba886d01dd7d44b94e8",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x663dc15d3c1ac63ff12e45ab68fea3f0a883c251",
+    "Label": "Dln: Crosschain Forwarder"
+  },
+  {
+    "Address": "0x9d58779365b067d5d3fcc6e92d237acd06f1e6a1",
+    "Label": "Argent: Argent Module"
+  },
+  {
+    "Address": "0x5a89b336be320af45db032007e89bf6484239f78",
+    "Label": "DSProxy #220,150"
+  },
+  {
+    "Address": "0x25e9aca5951262241290841b6f863d59d37dc4f0",
+    "Label": "Frax Finance: Fraxswap Router Multihop V2"
+  },
+  {
+    "Address": "0x459579e5a987559bdb97bfb30ec1c572e64b5b5f",
+    "Label": "Contract Address 0x459579e5a987559bdb97bfb30ec1c572e64b5b5f"
+  },
+  {
+    "Address": "0x97cdc76a609ddbdea570c362a0dc9d108d18a2f3",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xd3899b49b007128ce5a0ca002ac1a62e679aaca5",
+    "Label": "GearboxVault"
+  },
+  {
+    "Address": "0xbba4c8eb57df16c4cfabe4e9a3ab697a3e0c65d8",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x51ccd9a50b6ead2fc51ea8917ed6f221b4d3706c",
+    "Label": "Contract Address 0x51ccd9a50b6ead2fc51ea8917ed6f221b4d3706c"
+  },
+  {
+    "Address": "0x4ca9b3063ec5866a4b82e437059d2c43d1be596f",
+    "Label": "Curve.fi: HBTC/WBTC Pool"
+  },
+  {
+    "Address": "0xeb401fab7f573ea207c6980e4341d5bbdb0d9eb8",
+    "Label": "AnbotoExecV2"
+  },
+  {
+    "Address": "0xecd5e75afb02efa118af914515d6521aabd189f1",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x0c0194e9873278db3d424768f692a94f9f8e7acd",
+    "Label": "DSProxy #218,628"
+  },
+  {
+    "Address": "0xbcecb01aa1a34121ffb839b4a0a810a95d2f025b",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xd861ff854206d0db64f1c0f3108f59576a5ccc04",
+    "Label": "SdtUtilities"
+  },
+  {
+    "Address": "0x8d41faa4c774221aeddf324461864da3a14b5474",
+    "Label": "SdtUtilities"
+  },
+  {
+    "Address": "0xfee3ae72fcd9e90f44e200ade77e07f378303a19",
+    "Label": "ComptrollerProxy"
+  },
+  {
+    "Address": "0xc218612c32bd331fb55a642cd2435dd7765e09cf",
+    "Label": "DSProxy #217,774"
+  },
+  {
+    "Address": "0x2c23276107b45e64c8c59482f4a24f4f2e568ea6",
+    "Label": "bVault"
+  },
+  {
+    "Address": "0x375f6b0cd12b34dc28e34c26853a37012c24dde5",
+    "Label": "Avocado: Forwarder"
+  },
+  {
+    "Address": "0x902f09715b6303d4173037652fa7377e5b98089e",
+    "Label": "Layer Zero: Relayer V2"
+  },
+  {
+    "Address": "0x0a95a75d20a71d1495167c9cd3c3fc52a151ee0e",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xdf326ac661a2bea8547b3786b990b7ada709164a",
+    "Label": "DSProxy #214,737"
+  },
+  {
+    "Address": "0x59e9082e068ddb27fc5ef1690f9a9f22b32e573f",
+    "Label": "CauldronV2"
+  },
+  {
+    "Address": "0xe20cd9377c204a27952f8b41075f0b8bd1ceec3d",
+    "Label": "MEV Bot: 0xe20...c3d"
+  },
+  {
+    "Address": "0xb31845f164d8b085cfdaf507bd778a2ce1e2ba31",
+    "Label": "DSProxy #221,501"
+  },
+  {
+    "Address": "0xa4c567c662349bec3d0fb94c4e7f85ba95e208e4",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x808db6e464279c6a77a1164e0b34d64bd6fb526e",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x078a7a4d41e275212c6604c2da0779133f4a39c8",
+    "Label": "DSProxy #221,440"
+  },
+  {
+    "Address": "0x3367070ed152e2b715eef48d157685cf496f3543",
+    "Label": "ConicEthPool"
+  },
+  {
+    "Address": "0xa9e38689e02eba6a4465eceee53593479bbbbaaa",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x167478921b907422f8e88b43c4af2b8bea278d3a",
+    "Label": "CurveStableSwapNG"
+  },
+  {
+    "Address": "0xa391c8178d7b951c148302afb6b20bcfd3ba29b6",
+    "Label": "CreditFacadeV3"
+  },
+  {
+    "Address": "0x28aac2365e08fa9cb1f2cb379366ecdc2714aafd",
+    "Label": "DSProxy #8,031"
+  },
+  {
+    "Address": "0xf1d1ccf5ecca0219c4ac845b5b8f369349a012d5",
+    "Label": "DSProxy #89,640"
+  },
+  {
+    "Address": "0x6abaaa0b6be7badd867964e2273600cad415fcae",
+    "Label": "DSProxy #220,660"
+  },
+  {
+    "Address": "0xfa6c8ec6841fba19a95876a748123722674ec62e",
+    "Label": "DSProxy #218,482"
+  },
+  {
+    "Address": "0x07284bb0300d4ff815104ebf4037c7e8a6226903",
+    "Label": "DSProxy #219,734"
+  },
+  {
+    "Address": "0x80ad9e5e2d77bbb7d4314c1d3a2f0366cc98bd6f",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xb056b9a45f09b006ec7a69770a65339586231a34",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xa5e2ec4682a32605b9098ddd7204fe84ab932fe4",
+    "Label": "Diamond"
+  },
+  {
+    "Address": "0xd9093a0b2687cff5c0936bc3b2fab3563adab57b",
+    "Label": "CurveDepositZap"
+  },
+  {
+    "Address": "0x111111125421ca6dc452d289314280a0f8842a65",
+    "Label": "1inch Network : Aggregation Router V6"
+  },
+  {
+    "Address": "0x00000047bb99ea4d791bb749d970de71ee0b1a34",
+    "Label": "TransitSwap v5: Router"
+  },
+  {
+    "Address": "0xda05b7967588454fb046f4358c022972f304db4b",
+    "Label": "MEV Bot: 0xda0...b4b"
+  },
+  {
+    "Address": "0x3a05e5d33d7ab3864d53aaec93c8301c1fa49115",
+    "Label": "Blast: L1 Bridge Proxy"
+  },
+  {
+    "Address": "0xb6881114c8aad62082a7df5bf0f199d6f1bfcac9",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xae335a51e69eed334376df3bf4a6d9e02e7a1440",
+    "Label": "DSProxy #220,803"
+  },
+  {
+    "Address": "0x26f3f26f46cbee59d1f8860865e13aa39e36a8c0",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xbadc0de76438f9524d42c219b390636196bfbdfc",
+    "Label": "MEV Bot: 0xbad...dfc"
+  },
+  {
+    "Address": "0x9d9820615298380d2f51b3f8c9abefb676da3263",
+    "Label": "GuildFi: Treasury tfUSDC Wallet"
+  },
+  {
+    "Address": "0xc1e15f1707a210eb15796603a60cf4746405335a",
+    "Label": "DSProxy #190,962"
+  },
+  {
+    "Address": "0x88f1f108cd21eb9b34ccde5c4b95aa4ed872432b",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x93acd099cec5a4bf6ffb10ba7937ddba53ccd390",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x96fb9f577498911f37e0786b56ea379a7e707426",
+    "Label": "DSProxy #221,227"
+  },
+  {
+    "Address": "0xabb735648a076d570aff2a61d8d141099823eae9",
+    "Label": "ConicPool"
+  },
+  {
+    "Address": "0x3c0756ba2b1d702f8f63629555625b11be81546f",
+    "Label": "MEV Bot: 0x3C0...46F"
+  },
+  {
+    "Address": "0xa25b17d7deee59f9e326e45cc3c0c1b158e74316",
+    "Label": "TreasurySwap"
+  },
+  {
+    "Address": "0x69833361991ed76f9e8dbbcdf9ea1520febfb4a7",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x637d43d2cfb46012ec7bde3d7062a397be961894",
+    "Label": "DSProxy #178,956"
+  },
+  {
+    "Address": "0xa356867fdcea8e71aeaf87805808803806231fdc",
+    "Label": "DODO: V2 Proxy"
+  },
+  {
+    "Address": "0x77f0de655885dcf6b6942ea5b3de171dfd3f5da9",
+    "Label": "MinterProxy"
+  },
+  {
+    "Address": "0xbc53d7f3a2bfa7d685b55a62c8658f51f370fae1",
+    "Label": "Contract Address 0xbc53d7f3a2bfa7d685b55a62c8658f51f370fae1"
+  },
+  {
+    "Address": "0xfdb45d87853a431f309c4f4c0b917f457394658f",
+    "Label": "DSProxy #219,627"
+  },
+  {
+    "Address": "0x7ed788d71f2b965e3473994d52a01198746c8b2e",
+    "Label": "CreditFacadeV3"
+  },
+  {
+    "Address": "0x802a11a27c1392bb27b6ddf7d79a77c13da9affb",
+    "Label": "DSProxy #217,939"
+  },
+  {
+    "Address": "0x00711e5c8fcd631ba9c6165d99e641face75d21d",
+    "Label": "TreasurySwap"
+  },
+  {
+    "Address": "0x5cc9400ffb4da168cf271e912f589462c3a00d1f",
+    "Label": "BeefyZapRouter"
+  },
+  {
+    "Address": "0x111111125434b319222cdbf8c261674adb56f3ae",
+    "Label": "1inch v2: Aggregation Router"
+  },
+  {
+    "Address": "0x68b56567af308fe8d94876ab0fe88541ed025e1c",
+    "Label": "stkCvxCrvDistributorZaps"
+  },
+  {
+    "Address": "0xa148bd19e26ff9604f6a608e22bfb7b772d0d1a3",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xe0e970a99bc4f53804d8145bebbc7ebc9422ba7f",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x4535913573d299a6372ca43b90aa6be1cf68f779",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xeb0cda1a52f9ac0bd5293bd65b52ed07168e1e8e",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xf3de3c0d654fda23dad170f0f320a92172509127",
+    "Label": "Contract Address 0xf3de3c0d654fda23dad170f0f320a92172509127"
+  },
+  {
+    "Address": "0x3b87ceb9af7ee09da712840fc041d23c02205f83",
+    "Label": "Contract Address 0x3b87ceb9af7ee09da712840fc041d23c02205f83"
+  },
+  {
+    "Address": "0xe5feefe90db941ad9808008b019eeac58a2b076f",
+    "Label": "DSProxy #164,719"
+  },
+  {
+    "Address": "0x36d4582fd13b5fe337c088ae659723251a0a68dc",
+    "Label": "DSProxy #216,854"
+  },
+  {
+    "Address": "0x69e627ac4eedbace4fa1fafbeec5539d124b3679",
+    "Label": "DSProxy #159,700"
+  },
+  {
+    "Address": "0x369cbc5c6f139b1132d3b91b87241b37fc5b971f",
+    "Label": "ConicPoolV2"
+  },
+  {
+    "Address": "0xd1de3f9cd4ae2f23da941a67ca4c739f8dd9af33",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x2a4286b60d5c7b64ed76693eb0cd2ddca239e9bf",
+    "Label": "DSProxy #221,527"
+  },
+  {
+    "Address": "0x06bf1e959edad7e1f7003a9fa122233f1bd22f34",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x81c46feca27b31f3adc2b91ee4be9717d1cd3dd7",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x67479449b2cf25aee2fb6ef6f0aec54591154f62",
+    "Label": "CreditFacade"
+  },
+  {
+    "Address": "0xa17bf5630052451c3f72c1d47fe4a57d72ffea70",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0xa9cb3019c4d598ba4b9bb06f589abff1a5add7c2",
+    "Label": "DSProxy #214,686"
+  },
+  {
+    "Address": "0x2acf35c9a3f4c5c3f4c78ef5fb64c3ee82f07c45",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xe4762eacebdb7585d32079fdcba5bb94eb5d76f2",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0xcb636b81743bb8a7f1e355debb7d33b07009cccc",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x9a81f5a6ea7e60632f659f3f4e772ba977d80bd5",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x4d9f9d15101eec665f77210cb999639f760f831e",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x942a70014b6ba71ec84b16e1604fc76b1071eaf9",
+    "Label": "Contract Address 0x942a70014b6ba71ec84b16e1604fc76b1071eaf9"
+  },
+  {
+    "Address": "0xcae5ff0581228b460256987043d1ad9e570dfb28",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x19a254de0f6fa63600a841cb6518a7feed040601",
+    "Label": "DSProxy #218,845"
+  },
+  {
+    "Address": "0x5cc18c12af18c7997435d4fc0e8cb7559e1c28f2",
+    "Label": "CoboSafeModule"
+  },
+  {
+    "Address": "0xe0e7ac2b0884ba8a05190fb6ceaffadc7c3aedf1",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0xedc41646ad8585a2937f9d17a8c504be1eec4e9e",
+    "Label": "ComptrollerProxy"
+  },
+  {
+    "Address": "0xa8bd3ffebf92538b3b830dd5b2516a5111db164d",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0xb2c57d651db0fccc96cabda11191df25e05b88b6",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x696ff74cedde1f590013243f52810e75285f12d5",
+    "Label": "DSProxy #219,672"
+  },
+  {
+    "Address": "0x4929e86635a6735b559ecb51981f0dc4ab4bf64f",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0xf851350313d504756e09a979dbe8e958938a176f",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xd4690fa92f3f37bf98585feead0e4b3fad967fcd",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xd377ad484094cc2c08dff34ea7292af4425b3e34",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xeb326257f0a3c549a690e406e975ba3474526a1d",
+    "Label": "DSProxy #218,838"
+  },
+  {
+    "Address": "0xcaa70cc97165d8168e3da7a99f6430d64e2f09a1",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0xd84ed0cc0a385337a9c98c9d0eb30a952f3970af",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xcc0e75a98987bd2592db39b203f3dc99b75d5ce9",
+    "Label": "BeefyZapOneInch"
+  },
+  {
+    "Address": "0xc563c201fd129d0851ad03759f260c210c02780b",
+    "Label": "Contract Address 0xc563c201fd129d0851ad03759f260c210c02780b"
+  },
+  {
+    "Address": "0xf432110e5206356cd6448da16b05394a89b44cef",
+    "Label": "ConicPoolV2"
+  },
+  {
+    "Address": "0xb37d6c07482bc11cd28a1f11f1a6ad7b66dec933",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x46d5e1ad1dc8c222b615c249989388e19dfe758e",
+    "Label": "DSProxy #212,167"
+  },
+  {
+    "Address": "0x028f7555816bf16a8bb45f31b53c4c4f301e588b",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xf98af660d1ff28cd986b205d6201fb1d5ee231a3",
+    "Label": "SdCRVBribeBurner"
+  },
+  {
+    "Address": "0x2ea5fdb806138243d75484c2fd1a8de697ef3664",
+    "Label": "Contract Address 0x2ea5fdb806138243d75484c2fd1a8de697ef3664"
+  },
+  {
+    "Address": "0xd8af19cec55374cf424f98effe9c40fd45128ad1",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0x0589c05eaaf13f559d1e7881c43ae68bd35afc74",
+    "Label": "Contract Address 0x0589c05eaaf13f559d1e7881c43ae68bd35afc74"
+  },
+  {
+    "Address": "0x50da1e9c57c334bb3a7bc10ddb6860331ec3c62a",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x67e254c61b3fc5f5ed92f3004063b21cd0b46b6b",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x3c1d46c769f3c09b22c7e9c7144eb392102088b7",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xfaa763790b26e7ea354373072bab02e680eeb07f",
+    "Label": "StrategyExecutor"
+  },
+  {
+    "Address": "0xcf5540fffcdc3d510b18bfca6d2b9987b0772559",
+    "Label": "Odos: Router V2"
+  },
+  {
+    "Address": "0xa717c6988acb331323fa88ece0248200d6b143e9",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x0000000000590b74eb97457bf7b3ff6d63c6fde2",
+    "Label": "MEV Bot: 0x000...de2"
+  },
+  {
+    "Address": "0xd835cdedc20ca3075f86dea4e0d914499d0c5b25",
+    "Label": "stkCvxCrvZaps"
+  },
+  {
+    "Address": "0xa539e86e09037be64c4f6e34b4278a32c809cab2",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x851cf9b161d695914cd248f7db60ea4d4b68b449",
+    "Label": "DSProxy #157,778"
+  },
+  {
+    "Address": "0x35a0dd182e4bca59d5931eae13d0a2332fa30321",
+    "Label": "Abracadabra.Money: cvxrenCrv Market"
+  },
+  {
+    "Address": "0x46978cd477a496028a18c02f07ab7f35edba5a54",
+    "Label": "AvoForwarderProxy"
+  },
+  {
+    "Address": "0x5d30898baf76bce6a8403af83f371f638264f97f",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xceaf7747579696a2f0bb206a14210e3c9e6fb269",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xb51e96889d74abb17c833480084514048cf51ff4",
+    "Label": "Contract Address 0xb51e96889d74abb17c833480084514048cf51ff4"
+  },
+  {
+    "Address": "0xf894fea045eccb2927e2e0cb15c12debee9f2be8",
+    "Label": "PleasrDAO: Treasury"
+  },
+  {
+    "Address": "0xb1813f5e2bd99eac13fd9e1dbd689f3309171e44",
+    "Label": "DSProxy #220,415"
+  },
+  {
+    "Address": "0xf2f12b364f614925ab8e2c8bfc606edb9282ba09",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x007591461018b01fd436f4599ee40d77f329fe67",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x25854e2a49a6cdaec7f0505b4179834509038549",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0xc6625129c9df3314a4dd604845488f4ba62f9db8",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xd853a8d4ea3d90c2e7c9b88dea7e0fdc850fd13c",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xdc24316b9ae028f1497c275eb9192a3ea0f67022",
+    "Label": "Lido: Curve Liquidity Farming Pool Contract"
+  },
+  {
+    "Address": "0xed77777586d73c58eb4d6bebdf9c85c2d5f56c2d",
+    "Label": "MEV Bot: 0xED7...C2d"
+  },
+  {
+    "Address": "0x8ac64ba8e440ce5c2d08688f4020698b1826152e",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xc0f365ca7de42a974f130e21152e7a34d21ac438",
+    "Label": "ComptrollerProxy"
+  },
+  {
+    "Address": "0x287ba01900cbcbcfa0aeb1e39c545d788c4f635c",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0x6861084754ade765827ce1cf5a9add450864230a",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x0ae30275382e4517977e3a4291bb9bb59461a8d3",
+    "Label": "DSProxy #206,575"
+  },
+  {
+    "Address": "0x4467f94fd5cc91f43d17af8c8a935591b335af6d",
+    "Label": "DSProxy #214,703"
+  },
+  {
+    "Address": "0x831282ba73dd03aa8a27d3725ba3bcacb1bebc46",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xa95d1e735100b66215b794be80f12c4775e08a3c",
+    "Label": "DSProxy #150,348"
+  },
+  {
+    "Address": "0x8051699299f929a55f74b550cdb2d9c15c023a87",
+    "Label": "CreditFacade"
+  },
+  {
+    "Address": "0x5f6ae08b8aeb7078cf2f96afb089d7c9f51da47d",
+    "Label": "Blast: Deposit"
+  },
+  {
+    "Address": "0x00000000009726632680fb29d3f7a9734e3010e2",
+    "Label": "Rainbow: Router"
+  },
+  {
+    "Address": "0x2e74c673d3c14b0bab2dc184c67a819333cf87e1",
+    "Label": "DSProxy #221,602"
+  },
+  {
+    "Address": "0x56427350a1940eae254575d56f8a569e96e81081",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0x2b5964447005f661d13637cbdfffce600708138f",
+    "Label": "Rumble Kong League: Royalties"
+  },
+  {
+    "Address": "0x5beef400f378df4f353fb42e58498f9779002624",
+    "Label": "stkCvxPrismaZaps"
+  },
+  {
+    "Address": "0xe60343a903f0a3122f73b5d2bb9e1bc9491dbf01",
+    "Label": "CVXStrategy"
+  },
+  {
+    "Address": "0x84d99aa569d93a9ca187d83734c8c4a519c4e9b1",
+    "Label": "1inch: Labs Resolver"
+  },
+  {
+    "Address": "0xa9dee54892713f43c221509cfedbd717d16791a0",
+    "Label": "DSProxy #212,158"
+  },
+  {
+    "Address": "0xb33af361843357e05b6df3e45ae3b5cec8e01137",
+    "Label": "DSProxy #217,845"
+  },
+  {
+    "Address": "0x13684389e01c1250867775a5ce371ce559a8c09c",
+    "Label": "DSProxy #213,955"
+  },
+  {
+    "Address": "0x241d7598bd1eb819c0e9ded456acb24aca623679",
+    "Label": "Angle Protocol: agEUR - wBTC Manager"
+  },
+  {
+    "Address": "0xc5c75caf067ae899a7ec10b86b5ab38c13879388",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x5050e08626c499411b5d0e0b5af0e83d3fd82edf",
+    "Label": "MEV Bot: 0x50...EDF"
+  },
+  {
+    "Address": "0xd09f16830172e6073e8e5ee5053f35010f1c7d7a",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0xf43b15ab692fde1f9c24a9fce700adcc809d5391",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x95143890162bd671d77ae9b771881a1cb76c29a4",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0xad3b67bca8935cb510c8d18bd45f0b94f54a968f",
+    "Label": "Contract Address 0xad3b67bca8935cb510c8d18bd45f0b94f54a968f"
+  },
+  {
+    "Address": "0x64545160d28fd0e309277c02d6d73b3923cc4bfa",
+    "Label": "MEV Bot: 0x645...bfa"
+  },
+  {
+    "Address": "0x9d464b601f74c8d3d42379921106b907f1055f80",
+    "Label": "TreasuryManagerFrax"
+  },
+  {
+    "Address": "0x69460570c93f9de5e2edbc3052bf10125f0ca22d",
+    "Label": "RangoDiamond"
+  },
+  {
+    "Address": "0xdee65fc4ed728416d02f61ab72e10666f1c67b1f",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x313e1ce56a0386fbf9cc356e34646591b6c31c39",
+    "Label": "CreditFacadeV3"
+  },
+  {
+    "Address": "0xf6765a4669c3e7bca52a81eaec10e21caedf1268",
+    "Label": "Contract Address 0xf6765a4669c3e7bca52a81eaec10e21caedf1268"
+  },
+  {
+    "Address": "0x61e10659fe3aa93d036d099405224e4ac24996d0",
+    "Label": "Curve.fi: Deposit DUSD"
+  },
+  {
+    "Address": "0x6b0e55f66add3861ffaa1e7137fa659abe530b8d",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x3fb6b07d77dace1ba6b5f6ab1d8668643d15a2cc",
+    "Label": "bVault"
+  },
+  {
+    "Address": "0xf421f227bef170b36e5f875fb3400bc839063cf8",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xbca2bd085f83d734e1495b4c2b94e30f6e0b5448",
+    "Label": "DSProxy #192,180"
+  },
+  {
+    "Address": "0x0ab13a5b03c77b1f0a8734339f12d9f47b83e35d",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x14a05a25b65caecedab6510e239d8a64afaa96fc",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0x7e82f577a4eff903c2086951976bef1b83bfe5bd",
+    "Label": "EthZap"
+  },
+  {
+    "Address": "0x307111465e4cedd89fa28b9768981b8768a3cabe",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0x2673099769201c08e9a5e63b25fbaf25541a6557",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x9ae9bc5b4344a99c3faebbbf617604fed59b12d5",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x70fce97d671e81080ca3ab4cc7a59aac2e117137",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0xa2398842f37465f89540430bdc00219fa9e4d28a",
+    "Label": "DODO: Route Proxy 2"
+  },
+  {
+    "Address": "0x3f3210e26ba140af501f50403e9b02d9e62af543",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x2d1d3476dcb3c0ffa488122ffeca75d532ebe3b6",
+    "Label": "DSProxy #156,834"
+  },
+  {
+    "Address": "0xff89c654846b2e4bc572ceabe77056daf7b299a3",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x226e0ba7ecc0220648197eef16c980dd97d1efec",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x68934f60758243eafaf4d2cfed27bf8010bede3a",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x78036dc2785eacd76cca4ab6eac6b8105d0d42b3",
+    "Label": "EthZap"
+  },
+  {
+    "Address": "0x00000000c2cf7648c169b25ef1c217864bfa38cc",
+    "Label": "MEV Bot: 0x000...8cC"
+  },
+  {
+    "Address": "0x2867eabf9a74c75049c8eee01c64539316c0b467",
+    "Label": "DSProxy #220,963"
+  },
+  {
+    "Address": "0x9848482da3ee3076165ce6497eda906e66bb85c5",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xe38f15feaa62cc98411521fa293d562b9b5229fe",
+    "Label": "BotMarket"
+  },
+  {
+    "Address": "0xa69babef1ca67a37ffaf7a485dfff3382056e78c",
+    "Label": "MEV Bot: 0xA69...78C"
+  },
+  {
+    "Address": "0x5e2289f8ee186bcf5ed0063493257259eb0fe66b",
+    "Label": "DSProxy #3,457"
+  },
+  {
+    "Address": "0x5ff910c34db2ae9eeee29cf6902197cbc7b6812d",
+    "Label": "DSProxy #189,031"
+  },
+  {
+    "Address": "0xea9f2e31ad16636f4e1af0012db569900401248a",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xa4e9161d11f023f7435e4539d081f4475c24eb58",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x8f2475523bd4a0b004af76906d8c39eb7dc65aec",
+    "Label": "AccountImplementation"
+  },
+  {
+    "Address": "0xaf98157af861d2d4d9bb6288221bf2aaf6a86cab",
+    "Label": "DSProxy #220,250"
+  },
+  {
+    "Address": "0x0ec5d318f770022d131eb0161c640fcca6d1c9d7",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x76f4eed9fe41262669d0250b2a97db79712ad855",
+    "Label": "Odos: Router V1"
+  },
+  {
+    "Address": "0x000000c0524f353223d94fb76efab586a2ff8664",
+    "Label": "MEV Bot: 0x000...664"
+  },
+  {
+    "Address": "0x69f23488e0f5789238f101d976b852c129e682dc",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xae34574ac03a15cd58a92dc79de7b1a0800f1ce3",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x7c5aaa2a20b01df027ad032f7a768ac015e77b86",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x3e5e9b5e4c08f1d0e7d5a75204edcd57e44ee2cf",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x0ba8d1cde32fcbe1c53159eda33684b479f29013",
+    "Label": "Contract Address 0x0ba8d1cde32fcbe1c53159eda33684b479f29013"
+  },
+  {
+    "Address": "0xf861483fa7e511fbc37487d91b6faa803af5d37c",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x37b2f931469fc38425f4e1968a4d27d75c113f43",
+    "Label": "DSProxy #215,461"
+  },
+  {
+    "Address": "0x5a6a4d54456819380173272a5e8e9b9904bdf41b",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x03f34be1bf910116595db1b11e9d1b2ca5d59659",
+    "Label": "Tokenlon: DEX 2"
+  },
+  {
+    "Address": "0x80aa1a80a30055daa084e599836532f3e58c95e2",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0x9614a4c61e45575b56c7e0251f63dcde797d93c5",
+    "Label": "AssetProxy"
+  },
+  {
+    "Address": "0x711d2fc1fc38e5f1f23650c5b392510dd917eb7d",
+    "Label": "DSProxy #218,948"
+  },
+  {
+    "Address": "0x257e338828f6d7cb2d862e919319f1aab3fa6762",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xf14bbdf064e3f67f51cd9bd646ae3716ad938fdc",
+    "Label": "Origin Dollar: Multisig 2"
+  },
+  {
+    "Address": "0xf428ad871b000f64d14be06465b301bf182c2d8c",
+    "Label": "DSProxy #221,291"
+  },
+  {
+    "Address": "0x0065a3e2a2b5f0f6da77147eb25f42a9f3ed4e2b",
+    "Label": "InstaAccountV2"
+  },
+  {
+    "Address": "0xe08d97e151473a848c3d9ca3f323cb720472d015",
+    "Label": "Contract Address 0xe08d97e151473a848c3d9ca3f323cb720472d015"
+  },
+  {
+    "Address": "0x6d172fe4a1f68bf86d5ecc16292a8fd33597e22a",
+    "Label": "DSProxy #157,746"
+  },
+  {
+    "Address": "0x0d59d4e24731c7304baefd9360ec9669764be28a",
+    "Label": "DSProxy #220,186"
+  },
+  {
+    "Address": "0xa6da84219b1d5f419ef959f1f2a7ec7e32f45ca6",
+    "Label": "TransparentUpgradeableProxy"
+  },
+  {
+    "Address": "0x16bcbacb2f9a2fbd8c825d3c3da41961fb6213b7",
+    "Label": "ParaswapWrapperV2"
+  },
+  {
+    "Address": "0xa58e653d940446c70b85e12d3487debcff9c7f3c",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x050e599297affca0dc1bdc03fa3cd6e97f5ff1b3",
+    "Label": "DSProxy #217,664"
+  },
+  {
+    "Address": "0x36364fc092487a93c531e460e2e4396e210141a4",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0xf1454cd65c8fe0bcf938f70bd991ce6c71ff059e",
+    "Label": "DSProxy #216,886"
+  },
+  {
+    "Address": "0x941eb6f616114e4ecaa85377945ea306002612fe",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xb2be281e8b11b47fec825973fc8bb95332022a54",
+    "Label": "Zerion: DeFi SDK v1.0"
+  },
+  {
+    "Address": "0x9402435f8a7d0c7e6cf17ee654e465eb07a8ed9b",
+    "Label": "DSProxy #221,396"
+  },
+  {
+    "Address": "0x5e51328c0583094b76f28cfd532abc3d454fcfea",
+    "Label": "MEV Bot: 0x5e5...fea"
+  },
+  {
+    "Address": "0x6aaa692ee622667c2ea339878c93ef0f8de58a6a",
+    "Label": "ConvexForFrax"
+  },
+  {
+    "Address": "0xa43fa1228c2ca3080ef07dba20ea4429d18b027a",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x760dc9d1af094cd7f44656ede573279b08fc2d1b",
+    "Label": "SafeProxy"
+  },
+  {
+    "Address": "0x70a66281aa0b52272c447e859a20383487cb4235",
+    "Label": "DSProxy #219,708"
+  },
+  {
+    "Address": "0x26189892774c5b31a99619445a69b35db031af77",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0xaf25ffe6ba5a8a29665adcfa6d30c5ae56ca0cd3",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xc9e75fb77aa3c5a1a4c9c899ae50961f630e461a",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x5ac4fcee123dcadfae22bc814c4cc72b96c93f38",
+    "Label": "Vyper_contract"
+  },
+  {
+    "Address": "0xcc2b9b55952718b210660b56ca12eb88694dc60f",
+    "Label": "Zapper"
+  },
+  {
+    "Address": "0xf9440930043eb3997fc70e1339dbb11f341de7a8",
+    "Label": "Curve.fi: ETH/rETH Pool"
+  },
+  {
+    "Address": "0x33be2a7cf4bb94d28131116f840d313cab1ed2da",
+    "Label": "Socket: ZeroX Swap Implementation"
+  },
+  {
+    "Address": "0x37da6eea6b28d05fd289d6283e3d6c0edff19daf",
+    "Label": "DSProxy #219,906"
+  },
+  {
+    "Address": "0x7fc77b5c7614e1533320ea6ddc2eb61fa00a9714",
+    "Label": "Curve.fi: sBTC Swap"
+  },
+  {
+    "Address": "0x56398b89d53e8731bca8c1b06886cfb14bd6b654",
+    "Label": "GnosisSafeProxy"
+  },
+  {
+    "Address": "0x890535f70384a0c03b2010d6c43a86a6d95cdbf0",
+    "Label": "DSProxy #220,260"
+  },
+  {
+    "Address": "0x00000000003b3cc22af3ae1eac0440bcee416b40",
+    "Label": "MEV Bot: 0x000...B40"
+  },
+  {
+    "Address": "0xa920de414ea4ab66b97da1bfe9e6eca7d4219635",
+    "Label": "crvUSD Controller"
+  },
+  {
+    "Address": "0x0439e60f02a8900a951603950d8d4527f400c3f1",
+    "Label": "MetaMask: Meta Bridge"
+  },
+  {
+    "Address": "0x14c9c85576643df11a0e0162a30025f0664e3f32",
+    "Label": "Proxy"
+  },
+  {
+    "Address": "0x000000000002e33d9a86567c6dfe6d92f6777d1e",
+    "Label": "smithbot.eth"
+  },
+  {
+    "Address": "0x000000422a649825bda802b2c212c46127bd96fd",
+    "Label": "Address 0x000000422a649825bda802b2c212c46127bd96fd"
+  },
+  {
+    "Address": "0x000000ffa51e8fd8dc15c5b77990234810a640e8",
+    "Label": "Address 0x000000ffa51e8fd8dc15c5b77990234810a640e8"
+  },
+  {
+    "Address": "0x000002cba8dfb0a86a47a415592835e17fac080a",
+    "Label": "Wintermute 2"
+  },
+  {
+    "Address": "0x000032b9ff9e8143f6a8a28fb0e67d9739e22dd0",
+    "Label": "Address 0x000032b9ff9e8143f6a8a28fb0e67d9739e22dd0"
+  },
+  {
+    "Address": "0x0000495194ec698fcf89ccf8abb445daf01db497",
+    "Label": "Address 0x0000495194ec698fcf89ccf8abb445daf01db497"
+  },
+  {
+    "Address": "0x000076a33ef6a2027f01f73f7dbb122a8f31f61d",
+    "Label": "Address 0x000076a33ef6a2027f01f73f7dbb122a8f31f61d"
+  },
+  {
+    "Address": "0x00007d83668899a2af7b5b03efd2351585843de9",
+    "Label": "Address 0x00007d83668899a2af7b5b03efd2351585843de9"
+  },
+  {
+    "Address": "0x0000e0c70000ca6bc5006838e7cc3e7c8fd23d00",
+    "Label": "Address 0x0000e0c70000ca6bc5006838e7cc3e7c8fd23d00"
+  },
+  {
+    "Address": "0x000c227e72d9ed7a35a09e260cdd5bd468dcd29b",
+    "Label": "Address 0x000c227e72d9ed7a35a09e260cdd5bd468dcd29b"
+  },
+  {
+    "Address": "0x0037825fd75af7eeace28889665e3fac8fdb6300",
+    "Label": "Address 0x0037825fd75af7eeace28889665e3fac8fdb6300"
+  },
+  {
+    "Address": "0x003fd5f6030b8c1a4d2503339b14466b9ba6c6cf",
+    "Label": "Address 0x003fd5f6030b8c1a4d2503339b14466b9ba6c6cf"
+  },
+  {
+    "Address": "0x0124d0fa0dfb1430dfcff16ec6a96945e7a0bc10",
+    "Label": "Address 0x0124d0fa0dfb1430dfcff16ec6a96945e7a0bc10"
+  },
+  {
+    "Address": "0x015b9ff5766dcc1ecbeee087d0d2c2c5682cdbf8",
+    "Label": "Address 0x015b9ff5766dcc1ecbeee087d0d2c2c5682cdbf8"
+  },
+  {
+    "Address": "0x017bd64704cfce1a624201f62f0b87f4ddae13a5",
+    "Label": "Address 0x017bd64704cfce1a624201f62f0b87f4ddae13a5"
+  },
+  {
+    "Address": "0x0197abe48f0a9826d10f44dad7050f26586eb9ba",
+    "Label": "Address 0x0197abe48f0a9826d10f44dad7050f26586eb9ba"
+  },
+  {
+    "Address": "0x0237181ae2d655decb0b548872eb746437dc29c6",
+    "Label": "Address 0x0237181ae2d655decb0b548872eb746437dc29c6"
+  },
+  {
+    "Address": "0x027d24217f18822e6ce11821524c212f507d0787",
+    "Label": "Address 0x027d24217f18822e6ce11821524c212f507d0787"
+  },
+  {
+    "Address": "0x029f388ac4d5c8bff490550ce0853221030e822b",
+    "Label": "Address 0x029f388ac4d5c8bff490550ce0853221030e822b"
+  },
+  {
+    "Address": "0x02c090592a12829ca350286391653efbc3d7c0c8",
+    "Label": "Address 0x02c090592a12829ca350286391653efbc3d7c0c8"
+  },
+  {
+    "Address": "0x02d2050481f6baa6396e629f791504f52af93817",
+    "Label": "Address 0x02d2050481f6baa6396e629f791504f52af93817"
+  },
+  {
+    "Address": "0x03018dfe2775af34b143294dcafb910d50bd77c0",
+    "Label": "Address 0x03018dfe2775af34b143294dcafb910d50bd77c0"
+  },
+  {
+    "Address": "0x0336e78e4d09b8a6a84d34d0fd103452de57a7a3",
+    "Label": "Address 0x0336e78e4d09b8a6a84d34d0fd103452de57a7a3"
+  },
+  {
+    "Address": "0x03a8b6d17c22a4911a74cf0e3cdd1ba7a2c458bb",
+    "Label": "Address 0x03a8b6d17c22a4911a74cf0e3cdd1ba7a2c458bb"
+  },
+  {
+    "Address": "0x042523db4f3effc33d2742022b2490258494f8b3",
+    "Label": "Address 0x042523db4f3effc33d2742022b2490258494f8b3"
+  },
+  {
+    "Address": "0x047103830bc29b593ed2f48e5a29f93afc66e399",
+    "Label": "Address 0x047103830bc29b593ed2f48e5a29f93afc66e399"
+  },
+  {
+    "Address": "0x047a2fbe8aef590d4eb8942426a24970af301875",
+    "Label": "Address 0x047a2fbe8aef590d4eb8942426a24970af301875"
+  },
+  {
+    "Address": "0x048fde2d3d47f54d3e7be0be7a40e1cb5aff5d72",
+    "Label": "Address 0x048fde2d3d47f54d3e7be0be7a40e1cb5aff5d72"
+  },
+  {
+    "Address": "0x04adf082321b06e038674b3e1183a63e402b2716",
+    "Label": "Address 0x04adf082321b06e038674b3e1183a63e402b2716"
+  },
+  {
+    "Address": "0x04c62b449056d592474830d647d25451ee9c5f40",
+    "Label": "Address 0x04c62b449056d592474830d647d25451ee9c5f40"
+  },
+  {
+    "Address": "0x0561a78021d8966ddd20c28c6c4318d8675ee1f0",
+    "Label": "Address 0x0561a78021d8966ddd20c28c6c4318d8675ee1f0"
+  },
+  {
+    "Address": "0x0588eed1e58744ee5354c8ad0f89707b238c8aa9",
+    "Label": "Address 0x0588eed1e58744ee5354c8ad0f89707b238c8aa9"
+  },
+  {
+    "Address": "0x05b1984c74c531eb52ea749ca2d5c51d9f058ff6",
+    "Label": "Address 0x05b1984c74c531eb52ea749ca2d5c51d9f058ff6"
+  },
+  {
+    "Address": "0x061e29222ee7cdf5a1abfb4223a492b9c4ea69f0",
+    "Label": "Address 0x061e29222ee7cdf5a1abfb4223a492b9c4ea69f0"
+  },
+  {
+    "Address": "0x062d70df2c5ada007863fae86713ec430593e402",
+    "Label": "Address 0x062d70df2c5ada007863fae86713ec430593e402"
+  },
+  {
+    "Address": "0x06466f9ac08e872064950cec3812b57d6feafa7f",
+    "Label": "Address 0x06466f9ac08e872064950cec3812b57d6feafa7f"
+  },
+  {
+    "Address": "0x065e3dbafcb2c26a978720f9eb4bce6ad9d644a1",
+    "Label": "Address 0x065e3dbafcb2c26a978720f9eb4bce6ad9d644a1"
+  },
+  {
+    "Address": "0x06e64c7b3e1e9dc31aca77068ce0d6dafa55a4ea",
+    "Label": "Address 0x06e64c7b3e1e9dc31aca77068ce0d6dafa55a4ea"
+  },
+  {
+    "Address": "0x06ac16ff8caa7c7a4d66f506a4c74d4da9e8569e",
+    "Label": "Address 0x06ac16ff8caa7c7a4d66f506a4c74d4da9e8569e"
+  },
+  {
+    "Address": "0x06fda5b767c8b6171045e6549aab369a9dea36fc",
+    "Label": "Address 0x06fda5b767c8b6171045e6549aab369a9dea36fc"
+  },
+  {
+    "Address": "0x076ed039940ae1f5de89745609c7bbc307aab886",
+    "Label": "Address 0x076ed039940ae1f5de89745609c7bbc307aab886"
+  },
+  {
+    "Address": "0x077f6053a90449f43d28c38e00123829b1f4dfac",
+    "Label": "Address 0x077f6053a90449f43d28c38e00123829b1f4dfac"
+  },
+  {
+    "Address": "0x07b873de48807ec7b02b38cc31b4f96a6a507182",
+    "Label": "Address 0x07b873de48807ec7b02b38cc31b4f96a6a507182"
+  },
+  {
+    "Address": "0x07e533419577858543b30dd6bb4dfa9d809d8538",
+    "Label": "Address 0x07e533419577858543b30dd6bb4dfa9d809d8538"
+  },
+  {
+    "Address": "0x07cb1b3a52faf636a52822d918b07d30b0914d76",
+    "Label": "Address 0x07cb1b3a52faf636a52822d918b07d30b0914d76"
+  },
+  {
+    "Address": "0x0809616c35784db5f758e0338e9d9b25a2fd1932",
+    "Label": "Address 0x0809616c35784db5f758e0338e9d9b25a2fd1932"
+  },
+  {
+    "Address": "0x0811fd1808e14f0b93f0514313965a5f142c5539",
+    "Label": "Address 0x0811fd1808e14f0b93f0514313965a5f142c5539"
+  },
+  {
+    "Address": "0x08235a8339ca08ebb3cc1cc10718fae538f93a64",
+    "Label": "Address 0x08235a8339ca08ebb3cc1cc10718fae538f93a64"
+  },
+  {
+    "Address": "0x08f990eb738c7b7d80b6e57677acb4620a77cfcf",
+    "Label": "Address 0x08f990eb738c7b7d80b6e57677acb4620a77cfcf"
+  },
+  {
+    "Address": "0x08fdf0107a7d7e77b0f5e5a664ac49a93257c851",
+    "Label": "Address 0x08fdf0107a7d7e77b0f5e5a664ac49a93257c851"
+  },
+  {
+    "Address": "0x09508fabe568914bbec35301a633ed39870666cb",
+    "Label": "Address 0x09508fabe568914bbec35301a633ed39870666cb"
+  },
+  {
+    "Address": "0x09d032dfc700ebc9859b21e6f502bb37f6348585",
+    "Label": "Address 0x09d032dfc700ebc9859b21e6f502bb37f6348585"
+  },
+  {
+    "Address": "0x09a626642b21da614f4dfebcb4bcf63d13287d66",
+    "Label": "Address 0x09a626642b21da614f4dfebcb4bcf63d13287d66"
+  },
+  {
+    "Address": "0x0ac545310921e4885dc4cf5f758d7c49e8974482",
+    "Label": "Address 0x0ac545310921e4885dc4cf5f758d7c49e8974482"
+  },
+  {
+    "Address": "0x0ab21031124af2165586fbb495d93725a372c227",
+    "Label": "Address 0x0ab21031124af2165586fbb495d93725a372c227"
+  },
+  {
+    "Address": "0x0b916da0242e20a339d64992f1ad4a77fcd320a6",
+    "Label": "Address 0x0b916da0242e20a339d64992f1ad4a77fcd320a6"
+  },
+  {
+    "Address": "0x0bbe643d5d9dd0498d0c9546f728504a4aab78f4",
+    "Label": "Address 0x0bbe643d5d9dd0498d0c9546f728504a4aab78f4"
+  },
+  {
+    "Address": "0x0d5a17fb4a430512a516f6c633cc8e7a3a351d79",
+    "Label": "Address 0x0d5a17fb4a430512a516f6c633cc8e7a3a351d79"
+  },
+  {
+    "Address": "0x0ddcb0769a3591230caa80f85469240b71442089",
+    "Label": "Address 0x0ddcb0769a3591230caa80f85469240b71442089"
+  },
+  {
+    "Address": "0x0f92777b22213c9a3b3143ba33b0d8a7b736c0ae",
+    "Label": "Address 0x0f92777b22213c9a3b3143ba33b0d8a7b736c0ae"
+  },
+  {
+    "Address": "0x0f9e99217e8a96e6fd31d2228c8a72c14497116d",
+    "Label": "Address 0x0f9e99217e8a96e6fd31d2228c8a72c14497116d"
+  },
+  {
+    "Address": "0x0cac3d1a887206e0f6169222c4504301a8b4b993",
+    "Label": "Address 0x0cac3d1a887206e0f6169222c4504301a8b4b993"
+  },
+  {
+    "Address": "0x0ce669be6097edc110a598c13917fc3598b466f4",
+    "Label": "Address 0x0ce669be6097edc110a598c13917fc3598b466f4"
+  },
+  {
+    "Address": "0x0d93c617b84910be77e1ceb4d126a1e6d6018fc5",
+    "Label": "Address 0x0d93c617b84910be77e1ceb4d126a1e6d6018fc5"
+  },
+  {
+    "Address": "0x0e274455110a233bb7577c73aa58d75a0939f56e",
+    "Label": "Address 0x0e274455110a233bb7577c73aa58d75a0939f56e"
+  },
+  {
+    "Address": "0x0e447325746527809da498f526e08dba2e3da565",
+    "Label": "Address 0x0e447325746527809da498f526e08dba2e3da565"
+  },
+  {
+    "Address": "0x0ef80bf5c1f530c1c08effd495d0bccbcd894643",
+    "Label": "Address 0x0ef80bf5c1f530c1c08effd495d0bccbcd894643"
+  },
+  {
+    "Address": "0x0ef3794cb89864337e15a9f077020c285ef0989b",
+    "Label": "Address 0x0ef3794cb89864337e15a9f077020c285ef0989b"
+  },
+  {
+    "Address": "0x0f2de9ae421d6951de9ae7128b4c8074fdd07c89",
+    "Label": "Address 0x0f2de9ae421d6951de9ae7128b4c8074fdd07c89"
+  },
+  {
+    "Address": "0x0f4d4d3d22409b65b2d9b47ec9244634c51255cb",
+    "Label": "Address 0x0f4d4d3d22409b65b2d9b47ec9244634c51255cb"
+  },
+  {
+    "Address": "0x0faa6191e7e0bfcb036c3738fcb3da328073add0",
+    "Label": "Address 0x0faa6191e7e0bfcb036c3738fcb3da328073add0"
+  },
+  {
+    "Address": "0x0ffeb87106910eefc69c1902f411b431ffc424ff",
+    "Label": "Address 0x0ffeb87106910eefc69c1902f411b431ffc424ff"
+  },
+  {
+    "Address": "0x10045cf950fd303847010dfbff57eb1a6d978ee1",
+    "Label": "Address 0x10045cf950fd303847010dfbff57eb1a6d978ee1"
+  },
+  {
+    "Address": "0x10272e34e2952ba284587d9a02c5247ae326135f",
+    "Label": "Address 0x10272e34e2952ba284587d9a02c5247ae326135f"
+  },
+  {
+    "Address": "0x103eb4c4670e603fe296b1f5e19716be0072f40b",
+    "Label": "Address 0x103eb4c4670e603fe296b1f5e19716be0072f40b"
+  },
+  {
+    "Address": "0x104da4efb22a7e560e6df9c813e5eb54ca038737",
+    "Label": "Address 0x104da4efb22a7e560e6df9c813e5eb54ca038737"
+  },
+  {
+    "Address": "0x1063f26ffa0c74730e33f7cad9e46cff1fd405fb",
+    "Label": "Address 0x1063f26ffa0c74730e33f7cad9e46cff1fd405fb"
+  },
+  {
+    "Address": "0x108a8b7200d044bbbe95bef6f671baec5473e05f",
+    "Label": "Address 0x108a8b7200d044bbbe95bef6f671baec5473e05f"
+  },
+  {
+    "Address": "0x10e3085127c9bd92ab325f8d1f65cdcec2436149",
+    "Label": "Address 0x10e3085127c9bd92ab325f8d1f65cdcec2436149"
+  },
+  {
+    "Address": "0x10bf1dcb5ab7860bab1c3320163c6dddf8dcc0e4",
+    "Label": "Address 0x10bf1dcb5ab7860bab1c3320163c6dddf8dcc0e4"
+  },
+  {
+    "Address": "0x11c798c549b66a70f90628d920d226bafd92be73",
+    "Label": "Address 0x11c798c549b66a70f90628d920d226bafd92be73"
+  },
+  {
+    "Address": "0x11e91bb6d1334585aa37d8f4fde3932c7960b938",
+    "Label": "Address 0x11e91bb6d1334585aa37d8f4fde3932c7960b938"
+  },
+  {
+    "Address": "0x11d67fa925877813b744abc0917900c2b1d6eb81",
+    "Label": "Address 0x11d67fa925877813b744abc0917900c2b1d6eb81"
+  },
+  {
+    "Address": "0x11e3e27d4bd48833a91cb035c53a085a45d61204",
+    "Label": "Address 0x11e3e27d4bd48833a91cb035c53a085a45d61204"
+  },
+  {
+    "Address": "0x12429f1842c56e2116f93cbd6cf09418e49abcd7",
+    "Label": "Address 0x12429f1842c56e2116f93cbd6cf09418e49abcd7"
+  },
+  {
+    "Address": "0x127620319bcace9a4b2d9c2b4b67d5b2d85654d6",
+    "Label": "Address 0x127620319bcace9a4b2d9c2b4b67d5b2d85654d6"
+  },
+  {
+    "Address": "0x12dde15d3bc00d69fb6f94b5afe8cb71a364756c",
+    "Label": "Address 0x12dde15d3bc00d69fb6f94b5afe8cb71a364756c"
+  },
+  {
+    "Address": "0x137d923e679ed4fe7a0ecc01c34f5bfb2722d562",
+    "Label": "Address 0x137d923e679ed4fe7a0ecc01c34f5bfb2722d562"
+  },
+  {
+    "Address": "0x14259515c9d957dd6ce338f346afa80e05f4ca29",
+    "Label": "Address 0x14259515c9d957dd6ce338f346afa80e05f4ca29"
   }
 ]

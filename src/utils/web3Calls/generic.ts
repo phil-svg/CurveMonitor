@@ -8,7 +8,6 @@ import { ABI_TRANSFER } from '../helperFunctions/Erc20Abis.js';
 import { findCoinAddressById } from '../postgresTables/readFunctions/Coins.js';
 import { getTxHashByTxId } from '../postgresTables/readFunctions/Transactions.js';
 import axiosRetry from 'axios-retry';
-import Web3 from 'web3';
 
 export let WEB3_HTTP_PROVIDER = await getWeb3HttpProvider();
 export let WEB3_WS_PROVIDER = getWeb3WsProvider();
