@@ -1,14 +1,36 @@
 import { extractTransactionAddresses, getTransactionDetails } from '../../readFunctions/TransactionDetails.js';
-import { getAllTransactionIds, getTxHashByTxId, getTxIdByTxHash } from '../../readFunctions/Transactions.js';
+import { getTxHashByTxId, getTxIdByTxHash } from '../../readFunctions/Transactions.js';
 import { solveAtomicArb } from './utils/atomicArbDetection.js';
-import { logProgress } from '../../../helperFunctions/QualityOfLifeStuff.js';
+import { logMemoryUsage, logProgress } from '../../../helperFunctions/QualityOfLifeStuff.js';
 import { ReadableTokenTransfer, TransactionDetailsForAtomicArbs } from '../../../Interfaces.js';
 import { getCleanedTransfersForTxIdFromTable } from '../../readFunctions/CleanedTransfers.js';
-import { filterUncheckedTransactionIds, getTxIdsWithAtomicArb } from '../../readFunctions/AtomicArbs.js';
+import { getTxIdsWithAtomicArb } from '../../readFunctions/AtomicArbs.js';
 import { insertAtomicArbDetails } from '../../AtomicArbs.js';
 import { solveTransfersOnTheFlyFlag } from '../../../../App.js';
 import { isCexDexArb } from '../cexdex/utils/cexdexDetection.js';
 import { getCleanedTransfers } from '../../CleanedTransfers.js';
+import { sequelize } from '../../../../config/Database.js';
+import { QueryTypes } from 'sequelize';
+
+async function getToDoTxIdsForAtomicArbs(): Promise<number[]> {
+  // SQL query to select transaction IDs from transactions table where there is no corresponding entry in the atomic_arbs table
+  const query = `
+    SELECT t.tx_id
+    FROM transactions t
+    LEFT JOIN atomic_arbs aa ON t.tx_id = aa.tx_id
+    WHERE aa.tx_id IS NULL
+    ORDER BY t.tx_id ASC;
+  `;
+
+  // Execute the query using sequelize
+  const result = await sequelize.query(query, {
+    type: QueryTypes.SELECT,
+    raw: true,
+  });
+
+  // Map the result to return an array of transaction IDs (numbers)
+  return result.map((item: any) => item.tx_id);
+}
 
 export function filterForCorrectTransfers(transfers: ReadableTokenTransfer[]): ReadableTokenTransfer[] {
   return transfers.filter((transfer) => {
@@ -96,14 +118,14 @@ export async function checkSingleTxForArbForDebugging() {
 }
 
 export async function updateAtomicArbDetection() {
-  const transactionIds = await getAllTransactionIds();
-  const uncheckedTransactionIds = await filterUncheckedTransactionIds(transactionIds);
+  const uncheckedTransactionIds = await getToDoTxIdsForAtomicArbs();
   let totalTimeTaken = 0;
   let counter = 0;
 
   for (const txId of uncheckedTransactionIds) {
     const start = new Date().getTime();
     counter++;
+
     const res = await fetchDataThenDetectArb(txId);
     if (res) await insertAtomicArbDetails(txId, res);
 

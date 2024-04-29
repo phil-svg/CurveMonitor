@@ -1,12 +1,17 @@
 import { TransactionDetails } from '../../models/TransactionDetails.js';
 import { eventFlags } from '../api/utils/EventFlags.js';
 import { getContractByAddressWithWebsocket } from '../helperFunctions/Web3.js';
+import { insertAtomicArbDetails } from '../postgresTables/AtomicArbs.js';
 import { insertTokenTransfers, solveCleanTransfersForTx } from '../postgresTables/CleanedTransfers.js';
 import { fetchContractAgeInRealtime } from '../postgresTables/ContractCreations.js';
+import { storeCexDexArbFlag } from '../postgresTables/IsCexDexArb.js';
 import { storeEvent } from '../postgresTables/RawLogs.js';
 import { fetchAndSaveReceipt } from '../postgresTables/Receipts.js';
 import { saveTransactionTrace } from '../postgresTables/TransactionTraces.js';
 import { solveSingleTdId } from '../postgresTables/TransactionsDetails.js';
+import { fetchDataThenDetectArb } from '../postgresTables/mevDetection/atomic/atomicArb.js';
+import { processSinglCexDexTxId } from '../postgresTables/mevDetection/cexdex/CexDexArb.js';
+import { isCexDexArb } from '../postgresTables/mevDetection/cexdex/utils/cexdexDetection.js';
 import { findCandidatesInBatch } from '../postgresTables/mevDetection/sandwich/SandwichDetection.js';
 import { addAddressesForLabelingForBlock } from '../postgresTables/mevDetection/sandwich/SandwichUtils.js';
 import { getTimestampsByBlockNumbersFromLocalDatabase } from '../postgresTables/readFunctions/Blocks.js';
@@ -145,20 +150,18 @@ async function processBufferedEvents() {
         if (!cleanedTransfers)
             continue;
         await insertTokenTransfers(txId, cleanedTransfers);
-        /*
         const atomicArbInfo = await fetchDataThenDetectArb(txId);
         if (atomicArbInfo && atomicArbInfo !== 'not an arb') {
-          await insertAtomicArbDetails(txId, atomicArbInfo);
-          if (eventFlags.canEmitAtomicArb) eventEmitter.emit('New Transaction for Atomic-Arb-Livestream', atomicArbInfo);
+            await insertAtomicArbDetails(txId, atomicArbInfo);
+            if (eventFlags.canEmitAtomicArb)
+                eventEmitter.emit('New Transaction for Atomic-Arb-Livestream', atomicArbInfo);
         }
-    
         const isCexDexArbitrage = await isCexDexArb(txId);
         if (isCexDexArbitrage && isCexDexArbitrage !== 'unable to fetch') {
-          await storeCexDexArbFlag(txId, isCexDexArbitrage);
-          await processSinglCexDexTxId(txId);
-          // if (eventFlags.canEmitCexDexArb) eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId); // muted for now
+            await storeCexDexArbFlag(txId, isCexDexArbitrage);
+            await processSinglCexDexTxId(txId);
+            // if (eventFlags.canEmitCexDexArb) eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId); // muted for now
         }
-        */
         processedTxHashes.add(tx.tx_hash.toLowerCase());
     }
 }

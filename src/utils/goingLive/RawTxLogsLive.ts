@@ -184,7 +184,7 @@ async function processBufferedEvents() {
     const cleanedTransfers = await solveCleanTransfersForTx(txId, tx.tx_hash);
     if (!cleanedTransfers) continue;
     await insertTokenTransfers(txId, cleanedTransfers);
-    /*
+
     const atomicArbInfo = await fetchDataThenDetectArb(txId);
     if (atomicArbInfo && atomicArbInfo !== 'not an arb') {
       await insertAtomicArbDetails(txId, atomicArbInfo);
@@ -197,7 +197,7 @@ async function processBufferedEvents() {
       await processSinglCexDexTxId(txId);
       // if (eventFlags.canEmitCexDexArb) eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId); // muted for now
     }
-    */
+
     processedTxHashes.add(tx.tx_hash.toLowerCase());
   }
 }
