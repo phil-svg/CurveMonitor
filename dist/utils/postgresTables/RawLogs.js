@@ -170,7 +170,12 @@ export async function updateRawLogs() {
         let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId);
         if (!largestBlockNumberStored)
             largestBlockNumberStored = dbInceptionBlock;
-        await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
+        try {
+            await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
+        }
+        catch (error) {
+            console.error(`Error processing ${poolAddresses[i]}`, error);
+        }
     }
 }
 //# sourceMappingURL=RawLogs.js.map

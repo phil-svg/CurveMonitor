@@ -213,6 +213,10 @@ export async function updateRawLogs(): Promise<void> {
     let poolId = await getIdByAddress(poolAddresses[i]);
     let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId!);
     if (!largestBlockNumberStored) largestBlockNumberStored = dbInceptionBlock;
-    await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
+    try {
+      await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
+    } catch (error) {
+      console.error(`Error processing ${poolAddresses[i]}`, error);
+    }
   }
 }

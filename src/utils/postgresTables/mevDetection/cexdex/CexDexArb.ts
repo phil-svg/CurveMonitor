@@ -1,12 +1,38 @@
-import { logProgress } from "../../../helperFunctions/QualityOfLifeStuff.js";
-import { getUnstoredCexDexArbTxIds, getUnstoredCexDexArbTxIdsForSinglePool, saveCexDexArb } from "../../CexDexArbs.js";
-import { storeCexDexArbFlag } from "../../IsCexDexArb.js";
-import { getAllTxIdsFromCleanedTransfers } from "../../readFunctions/CleanedTransfers.js";
-import { getAllPoolIds } from "../../readFunctions/Pools.js";
-import { getToAddress } from "../../readFunctions/TransactionDetails.js";
-import { getPoolIdByTxId } from "../../readFunctions/Transactions.js";
-import { filterProcessedTxIds } from "./Helpers.js";
-import { isCexDexArb } from "./utils/cexdexDetection.js";
+import { QueryTypes } from 'sequelize';
+import { logMemoryUsage, logProgress } from '../../../helperFunctions/QualityOfLifeStuff.js';
+import { getUnstoredCexDexArbTxIds, getUnstoredCexDexArbTxIdsForSinglePool, saveCexDexArb } from '../../CexDexArbs.js';
+import { storeCexDexArbFlag } from '../../IsCexDexArb.js';
+import { getAllPoolIds } from '../../readFunctions/Pools.js';
+import { getToAddress } from '../../readFunctions/TransactionDetails.js';
+import { getPoolIdByTxId } from '../../readFunctions/Transactions.js';
+import { isCexDexArb } from './utils/cexdexDetection.js';
+import { sequelize } from '../../../../config/Database.js';
+
+async function getUnprocessedTxIds(): Promise<number[]> {
+  // SQL query that selects transaction IDs from the token_transfers table
+  // that are not present in the is_cex_dex_arb table
+  const query = `
+    SELECT tt.tx_id
+    FROM token_transfers tt
+    LEFT JOIN is_cex_dex_arb icda ON tt.tx_id = icda.tx_id
+    WHERE icda.tx_id IS NULL
+    ORDER BY tt.tx_id ASC;
+  `;
+
+  try {
+    // Execute the query using sequelize
+    const result = await sequelize.query(query, {
+      type: QueryTypes.SELECT,
+      raw: true,
+    });
+
+    // Map the result to return an array of transaction IDs (numbers)
+    return result.map((item: any) => item.tx_id);
+  } catch (error) {
+    console.error('Error retrieving unprocessed transaction IDs:', error);
+    return [];
+  }
+}
 
 async function processSingleTxId(txId: number, poolId: number): Promise<void> {
   const botAddress = await getToAddress(txId);
@@ -41,7 +67,7 @@ export async function updateCexDexArbTableOld(): Promise<void> {
     const end = new Date().getTime();
     totalTimeTaken += end - start;
     counter++;
-    logProgress("updating CexDexArb-Table", 100, counter, totalTimeTaken, totalToBeProcessed);
+    logProgress('updating CexDexArb-Table', 100, counter, totalTimeTaken, totalToBeProcessed);
   }
 }
 
@@ -50,6 +76,7 @@ export async function updateCexDexArbTable(): Promise<void> {
   let totalTimeTaken = 0;
 
   const unstoredCexDexArbTxIds = await getUnstoredCexDexArbTxIds();
+
   for (const txId of unstoredCexDexArbTxIds) {
     const start = new Date().getTime();
     const poolId = await getPoolIdByTxId(txId);
@@ -57,7 +84,7 @@ export async function updateCexDexArbTable(): Promise<void> {
     const end = new Date().getTime();
     totalTimeTaken += end - start;
     counter++;
-    logProgress("updating CexDexArb-Table", 100, counter, totalTimeTaken, unstoredCexDexArbTxIds.length);
+    logProgress('updating CexDexArb-Table', 100, counter, totalTimeTaken, unstoredCexDexArbTxIds.length);
   }
 }
 
@@ -65,25 +92,18 @@ export async function solveAndStoreCexDexArbFlag(): Promise<void> {
   let counter = 0;
   let totalTimeTaken = 0;
 
-  const allTxIds = await getAllTxIdsFromCleanedTransfers();
-  const unprocessedTxIds = await filterProcessedTxIds(allTxIds);
+  const unprocessedTxIds = await getUnprocessedTxIds();
 
   for (const txId of unprocessedTxIds) {
     const start = new Date().getTime();
     counter++;
 
-    // if (txId !== 832537) continue;
-
-    // const poolId = await getPoolIdByTxId(txId);
-    // if (!poolId) continue;
-    // if (poolId !== 639) continue; // filtering for only tricryptoUSDC 333,639,640
-
     const arbStatus = await isCexDexArb(txId);
-    if (arbStatus === "unable to fetch") {
+    if (arbStatus === 'unable to fetch') {
       // If unable to fetch, log the progress and continue to the next iteration
       const end = new Date().getTime();
       totalTimeTaken += end - start;
-      logProgress("solving and storing CexDexArbFlags", 200, counter, totalTimeTaken, unprocessedTxIds.length);
+      logProgress('solving and storing CexDexArbFlags', 200, counter, totalTimeTaken, unprocessedTxIds.length);
       continue;
     }
 
@@ -92,7 +112,7 @@ export async function solveAndStoreCexDexArbFlag(): Promise<void> {
     const end = new Date().getTime();
     totalTimeTaken += end - start;
 
-    logProgress("solving and storing CexDexArbFlags", 200, counter, totalTimeTaken, unprocessedTxIds.length);
+    logProgress('solving and storing CexDexArbFlags', 200, counter, totalTimeTaken, unprocessedTxIds.length);
   }
 
   console.log(`[✓] CexDexArbFlags synced successfully.`);

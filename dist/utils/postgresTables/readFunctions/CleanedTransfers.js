@@ -1,20 +1,6 @@
 import { TokenTransfers } from '../../../models/CleanedTransfers.js';
 import { getToAddress } from './TransactionDetails.js';
 import { getTxIdByTxHash } from './Transactions.js';
-export async function getAllTxIdsFromCleanedTransfers() {
-    try {
-        const tokenTransfers = await TokenTransfers.findAll({
-            attributes: ['tx_id'],
-            raw: true,
-        });
-        const txIds = tokenTransfers.map((transfer) => transfer.tx_id);
-        return txIds;
-    }
-    catch (error) {
-        console.error('Error retrieving tx_ids:', error);
-        return [];
-    }
-}
 export async function getTransferArrLengthForTxId(txId) {
     try {
         const tokenTransferEntry = await TokenTransfers.findOne({
