@@ -160,7 +160,8 @@ async function processBufferedEvents() {
         if (isCexDexArbitrage && isCexDexArbitrage !== 'unable to fetch') {
             await storeCexDexArbFlag(txId, isCexDexArbitrage);
             await processSinglCexDexTxId(txId);
-            // if (eventFlags.canEmitCexDexArb) eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId); // muted for now
+            if (eventFlags.canEmitCexDexArb)
+                eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId);
         }
         processedTxHashes.add(tx.tx_hash.toLowerCase());
     }

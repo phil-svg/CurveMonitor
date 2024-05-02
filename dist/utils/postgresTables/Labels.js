@@ -1,18 +1,20 @@
-import fs from "fs";
-import _ from "lodash";
-import path from "path";
-import { updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
-import { findUniqueSourceOfLossAddresses } from "./readFunctions/Sandwiches.js";
-import { findUniqueLabeledAddresses, findVyperContractAddresses } from "./readFunctions/Labels.js";
-import { Labels } from "../../models/Labels.js";
-import { fetchAbiFromEtherscan } from "./Abi.js";
-import { WEB3_HTTP_PROVIDER, web3Call } from "../web3Calls/generic.js";
-import { manualLaborLabels } from "../api/utils/PoolNamesManualLabor.js";
-import { findAndCountUniqueCallesPlusCalledContracts } from "./readFunctions/TransactionDetails.js";
+import fs from 'fs';
+import _ from 'lodash';
+import path from 'path';
+import { updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { findUniqueSourceOfLossAddresses } from './readFunctions/Sandwiches.js';
+import { findUniqueLabeledAddresses, findVyperContractAddresses } from './readFunctions/Labels.js';
+import { Labels } from '../../models/Labels.js';
+import { fetchAbiFromEtherscan } from './Abi.js';
+import { WEB3_HTTP_PROVIDER, web3Call } from '../web3Calls/generic.js';
+import { manualLaborLabels } from '../api/utils/PoolNamesManualLabor.js';
+import { findAndCountUniqueCallesPlusCalledContracts } from './readFunctions/TransactionDetails.js';
 export async function getAddressesWithMinOccurrences(minOccurrences) {
     const foundAndCountedUniqueCallesPlusCalledContracts = await findAndCountUniqueCallesPlusCalledContracts();
     // Filter addresses with at least 'minOccurrences' occurrences
-    const filteredAddresses = foundAndCountedUniqueCallesPlusCalledContracts.filter((item) => item.count >= minOccurrences).map((item) => item.address);
+    const filteredAddresses = foundAndCountedUniqueCallesPlusCalledContracts
+        .filter((item) => item.count >= minOccurrences)
+        .map((item) => item.address);
     return filteredAddresses;
 }
 /**
@@ -52,16 +54,16 @@ async function vyper_contract() {
         }
         let contract = new WEB3_HTTP_PROVIDER.eth.Contract(abi, address);
         // Check if the ABI has a "name" function
-        const hasNameFunction = abi.some((item) => item.name === "name" && item.type === "function");
+        const hasNameFunction = abi.some((item) => item.name === 'name' && item.type === 'function');
         if (hasNameFunction) {
             try {
-                let name = await web3Call(contract, "name", []);
+                let name = await web3Call(contract, 'name', []);
                 console.log(name);
                 // Update label in the Labels table for the given address
                 await Labels.update({ label: name }, { where: { address: address } });
             }
             catch (err) {
-                console.log("err in vyper_contract", err);
+                console.log('err in vyper_contract', err);
             }
         }
         else {
@@ -74,7 +76,7 @@ async function vyper_contract() {
         }
     }
 }
-async function addCustomLabels() {
+export async function addCustomLabels() {
     // Fetch all records from the Labels table
     const existingLabels = await Labels.findAll();
     const labelsMap = new Map();
@@ -107,20 +109,20 @@ export async function updateLabels() {
     // Fetch addresses that need to be labeled
     const inTableUnlabeledAddresses = await getUnlabeledAddresses();
     // Read the labels from the file
-    const possibleDirs = [process.cwd(), path.join(process.cwd(), "..")];
+    const possibleDirs = [process.cwd(), path.join(process.cwd(), '..')];
     let labelsFilePath;
     for (const dir of possibleDirs) {
-        const tryPath = path.join(dir, "Labels.json");
+        const tryPath = path.join(dir, 'Labels.json');
         if (fs.existsSync(tryPath)) {
             labelsFilePath = tryPath;
             break;
         }
     }
     if (!labelsFilePath) {
-        console.error("Labels.json file not found");
+        console.error('Labels.json file not found');
         process.exit(1);
     }
-    const labelsFromFile = JSON.parse(fs.readFileSync(labelsFilePath, "utf8"));
+    const labelsFromFile = JSON.parse(fs.readFileSync(labelsFilePath, 'utf8'));
     // Iterate over the unlabeled addresses
     for (const unlabeledAddress of inTableUnlabeledAddresses) {
         // Check if the unlabeledAddress is not null

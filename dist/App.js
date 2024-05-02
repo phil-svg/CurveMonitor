@@ -7,6 +7,7 @@ import { updatePoolAbis } from './utils/postgresTables/Abi.js';
 import { updateBlockTimestamps } from './utils/postgresTables/Blocks.js';
 import { updateRawLogs, updateRawLogsForLiveMode } from './utils/postgresTables/RawLogs.js';
 import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
+import { addCustomLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
 import { preparingLiveModeForRawEvents } from './utils/goingLive/RawTxLogsLive.js';
 import { startAPI } from './utils/api/Server.js';
@@ -36,7 +37,7 @@ export async function initDatabase() {
     }
 }
 // await initDatabase();
-// await updateProxiesFromManualList()
+// await updateProxiesFromManualList();
 startAPI();
 export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.
 // await research(); // opening function for queries for a bunch of statistics
@@ -77,6 +78,7 @@ export async function main() {
     await updateCleanedTransfers();
     await updateAtomicArbDetection();
     await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
+    await addCustomLabels();
     // await updateLabels(); // muted, only has to run when there are changes made to the labels-file
     // todo
     console.log(`\n[✓] Everything finished syncing successfully.`);
