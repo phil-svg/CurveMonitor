@@ -4,7 +4,8 @@ import { getAbiBy } from '../postgresTables/Abi.js';
 import { getAddressById, getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
 import { Log } from 'web3-core';
 import { readAbiFromAbisEthereumTable } from '../postgresTables/readFunctions/Abi.js';
-import { WEB3_HTTP_PROVIDER, WEB3_WS_PROVIDER } from '../web3Calls/generic.js';
+import { WEB3_HTTP_PROVIDER, WEB3_WS_PROVIDER, web3Call } from '../web3Calls/generic.js';
+import { ERC20_ABI } from './Erc20Abis.js';
 
 export function getWeb3WsProvider(): Web3 {
   let web3WsProvider: Web3 | null = null;
@@ -164,5 +165,32 @@ export function toChecksumAddress(address: string): string {
   } catch (err) {
     console.log('err in toChecksumAddress', err);
     return address;
+  }
+}
+
+export async function getTokenDecimalsFromChain(tokenAddress: string): Promise<number | null> {
+  const contract = new WEB3_HTTP_PROVIDER.eth.Contract(ERC20_ABI, tokenAddress);
+  try {
+    const decimals = await web3Call(contract, 'decimals', []);
+    return Number(decimals);
+  } catch (err) {
+    console.log('err in getTokenDecimalsFromChain', err);
+    return null;
+  }
+}
+
+export async function getTokenBalanceForWalletAndTokenAndBlockFromChain(
+  tokenAddress: string,
+  tokenDecimals: number,
+  walletAddress: string,
+  blockNumber: number
+): Promise<number | null> {
+  const contract = new WEB3_HTTP_PROVIDER.eth.Contract(ERC20_ABI, tokenAddress);
+  try {
+    const balance = await web3Call(contract, 'balanceOf', [walletAddress], blockNumber);
+    return Number(balance) / 10 ** tokenDecimals;
+  } catch (err) {
+    console.log('err in getTokenBalanceForWalletAndTokenAndBlockFromChain', err);
+    return null;
   }
 }

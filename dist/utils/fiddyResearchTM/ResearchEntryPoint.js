@@ -1,5 +1,5 @@
 import { getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
-import { fxThings } from './atomicArb/fxArbs.js';
+import { studyTokenBalanceOfWallet } from './DefiMonitooor/DexAggregators/Research/WalletBalanceChanges.js';
 /*
 0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7 3Pool
 0xdc24316b9ae028f1497c275eb9192a3ea0f67022 stETH
@@ -38,7 +38,8 @@ export async function research() {
     // const startDate = "2021-01-01";
     // const endDate = "2022-07-31";
     console.log('conducting research');
-    await fxThings();
+    await studyTokenBalanceOfWallet();
+    // await fxThings();
     // await uniswapV3EntryPoint()
     // await oneInchVolThings();
     // await whatWasSwappedAnalytics(_3Pool, CoWProtocolGPv2Settlement, startDate, endDate);

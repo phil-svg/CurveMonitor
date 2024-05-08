@@ -12,6 +12,7 @@ import { getCleanedTransfersForTxHashFromTable } from '../postgresTables/readFun
 import { getIdByAddress, getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
 import { getTxIdByTxHash } from '../postgresTables/readFunctions/Transactions.js';
 import { oneInchVolThings, whatWasSwappedAnalytics } from './DefiMonitooor/DexAggregators/1Inch/oneInch.js';
+import { studyTokenBalanceOfWallet } from './DefiMonitooor/DexAggregators/Research/WalletBalanceChanges.js';
 import { uniswapV3EntryPoint } from './DefiMonitooor/DexAggregators/uniswapV3/UniV3EntryPoint.js';
 import { fxThings } from './atomicArb/fxArbs.js';
 import { aggregateCexDexBotVolumeOverTime, writeDBotVolOverTimeataToExcel } from './cexdex/BotVolOverTime.js';
@@ -97,7 +98,8 @@ export async function research() {
 
   console.log('conducting research');
 
-  await fxThings();
+  await studyTokenBalanceOfWallet();
+  // await fxThings();
   // await uniswapV3EntryPoint()
   // await oneInchVolThings();
   // await whatWasSwappedAnalytics(_3Pool, CoWProtocolGPv2Settlement, startDate, endDate);

@@ -1,9 +1,14 @@
-import { Sequelize } from "sequelize";
-import { Sandwiches } from "../../../models/Sandwiches.js";
-import { getLabelNameFromAddress } from "../../postgresTables/readFunctions/Labels.js";
-import { AddressesCalledCounts } from "../../../models/AddressesCalledCount.js";
-import { getIdsForFullSandwichTable, getIdsForFullSandwichTableForPool } from "../../postgresTables/readFunctions/Sandwiches.js";
-import { SandwichDetail, enrichSandwiches } from "../../postgresTables/readFunctions/SandwichDetailEnrichments.js";
+import { QueryTypes, Sequelize } from 'sequelize';
+import { Sandwiches } from '../../../models/Sandwiches.js';
+import { getLabelNameFromAddress } from '../../postgresTables/readFunctions/Labels.js';
+import { AddressesCalledCounts } from '../../../models/AddressesCalledCount.js';
+import {
+  getIdsForFullSandwichTable,
+  getIdsForFullSandwichTableForPool,
+} from '../../postgresTables/readFunctions/Sandwiches.js';
+import { SandwichDetail, enrichSandwiches } from '../../postgresTables/readFunctions/SandwichDetailEnrichments.js';
+import { getIdByAddressCaseInsensitive } from '../../postgresTables/readFunctions/Pools.js';
+import { sequelize } from '../../../config/Database.js';
 
 export async function getTotalAmountOfSandwichesInLocalDB(): Promise<number> {
   const count = await Sandwiches.count();
@@ -19,63 +24,72 @@ export async function getTotalExtractedFromCurve(): Promise<number> {
   return count;
 }
 
-export async function getLabelsRankingDecendingAbsOccurences(): Promise<{ address: string; label: string; occurrences: number }[] | null> {
+interface LabelOccurrence {
+  address: string;
+  label: string;
+  occurrences: number;
+}
+
+export async function getLabelsRankingDescendingAbsOccurrences(): Promise<LabelOccurrence[] | null> {
   try {
-    // Fetch the count of each source_of_loss_contract_address
-    const counts = (await Sandwiches.findAll({
-      attributes: ["source_of_loss_contract_address", [Sequelize.fn("COUNT", Sequelize.col("source_of_loss_contract_address")), "count"]],
-      group: ["source_of_loss_contract_address"],
+    const query = `
+      SELECT 
+        s.source_of_loss_contract_address AS address, 
+        COALESCE(l.label, s.source_of_loss_contract_address) AS label, 
+        COUNT(s.source_of_loss_contract_address) AS occurrences
+      FROM 
+        sandwiches s
+      LEFT JOIN 
+        labels l ON lower(s.source_of_loss_contract_address) = lower(l.address)
+      GROUP BY 
+        s.source_of_loss_contract_address, l.label
+      ORDER BY 
+        occurrences DESC;
+    `;
+
+    const labelsOccurrences: LabelOccurrence[] = await sequelize.query(query, {
+      type: QueryTypes.SELECT,
       raw: true,
-    })) as unknown as { source_of_loss_contract_address: string; count: string }[];
-
-    // For each unique address, get its label
-    const labelsOccurrences: { address: string; label: string; occurrences: number }[] = [];
-    for (const countObj of counts) {
-      const address = countObj.source_of_loss_contract_address;
-      if (!address) {
-        console.log(`err with address ${address} in labelsOccurrences`);
-        continue;
-      }
-      let label = await getLabelNameFromAddress(address);
-      if (!label) label = address;
-      labelsOccurrences.push({ address, label, occurrences: parseInt(countObj.count) });
-    }
-
-    // Sort labelsOccurrences in descending order of count
-    labelsOccurrences.sort((a, b) => b.occurrences - a.occurrences);
+    });
 
     return labelsOccurrences;
   } catch (error) {
-    console.error(`Error in getLabelsRankingDecendingAbsOccurences: ${error}`);
+    console.error(`Error in getLabelsRankingDescendingAbsOccurrences: ${error}`);
     return null;
   }
 }
 
-export async function getSandwichLabelOccurrences(): Promise<{ address: string; label: string; occurrences: number; numOfAllTx: number }[] | null> {
+interface LabelOccurrence {
+  address: string;
+  label: string;
+  occurrences: number;
+  numOfAllTx: number;
+}
+
+export async function getSandwichLabelOccurrences(): Promise<LabelOccurrence[] | null> {
   try {
-    const labelsRanking = await getLabelsRankingDecendingAbsOccurences();
+    const query = `
+      SELECT 
+        s.source_of_loss_contract_address AS address, 
+        COALESCE(l.label, s.source_of_loss_contract_address) AS label, 
+        COUNT(s.source_of_loss_contract_address) AS occurrences,
+        COALESCE(ac.count, 0) AS "numOfAllTx"
+      FROM 
+        sandwiches s
+      LEFT JOIN 
+        labels l ON lower(s.source_of_loss_contract_address) = lower(l.address)
+      LEFT JOIN 
+        address_counts ac ON lower(s.source_of_loss_contract_address) = lower(ac.called_address)
+      GROUP BY 
+        s.source_of_loss_contract_address, l.label, ac.count
+      ORDER BY 
+        occurrences DESC;
+    `;
 
-    // If labelsRanking is null, something went wrong in getLabelsRankingDecendingAbsOccurences
-    if (!labelsRanking) {
-      console.error("Error: getLabelsRankingDecendingAbsOccurences returned null.");
-      return null;
-    }
-
-    // For each unique address, get its count in AddressesCalledCounts
-    const labelsOccurrences: { address: string; label: string; occurrences: number; numOfAllTx: number }[] = [];
-    for (const labelRanking of labelsRanking) {
-      const address = labelRanking.address;
-      if (!address) {
-        console.log(`err with address ${address} in labelsOccurrences`);
-        continue;
-      }
-
-      // Fetch address count from AddressesCalledCounts table
-      const addressCountRecord = await AddressesCalledCounts.findOne({ where: { called_address: address } });
-      const allTxCount = addressCountRecord ? addressCountRecord.count : 0;
-
-      labelsOccurrences.push({ ...labelRanking, numOfAllTx: allTxCount });
-    }
+    const labelsOccurrences: LabelOccurrence[] = await sequelize.query(query, {
+      type: QueryTypes.SELECT,
+      raw: true,
+    });
 
     return labelsOccurrences;
   } catch (error) {
@@ -84,13 +98,25 @@ export async function getSandwichLabelOccurrences(): Promise<{ address: string; 
   }
 }
 
-export async function getFullSandwichTable(duration: string, page: number): Promise<{ data: SandwichDetail[]; totalSandwiches: number }> {
+export async function getFullSandwichTable(
+  duration: string,
+  page: number
+): Promise<{ data: SandwichDetail[]; totalSandwiches: number }> {
   const { ids, totalSandwiches } = await getIdsForFullSandwichTable(duration, page);
   const enrichedSandwiches = await enrichSandwiches(ids);
+
   return { data: enrichedSandwiches, totalSandwiches };
 }
 
-export async function getSandwichTableContentForPool(poolId: number, duration: string, page: number): Promise<{ data: SandwichDetail[]; totalSandwiches: number }> {
+export async function getSandwichTableContentForPool(
+  poolAddress: string,
+  duration: string,
+  page: number
+): Promise<{ data: SandwichDetail[]; totalSandwiches: number }> {
+  const poolId = await getIdByAddressCaseInsensitive(poolAddress);
+  if (!poolId) {
+    throw new Error('Pool not found');
+  }
   const { ids, totalSandwiches } = await getIdsForFullSandwichTableForPool(duration, poolId, page);
   const enrichedSandwiches = await enrichSandwiches(ids);
   return { data: enrichedSandwiches, totalSandwiches };

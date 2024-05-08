@@ -1,11 +1,14 @@
-import { Op, Sequelize } from "sequelize";
-import { LossTransaction, Sandwiches } from "../../../models/Sandwiches.js";
-import { Transactions } from "../../../models/Transactions.js";
-import { getIdByAddress } from "./Pools.js";
-import { getTimeframeTimestamp } from "../../api/utils/Timeframes.js";
-import { SandwichDetail, enrichSandwiches } from "./SandwichDetailEnrichments.js";
+import { Op, QueryTypes, Sequelize } from 'sequelize';
+import { LossTransaction, Sandwiches } from '../../../models/Sandwiches.js';
+import { Transactions } from '../../../models/Transactions.js';
+import { getIdByAddress } from './Pools.js';
+import { getTimeframeTimestamp } from '../../api/utils/Timeframes.js';
+import { SandwichDetail, enrichSandwiches } from './SandwichDetailEnrichments.js';
+import { sequelize } from '../../../config/Database.js';
 
-export async function readSandwichesInBatches(batchSize: number = 100): Promise<{ id: number; loss_transactions: any }[][]> {
+export async function readSandwichesInBatches(
+  batchSize: number = 100
+): Promise<{ id: number; loss_transactions: any }[][]> {
   let offset = 0;
   const batches: { id: number; loss_transactions: any }[][] = [];
 
@@ -35,7 +38,10 @@ export async function readSandwichesInBatches(batchSize: number = 100): Promise<
   return batches;
 }
 
-export async function readSandwichesInBatchesForBlock(blockNumber: number, batchSize: number = 100): Promise<{ id: number; loss_transactions: any }[][]> {
+export async function readSandwichesInBatchesForBlock(
+  blockNumber: number,
+  batchSize: number = 100
+): Promise<{ id: number; loss_transactions: any }[][]> {
   let offset = 0;
   const batches: { id: number; loss_transactions: any }[][] = [];
 
@@ -48,13 +54,13 @@ export async function readSandwichesInBatchesForBlock(blockNumber: number, batch
       include: [
         {
           model: Transactions,
-          as: "frontrunTransaction",
+          as: 'frontrunTransaction',
           where: { block_number: blockNumber },
           required: true,
         },
         {
           model: Transactions,
-          as: "backrunTransaction",
+          as: 'backrunTransaction',
           where: { block_number: blockNumber },
           required: true,
         },
@@ -81,9 +87,11 @@ export async function readSandwichesInBatchesForBlock(blockNumber: number, batch
 
 export async function findUniqueSourceOfLossAddresses(): Promise<string[]> {
   const sandwiches = await Sandwiches.findAll({
-    attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("source_of_loss_contract_address")), "source_of_loss_contract_address"]],
+    attributes: [
+      [Sequelize.fn('DISTINCT', Sequelize.col('source_of_loss_contract_address')), 'source_of_loss_contract_address'],
+    ],
   });
-  return sandwiches.map((sandwich) => sandwich.getDataValue("source_of_loss_contract_address"));
+  return sandwiches.map((sandwich) => sandwich.getDataValue('source_of_loss_contract_address'));
 }
 
 export async function getAllRawTableEntriesForPoolByPoolAddress(poolAddress: string): Promise<Sandwiches[]> {
@@ -118,7 +126,7 @@ export async function getAllIdsForFullSandwichTable(timeDuration: string): Promi
     include: [
       {
         model: Transactions,
-        as: "frontrunTransaction",
+        as: 'frontrunTransaction',
         where: {
           block_unixtime: {
             [Op.gte]: timeframeStartUnix,
@@ -130,7 +138,7 @@ export async function getAllIdsForFullSandwichTable(timeDuration: string): Promi
     where: {
       extracted_from_curve: true,
     },
-    order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+    order: [[{ model: Transactions, as: 'frontrunTransaction' }, 'block_unixtime', 'DESC']],
   });
 
   const ids = sandwiches.map((sandwich) => sandwich.id);
@@ -138,33 +146,44 @@ export async function getAllIdsForFullSandwichTable(timeDuration: string): Promi
   return ids;
 }
 
-export async function getIdsForFullSandwichTable(timeDuration: string, page: number): Promise<{ ids: number[]; totalSandwiches: number }> {
+interface TotalResult {
+  total: number;
+}
+
+async function getTotalNumberOfSandwichesForTimeDuration(timeDuration: string): Promise<number> {
+  const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
+
+  const query = `
+    SELECT COUNT(*) AS total
+    FROM sandwiches s
+    JOIN transactions t ON s.frontrun = t.tx_id -- Ensure correct join columns
+    WHERE s.extracted_from_curve = true
+      AND t.block_unixtime >= :timeframeStartUnix
+  `;
+
+  const result: TotalResult[] = await sequelize.query(query, {
+    type: QueryTypes.SELECT,
+    raw: false,
+    replacements: {
+      timeframeStartUnix,
+    },
+  });
+
+  const totalSandwiches = result[0].total;
+
+  return totalSandwiches;
+}
+
+async function getSandwichIdsForTimeframe(timeDuration: string, page: number): Promise<number[]> {
   const recordsPerPage = 10;
   const offset = (page - 1) * recordsPerPage;
   const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
-
-  const totalSandwiches = await Sandwiches.count({
-    include: [
-      {
-        model: Transactions,
-        as: "frontrunTransaction",
-        where: {
-          block_unixtime: {
-            [Op.gte]: timeframeStartUnix,
-          },
-        },
-      },
-    ],
-    where: {
-      extracted_from_curve: true,
-    },
-  });
 
   const sandwiches = await Sandwiches.findAll({
     include: [
       {
         model: Transactions,
-        as: "frontrunTransaction",
+        as: 'frontrunTransaction',
         where: {
           block_unixtime: {
             [Op.gte]: timeframeStartUnix,
@@ -178,43 +197,65 @@ export async function getIdsForFullSandwichTable(timeDuration: string, page: num
     },
     limit: recordsPerPage,
     offset: offset,
-    order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+    order: [[{ model: Transactions, as: 'frontrunTransaction' }, 'block_unixtime', 'DESC']],
   });
 
   const ids = sandwiches.map((sandwich) => sandwich.id);
-
-  return { ids, totalSandwiches };
+  return ids;
 }
 
-export async function getIdsForFullSandwichTableForPool(timeDuration: string, poolId: number, page: number = 1): Promise<{ ids: number[]; totalSandwiches: number }> {
+export async function getIdsForFullSandwichTable(
+  timeDuration: string,
+  page: number
+): Promise<{ ids: number[]; totalSandwiches: number }> {
+  const totalSandwiches = await getTotalNumberOfSandwichesForTimeDuration(timeDuration);
+  const sandwichIds = await getSandwichIdsForTimeframe(timeDuration, page);
+
+  return { ids: sandwichIds, totalSandwiches };
+}
+
+async function getTotalNumberOfSandwichesForPoolAndTimeDuration(poolId: number, timeDuration: string): Promise<number> {
+  const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
+
+  const query = `
+    SELECT COUNT(*) AS total
+    FROM sandwiches s
+    JOIN transactions t ON s.frontrun = t.tx_id -- Ensure correct join columns
+    WHERE s.extracted_from_curve = true
+      AND t.pool_id = :poolId
+      AND t.block_unixtime >= :timeframeStartUnix
+  `;
+
+  const result: TotalResult[] = await sequelize.query(query, {
+    type: QueryTypes.SELECT,
+    raw: false,
+    replacements: {
+      poolId,
+      timeframeStartUnix,
+    },
+  });
+
+  const totalSandwiches = result[0].total;
+
+  return totalSandwiches;
+}
+
+export async function getIdsForFullSandwichTableForPool(
+  timeDuration: string,
+  poolId: number,
+  page: number = 1
+): Promise<{ ids: number[]; totalSandwiches: number }> {
   const recordsPerPage = 10;
   const offset = (page - 1) * recordsPerPage;
   const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
 
-  const totalSandwiches = await Sandwiches.count({
-    include: [
-      {
-        model: Transactions,
-        as: "frontrunTransaction",
-        where: {
-          pool_id: poolId,
-          block_unixtime: {
-            [Op.gte]: timeframeStartUnix,
-          },
-        },
-        required: true,
-      },
-    ],
-    where: {
-      extracted_from_curve: true,
-    },
-  });
+  const totalSandwiches = await getTotalNumberOfSandwichesForPoolAndTimeDuration(poolId, timeDuration);
 
   const sandwiches = await Sandwiches.findAll({
     include: [
       {
         model: Transactions,
-        as: "frontrunTransaction",
+        as: 'frontrunTransaction',
         where: {
           pool_id: poolId,
           block_unixtime: {
@@ -229,7 +270,7 @@ export async function getIdsForFullSandwichTableForPool(timeDuration: string, po
     },
     limit: recordsPerPage,
     offset: offset,
-    order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+    order: [[{ model: Transactions, as: 'frontrunTransaction' }, 'block_unixtime', 'DESC']],
   });
 
   const ids = sandwiches.map((sandwich) => sandwich.id);
@@ -237,12 +278,16 @@ export async function getIdsForFullSandwichTableForPool(timeDuration: string, po
   return { ids, totalSandwiches };
 }
 
-export async function getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCurve(poolId: number, startUnixtime: number, endUnixtime: number): Promise<number[]> {
+export async function getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCurve(
+  poolId: number,
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<number[]> {
   const sandwiches = await Sandwiches.findAll({
     include: [
       {
         model: Transactions,
-        as: "frontrunTransaction",
+        as: 'frontrunTransaction',
         where: {
           pool_id: poolId,
           block_unixtime: {
@@ -253,7 +298,7 @@ export async function getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCur
         required: true,
       },
     ],
-    order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+    order: [[{ model: Transactions, as: 'frontrunTransaction' }, 'block_unixtime', 'DESC']],
   });
 
   const ids = sandwiches.map((sandwich) => sandwich.id);
@@ -261,7 +306,11 @@ export async function getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCur
   return ids;
 }
 
-export async function getSandwichContentForPoolAndTime(poolId: number, startUnixtime: number, endUnixtime: number): Promise<SandwichDetail[]> {
+export async function getSandwichContentForPoolAndTime(
+  poolId: number,
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<SandwichDetail[]> {
   const ids = await getIdsOfSandwichesForPoolAndTimeIncludingVictimsOutsideCurve(poolId, startUnixtime, endUnixtime);
   const enrichedSandwiches = await enrichSandwiches(ids);
   return enrichedSandwiches;
@@ -279,7 +328,12 @@ export interface TransactionLossDetail {
 export async function getLossInUsdForSandwich(sandwichId: number): Promise<number | null> {
   try {
     const sandwich = await Sandwiches.findByPk(sandwichId);
-    if (sandwich && sandwich.loss_transactions && Array.isArray(sandwich.loss_transactions) && sandwich.loss_transactions.length > 0) {
+    if (
+      sandwich &&
+      sandwich.loss_transactions &&
+      Array.isArray(sandwich.loss_transactions) &&
+      sandwich.loss_transactions.length > 0
+    ) {
       const lossTransactionDetail: TransactionLossDetail = sandwich.loss_transactions[0];
       return lossTransactionDetail.lossInUsd;
     } else {
@@ -294,19 +348,22 @@ export async function getLossInUsdForSandwich(sandwichId: number): Promise<numbe
 
 export async function fetchSandwichIdsByBlockNumber(blockNumber: number): Promise<number[]> {
   const sandwiches = await Sandwiches.findAll({
-    attributes: ["id"],
+    attributes: ['id'],
     where: {
-      [Op.or]: [{ "$frontrunTransaction.block_number$": blockNumber }, { "$backrunTransaction.block_number$": blockNumber }],
+      [Op.or]: [
+        { '$frontrunTransaction.block_number$': blockNumber },
+        { '$backrunTransaction.block_number$': blockNumber },
+      ],
     },
     include: [
       {
         model: Transactions,
-        as: "frontrunTransaction",
+        as: 'frontrunTransaction',
         attributes: [],
       },
       {
         model: Transactions,
-        as: "backrunTransaction",
+        as: 'backrunTransaction',
         attributes: [],
       },
     ],

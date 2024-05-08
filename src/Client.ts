@@ -1,10 +1,10 @@
-import { io, Socket } from "socket.io-client";
-import { topBestPerformingLabels, topWorstPerformingLabels } from "./utils/helperFunctions/Client.js";
-import { SandwichDetail } from "./utils/postgresTables/readFunctions/SandwichDetailEnrichments.js";
-import { EnrichedTransactionDetail, TransactionDetail, TransactionDetailsForAtomicArbs } from "./utils/Interfaces.js";
+import { io, Socket } from 'socket.io-client';
+import { topBestPerformingLabels, topWorstPerformingLabels } from './utils/helperFunctions/Client.js';
+import { SandwichDetail } from './utils/postgresTables/readFunctions/SandwichDetailEnrichments.js';
+import { EnrichedTransactionDetail, TransactionDetailsForAtomicArbs } from './utils/Interfaces.js';
 
 // Replace with "wss://api.curvemonitor.com" for production
-const url = "http://localhost:443";
+const url = 'http://localhost:443';
 // const url = "wss://api.curvemonitor.com";
 
 /**
@@ -26,14 +26,14 @@ const url = "http://localhost:443";
 export function startPingClient(socket: Socket) {
   // Ping the server every 500ms
   setInterval(() => {
-    socket.emit("Ping");
+    socket.emit('Ping');
   }, 500);
 
-  socket.on("Pong", () => {
-    console.log("Received pong from the server.");
+  socket.on('Pong', () => {
+    console.log('Received pong from the server.');
   });
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 /**
@@ -73,14 +73,14 @@ export function startPingClient(socket: Socket) {
  */
 export function startAbsoluteLabelsRankingClient(socket: Socket) {
   // request for absolute labels ranking
-  socket.emit("getAbsoluteLabelsRanking");
+  socket.emit('getAbsoluteLabelsRanking');
 
-  socket.on("labelsRanking", (labelsRanking: LabelRankingShort[]) => {
-    console.log("Received absolute labels ranking: ", labelsRanking);
-    console.log("Number of labels:", labelsRanking.length);
+  socket.on('labelsRanking', (labelsRanking: LabelRankingShort[]) => {
+    console.log('Received absolute labels ranking: ', labelsRanking);
+    console.log('Number of labels:', labelsRanking.length);
   });
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 export interface LabelRankingShort {
@@ -101,20 +101,20 @@ export interface LabelRankingShort {
  */
 export function startSandwichLabelOccurrencesClient(socket: Socket) {
   // request for sandwich label occurrences
-  socket.emit("getSandwichLabelOccurrences");
+  socket.emit('getSandwichLabelOccurrences');
 
-  socket.on("sandwichLabelOccurrences", (labelsOccurrence: LabelRankingExtended[]) => {
+  socket.on('sandwichLabelOccurrences', (sandwichLabelOccurrences: LabelRankingExtended[]) => {
     // console.log("Received sandwich label occurrences: ", labelsOccurrence);
     // console.log("Number of labels:", labelsOccurrence.length);
 
-    const bestPerforming = topBestPerformingLabels(labelsOccurrence);
-    console.log("Best performing labels: ", bestPerforming);
+    const bestPerforming = topBestPerformingLabels(sandwichLabelOccurrences);
+    console.log('Best performing labels: ', bestPerforming);
 
-    const worstPerforming = topWorstPerformingLabels(labelsOccurrence);
-    console.log("Worst performing labels: ", worstPerforming);
+    const worstPerforming = topWorstPerformingLabels(sandwichLabelOccurrences);
+    console.log('Worst performing labels: ', worstPerforming);
   });
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 export interface LabelRankingExtended {
   address: string;
@@ -125,13 +125,13 @@ export interface LabelRankingExtended {
 
 // Convert user input into pool-suggestions, returns ranked pool suggestions (Pool-Name and Pool-Address)
 export function startUserSearchClient(socket: Socket, userInput: string) {
-  socket.emit("getUserSearchResult", userInput);
+  socket.emit('getUserSearchResult', userInput);
 
-  socket.on("userSearchResult", (userSearchResult: UserSearchResult[]) => {
-    console.log("Received user search result: ", userSearchResult);
+  socket.on('userSearchResult', (userSearchResult: UserSearchResult[]) => {
+    console.log('Received user search result: ', userSearchResult);
   });
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 export interface UserSearchResult {
@@ -240,23 +240,23 @@ export interface UserSearchResult {
 }
  */
 export function startNewSandwichClient(socket: Socket) {
-  socket.on("NewSandwich", (sandwichDetails: SandwichDetail) => {
-    console.log("Received new sandwich");
+  socket.on('NewSandwich', (sandwichDetails: SandwichDetail) => {
+    console.log('Received new sandwich');
     console.dir(sandwichDetails, { depth: null, colors: true });
   });
 
-  socket.emit("connectToGeneralSandwichLivestream");
+  socket.emit('connectToGeneralSandwichLivestream');
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 // This function takes care of any connection or generic errors
 function handleErrors(socket: Socket, endpoint: string) {
-  socket.on("connect_error", (err: Error) => {
+  socket.on('connect_error', (err: Error) => {
     console.log(`Connection Error on ${endpoint}: ${err}`);
   });
 
-  socket.on("error", (err: Error) => {
+  socket.on('error', (err: Error) => {
     console.log(`Error on ${endpoint}: ${err}`);
   });
 }
@@ -265,26 +265,31 @@ function handleErrors(socket: Socket, endpoint: string) {
 // time periods: "1 day", "1 week", "1 month", "full"
 // 10 resuts per page
 export function startFullSandwichTableClient(socket: Socket, timeDuration: string, page: number) {
-  socket.emit("getFullSandwichTableContent", timeDuration, page);
+  socket.emit('getFullSandwichTableContent', timeDuration, page);
 
-  socket.on("fullSandwichTableContent", (fullTableContent: SandwichDetail[]) => {
-    console.log("Received full Sandwich-Table Content: ", fullTableContent);
+  socket.on('fullSandwichTableContent', (fullTableContent: SandwichDetail[]) => {
+    console.log('Received full Sandwich-Table Content: ', fullTableContent);
   });
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 // returns a list/table, of sandwiches in a given pool, for a given time period.
 // time periods: "1 day", "1 week", "1 month", "full"
 // 10 resuts per page
-export function startPoolSpecificSandwichTable(socket: Socket, poolAddress: string, timeDuration: string, page: number) {
-  socket.emit("getPoolSpecificSandwichTable", poolAddress, timeDuration, page);
+export function startPoolSpecificSandwichTable(
+  socket: Socket,
+  poolAddress: string,
+  timeDuration: string,
+  page: number
+) {
+  socket.emit('getPoolSpecificSandwichTable', poolAddress, timeDuration, page);
 
-  socket.on("SandwichTableContentForPool", (fullTableContent: SandwichDetail[]) => {
-    console.log("Received Pool specific Sandwich-Table: ", fullTableContent);
+  socket.on('SandwichTableContentForPool', (fullTableContent: SandwichDetail[]) => {
+    console.log('Received Pool specific Sandwich-Table: ', fullTableContent);
   });
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 // streams all tx in real-time
@@ -324,65 +329,70 @@ Example:
 }
 */
 export function startNewGeneralTxClient(socket: Socket) {
-  socket.on("NewGeneralTx", (enrichedTransaction: EnrichedTransactionDetail) => {
-    console.log("Received new General Tx");
+  socket.on('NewGeneralTx', (enrichedTransaction: EnrichedTransactionDetail) => {
+    console.log('Received new General Tx');
     console.dir(enrichedTransaction, { depth: null, colors: true });
   });
 
-  socket.emit("connectToGeneralTxLivestream");
+  socket.emit('connectToGeneralTxLivestream');
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 // returns a list/table, of swaps/deposits/withdrawals in a given pool, for a given time period.
 // time periods: "1 day", "1 week", "1 month", "full"
 // 10 resuts per page
-export function startPoolSpecificTransactionTable(socket: Socket, poolAddress: string, timeDuration: string, page: number) {
-  socket.emit("getPoolSpecificTransactionTable", poolAddress, timeDuration, page);
+export function startPoolSpecificTransactionTable(
+  socket: Socket,
+  poolAddress: string,
+  timeDuration: string,
+  page: number
+) {
+  socket.emit('getPoolSpecificTransactionTable', poolAddress, timeDuration, page);
 
-  socket.on("TransactionTableContentForPool", (transactionTableContentForPool: EnrichedTransactionDetail[]) => {
-    console.log("Received Pool specific Transaction-Table:");
+  socket.on('TransactionTableContentForPool', (transactionTableContentForPool: EnrichedTransactionDetail[]) => {
+    console.log('Received Pool specific Transaction-Table:');
     console.dir(transactionTableContentForPool, { depth: null, colors: true });
   });
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 export function startPoolLabel(socket: Socket, poolAddress: string) {
-  socket.emit("getPoolLabel", poolAddress);
+  socket.emit('getPoolLabel', poolAddress);
 
-  socket.on("poolLabel", (poolLabel: string) => {
+  socket.on('poolLabel', (poolLabel: string) => {
     console.log(`Do something with ${poolLabel}`);
   });
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 // connecting to atomic arb livestream:
 export function startNewAtomicArbClient(socket: Socket) {
-  socket.on("NewAtomicArb", (atomicArbDetails: TransactionDetailsForAtomicArbs) => {
-    console.log("Received new Atomic Arb");
+  socket.on('NewAtomicArb', (atomicArbDetails: TransactionDetailsForAtomicArbs) => {
+    console.log('Received new Atomic Arb');
     console.dir(atomicArbDetails, { depth: null, colors: true });
   });
 
-  socket.emit("connectToAtomicArbLivestream");
+  socket.emit('connectToAtomicArbLivestream');
 
-  handleErrors(socket, "/main");
+  handleErrors(socket, '/main');
 }
 
 export async function startTestClient() {
   const mainSocket = io(`${url}/main`);
   console.log(`connecting to ${url}/main`);
 
-  mainSocket.on("connect", () => {
-    console.log("connected");
+  mainSocket.on('connect', () => {
+    console.log('connected');
     // startPingClient(mainSocket);
     // startUserSearchClient(mainSocket, "crvu");
     // startAbsoluteLabelsRankingClient(mainSocket);
-    // startSandwichLabelOccurrencesClient(mainSocket);
+    startSandwichLabelOccurrencesClient(mainSocket);
     // startNewSandwichClient(mainSocket);
-    startFullSandwichTableClient(mainSocket, "full", 1);
-    // startPoolSpecificSandwichTable(mainSocket, "0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B", "1 week", 1);
+    // startFullSandwichTableClient(mainSocket, 'full', 1);
+    // startPoolSpecificSandwichTable(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 week', 1);
     // startNewGeneralTxClient(mainSocket);
     // startNewAtomicArbClient(mainSocket);
     // startPoolSpecificTransactionTable(mainSocket, "0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14", "1 day", 3);

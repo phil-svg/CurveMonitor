@@ -1,9 +1,9 @@
-import { getVersionBy, getInceptionBlockBy, getAllPoolIds, getAddressById } from "./readFunctions/Pools.js";
-import { getPastEvents, getBlockTimeStamp, WEB3_HTTP_PROVIDER } from "../web3Calls/generic.js";
-import { getAbiBy } from "./Abi.js";
-import { PoolParamsEvents } from "../../models/PoolParamsEvents.js";
-import { retry } from "../helperFunctions/Web3Retry.js";
-import { getLatestEventTimestampFromSubgraph } from "../subgraph/DaoSubgraph.js";
+import { getVersionBy, getInceptionBlockBy, getAllPoolIds, getAddressById } from './readFunctions/Pools.js';
+import { getPastEvents, getBlockTimeStamp, WEB3_HTTP_PROVIDER } from '../web3Calls/generic.js';
+import { getAbiBy } from './Abi.js';
+import { PoolParamsEvents } from '../../models/PoolParamsEvents.js';
+import { retry } from '../helperFunctions/Web3Retry.js';
+import { getLatestEventTimestampFromSubgraph } from '../subgraph/DaoSubgraph.js';
 async function addPoolParamsEvent(pool_id, log_index, event_name, raw_log, event_block, event_timestamp) {
     const newPoolParamsEvent = new PoolParamsEvents({
         pool_id,
@@ -34,10 +34,10 @@ async function handleEvent(poolId, eventName, EVENT) {
     const EVENT_BLOCK = EVENT.blockNumber;
     const EVENT_TIMESTAMP = await getBlockTimeStamp(EVENT_BLOCK);
     await addPoolParamsEvent(POOL_ID, LOG_INDEX, EVENT_NAME, RAW_LOG, EVENT_BLOCK, EVENT_TIMESTAMP);
-    console.log("saving", POOL_ID, LOG_INDEX);
+    console.log('saving', POOL_ID, LOG_INDEX);
 }
 function isEventInABI(abi, eventName) {
-    return abi.some((entry) => entry.type === "event" && entry.name === eventName);
+    return abi.some((entry) => entry.type === 'event' && entry.name === eventName);
 }
 async function handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, POTENTIAL_EVENTS) {
     const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(POOL_ABI, POOL_ADDRESS);
@@ -47,7 +47,7 @@ async function handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, POTE
     for (const EVENT_NAME of POTENTIAL_EVENTS) {
         if (!isEventInABI(POOL_ABI, EVENT_NAME))
             continue;
-        console.log("checking for", EVENT_NAME);
+        console.log('checking for', EVENT_NAME);
         const PAST_EVENTS = await retry(() => getPastEvents(CONTRACT, EVENT_NAME, startingBlock, CURRENT_BLOCK));
         if (!PAST_EVENTS)
             continue;
@@ -66,20 +66,26 @@ async function solveParamEvents(poolId, CURRENT_BLOCK) {
     const POOL_ADDRESS = await getAddressById(poolId);
     if (!POOL_ADDRESS)
         return;
-    const POOL_ABI = await getAbiBy("AbisPools", { id: poolId });
+    const POOL_ABI = await getAbiBy('AbisPools', { id: poolId });
     if (!POOL_ABI)
         return;
-    if (VERSION === "v1") {
-        await handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, ["NewFee", "RampA", "StopRampA", "NewParameters", "CommitNewParameters"]);
+    if (VERSION === 'v1') {
+        await handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, [
+            'NewFee',
+            'RampA',
+            'StopRampA',
+            'NewParameters',
+            'CommitNewParameters',
+        ]);
     }
-    else if (VERSION === "v2") {
-        await handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, ["NewParameters", "RampAgamma", "StopRampA"]);
+    else if (VERSION === 'v2') {
+        await handleVersion(poolId, POOL_ADDRESS, POOL_ABI, CURRENT_BLOCK, ['NewParameters', 'RampAgamma', 'StopRampA']);
     }
     await updateLastBlockChecked(poolId, CURRENT_BLOCK);
 }
 export async function updatePoolParamsEvents() {
     const latestEventTimestampFromSubgraph = Number(await getLatestEventTimestampFromSubgraph());
-    const LAST_BLOCK_CHECKED = (await PoolParamsEvents.min("last_block_checked"));
+    const LAST_BLOCK_CHECKED = (await PoolParamsEvents.min('last_block_checked'));
     const LAST_UNIXTIME_CHECKED = await getBlockTimeStamp(LAST_BLOCK_CHECKED);
     if (!LAST_UNIXTIME_CHECKED)
         return;
@@ -89,12 +95,12 @@ export async function updatePoolParamsEvents() {
         const CURRENT_BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlockNumber();
         let i = 1;
         for (const POOL_ID of ALL_POOL_IDS) {
-            console.log(i + "/" + ALL_POOL_IDS.length);
+            console.log(i + '/' + ALL_POOL_IDS.length);
             i++;
             await solveParamEvents(POOL_ID, CURRENT_BLOCK);
         }
     }
     console.log(`[✓] Table: Param | Parameter-Events synced successfully.`);
-    console.log("[✓] Syncing configs complete.");
+    console.log('[✓] Syncing configs complete.');
 }
 //# sourceMappingURL=PoolParamsEvents.js.map

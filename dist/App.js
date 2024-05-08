@@ -38,10 +38,8 @@ export async function initDatabase() {
 }
 // await initDatabase();
 // await updateProxiesFromManualList();
-startAPI();
 export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.
 // await research(); // opening function for queries for a bunch of statistics
-// await startTestClient();
 export async function main() {
     console.time('booting main');
     eventFlags.canEmitGeneralTx = false;
@@ -87,5 +85,7 @@ export async function main() {
     await checkWsConnectionViaNewBlocks(); // restarts main if WS dead for 30s.
     // process.exit();
 }
+startAPI();
+// await startTestClient();
 await main();
 //# sourceMappingURL=App.js.map

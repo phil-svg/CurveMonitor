@@ -1,14 +1,10 @@
-import { Sandwiches } from "../../../models/Sandwiches.js";
-import { TransactionDetail } from "../../Interfaces.js";
-import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
-import { getLabelNameFromAddress } from "./Labels.js";
-import { getAddressById } from "./Pools.js";
-import { getLossInUsdForSandwich } from "./Sandwiches.js";
-import { txDetailEnrichment } from "./TxDetailEnrichment.js";
-
-function shortenAddress(address: string): string {
-  return address.slice(0, 8) + ".." + address.slice(-6);
-}
+import { Sandwiches } from '../../../models/Sandwiches.js';
+import { TransactionDetail } from '../../Interfaces.js';
+import { getModifiedPoolName } from '../../api/utils/SearchBar.js';
+import { getLabelNameFromAddress } from './Labels.js';
+import { getAddressById } from './Pools.js';
+import { getLossInUsdForSandwich } from './Sandwiches.js';
+import { txDetailEnrichment } from './TxDetailEnrichment.js';
 
 export interface UserLossDetail {
   unit: string;
@@ -33,15 +29,15 @@ export async function SandwichDetailEnrichment(id: number): Promise<SandwichDeta
     where: { id },
   });
 
-  if (!sandwich) console.log("no sandwich");
+  if (!sandwich) console.log('no sandwich');
   if (!sandwich) return null;
 
   const frontrunTransaction = await txDetailEnrichment(sandwich.frontrun);
-  if (!frontrunTransaction) console.log("no frontrunTransaction");
+  if (!frontrunTransaction) console.log('no frontrunTransaction');
   if (!frontrunTransaction) return null;
 
   const backrunTransaction = await txDetailEnrichment(sandwich.backrun);
-  if (!backrunTransaction) console.log("no backrunTransaction");
+  if (!backrunTransaction) console.log('no backrunTransaction');
   if (!backrunTransaction) return null;
 
   let centerTransactions: TransactionDetail[] = [];
@@ -62,7 +58,7 @@ export async function SandwichDetailEnrichment(id: number): Promise<SandwichDeta
   }
 
   let label = await getLabelNameFromAddress(centerTransactions[0].called_contract_by_user);
-  if (!label || label.startsWith("Contract Address")) {
+  if (!label || label.startsWith('Contract Address')) {
     label = centerTransactions[0].called_contract_by_user;
   }
 
@@ -87,11 +83,17 @@ export async function SandwichDetailEnrichment(id: number): Promise<SandwichDeta
 
 export async function enrichSandwiches(sandwichIds: number[]): Promise<SandwichDetail[]> {
   const enrichedSandwiches: (SandwichDetail | null)[] = await chunkedAsync(sandwichIds, 10, SandwichDetailEnrichment);
-  const validSandwiches: SandwichDetail[] = enrichedSandwiches.filter((sandwich) => sandwich !== null) as SandwichDetail[];
+  const validSandwiches: SandwichDetail[] = enrichedSandwiches.filter(
+    (sandwich) => sandwich !== null
+  ) as SandwichDetail[];
   return validSandwiches;
 }
 
-export async function chunkedAsync<T, U>(arr: T[], concurrency: number, worker: (item: T) => Promise<U>): Promise<(U | null)[]> {
+export async function chunkedAsync<T, U>(
+  arr: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<U>
+): Promise<(U | null)[]> {
   const results: (U | null)[] = [];
   const queue = arr.slice();
 

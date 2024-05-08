@@ -1,8 +1,9 @@
-import { Op, Sequelize } from 'sequelize';
+import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { Pool } from '../../../models/Pools.js';
 import { findCoinAddressById, findCoinAddressesByIds } from './Coins.js';
 import { getLatestTransactionTimeForAllPools } from './Transactions.js';
 import { toChecksumAddress } from '../../helperFunctions/Web3.js';
+import { sequelize } from '../../../config/Database.js';
 
 export const getIdByAddress = async (poolAddress: string): Promise<number | null> => {
   try {
@@ -20,11 +21,49 @@ export const getIdByAddress = async (poolAddress: string): Promise<number | null
   }
 };
 
+interface PoolResult {
+  id: number;
+}
+
 export const getIdByAddressCaseInsensitive = async (poolAddress: string): Promise<number | null> => {
-  const pool = await Pool.findOne({
-    where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('address')), Sequelize.fn('lower', poolAddress)),
-  });
-  return pool ? pool.id : null;
+  const checksumAddress = toChecksumAddress(poolAddress);
+
+  const query = `
+    SELECT id
+    FROM pools
+    WHERE address = :checksumAddress
+    LIMIT 1;
+  `;
+
+  try {
+    const result: PoolResult[] = await sequelize.query(query, {
+      type: QueryTypes.SELECT,
+      raw: true,
+      replacements: { checksumAddress },
+    });
+
+    if (result.length === 0) {
+      const caseInsensitiveQuery = `
+        SELECT id
+        FROM pools
+        WHERE lower(address) = lower(:poolAddress)
+        LIMIT 1;
+      `;
+
+      const caseInsensitiveResult: PoolResult[] = await sequelize.query(caseInsensitiveQuery, {
+        type: QueryTypes.SELECT,
+        raw: true,
+        replacements: { poolAddress },
+      });
+
+      return caseInsensitiveResult.length > 0 ? caseInsensitiveResult[0].id : null;
+    }
+
+    return result.length > 0 ? result[0].id : null;
+  } catch (error) {
+    console.error('Error retrieving pool ID:', error);
+    return null;
+  }
 };
 
 export const getPoolBy = async (options: { id?: number; address?: string }): Promise<Pool | null> => {

@@ -1,5 +1,5 @@
-import fetch from "node-fetch";
-const API_URL = "https://api.binance.com";
+import fetch from 'node-fetch';
+const API_URL = 'https://api.binance.com';
 // Function to test connectivity
 export async function testConnectivity() {
     try {
@@ -7,7 +7,7 @@ export async function testConnectivity() {
         return response.ok;
     }
     catch (error) {
-        console.error("Error testing connectivity:", error);
+        console.error('Error testing connectivity:', error);
         return false;
     }
 }
@@ -19,7 +19,7 @@ export async function getServerTime() {
         return data.serverTime;
     }
     catch (error) {
-        console.error("Error fetching server time:", error);
+        console.error('Error fetching server time:', error);
         return null;
     }
 }
@@ -31,15 +31,15 @@ export async function getExchangeInfo() {
         return data;
     }
     catch (error) {
-        console.error("Error fetching exchange information:", error);
+        console.error('Error fetching exchange information:', error);
         return null;
     }
 }
 // Helper function to normalize token names to Binance symbols.
 function normalizeTokenName(name) {
     const map = {
-        WBTC: "BTC",
-        WETH: "ETH",
+        WBTC: 'BTC',
+        WETH: 'ETH',
         // Add more mappings if needed
     };
     return map[name] || name;
@@ -61,20 +61,20 @@ export async function getFlexibleSymbolForTradingPair(asset1, asset2) {
         const { symbols } = (await response.json());
         // Normalize asset names
         const normalizeAssetName = (name) => {
-            const map = { WBTC: "BTC", WETH: "ETH" };
+            const map = { WBTC: 'BTC', WETH: 'ETH' };
             return map[name] || name;
         };
         const normalizedAsset1 = normalizeAssetName(asset1.toUpperCase());
         let normalizedAsset2 = normalizeAssetName(asset2.toUpperCase());
         let matchingSymbol = symbols.find((symbolInfo) => ((symbolInfo.baseAsset === normalizedAsset1 && symbolInfo.quoteAsset === normalizedAsset2) ||
             (symbolInfo.baseAsset === normalizedAsset2 && symbolInfo.quoteAsset === normalizedAsset1)) &&
-            symbolInfo.status === "TRADING");
+            symbolInfo.status === 'TRADING');
         // Fallback to USDT if no symbol found and asset2 is USDC or DAI
-        if (!matchingSymbol && (normalizedAsset2 === "USDC" || normalizedAsset2 === "DAI")) {
-            normalizedAsset2 = "USDT";
+        if (!matchingSymbol && (normalizedAsset2 === 'USDC' || normalizedAsset2 === 'DAI')) {
+            normalizedAsset2 = 'USDT';
             matchingSymbol = symbols.find((symbolInfo) => ((symbolInfo.baseAsset === normalizedAsset1 && symbolInfo.quoteAsset === normalizedAsset2) ||
                 (symbolInfo.baseAsset === normalizedAsset2 && symbolInfo.quoteAsset === normalizedAsset1)) &&
-                symbolInfo.status === "TRADING");
+                symbolInfo.status === 'TRADING');
         }
         return matchingSymbol ? matchingSymbol.symbol : null;
     }
@@ -91,7 +91,7 @@ export async function fetchHistoricalKlines(symbol, startTime, endTime) {
         return data;
     }
     catch (error) {
-        console.error("Error fetching historical klines:", error);
+        console.error('Error fetching historical klines:', error);
         return null;
     }
 }
@@ -120,7 +120,7 @@ export async function getRecentBinanceTrades(symbol, limit = 1000) {
         return trades;
     }
     catch (error) {
-        console.error("Error fetching recent Binance trades:", error);
+        console.error('Error fetching recent Binance trades:', error);
         return [];
     }
 }
@@ -180,23 +180,24 @@ export function findMatchingTrade(trades, targetTimestamp, targetVolume, isOnCha
  * @returns A promise resolving to a matching Binance trade or null if no match is found.
  */
 export async function findBestMatchingBinanceTrade(enrichedTransaction) {
+    // console.log('enrichedTransaction', enrichedTransaction);
     const coinLeaving = enrichedTransaction.coins_leaving_wallet[0];
-    // console.log("coinLeaving", coinLeaving);
+    // console.log('coinLeaving', coinLeaving);
     const coinEntering = enrichedTransaction.coins_entering_wallet[0];
-    // console.log("coinEntering", coinEntering);
+    // console.log('coinEntering', coinEntering);
     const baseAsset = normalizeTokenName(coinLeaving.name);
-    // console.log("baseAsset", baseAsset);
+    // console.log('baseAsset', baseAsset);
     const quoteAsset = normalizeTokenName(coinEntering.name);
-    // console.log("quoteAsset", quoteAsset);
+    // console.log('quoteAsset', quoteAsset);
     try {
         const symbol = await getFlexibleSymbolForTradingPair(baseAsset, quoteAsset);
-        // console.log("symbol", symbol);
+        // console.log('symbol', symbol);
         if (!symbol) {
             console.log(`No symbol found for trading pair ${baseAsset}/${quoteAsset}`);
             return null;
         }
         const recentTrades = await getRecentBinanceTrades(symbol);
-        // console.log("recentTrades", recentTrades);
+        // console.log('recentTrades', recentTrades);
         const targetTimestamp = enrichedTransaction.block_unixtime * 1000;
         // On-chain transaction is a buy if the coin is entering the wallet
         const isOnChainBuy = coinEntering.name === baseAsset;
@@ -204,13 +205,14 @@ export async function findBestMatchingBinanceTrade(enrichedTransaction) {
         if (isOnChainBuy) {
             targetVolume = coinEntering.amount;
         }
-        // console.log("isOnChainBuy", isOnChainBuy);
+        // console.log('isOnChainBuy', isOnChainBuy);
         const matchingTrade = findMatchingTrade(recentTrades, targetTimestamp, targetVolume, isOnChainBuy);
-        // console.log("matchingTrade", matchingTrade);
+        // console.log('matchingTrade', matchingTrade);
+        // process.exit();
         return matchingTrade;
     }
     catch (err) {
-        // console.log("err in findBestMatchingBinanceTrade,")
+        // console.log('err in findBestMatchingBinanceTrade,');
         // most likely Error fetching symbol for trading pair ETH/LDO: Error: HTTP error! status: 451
         return null;
     }

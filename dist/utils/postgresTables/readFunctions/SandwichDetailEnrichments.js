@@ -1,28 +1,25 @@
-import { Sandwiches } from "../../../models/Sandwiches.js";
-import { getModifiedPoolName } from "../../api/utils/SearchBar.js";
-import { getLabelNameFromAddress } from "./Labels.js";
-import { getAddressById } from "./Pools.js";
-import { getLossInUsdForSandwich } from "./Sandwiches.js";
-import { txDetailEnrichment } from "./TxDetailEnrichment.js";
-function shortenAddress(address) {
-    return address.slice(0, 8) + ".." + address.slice(-6);
-}
+import { Sandwiches } from '../../../models/Sandwiches.js';
+import { getModifiedPoolName } from '../../api/utils/SearchBar.js';
+import { getLabelNameFromAddress } from './Labels.js';
+import { getAddressById } from './Pools.js';
+import { getLossInUsdForSandwich } from './Sandwiches.js';
+import { txDetailEnrichment } from './TxDetailEnrichment.js';
 export async function SandwichDetailEnrichment(id) {
     const sandwich = await Sandwiches.findOne({
         where: { id },
     });
     if (!sandwich)
-        console.log("no sandwich");
+        console.log('no sandwich');
     if (!sandwich)
         return null;
     const frontrunTransaction = await txDetailEnrichment(sandwich.frontrun);
     if (!frontrunTransaction)
-        console.log("no frontrunTransaction");
+        console.log('no frontrunTransaction');
     if (!frontrunTransaction)
         return null;
     const backrunTransaction = await txDetailEnrichment(sandwich.backrun);
     if (!backrunTransaction)
-        console.log("no backrunTransaction");
+        console.log('no backrunTransaction');
     if (!backrunTransaction)
         return null;
     let centerTransactions = [];
@@ -42,7 +39,7 @@ export async function SandwichDetailEnrichment(id) {
         }
     }
     let label = await getLabelNameFromAddress(centerTransactions[0].called_contract_by_user);
-    if (!label || label.startsWith("Contract Address")) {
+    if (!label || label.startsWith('Contract Address')) {
         label = centerTransactions[0].called_contract_by_user;
     }
     let poolAddress = await getAddressById(frontrunTransaction.pool_id);
