@@ -36,7 +36,9 @@ export async function getLabelsRankingDescendingAbsOccurrences() {
             type: QueryTypes.SELECT,
             raw: true,
         });
-        return labelsOccurrences;
+        // Convert occurrences to number
+        const formattedOccurrences = labelsOccurrences.map((item) => (Object.assign(Object.assign({}, item), { occurrences: Number(item.occurrences) })));
+        return formattedOccurrences;
     }
     catch (error) {
         console.error(`Error in getLabelsRankingDescendingAbsOccurrences: ${error}`);
@@ -66,7 +68,9 @@ export async function getSandwichLabelOccurrences() {
             type: QueryTypes.SELECT,
             raw: true,
         });
-        return labelsOccurrences;
+        // Convert occurrences to number
+        const formattedOccurrences = labelsOccurrences.map((item) => (Object.assign(Object.assign({}, item), { occurrences: Number(item.occurrences) })));
+        return formattedOccurrences;
     }
     catch (error) {
         console.error(`Error in getSandwichLabelOccurrences: ${error}`);

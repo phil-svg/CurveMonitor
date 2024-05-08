@@ -318,8 +318,8 @@ export async function startTestClient() {
         console.log('connected');
         // startPingClient(mainSocket);
         // startUserSearchClient(mainSocket, "crvu");
-        // startAbsoluteLabelsRankingClient(mainSocket);
-        startSandwichLabelOccurrencesClient(mainSocket);
+        startAbsoluteLabelsRankingClient(mainSocket);
+        // startSandwichLabelOccurrencesClient(mainSocket);
         // startNewSandwichClient(mainSocket);
         // startFullSandwichTableClient(mainSocket, 'full', 1);
         // startPoolSpecificSandwichTable(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 week', 1);

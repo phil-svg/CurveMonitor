@@ -52,7 +52,13 @@ export async function getLabelsRankingDescendingAbsOccurrences(): Promise<LabelO
       raw: true,
     });
 
-    return labelsOccurrences;
+    // Convert occurrences to number
+    const formattedOccurrences = labelsOccurrences.map((item) => ({
+      ...item,
+      occurrences: Number(item.occurrences),
+    }));
+
+    return formattedOccurrences;
   } catch (error) {
     console.error(`Error in getLabelsRankingDescendingAbsOccurrences: ${error}`);
     return null;
@@ -91,7 +97,13 @@ export async function getSandwichLabelOccurrences(): Promise<LabelOccurrence[] |
       raw: true,
     });
 
-    return labelsOccurrences;
+    // Convert occurrences to number
+    const formattedOccurrences = labelsOccurrences.map((item) => ({
+      ...item,
+      occurrences: Number(item.occurrences),
+    }));
+
+    return formattedOccurrences;
   } catch (error) {
     console.error(`Error in getSandwichLabelOccurrences: ${error}`);
     return null;
