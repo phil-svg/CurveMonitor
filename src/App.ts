@@ -34,6 +34,7 @@ import {
 } from './utils/goingLive/WebsocketConnectivityChecks.js';
 import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
+import { getCexDexArbDetailsFromTxId, getPoolSpecificCexDexArbTable } from './utils/api/queries/CexDexArbs.js';
 
 export async function initDatabase() {
   try {

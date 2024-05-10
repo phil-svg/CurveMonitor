@@ -1,22 +1,35 @@
-import { EnrichedCexDexDetails, EnrichedTransactionDetail, ReadableTokenTransfer } from "../../../../Interfaces.js";
-import { filterSmallAmountsFromCleanedTransfers, getCleanedTransfersForTxIdFromTable, getTransferArrLengthForTxId } from "../../../readFunctions/CleanedTransfers.js";
-import { isActuallyBackrun } from "../../../readFunctions/Sandwiches.js";
-import { extractTransactionAddresses, getToAddress, getTransactionDetails, getTransactionDetailsByTxId } from "../../../readFunctions/TransactionDetails.js";
-import { whitelistedAddress } from "./Constants.js";
-import { getTxHashByTxId, getUnixTimestampByTxId } from "../../../readFunctions/Transactions.js";
-import { readAbiFromAbisEthereumTable } from "../../../readFunctions/Abi.js";
-import { calculateGasInfo, getBlockBuilderAddress, getValidatorPayOff } from "../../atomic/utils/atomicArbDetection.js";
-import { getBribeInUSDfromTx } from "./revenueProfitThings/LowerBoundSolver.js";
-import { getEthPriceWithTimestampFromTable } from "../../../readFunctions/PriceMap.js";
-import { getNonceWithLimiter } from "../../../../web3Calls/generic.js";
-import { ETH_ADDRESS, WETH_ADDRESS } from "../../../../helperFunctions/Constants.js";
-import { getAllPoolAddresses } from "../../../readFunctions/Pools.js";
+import { EnrichedCexDexDetails, EnrichedTransactionDetail, ReadableTokenTransfer } from '../../../../Interfaces.js';
+import {
+  filterSmallAmountsFromCleanedTransfers,
+  getCleanedTransfersForTxIdFromTable,
+  getTransferArrLengthForTxId,
+} from '../../../readFunctions/CleanedTransfers.js';
+import { isActuallyBackrun } from '../../../readFunctions/Sandwiches.js';
+import {
+  extractTransactionAddresses,
+  getToAddress,
+  getTransactionDetails,
+  getTransactionDetailsByTxId,
+} from '../../../readFunctions/TransactionDetails.js';
+import { whitelistedAddress } from './Constants.js';
+import { getTxHashByTxId, getUnixTimestampByTxId } from '../../../readFunctions/Transactions.js';
+import { readAbiFromAbisEthereumTable } from '../../../readFunctions/Abi.js';
+import { calculateGasInfo, getBlockBuilderAddress, getValidatorPayOff } from '../../atomic/utils/atomicArbDetection.js';
+import { getBribeInUSDfromTx } from './revenueProfitThings/LowerBoundSolver.js';
+import { getEthPriceWithTimestampFromTable } from '../../../readFunctions/PriceMap.js';
+import { getNonceWithLimiter } from '../../../../web3Calls/generic.js';
+import { ETH_ADDRESS, WETH_ADDRESS } from '../../../../helperFunctions/Constants.js';
+import { getAllPoolAddresses } from '../../../readFunctions/Pools.js';
 
 function hasIllegalOutbound(from: string, to: string, cleanedTransfers: ReadableTokenTransfer[]): boolean {
   const lowerCaseFrom = from.toLowerCase();
   const lowerCaseTo = to.toLowerCase();
 
-  return cleanedTransfers.some((transfer) => transfer.from.toLowerCase() === lowerCaseFrom && (transfer.to.toLowerCase() !== lowerCaseTo || transfer.tokenSymbol !== "ETH"));
+  return cleanedTransfers.some(
+    (transfer) =>
+      transfer.from.toLowerCase() === lowerCaseFrom &&
+      (transfer.to.toLowerCase() !== lowerCaseTo || transfer.tokenSymbol !== 'ETH')
+  );
 }
 
 export function addressIsWhitelisted(to: string): boolean {
@@ -37,7 +50,7 @@ export async function isCexDexArbCandidate(txId: number, numOfTransfers: number)
   // Fetch transaction details
   const transactionDetails = await getTransactionDetails(txId);
   if (!transactionDetails) {
-    console.log("Transaction details are missing for txId", txId);
+    console.log('Transaction details are missing for txId', txId);
     return false;
   }
 
@@ -51,7 +64,7 @@ export async function isCexDexArbCandidate(txId: number, numOfTransfers: number)
   // Fetch cleaned transfers for the transaction
   const cleanedTransfers = await getCleanedTransfersForTxIdFromTable(txId);
   if (!cleanedTransfers) {
-    console.log("Cleaned transfers are missing for txId", txId);
+    console.log('Cleaned transfers are missing for txId', txId);
     return false;
   }
 
@@ -65,16 +78,21 @@ export async function isCexDexArbCandidate(txId: number, numOfTransfers: number)
       // Check if "to" either received ETH from "from" address or sent ETH to a leaf address
       return cleanedTransfers.some(
         (transfer) =>
-          transfer.tokenSymbol === "ETH" &&
+          transfer.tokenSymbol === 'ETH' &&
           ((transfer.from.toLowerCase() === from.toLowerCase() && transfer.to.toLowerCase() === to.toLowerCase()) ||
             (transfer.from.toLowerCase() === to.toLowerCase() && isLeafAddress(transfer.to, cleanedTransfers)))
       );
     case 4:
       // Check if the other two transfers are ETH, and one is sent to "to" from "from", and one is "to" sending ETH to leaf
-      const ethTransfers = cleanedTransfers.filter((transfer) => transfer.tokenSymbol === "ETH");
+      const ethTransfers = cleanedTransfers.filter((transfer) => transfer.tokenSymbol === 'ETH');
       return (
-        ethTransfers.some((transfer) => transfer.from.toLowerCase() === from.toLowerCase() && transfer.to.toLowerCase() === to.toLowerCase()) &&
-        ethTransfers.some((transfer) => transfer.from.toLowerCase() === to.toLowerCase() && isLeafAddress(transfer.to, cleanedTransfers))
+        ethTransfers.some(
+          (transfer) =>
+            transfer.from.toLowerCase() === from.toLowerCase() && transfer.to.toLowerCase() === to.toLowerCase()
+        ) &&
+        ethTransfers.some(
+          (transfer) => transfer.from.toLowerCase() === to.toLowerCase() && isLeafAddress(transfer.to, cleanedTransfers)
+        )
       );
     default:
       return false; // If none of the above cases match, return false
@@ -87,7 +105,9 @@ function removeEthWrapsAndUnwraps(cleanedTransfers: ReadableTokenTransfer[]): Re
 
   // Remove all transfers with from or to being WETH_ADDRESS
   const filteredTransfers = cleanedTransfers.filter(
-    (transfer) => transfer.from.toLowerCase() !== WETH_ADDRESS.toLowerCase() && transfer.to.toLowerCase() !== WETH_ADDRESS.toLowerCase()
+    (transfer) =>
+      transfer.from.toLowerCase() !== WETH_ADDRESS.toLowerCase() &&
+      transfer.to.toLowerCase() !== WETH_ADDRESS.toLowerCase()
   );
 
   // Convert remaining WETH transfers to ETH
@@ -95,7 +115,7 @@ function removeEthWrapsAndUnwraps(cleanedTransfers: ReadableTokenTransfer[]): Re
     if (transfer.tokenAddress.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
       return {
         ...transfer,
-        tokenSymbol: "ETH",
+        tokenSymbol: 'ETH',
         tokenAddress: ETH_ADDRESS,
       };
     } else {
@@ -118,13 +138,13 @@ function isLeafAddress(address: string, cleanedTransfers: ReadableTokenTransfer[
   return occurrences === 1;
 }
 
-export async function isCexDexArb(txId: number): Promise<boolean | "unable to fetch"> {
+export async function isCexDexArb(txId: number): Promise<boolean | 'unable to fetch'> {
   let numOfTransfers = await getTransferArrLengthForTxId(txId);
-  if (!numOfTransfers) return "unable to fetch";
+  if (!numOfTransfers) return 'unable to fetch';
 
   if (numOfTransfers < 10) {
     let cleanedTransfers = await getCleanedTransfersForTxIdFromTable(txId);
-    if (!cleanedTransfers) return "unable to fetch";
+    if (!cleanedTransfers) return 'unable to fetch';
     cleanedTransfers = filterSmallAmountsFromCleanedTransfers(cleanedTransfers);
     cleanedTransfers = removeEthWrapsAndUnwraps(cleanedTransfers);
     numOfTransfers = cleanedTransfers.length;
@@ -133,7 +153,7 @@ export async function isCexDexArb(txId: number): Promise<boolean | "unable to fe
   if (numOfTransfers > 4) return false;
 
   const to = await getToAddress(txId);
-  if (!to) return "unable to fetch";
+  if (!to) return 'unable to fetch';
 
   if (addressIsWhitelisted(to)) return false;
 
@@ -149,15 +169,17 @@ export async function isCexDexArb(txId: number): Promise<boolean | "unable to fe
   return true;
 }
 
-export async function getEnrichedCexDexDetails(enrichedTransaction: EnrichedTransactionDetail): Promise<EnrichedCexDexDetails | null> {
-  const eoaAddress = enrichedTransaction.from;
+export async function getEnrichedCexDexDetails(
+  enrichedTransaction: EnrichedTransactionDetail
+): Promise<EnrichedCexDexDetails | null> {
+  // const eoaAddress = enrichedTransaction.from;
   const txId = enrichedTransaction.tx_id;
 
-  const eoaNonce = await getNonceWithLimiter(eoaAddress);
-  if (!eoaNonce) {
-    console.log(`Unable to get EOA nonce in getNonceWithLimiter for address: ${eoaAddress}`);
-    return null;
-  }
+  // const eoaNonce = await getNonceWithLimiter(eoaAddress);
+  // if (!eoaNonce) {
+  //   console.log(`Unable to get EOA nonce in getNonceWithLimiter for address: ${eoaAddress}`);
+  //   return null;
+  // }
 
   const txHash = await getTxHashByTxId(txId);
   if (!txHash) {
@@ -165,11 +187,11 @@ export async function getEnrichedCexDexDetails(enrichedTransaction: EnrichedTran
     return null;
   }
 
-  const builder = await getBlockBuilderAddress(txHash);
-  if (!builder) {
-    console.log(`Unable to get block builder in getBlockBuilderFromFromAndTo for txId: ${txId}`);
-    return null;
-  }
+  // const builder = await getBlockBuilderAddress(txHash);
+  // if (!builder) {
+  //   console.log(`Unable to get block builder in getBlockBuilderFromFromAndTo for txId: ${txId}`);
+  //   return null;
+  // }
 
   const transactionDetails = await getTransactionDetailsByTxId(txId);
   if (!transactionDetails) {
@@ -190,12 +212,12 @@ export async function getEnrichedCexDexDetails(enrichedTransaction: EnrichedTran
     return null;
   }
 
-  const blockPayoutETH = await getValidatorPayOff(txHash);
-  if (!blockPayoutETH) {
-    console.log(`Unable to get validator payoff in getValidatorPayOff for txHash: ${txHash}`);
-    return null;
-  }
-  const blockPayoutUSD = blockPayoutETH * ethPriceAtThatTime;
+  // const blockPayoutETH = await getValidatorPayOff(txHash);
+  // if (!blockPayoutETH) {
+  //   console.log(`Unable to get validator payoff in getValidatorPayOff for txHash: ${txHash}`);
+  //   return null;
+  // }
+  // const blockPayoutUSD = blockPayoutETH * ethPriceAtThatTime;
 
   const gasCostUSD = ethPriceAtThatTime * gasCostETH;
 
@@ -212,10 +234,10 @@ export async function getEnrichedCexDexDetails(enrichedTransaction: EnrichedTran
 
   const enrichedCexDexDetails: EnrichedCexDexDetails = {
     ...enrichedTransaction,
-    builder: builder,
-    blockPayoutETH: blockPayoutETH,
-    blockPayoutUSD: blockPayoutUSD,
-    eoaNonce: eoaNonce,
+    //builder: builder,
+    // blockPayoutETH: blockPayoutETH,
+    // blockPayoutUSD: blockPayoutUSD,
+    // eoaNonce: eoaNonce,
     gasInGwei: gasInGwei,
     gasCostUSD: gasCostUSD,
     bribeInUSD: bribeInUSD,

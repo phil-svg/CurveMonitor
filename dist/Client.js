@@ -374,16 +374,16 @@ Example Response:
 Received full CexDex Arb-Table Content:
 Data: [
   {
-    tx_id: 4348610,
-    pool_id: 706,
-    event_id: 5389195,
-    tx_hash: '0xde4127aead4d4f426207af9face182d35ec00ba34ac93b45e8a759956a5ae57e',
-    block_number: 19835557,
-    block_unixtime: '1715294783',
+    tx_id: 4385866,
+    pool_id: 639,
+    event_id: 5394281,
+    tx_hash: '0x518640c442563a4d978fd619464d92e3d5a1762e1aa86d3daf32fc2e6ef0bb93',
+    block_number: 19841117,
+    block_unixtime: '1715361971',
     transaction_type: 'swap',
-    called_contract_by_user: '0x6F1cDbBb4d53d226CF4B917bF768B94acbAB6168',
-    trader: '0x152a04D9FdE2396C01c5F065a00BD5F6Edf5C88D',
-    tx_position: 0,
+    called_contract_by_user: '0x51C72848c68a965f66FA7a88855F9f7784502a7F',
+    trader: '0x867bDC57D1B071FE5A9F670Dd70b91E4269814D3',
+    tx_position: 14,
     coins_leaving_wallet: [
       {
         coin_id: 200,
@@ -400,19 +400,15 @@ Data: [
         address: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84'
       }
     ],
-    poolAddress: '0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14',
-    poolName: 'TriCRV',
-    calledContractLabel: '0x6F1cDbBb4d53d226CF4B917bF768B94acbAB6168',
-    from: '0x152a04D9FdE2396C01c5F065a00BD5F6Edf5C88D',
-    calledContractInceptionTimestamp: '1690212947',
-    isCalledContractFromCurve: false,
-    builder: '0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5',
-    blockPayoutETH: 0.03227339798674891,
-    blockPayoutUSD: 97.13324592071818,
-    eoaNonce: 13985,
-    gasInGwei: 25275312078,
-    gasCostUSD: 15.448596432162443,
-    bribeInUSD: 0
+    poolAddress: '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B',
+      poolName: 'TricryptoUSDC',
+      calledContractLabel: '0x51C72848c68a965f66FA7a88855F9f7784502a7F',
+      from: '0x867bDC57D1B071FE5A9F670Dd70b91E4269814D3',
+      calledContractInceptionTimestamp: '1692200591',
+      isCalledContractFromCurve: false,
+      gasInGwei: 24576345626,
+      gasCostUSD: 15.701148521178318,
+      bribeInUSD: 9.60234188155955
   },
   ...
 ]

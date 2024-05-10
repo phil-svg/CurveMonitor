@@ -322,10 +322,10 @@ export interface Subscription {
 }
 
 export interface EnrichedCexDexDetails extends TransactionDetail {
-  builder: string;
-  blockPayoutETH: number;
-  blockPayoutUSD: number;
-  eoaNonce: number;
+  // builder: string;
+  // blockPayoutETH: number;
+  // blockPayoutUSD: number;
+  // eoaNonce: number;
   gasInGwei: number;
   gasCostUSD: number;
   bribeInUSD: number;
