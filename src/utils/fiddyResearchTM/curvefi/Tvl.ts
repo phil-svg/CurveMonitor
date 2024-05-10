@@ -1,12 +1,12 @@
-import { Coins } from "../../../models/Coins.js";
-import { Pool } from "../../../models/Pools.js";
-import { convertDateToUnixTime } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { getAbiByForPools } from "../../postgresTables/Abi.js";
-import { getIdByAddress } from "../../postgresTables/readFunctions/Pools.js";
-import { findTransactionCoinsByTxIds } from "../../postgresTables/readFunctions/TransactionCoins.js";
-import { getBlockNumberFromTxId } from "../../postgresTables/readFunctions/Transactions.js";
-import { WEB3_HTTP_PROVIDER, web3Call } from "../../web3Calls/generic.js";
-import { fetchSortedTransactionIdsByDateAndPool } from "./PriceImpact.js";
+import { Coins } from '../../../models/Coins.js';
+import { Pool } from '../../../models/Pools.js';
+import { convertDateToUnixTime } from '../../helperFunctions/QualityOfLifeStuff.js';
+import { getAbiByForPools } from '../../postgresTables/Abi.js';
+import { getPoolIdByPoolAddress } from '../../postgresTables/readFunctions/Pools.js';
+import { findTransactionCoinsByTxIds } from '../../postgresTables/readFunctions/TransactionCoins.js';
+import { getBlockNumberFromTxId } from '../../postgresTables/readFunctions/Transactions.js';
+import { WEB3_HTTP_PROVIDER, web3Call } from '../../web3Calls/generic.js';
+import { fetchSortedTransactionIdsByDateAndPool } from './PriceImpact.js';
 
 export interface TVLChange {
   symbol: string;
@@ -17,22 +17,25 @@ export interface TVLChange {
   finalActualBalance?: number;
 }
 
-export async function getPoolTokenBalancesAtBlock(poolAddress: string, blockNumber: number): Promise<{ symbol: string; address: string; balance: number }[] | null> {
-  const poolId = await getIdByAddress(poolAddress);
+export async function getPoolTokenBalancesAtBlock(
+  poolAddress: string,
+  blockNumber: number
+): Promise<{ symbol: string; address: string; balance: number }[] | null> {
+  const poolId = await getPoolIdByPoolAddress(poolAddress);
   if (!poolId) {
-    console.log("Failed to Fetch Pool ID for", poolAddress);
+    console.log('Failed to Fetch Pool ID for', poolAddress);
     return null;
   }
 
   const pool = await Pool.findByPk(poolId);
   if (!pool || !pool.coins || pool.coins.length === 0) {
-    console.log("Pool not found or no coins associated with pool", poolAddress);
+    console.log('Pool not found or no coins associated with pool', poolAddress);
     return null;
   }
 
   const ABI = await getAbiByForPools({ id: poolId });
   if (!ABI) {
-    console.log("Failed to Fetch ABI for", poolAddress);
+    console.log('Failed to Fetch ABI for', poolAddress);
     return null;
   }
 
@@ -41,7 +44,7 @@ export async function getPoolTokenBalancesAtBlock(poolAddress: string, blockNumb
 
   for (let i = 0; i < pool.coins.length; i++) {
     const coinAddress = pool.coins[i];
-    const balance = await web3Call(CONTRACT, "balances", [i], blockNumber);
+    const balance = await web3Call(CONTRACT, 'balances', [i], blockNumber);
 
     // Fetch additional coin information from the Coins table
     const coinInfo = await Coins.findOne({ where: { address: coinAddress } });
@@ -75,7 +78,11 @@ export function getBlockNumberAtTime(unixtime: number): number {
   return estimatedBlockNumber;
 }
 
-export async function calculateTVLChangesOverTime(poolAddress: string, startDate: string, endDate: string): Promise<TVLChange[]> {
+export async function calculateTVLChangesOverTime(
+  poolAddress: string,
+  startDate: string,
+  endDate: string
+): Promise<TVLChange[]> {
   // Fetch sorted transaction IDs
   const sortedTxIds = await fetchSortedTransactionIdsByDateAndPool(poolAddress, startDate, endDate);
 
@@ -87,7 +94,7 @@ export async function calculateTVLChangesOverTime(poolAddress: string, startDate
   // Initial balances at the start
   const initialBalances = await getPoolTokenBalancesAtBlock(poolAddress, startBlockNumber!);
   if (!initialBalances) {
-    console.error("Failed to fetch initial token balances.");
+    console.error('Failed to fetch initial token balances.');
     return [];
   }
 
@@ -108,10 +115,10 @@ export async function calculateTVLChangesOverTime(poolAddress: string, startDate
       const tvlEntry = tvlChanges.find((entry) => entry.address === movement.coin.address);
       if (tvlEntry) {
         const amount = parseFloat(movement.amount);
-        if (movement.direction === "out") {
+        if (movement.direction === 'out') {
           tvlEntry.finalPredictedBalance += amount;
         }
-        if (movement.direction === "in") {
+        if (movement.direction === 'in') {
           tvlEntry.finalPredictedBalance -= amount;
         }
         tvlEntry.changes.push({ txId, newBalance: tvlEntry.finalPredictedBalance });
@@ -137,18 +144,18 @@ export async function calculateTVLChangesOverTime(poolAddress: string, startDate
 }
 
 export async function tvlThings(): Promise<void> {
-  const tricrypto2 = "0xd51a44d3fae010294c616388b506acda1bfaae46";
-  const tricryptoUSDT = "0xf5f5b97624542d72a9e06f04804bf81baa15e2b4";
-  const tricryptoUSDC = "0x7f86bf177dd4f3494b841a37e810a34dd56c829b";
+  const tricrypto2 = '0xd51a44d3fae010294c616388b506acda1bfaae46';
+  const tricryptoUSDT = '0xf5f5b97624542d72a9e06f04804bf81baa15e2b4';
+  const tricryptoUSDC = '0x7f86bf177dd4f3494b841a37e810a34dd56c829b';
 
   // const blockNumber = 19168868;
   // const poolTokenBalancesAtBlock = await getPoolTokenBalancesAtBlock(tricrypto2, blockNumber);
   // console.log("poolTokenBalancesAtBlock", poolTokenBalancesAtBlock);
 
   const poolAddress = tricryptoUSDT;
-  const startDate = "2024-01-15";
-  const endDate = "2024-01-22";
+  const startDate = '2024-01-15';
+  const endDate = '2024-01-22';
 
   const calculatedTVLChangesOverTime = await calculateTVLChangesOverTime(poolAddress, startDate, endDate);
-  console.log("calculatedTVLChangesOverTime", calculatedTVLChangesOverTime);
+  console.log('calculatedTVLChangesOverTime', calculatedTVLChangesOverTime);
 }

@@ -1,15 +1,15 @@
-import { Op } from "sequelize";
-import { Transactions } from "../../../models/Transactions.js";
-import { convertDateToUnixTime } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { getIdByAddress } from "../../postgresTables/readFunctions/Pools.js";
-import { findTransactionCoinsByTxIds } from "../../postgresTables/readFunctions/TransactionCoins.js";
-import { CoinMovement } from "../../Interfaces.js";
-import { getTransactionVolume } from "../utils/Volume.js";
-import { saveEnhancedSwapDetailsToExcel, savePriceImpactThingsToExcel } from "../utils/Excel.js";
-import { calculateTVLChangesOverTime } from "./Tvl.js";
-import { getTokenPriceWithTimestampFromDb } from "../../postgresTables/readFunctions/PriceMap.js";
-import { getUnixTimestampByTxId } from "../../postgresTables/readFunctions/Transactions.js";
-import { getCoinIdByAddress } from "../../postgresTables/readFunctions/Coins.js";
+import { Op } from 'sequelize';
+import { Transactions } from '../../../models/Transactions.js';
+import { convertDateToUnixTime } from '../../helperFunctions/QualityOfLifeStuff.js';
+import { getPoolIdByPoolAddress } from '../../postgresTables/readFunctions/Pools.js';
+import { findTransactionCoinsByTxIds } from '../../postgresTables/readFunctions/TransactionCoins.js';
+import { CoinMovement } from '../../Interfaces.js';
+import { getTransactionVolume } from '../utils/Volume.js';
+import { saveEnhancedSwapDetailsToExcel, savePriceImpactThingsToExcel } from '../utils/Excel.js';
+import { calculateTVLChangesOverTime } from './Tvl.js';
+import { getTokenPriceWithTimestampFromDb } from '../../postgresTables/readFunctions/PriceMap.js';
+import { getUnixTimestampByTxId } from '../../postgresTables/readFunctions/Transactions.js';
+import { getCoinIdByAddress } from '../../postgresTables/readFunctions/Coins.js';
 
 export interface SwapDetails {
   bought: string;
@@ -18,14 +18,18 @@ export interface SwapDetails {
   swapVolumeUSD: number;
 }
 
-export async function fetchSortedTransactionIdsByDateAndPool(poolAddress: string, startDate: string, endDate: string): Promise<number[]> {
+export async function fetchSortedTransactionIdsByDateAndPool(
+  poolAddress: string,
+  startDate: string,
+  endDate: string
+): Promise<number[]> {
   const startUnixtime = convertDateToUnixTime(startDate);
   const endUnixtime = convertDateToUnixTime(endDate);
 
   // Convert pool address to pool ID
-  const poolId = await getIdByAddress(poolAddress);
+  const poolId = await getPoolIdByPoolAddress(poolAddress);
   if (poolId === null) {
-    throw new Error("Pool not found for the given address");
+    throw new Error('Pool not found for the given address');
   }
 
   // Fetch transactions matching the poolId within the specified time range
@@ -38,10 +42,10 @@ export async function fetchSortedTransactionIdsByDateAndPool(poolAddress: string
       },
     },
     order: [
-      ["block_unixtime", "ASC"], // Sort by time first
-      ["tx_position", "ASC"], // Then by transaction position within the block
+      ['block_unixtime', 'ASC'], // Sort by time first
+      ['tx_position', 'ASC'], // Then by transaction position within the block
     ],
-    attributes: ["tx_id"], // Only fetch the transaction IDs
+    attributes: ['tx_id'], // Only fetch the transaction IDs
     raw: true,
   });
 
@@ -72,14 +76,25 @@ async function findConsecutiveTransactionPairsWithMatchingSwaps(sortedTxIds: num
       const nextMovements = movementsByTxId[nextTxId];
 
       // Extract coin_ids for "in" and "out" movements for comparison
-      const currentInCoins = currentMovements.filter((movement) => movement.direction === "in").map((movement) => movement.coin_id);
-      const currentOutCoins = currentMovements.filter((movement) => movement.direction === "out").map((movement) => movement.coin_id);
-      const nextInCoins = nextMovements.filter((movement) => movement.direction === "in").map((movement) => movement.coin_id);
-      const nextOutCoins = nextMovements.filter((movement) => movement.direction === "out").map((movement) => movement.coin_id);
+      const currentInCoins = currentMovements
+        .filter((movement) => movement.direction === 'in')
+        .map((movement) => movement.coin_id);
+      const currentOutCoins = currentMovements
+        .filter((movement) => movement.direction === 'out')
+        .map((movement) => movement.coin_id);
+      const nextInCoins = nextMovements
+        .filter((movement) => movement.direction === 'in')
+        .map((movement) => movement.coin_id);
+      const nextOutCoins = nextMovements
+        .filter((movement) => movement.direction === 'out')
+        .map((movement) => movement.coin_id);
 
       // Check for matching "in" coins and "out" coins between the two sets
-      const matchingInCoins = currentInCoins.every((coinId) => nextInCoins.includes(coinId)) && currentInCoins.length === nextInCoins.length;
-      const matchingOutCoins = currentOutCoins.every((coinId) => nextOutCoins.includes(coinId)) && currentOutCoins.length === nextOutCoins.length;
+      const matchingInCoins =
+        currentInCoins.every((coinId) => nextInCoins.includes(coinId)) && currentInCoins.length === nextInCoins.length;
+      const matchingOutCoins =
+        currentOutCoins.every((coinId) => nextOutCoins.includes(coinId)) &&
+        currentOutCoins.length === nextOutCoins.length;
 
       if (matchingInCoins && matchingOutCoins) {
         // If both "in" and "out" coins match between the two transactions, add this pair to the array
@@ -109,10 +124,10 @@ async function getSwapDetailsAndImpactForTxPairs(matchingTxIds: number[][]): Pro
     const movements1 = await findTransactionCoinsByTxIds([txId1]);
     const movements2 = await findTransactionCoinsByTxIds([txId2]);
 
-    const inMovement1 = movements1.find((movement) => movement.direction === "in");
-    const outMovement1 = movements1.find((movement) => movement.direction === "out");
-    const inMovement2 = movements2.find((movement) => movement.direction === "in");
-    const outMovement2 = movements2.find((movement) => movement.direction === "out");
+    const inMovement1 = movements1.find((movement) => movement.direction === 'in');
+    const outMovement1 = movements1.find((movement) => movement.direction === 'out');
+    const inMovement2 = movements2.find((movement) => movement.direction === 'in');
+    const outMovement2 = movements2.find((movement) => movement.direction === 'out');
 
     if (inMovement1 && outMovement1 && inMovement2 && outMovement2) {
       const priceBefore = Number(outMovement1.amount) / Number(inMovement1.amount);
@@ -141,7 +156,7 @@ function groupSwapsByTokenPairs(swaps: SwapDetails[]): { [pair: string]: SwapDet
 
   for (const swap of swaps) {
     const pairTokens = [swap.bought, swap.sold].sort(); // Sort the tokens alphabetically
-    const pairKey = pairTokens.join("-"); // Create the pair key
+    const pairKey = pairTokens.join('-'); // Create the pair key
 
     if (!groupedSwaps[pairKey]) {
       groupedSwaps[pairKey] = [];
@@ -158,7 +173,7 @@ function groupEnhancedSwapsByTokenPairs(swaps: EnhancedSwapDetail[]): { [pair: s
 
   swaps.forEach((swap) => {
     const pairTokens = [swap.bought, swap.sold].sort(); // Sort the tokens alphabetically
-    const pairKey = pairTokens.join("-");
+    const pairKey = pairTokens.join('-');
     if (!groupedSwaps[pairKey]) {
       groupedSwaps[pairKey] = [];
     }
@@ -168,7 +183,9 @@ function groupEnhancedSwapsByTokenPairs(swaps: EnhancedSwapDetail[]): { [pair: s
   return groupedSwaps;
 }
 
-function removeBoughtSoldProperties(groupedSwaps: { [pair: string]: SwapDetails[] }): { [pair: string]: { priceImpactInPercentage: number; swapVolumeUSD: number }[] } {
+function removeBoughtSoldProperties(groupedSwaps: { [pair: string]: SwapDetails[] }): {
+  [pair: string]: { priceImpactInPercentage: number; swapVolumeUSD: number }[];
+} {
   const modifiedSwaps: { [pair: string]: { priceImpactInPercentage: number; swapVolumeUSD: number }[] } = {};
 
   for (const pairKey in groupedSwaps) {
@@ -187,7 +204,9 @@ function removeBoughtSoldProperties(groupedSwaps: { [pair: string]: SwapDetails[
 function removeBoughtSoldPropertiesFromEnhanced(groupedSwaps: { [pair: string]: EnhancedSwapDetail[] }): {
   [pair: string]: { priceImpactInPercentage: number; swapVolumeUSD: number; tvlPercentage: number }[];
 } {
-  const modifiedSwaps: { [pair: string]: { priceImpactInPercentage: number; swapVolumeUSD: number; tvlPercentage: number }[] } = {};
+  const modifiedSwaps: {
+    [pair: string]: { priceImpactInPercentage: number; swapVolumeUSD: number; tvlPercentage: number }[];
+  } = {};
 
   Object.entries(groupedSwaps).forEach(([pairKey, swaps]) => {
     modifiedSwaps[pairKey] = swaps.map(({ priceImpactInPercentage, swapVolumeUSD, tvlPercentage }) => ({
@@ -205,7 +224,11 @@ interface EnhancedSwapDetail extends SwapDetail {
   totalTvlUsdAtSwap: number;
 }
 
-async function calculateSwapImpactIncludingTVL(poolAddress: string, startDate: string, endDate: string): Promise<EnhancedSwapDetail[]> {
+async function calculateSwapImpactIncludingTVL(
+  poolAddress: string,
+  startDate: string,
+  endDate: string
+): Promise<EnhancedSwapDetail[]> {
   const sortedTxIds = await fetchSortedTransactionIdsByDateAndPool(poolAddress, startDate, endDate);
   const matchingTxIds = await findConsecutiveTransactionPairsWithMatchingSwaps(sortedTxIds);
   const priceImpactTxs = await getSwapDetailsAndImpactForTxPairs(matchingTxIds);
@@ -222,7 +245,8 @@ async function calculateSwapImpactIncludingTVL(poolAddress: string, startDate: s
         for (const tvlChange of tvlChanges) {
           const coinId = await getCoinIdByAddress(tvlChange.address);
           const price = await getTokenPriceWithTimestampFromDb(coinId!, unixtime);
-          const balanceAtTx = tvlChange.changes.find((change) => change.txId === swapDetail.txId)?.newBalance || tvlChange.startBalance;
+          const balanceAtTx =
+            tvlChange.changes.find((change) => change.txId === swapDetail.txId)?.newBalance || tvlChange.startBalance;
           totalTvlUsdAtSwap += price ? balanceAtTx * price : 0;
         }
       }
@@ -241,18 +265,18 @@ async function calculateSwapImpactIncludingTVL(poolAddress: string, startDate: s
 }
 
 export async function priceImpactThings(): Promise<void> {
-  const tricrypto2 = "0xd51a44d3fae010294c616388b506acda1bfaae46";
-  const tricryptoUSDT = "0xf5f5b97624542d72a9e06f04804bf81baa15e2b4";
-  const tricryptoUSDC = "0x7f86bf177dd4f3494b841a37e810a34dd56c829b";
+  const tricrypto2 = '0xd51a44d3fae010294c616388b506acda1bfaae46';
+  const tricryptoUSDT = '0xf5f5b97624542d72a9e06f04804bf81baa15e2b4';
+  const tricryptoUSDC = '0x7f86bf177dd4f3494b841a37e810a34dd56c829b';
 
   const poolAddress = tricryptoUSDC;
-  const startDate = "2024-01-15";
-  const endDate = "2024-01-22";
+  const startDate = '2024-01-15';
+  const endDate = '2024-01-22';
 
   const calculatedSwapImpactIncludingTVL = await calculateSwapImpactIncludingTVL(poolAddress, startDate, endDate);
   // console.log("calculatedSwapImpactIncludingTVL", calculatedSwapImpactIncludingTVL);
   const groupedSwaps = groupEnhancedSwapsByTokenPairs(calculatedSwapImpactIncludingTVL);
   const sortedGroupedSwaps = removeBoughtSoldPropertiesFromEnhanced(groupedSwaps);
-  saveEnhancedSwapDetailsToExcel(sortedGroupedSwaps, "tricryptoUSDC.xlsx");
-  console.log("done");
+  saveEnhancedSwapDetailsToExcel(sortedGroupedSwaps, 'tricryptoUSDC.xlsx');
+  console.log('done');
 }

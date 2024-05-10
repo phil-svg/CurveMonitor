@@ -1,14 +1,14 @@
-import { Socket } from "socket.io";
-import { getSandwichLabelOccurrences } from "../../queries/query_sandwiches.js";
+import { Socket } from 'socket.io';
+import { getSandwichLabelOccurrences } from '../../queries/Sandwiches.js';
 
 export const handleSandwichLabelOccurrencesRoom = (socket: Socket) => {
-  socket.on("getSandwichLabelOccurrences", async () => {
+  socket.on('getSandwichLabelOccurrences', async () => {
     try {
       const labelsOccurrence = await getSandwichLabelOccurrences();
-      socket.emit("sandwichLabelOccurrences", labelsOccurrence);
+      socket.emit('sandwichLabelOccurrences', labelsOccurrence);
     } catch (error) {
       console.error(error);
-      socket.emit("error", "Internal Server Error");
+      socket.emit('error', 'Internal Server Error');
     }
   });
 };

@@ -1,11 +1,11 @@
 import { convertDateToUnixTime } from '../../helperFunctions/QualityOfLifeStuff.js';
-import { getAllPoolIds, getIdByAddress, getPoolsBySourceAddress } from '../../postgresTables/readFunctions/Pools.js';
+import { getAllPoolIds, getPoolIdByPoolAddress, getPoolsBySourceAddress, } from '../../postgresTables/readFunctions/Pools.js';
 import { saveJsonToExcel } from '../utils/Excel.js';
 import { calculateDailySandwichVolumes, calculateDailyVolumes, calculateDailyAtomicArbVolumes, calculateDailyCexDexArbVolumes, formatVolumeDataToJson, } from '../utils/Volume.js';
 export async function generateVolumeReportForSinglePool(poolAddress, startDate, endDate) {
     const startUnixTime = new Date(startDate).getTime() / 1000;
     const endUnixTime = new Date(endDate).getTime() / 1000;
-    const poolId = await getIdByAddress(poolAddress);
+    const poolId = await getPoolIdByPoolAddress(poolAddress);
     if (!poolId) {
         console.log('could not find poolId for', poolAddress, 'in generateVolumeReportForSinglePool');
         return;
@@ -47,7 +47,7 @@ export async function generateVolumeReportForPoolArr(startDate, endDate) {
     for (const poolAddress of poolArr) {
         poolCounter++;
         console.log(poolCounter, poolArr.length);
-        const poolId = await getIdByAddress(poolAddress);
+        const poolId = await getPoolIdByPoolAddress(poolAddress);
         if (!poolId) {
             console.log(`Could not find poolId for ${poolAddress} in generateVolumeReportForPoolArr`);
             continue;

@@ -1,11 +1,19 @@
 import { io, Socket } from 'socket.io-client';
 import { topBestPerformingLabels, topWorstPerformingLabels } from './utils/helperFunctions/Client.js';
-import { SandwichDetail } from './utils/postgresTables/readFunctions/SandwichDetailEnrichments.js';
-import { EnrichedTransactionDetail, TransactionDetailsForAtomicArbs } from './utils/Interfaces.js';
+import {
+  SandwichDetail,
+  SandwichTableContent,
+} from './utils/postgresTables/readFunctions/SandwichDetailEnrichments.js';
+import {
+  AtomicArbTableContent,
+  CexDexArbTableContent,
+  EnrichedTransactionDetail,
+  TransactionDetailsForAtomicArbs,
+} from './utils/Interfaces.js';
 
 // Replace with "wss://api.curvemonitor.com" for production
 const url = 'http://localhost:443';
-// const url = "wss://api.curvemonitor.com";
+// const url = 'wss://api.curvemonitor.com';
 
 /**
  *
@@ -261,14 +269,17 @@ function handleErrors(socket: Socket, endpoint: string) {
   });
 }
 
-// returns a list/table, of all sandwiches, of all pools, for a given time period.
+// returns a list/table, of all sandwiches, for all pools, for a given time period.
 // time periods: "1 day", "1 week", "1 month", "full"
 // 10 resuts per page
+// returns the total number of found sandwiches for the pool and time period
 export function startFullSandwichTableClient(socket: Socket, timeDuration: string, page: number) {
   socket.emit('getFullSandwichTableContent', timeDuration, page);
 
-  socket.on('fullSandwichTableContent', (fullTableContent: SandwichDetail[]) => {
-    console.log('Received full Sandwich-Table Content: ', fullTableContent);
+  socket.on('fullSandwichTableContent', (fullTableContent: SandwichTableContent) => {
+    console.log('Received full Sandwich-Table Content:');
+    console.log('Data:', fullTableContent.data);
+    console.log('Total Sandwiches:', fullTableContent.totalSandwiches);
   });
 
   handleErrors(socket, '/main');
@@ -277,6 +288,7 @@ export function startFullSandwichTableClient(socket: Socket, timeDuration: strin
 // returns a list/table, of sandwiches in a given pool, for a given time period.
 // time periods: "1 day", "1 week", "1 month", "full"
 // 10 resuts per page
+// returns the total number of found sandwiches for the pool and time period
 export function startPoolSpecificSandwichTable(
   socket: Socket,
   poolAddress: string,
@@ -285,8 +297,10 @@ export function startPoolSpecificSandwichTable(
 ) {
   socket.emit('getPoolSpecificSandwichTable', poolAddress, timeDuration, page);
 
-  socket.on('SandwichTableContentForPool', (fullTableContent: SandwichDetail[]) => {
-    console.log('Received Pool specific Sandwich-Table: ', fullTableContent);
+  socket.on('SandwichTableContentForPool', (fullTableContent: SandwichTableContent) => {
+    console.log('Received Pool specific Sandwich-Table:');
+    console.log('Data:', fullTableContent.data);
+    console.log('Total Sandwiches:', fullTableContent.totalSandwiches);
   });
 
   handleErrors(socket, '/main');
@@ -380,22 +394,183 @@ export function startNewAtomicArbClient(socket: Socket) {
   handleErrors(socket, '/main');
 }
 
+/*
+Example Response:
+Data: [
+  {
+    tx_id: 4338552,
+    pool_id: 687,
+    event_id: 5387558,
+    tx_hash: '0x66d717f0f06ccda8a5a5e1ae646dc078b0856c477406a6c8d41e6bd9c1ef0d92',
+    block_number: 19833834,
+    block_unixtime: '1715273939',
+    transaction_type: 'swap',
+    trader: '0x00000000009E50a7dDb7a7B0e2ee6604fd120E49',
+    tx_position: 11,
+    raw_fees: null,
+    fee_usd: null,
+    value_usd: null,
+    createdAt: '2024-05-09T16:59:03.065Z',
+    updatedAt: '2024-05-09T16:59:03.065Z',
+    revenue: 19.93,
+    gasInUsd: 19.51,
+    gasInGwei: 8.164614414,
+    netWin: 0.41,
+    bribe: 0,
+    totalCost: 19.51,
+    blockBuilder: null,
+    validatorPayOffUSD: null
+  },
+  {...},
+  ...
+]
+Total Atomic Arbitrages: 458
+*/
+export function startFullAtomicArbTableClient(socket: Socket, timeDuration: string, page: number) {
+  socket.emit('getFullAtomicArbTableContent', timeDuration, page);
+
+  socket.on('fullAtomicArbTableContent', (fullTableContent: AtomicArbTableContent) => {
+    console.log('Received full Atomic Arb-Table Content:');
+    console.log('Data:', fullTableContent.data);
+    console.log('Total Atomic Arbitrages:', fullTableContent.totalNumberOfAtomicArbs);
+  });
+
+  handleErrors(socket, '/main');
+}
+
+// *see info at startFullAtomicArbTableClient. Identical response, just for a specific pool.
+export function startPoolSpecificAtomicArbTableClient(
+  socket: Socket,
+  poolAddress: string,
+  timeDuration: string,
+  page: number
+) {
+  socket.emit('getPoolSpecificAtomicArbTable', poolAddress, timeDuration, page);
+
+  socket.on('poolSpecificAtomicArbTableContent', (atomicArbTableContentForPool: AtomicArbTableContent) => {
+    console.log('Received Pool specific Atomic Arb-Table:');
+    console.log('Data:', atomicArbTableContentForPool.data);
+    console.log('Total Atomic Arbitrages:', atomicArbTableContentForPool.totalNumberOfAtomicArbs);
+  });
+
+  handleErrors(socket, '/main');
+}
+
+/*
+Example Response:
+*note: coin values in this example are made up, but structure is accurate. 
+Received full CexDex Arb-Table Content:
+Data: [
+  {
+    tx_id: 4348610,
+    pool_id: 706,
+    event_id: 5389195,
+    tx_hash: '0xde4127aead4d4f426207af9face182d35ec00ba34ac93b45e8a759956a5ae57e',
+    block_number: 19835557,
+    block_unixtime: '1715294783',
+    transaction_type: 'swap',
+    called_contract_by_user: '0x6F1cDbBb4d53d226CF4B917bF768B94acbAB6168',
+    trader: '0x152a04D9FdE2396C01c5F065a00BD5F6Edf5C88D',
+    tx_position: 0,
+    coins_leaving_wallet: [
+      {
+        coin_id: 200,
+        amount: '55.000000000000000',
+        name: 'ETH',
+        address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+      }
+    ],
+    coins_entering_wallet: [
+      {
+        coin_id: 96,
+        amount: '55.004610511990260',
+        name: 'stETH',
+        address: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84'
+      }
+    ],
+    poolAddress: '0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14',
+    poolName: 'TriCRV',
+    calledContractLabel: '0x6F1cDbBb4d53d226CF4B917bF768B94acbAB6168',
+    from: '0x152a04D9FdE2396C01c5F065a00BD5F6Edf5C88D',
+    calledContractInceptionTimestamp: '1690212947',
+    isCalledContractFromCurve: false,
+    builder: '0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5',
+    blockPayoutETH: 0.03227339798674891,
+    blockPayoutUSD: 97.13324592071818,
+    eoaNonce: 13985,
+    gasInGwei: 25275312078,
+    gasCostUSD: 15.448596432162443,
+    bribeInUSD: 0
+  },
+  ...
+]
+Total CexDex Arbitrages: 926
+*/
+export function startFullCexDexArbTableClient(socket: Socket, timeDuration: string, page: number) {
+  socket.emit('getFullCexDexArbTableContent', timeDuration, page);
+
+  socket.on('fullCexDexArbTableContent', (fullTableContent: CexDexArbTableContent) => {
+    console.log('Received full CexDex Arb-Table Content:');
+    console.log('Data:', fullTableContent.data);
+    console.log('Total CexDex Arbitrages:', fullTableContent.totalNumberOfCexDexArbs);
+  });
+
+  handleErrors(socket, '/main');
+}
+
+// *see info at startFullCexDexArbTableClient. Identical response, just for a specific pool.
+export function startPoolSpecificCexDexArbTableClient(
+  socket: Socket,
+  poolAddress: string,
+  timeDuration: string,
+  page: number
+) {
+  socket.emit('getPoolSpecificCexDexArbTable', poolAddress, timeDuration, page);
+
+  socket.on('poolSpecificCexDexArbTableContent', (cexDexArbTableContentForPool: CexDexArbTableContent) => {
+    console.log('Received Pool specific CexDex Arb-Table:');
+    console.log('Data:', cexDexArbTableContentForPool.data);
+    console.log('Total CexDex Arbitrages:', cexDexArbTableContentForPool.totalNumberOfCexDexArbs);
+  });
+}
+
 export async function startTestClient() {
   const mainSocket = io(`${url}/main`);
   console.log(`connecting to ${url}/main`);
 
   mainSocket.on('connect', () => {
     console.log('connected');
+
+    //  *************** GENERAL STUFF ***************
     // startPingClient(mainSocket);
-    // startUserSearchClient(mainSocket, "crvu");
-    startAbsoluteLabelsRankingClient(mainSocket);
-    // startSandwichLabelOccurrencesClient(mainSocket);
-    // startNewSandwichClient(mainSocket);
-    // startFullSandwichTableClient(mainSocket, 'full', 1);
-    // startPoolSpecificSandwichTable(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 week', 1);
-    // startNewGeneralTxClient(mainSocket);
-    // startNewAtomicArbClient(mainSocket);
-    // startPoolSpecificTransactionTable(mainSocket, "0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14", "1 day", 3);
+    // startUserSearchClient(mainSocket, 'crvu');
     // startPoolLabel(mainSocket, "0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2");
+
+    // *************** MEV **************************
+
+    // *** sammich ***
+
+    // startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
+    // startAbsoluteLabelsRankingClient(mainSocket); // (All Pools)
+    // startSandwichLabelOccurrencesClient(mainSocket); // (All Pools)
+
+    // startNewSandwichClient(mainSocket); // (All Pools, live-feed)
+
+    // startPoolSpecificSandwichTable(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 week', 1); // (Pool Specific)
+
+    // *** atomic ***
+    // startFullAtomicArbTableClient(mainSocket, '1 day', 1); // (All Pools)
+    // startPoolSpecificAtomicArbTableClient(mainSocket, '0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14', '1 day', 1); // (Pool Specific)
+
+    // startNewAtomicArbClient(mainSocket); // (All Pools, live-feed)
+
+    // *** cex ***
+    // startFullCexDexArbTableClient(mainSocket, '1 day', 1); // (All Pools)
+    startPoolSpecificCexDexArbTableClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', 1); // (Pool Specific)
+
+    // *************** NOT MEV ********************
+
+    // startNewGeneralTxClient(mainSocket); // (All Pools, live-feed)
+    // startPoolSpecificTransactionTable(mainSocket, '0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14', '1 day', 3); // (Pool Specific)
   });
 }

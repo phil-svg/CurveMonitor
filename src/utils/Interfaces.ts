@@ -1,4 +1,4 @@
-import { TransactionData, TransactionType } from "../models/Transactions.js";
+import { TransactionData, TransactionType } from '../models/Transactions.js';
 
 export interface EventObject {
   address: string;
@@ -31,7 +31,7 @@ export interface CoinMovement {
   tx_id: number;
   coin_id: number;
   amount: string;
-  direction: "in" | "out";
+  direction: 'in' | 'out';
   coin: Coin;
 }
 
@@ -79,7 +79,7 @@ export interface TransactionCoinRecord {
   coin_id: number;
   amount: number;
   dollar_value?: number | null;
-  direction: "in" | "out";
+  direction: 'in' | 'out';
   coin_symbol: string | null;
 }
 
@@ -88,7 +88,7 @@ export interface TransactionCoin {
   coin_id: number;
   amount: string;
   dollar_value: null | string;
-  direction: "in" | "out";
+  direction: 'in' | 'out';
   coin_symbol: string | null;
 }
 
@@ -160,7 +160,7 @@ export interface TransferEvent {
   token: string;
 }
 
-export type CoinProperty = "address" | "symbol" | "decimals";
+export type CoinProperty = 'address' | 'symbol' | 'decimals';
 
 export interface FormattedArbitrageResult {
   extractedValue: Array<{
@@ -174,14 +174,14 @@ export interface FormattedArbitrageResult {
         symbol: string;
         amount: number;
       }
-    | "unknown";
+    | 'unknown';
   netWin:
     | Array<{
         address: string;
         symbol: string;
         amount: number;
       }>
-    | "unknown";
+    | 'unknown';
   txGas: {
     gasUsed: number;
     gasPrice: number;
@@ -275,12 +275,12 @@ export type ParsedEvent = {
 
 export interface USDValuedArbitrageResult {
   ethPrice: number | null;
-  bribeInETH: number | "unknown";
-  bribeInUSD: number | "unknown";
-  fullCostETH: number | "unknown";
-  fullCostUSD: number | "unknown";
-  extractedValue: Array<{ address: string; symbol: string; amount: number; amountInUSD: number }> | "unknown";
-  netWin: Array<{ address: string; symbol: string; amount: number; amountInUSD: number }> | "unknown";
+  bribeInETH: number | 'unknown';
+  bribeInUSD: number | 'unknown';
+  fullCostETH: number | 'unknown';
+  fullCostUSD: number | 'unknown';
+  extractedValue: Array<{ address: string; symbol: string; amount: number; amountInUSD: number }> | 'unknown';
+  netWin: Array<{ address: string; symbol: string; amount: number; amountInUSD: number }> | 'unknown';
   txGas: {
     gasUsed: number;
     gasPrice: number;
@@ -291,11 +291,11 @@ export interface USDValuedArbitrageResult {
 }
 
 export interface ProfitDetails {
-  netWin: number | "unknown";
-  revenue: number | "unknown";
-  bribe: number | "unknown";
+  netWin: number | 'unknown';
+  revenue: number | 'unknown';
+  bribe: number | 'unknown';
   gas: number;
-  totalCost: number | "unknown";
+  totalCost: number | 'unknown';
   gasInGwei: number | null;
   blockBuilder: string | null;
 }
@@ -311,6 +311,11 @@ export interface TransactionDetailsForAtomicArbs extends EnrichedTransactionDeta
   validatorPayOffUSD: number | null;
 }
 
+export interface AtomicArbTableContent {
+  data: TransactionDetailsForAtomicArbs[];
+  totalNumberOfAtomicArbs: number;
+}
+
 export interface Subscription {
   unsubscribe: (callback: (error: any, success: any) => void) => void;
   connection?: { readyState: number };
@@ -324,4 +329,9 @@ export interface EnrichedCexDexDetails extends TransactionDetail {
   gasInGwei: number;
   gasCostUSD: number;
   bribeInUSD: number;
+}
+
+export interface CexDexArbTableContent {
+  data: EnrichedCexDexDetails[];
+  totalNumberOfCexDexArbs: number;
 }

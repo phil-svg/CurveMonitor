@@ -4,7 +4,7 @@ import { findCoinAddressById, findCoinAddressesByIds } from './Coins.js';
 import { getLatestTransactionTimeForAllPools } from './Transactions.js';
 import { toChecksumAddress } from '../../helperFunctions/Web3.js';
 import { sequelize } from '../../../config/Database.js';
-export const getIdByAddress = async (poolAddress) => {
+export const getPoolIdByPoolAddress = async (poolAddress) => {
     try {
         const checksumAddress = toChecksumAddress(poolAddress);
         const pool = await Pool.findOne({
@@ -295,7 +295,7 @@ export async function getPoolsBySourceAddress(poolSourceAddress) {
 }
 export async function getPoolIdsByAddresses(poolAddresses) {
     const poolIdsPromises = poolAddresses.map(async (address) => {
-        return await getIdByAddress(address);
+        return await getPoolIdByPoolAddress(address);
     });
     const poolIds = await Promise.all(poolIdsPromises);
     return poolIds;
@@ -303,7 +303,7 @@ export async function getPoolIdsByAddresses(poolAddresses) {
 export async function getPoolIdsFromPoolAddresses(poolAddresses) {
     const res = [];
     for (const poolAddress of poolAddresses) {
-        const poolId = await getIdByAddress(poolAddress);
+        const poolId = await getPoolIdByPoolAddress(poolAddress);
         if (!poolId)
             continue;
         res.push(poolId);

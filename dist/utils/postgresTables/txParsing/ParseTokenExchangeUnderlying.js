@@ -1,6 +1,6 @@
 import { saveCoins, saveTransaction } from './ParsingHelper.js';
 import { TransactionType } from '../../../models/Transactions.js';
-import { getCoinsBy, getIdByAddress, getBasePoolBy } from '../readFunctions/Pools.js';
+import { getCoinsBy, getPoolIdByPoolAddress, getBasePoolBy } from '../readFunctions/Pools.js';
 import { getCoinIdByAddress, findCoinDecimalsById } from '../readFunctions/Coins.js';
 import { findTransactionsByPoolIdAndHash } from '../readFunctions/Transactions.js';
 import { findTransactionCoinsByTxIds } from '../readFunctions/TransactionCoins.js';
@@ -66,7 +66,7 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
         const BASEPOOL_ADDRESS = await getBasePoolBy({ id: event.pool_id });
         if (!BASEPOOL_ADDRESS)
             return;
-        const BASEPOOL_ID = await getIdByAddress(BASEPOOL_ADDRESS);
+        const BASEPOOL_ID = await getPoolIdByPoolAddress(BASEPOOL_ADDRESS);
         if (!BASEPOOL_ID)
             return;
         const BASEPOOL_COINS = await getCoinsBy({ id: BASEPOOL_ID });
@@ -85,7 +85,7 @@ export async function parseTokenExchangeUnderlying(event, BLOCK_UNIXTIME, POOL_C
         const BASEPOOL_ADDRESS = await getBasePoolBy({ id: event.pool_id });
         if (!BASEPOOL_ADDRESS)
             return;
-        const BASEPOOL_ID = await getIdByAddress(BASEPOOL_ADDRESS);
+        const BASEPOOL_ID = await getPoolIdByPoolAddress(BASEPOOL_ADDRESS);
         if (!BASEPOOL_ID)
             return;
         const BASEPOOL_COINS = await getCoinsBy({ id: BASEPOOL_ID });

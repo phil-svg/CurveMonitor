@@ -72,7 +72,7 @@ export async function main() {
   // await updateInitialPoolParams(); // muted until useful
   // await updatePoolParamsEvents(); // muted until useful
 
-  await updateRawLogs();
+  // await updateRawLogs();
   await preparingLiveModeForRawEvents();
   await updateRawLogsForLiveMode();
 
@@ -111,6 +111,7 @@ export async function main() {
   // process.exit();
 }
 
-startAPI();
 // await startTestClient();
+
+startAPI();
 await main();

@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 import { getAbiBy } from '../postgresTables/Abi.js';
-import { getAddressById, getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
+import { getAddressById, getPoolIdByPoolAddress } from '../postgresTables/readFunctions/Pools.js';
 import { Log } from 'web3-core';
 import { readAbiFromAbisEthereumTable } from '../postgresTables/readFunctions/Abi.js';
 import { WEB3_HTTP_PROVIDER, WEB3_WS_PROVIDER, web3Call } from '../web3Calls/generic.js';
@@ -67,7 +67,7 @@ export async function getWeb3HttpProvider(): Promise<Web3> {
 }
 
 export async function getContractByAddress(poolAddress: string): Promise<Contract | void> {
-  const POOL_ID = await getIdByAddress(poolAddress);
+  const POOL_ID = await getPoolIdByPoolAddress(poolAddress);
   if (!POOL_ID) {
     console.log(`Err fetching ABI for pool ${poolAddress} in getContractByAddress`);
     return;
@@ -78,7 +78,7 @@ export async function getContractByAddress(poolAddress: string): Promise<Contrac
 }
 
 export async function getContractByAddressWithWebsocket(poolAddress: string): Promise<Contract | void> {
-  const POOL_ID = await getIdByAddress(poolAddress);
+  const POOL_ID = await getPoolIdByPoolAddress(poolAddress);
   if (!POOL_ID) {
     console.log(`Err fetching ABI for pool ${poolAddress} in getContractByAddressWithWebsocket`);
     return;

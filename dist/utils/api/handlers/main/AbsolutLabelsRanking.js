@@ -1,4 +1,4 @@
-import { getLabelsRankingDescendingAbsOccurrences } from '../../queries/query_sandwiches.js';
+import { getLabelsRankingDescendingAbsOccurrences } from '../../queries/Sandwiches.js';
 export const handleAbsolutLabelsRankingRoom = (socket) => {
     socket.on('getAbsoluteLabelsRanking', async () => {
         try {

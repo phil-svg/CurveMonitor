@@ -16,7 +16,7 @@ import { isCexDexArb } from '../postgresTables/mevDetection/cexdex/utils/cexdexD
 import { findCandidatesInBatch } from '../postgresTables/mevDetection/sandwich/SandwichDetection.js';
 import { addAddressesForLabelingForBlock } from '../postgresTables/mevDetection/sandwich/SandwichUtils.js';
 import { getTimestampsByBlockNumbersFromLocalDatabase } from '../postgresTables/readFunctions/Blocks.js';
-import { getCoinsInBatchesByPools, getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
+import { getCoinsInBatchesByPools, getPoolIdByPoolAddress } from '../postgresTables/readFunctions/Pools.js';
 import { fetchEventsForChunkParsing } from '../postgresTables/readFunctions/RawLogs.js';
 import { fetchTransactionsForBlock } from '../postgresTables/readFunctions/Transactions.js';
 import { sortAndProcess } from '../postgresTables/txParsing/ParseTx.js';
@@ -42,7 +42,7 @@ export type PoolCoinsForLiveMode = {
 
 async function getPoolCoinsForLiveMode(): Promise<PoolCoinsForLiveMode> {
   const poolAddresses = eventBuffer.map((event) => event.address); // Get all addresses from the events
-  const poolIdsPromises = poolAddresses.map(getIdByAddress); // Convert each address to a Promise<id>
+  const poolIdsPromises = poolAddresses.map(getPoolIdByPoolAddress); // Convert each address to a Promise<id>
   const poolIds = await Promise.all(poolIdsPromises); // Await all promises to get an array of ids
   const validPoolIds = poolIds.filter((id) => id !== null) as number[];
   const POOL_COINS = await getCoinsInBatchesByPools(validPoolIds);
@@ -60,7 +60,7 @@ export async function subscribeToAddress(address: string) {
   // console.log('called subscribeToAddress, voiding for clean debugging purposes');
   // return;
   const contract = await getContractByAddressWithWebsocket(address);
-  const poolId = await getIdByAddress(address);
+  const poolId = await getPoolIdByPoolAddress(address);
 
   if (!contract) return;
   if (!poolId) return;

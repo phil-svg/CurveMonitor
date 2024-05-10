@@ -1,4 +1,4 @@
-import { getIdByAddress } from '../../postgresTables/readFunctions/Pools.js';
+import { getPoolIdByPoolAddress } from '../../postgresTables/readFunctions/Pools.js';
 import { formatVolumeDataToJson, getTransactionVolume } from '../utils/Volume.js';
 import { getBlockTimeStamp } from '../../web3Calls/generic.js';
 import {
@@ -44,7 +44,7 @@ export async function generateVolumeReportForSinglePoolHighRes(
   startDate?: string,
   endDate?: string
 ) {
-  const poolId = await getIdByAddress(poolAddress);
+  const poolId = await getPoolIdByPoolAddress(poolAddress);
   if (!poolId) {
     console.log('could not find poolId for', poolAddress, 'in generateVolumeReportForSinglePool');
     return;

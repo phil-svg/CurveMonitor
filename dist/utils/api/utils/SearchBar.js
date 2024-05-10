@@ -1,10 +1,10 @@
-import { Op, Sequelize } from "sequelize";
-import { fn, col } from "sequelize";
-import { Pool } from "../../../models/Pools.js";
-import { Transactions } from "../../../models/Transactions.js";
-import { getIdByAddress } from "../../postgresTables/readFunctions/Pools.js";
-import { manualLaborLabels } from "./PoolNamesManualLabor.js";
-import { Coins } from "../../../models/Coins.js";
+import { Op, Sequelize } from 'sequelize';
+import { fn, col } from 'sequelize';
+import { Pool } from '../../../models/Pools.js';
+import { Transactions } from '../../../models/Transactions.js';
+import { getPoolIdByPoolAddress } from '../../postgresTables/readFunctions/Pools.js';
+import { manualLaborLabels } from './PoolNamesManualLabor.js';
+import { Coins } from '../../../models/Coins.js';
 async function getPoolTransactionCount(poolId) {
     if (poolId === null) {
         return 0;
@@ -13,7 +13,7 @@ async function getPoolTransactionCount(poolId) {
         where: {
             pool_id: poolId,
         },
-        order: [["tx_id", "DESC"]],
+        order: [['tx_id', 'DESC']],
         limit: 2500,
     });
     return transactions.length;
@@ -23,7 +23,7 @@ export async function getModifiedPoolName(poolAddress) {
     if (manualLaborLabels.hasOwnProperty(lowercasedAddress)) {
         return manualLaborLabels[lowercasedAddress];
     }
-    const poolId = await getIdByAddress(poolAddress);
+    const poolId = await getPoolIdByPoolAddress(poolAddress);
     if (poolId === null) {
         return null;
     }
@@ -32,10 +32,10 @@ export async function getModifiedPoolName(poolAddress) {
         return null;
     let name = pool.name;
     // If the name starts with "Curve.fi ", remove this part
-    if (name.startsWith("Curve.fi ")) {
-        name = name.replace("Curve.fi ", "");
+    if (name.startsWith('Curve.fi ')) {
+        name = name.replace('Curve.fi ', '');
     }
-    const nameParts = name.split(":");
+    const nameParts = name.split(':');
     if (nameParts.length > 1) {
         // Take the second part of the name (after the colon) and remove leading and trailing spaces
         return nameParts[1].trim();
@@ -77,9 +77,9 @@ async function searchPoolsByAddress(userInput) {
     const userInputFormatted = userInput.toLowerCase();
     // Search for pools where the address contains the user input
     const pools = await Pool.findAll({
-        attributes: ["address", "id"],
+        attributes: ['address', 'id'],
         where: {
-            [Op.and]: [Sequelize.where(fn("lower", col("address")), "LIKE", "%" + userInputFormatted + "%")],
+            [Op.and]: [Sequelize.where(fn('lower', col('address')), 'LIKE', '%' + userInputFormatted + '%')],
         },
     });
     // Convert array of pool instances to array of addresses
@@ -94,55 +94,55 @@ async function searchPoolsByCoinSymbol(userInput) {
     const userInputFormatted = userInput.toLowerCase();
     // Search for coins where the symbol starts with the user input
     const coins = await Coins.findAll({
-        attributes: ["address"],
-        where: Sequelize.where(fn("lower", col("symbol")), Op.like, userInputFormatted + "%"),
+        attributes: ['address'],
+        where: Sequelize.where(fn('lower', col('symbol')), Op.like, userInputFormatted + '%'),
     });
-    const coinAddresses = coins.map((coin) => coin.get("address"));
+    const coinAddresses = coins.map((coin) => coin.get('address'));
     // Get all pools
     const allPools = await Pool.findAll({
-        attributes: ["address", "id", "coins"],
+        attributes: ['address', 'id', 'coins'],
     });
     // Filter pools that contain the coin
     const pools = allPools.filter((pool) => {
-        const poolCoins = pool.get("coins");
+        const poolCoins = pool.get('coins');
         return poolCoins && poolCoins.some((coin) => coinAddresses.includes(coin));
     });
-    const poolAddresses = pools.map((pool) => pool.get("address"));
-    const poolIds = pools.map((pool) => pool.get("id"));
+    const poolAddresses = pools.map((pool) => pool.get('address'));
+    const poolIds = pools.map((pool) => pool.get('id'));
     return { poolAddresses, poolIds };
 }
 async function searchPoolsByCoinAddress(coinAddress) {
     const coinAddressFormatted = coinAddress.toLowerCase();
     // Search for the coin in the Coins table
     const coin = await Coins.findOne({
-        attributes: ["address"],
-        where: Sequelize.where(fn("lower", col("address")), Op.like, coinAddressFormatted + "%"),
+        attributes: ['address'],
+        where: Sequelize.where(fn('lower', col('address')), Op.like, coinAddressFormatted + '%'),
     });
-    if (!coin || !coin.get("address")) {
+    if (!coin || !coin.get('address')) {
         return null;
     }
     // Get all pools
     const allPools = await Pool.findAll({
-        attributes: ["address", "id", "coins"],
+        attributes: ['address', 'id', 'coins'],
     });
     // Filter pools that contain the coin
     const pools = allPools.filter((pool) => {
-        const poolCoins = pool.get("coins");
-        return poolCoins && poolCoins.includes(coin.get("address"));
+        const poolCoins = pool.get('coins');
+        return poolCoins && poolCoins.includes(coin.get('address'));
     });
-    const poolAddresses = pools.map((pool) => pool.get("address"));
-    const poolIds = pools.map((pool) => pool.get("id"));
+    const poolAddresses = pools.map((pool) => pool.get('address'));
+    const poolIds = pools.map((pool) => pool.get('id'));
     return { poolAddresses, poolIds };
 }
 export async function getSuggestions(userInput) {
     // Validate user input
-    if (!userInput || typeof userInput !== "string" || userInput.trim() === "") {
+    if (!userInput || typeof userInput !== 'string' || userInput.trim() === '') {
         return [];
     }
     let resultsByAddress = null;
     let resultsByCoinAddress = null;
     let resultsByCoinSymbol = null;
-    if (userInput.startsWith("0x")) {
+    if (userInput.startsWith('0x')) {
         // If the input starts with "0x", it could be either a pool address or a coin address
         resultsByAddress = await searchPoolsByAddress(userInput);
         resultsByCoinAddress = await searchPoolsByCoinAddress(userInput);

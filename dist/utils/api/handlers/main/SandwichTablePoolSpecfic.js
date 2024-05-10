@@ -1,4 +1,4 @@
-import { getSandwichTableContentForPool } from '../../queries/query_sandwiches.js';
+import { getSandwichTableContentForPool } from '../../queries/Sandwiches.js';
 export const handlePoolSandwichRoom = (socket) => {
     socket.on('getPoolSpecificSandwichTable', async (poolAddress, duration, page) => {
         try {

@@ -1,4 +1,4 @@
-import { getAddressesByPoolIds, getAllPoolIds, getIdByAddress, getRelevantPoolIdsForFastMode, } from './readFunctions/Pools.js';
+import { getAddressesByPoolIds, getAllPoolIds, getPoolIdByPoolAddress, getRelevantPoolIdsForFastMode, } from './readFunctions/Pools.js';
 import { getContractByAddress } from '../helperFunctions/Web3.js';
 import { getPastEvents } from '../web3Calls/generic.js';
 import { RawTxLogs } from '../../models/RawTxLogs.js';
@@ -44,7 +44,7 @@ async function processPastEvents(pastEvents, poolId, toBlock, currentToBlock) {
     };
 }
 export async function processAddress(poolAddress, fromBlock, toBlock) {
-    const POOL_ID = await getIdByAddress(poolAddress);
+    const POOL_ID = await getPoolIdByPoolAddress(poolAddress);
     if (!POOL_ID)
         return;
     const CONTRACT = await getContractByAddress(poolAddress);
@@ -118,7 +118,7 @@ export async function processAllAddressesSequentially() {
         ].map((address) => address.toLowerCase());
         if (addressesToIgnore.includes(poolAddresses[i].toLowerCase()))
             continue;
-        let poolId = await getIdByAddress(poolAddresses[i]);
+        let poolId = await getPoolIdByPoolAddress(poolAddresses[i]);
         let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId);
         if (!largestBlockNumberStored)
             largestBlockNumberStored = dbInceptionBlock;
@@ -166,7 +166,7 @@ export async function updateRawLogs() {
         ].map((address) => address.toLowerCase());
         if (addressesToIgnore.includes(poolAddresses[i].toLowerCase()))
             continue;
-        let poolId = await getIdByAddress(poolAddresses[i]);
+        let poolId = await getPoolIdByPoolAddress(poolAddresses[i]);
         let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId);
         if (!largestBlockNumberStored)
             largestBlockNumberStored = dbInceptionBlock;

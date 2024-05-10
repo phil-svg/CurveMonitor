@@ -1,6 +1,6 @@
 import pkg from 'js-sha3';
 import { getAbiByForPools } from '../postgresTables/Abi.js';
-import { getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
+import { getPoolIdByPoolAddress } from '../postgresTables/readFunctions/Pools.js';
 import { getAbiFromDbClean } from '../postgresTables/readFunctions/Abi.js';
 const { keccak256 } = pkg;
 export async function getMethodId(contractAddress) {
@@ -38,7 +38,7 @@ export async function getMethodIdsByContractAddress(contractAddress) {
 }
 export async function getMethodIdsForPoolAddressLight(poolAddress) {
     // Fetch ABI for given contract address
-    const poolId = await getIdByAddress(poolAddress);
+    const poolId = await getPoolIdByPoolAddress(poolAddress);
     if (!poolId) {
         console.log('Could not find poolId for', poolAddress, 'in getMethodIdsByContractAddressLight');
         return null;

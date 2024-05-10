@@ -1,7 +1,7 @@
 import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { LossTransaction, Sandwiches } from '../../../models/Sandwiches.js';
 import { Transactions } from '../../../models/Transactions.js';
-import { getIdByAddress } from './Pools.js';
+import { getPoolIdByPoolAddress } from './Pools.js';
 import { getTimeframeTimestamp } from '../../api/utils/Timeframes.js';
 import { SandwichDetail, enrichSandwiches } from './SandwichDetailEnrichments.js';
 import { sequelize } from '../../../config/Database.js';
@@ -95,7 +95,7 @@ export async function findUniqueSourceOfLossAddresses(): Promise<string[]> {
 }
 
 export async function getAllRawTableEntriesForPoolByPoolAddress(poolAddress: string): Promise<Sandwiches[]> {
-  let poolId = await getIdByAddress(poolAddress);
+  let poolId = await getPoolIdByPoolAddress(poolAddress);
   return await getAllRawSandwichTableEntriesForPoolByPoolId(poolId!);
 }
 
@@ -146,7 +146,7 @@ export async function getAllIdsForFullSandwichTable(timeDuration: string): Promi
   return ids;
 }
 
-interface TotalResult {
+export interface TotalResult {
   total: number;
 }
 
@@ -169,9 +169,9 @@ async function getTotalNumberOfSandwichesForTimeDuration(timeDuration: string): 
     },
   });
 
-  const totalSandwiches = result[0].total;
+  const totalCount = result[0].total;
 
-  return totalSandwiches;
+  return totalCount;
 }
 
 async function getSandwichIdsForTimeframe(timeDuration: string, page: number): Promise<number[]> {

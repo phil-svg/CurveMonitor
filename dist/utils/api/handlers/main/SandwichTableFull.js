@@ -1,13 +1,13 @@
-import { getFullSandwichTable } from "../../queries/query_sandwiches.js";
+import { getFullSandwichTable } from '../../queries/Sandwiches.js';
 export const handleFullSandwichRoom = (socket) => {
-    socket.on("getFullSandwichTableContent", async (timeDuration, page) => {
+    socket.on('getFullSandwichTableContent', async (timeDuration, page) => {
         try {
             const { data, totalSandwiches } = await getFullSandwichTable(timeDuration, page);
-            socket.emit("fullSandwichTableContent", { data, totalSandwiches });
+            socket.emit('fullSandwichTableContent', { data, totalSandwiches });
         }
         catch (error) {
             console.error(error);
-            socket.emit("error", "Internal Server Error");
+            socket.emit('error', 'Internal Server Error');
         }
     });
 };

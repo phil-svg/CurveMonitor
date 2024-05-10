@@ -1,6 +1,5 @@
 import { Socket } from 'socket.io';
-import { getSandwichTableContentForPool } from '../../queries/query_sandwiches.js';
-import { getIdByAddressCaseInsensitive } from '../../../postgresTables/readFunctions/Pools.js';
+import { getSandwichTableContentForPool } from '../../queries/Sandwiches.js';
 
 export const handlePoolSandwichRoom = (socket: Socket) => {
   socket.on('getPoolSpecificSandwichTable', async (poolAddress: string, duration: string, page: number) => {

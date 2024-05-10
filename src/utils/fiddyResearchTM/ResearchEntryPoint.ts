@@ -9,7 +9,7 @@ import { getElementCountChunkedForArrayAndChunksize } from '../helperFunctions/Q
 import { getCleanedTransfers } from '../postgresTables/CleanedTransfers.js';
 import { getTvlForPoolArrFromChain } from '../postgresTables/Tvl.js';
 import { getCleanedTransfersForTxHashFromTable } from '../postgresTables/readFunctions/CleanedTransfers.js';
-import { getIdByAddress, getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
+import { getPoolIdByPoolAddress, getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
 import { getTxIdByTxHash } from '../postgresTables/readFunctions/Transactions.js';
 import { oneInchVolThings, whatWasSwappedAnalytics } from './DefiMonitooor/DexAggregators/1Inch/oneInch.js';
 import { studyTokenBalanceOfWallet } from './DefiMonitooor/DexAggregators/Research/WalletBalanceChanges.js';

@@ -24,6 +24,11 @@ export interface SandwichDetail {
   lossInUsd: number;
 }
 
+export interface SandwichTableContent {
+  data: SandwichDetail[];
+  totalSandwiches: number;
+}
+
 export async function SandwichDetailEnrichment(id: number): Promise<SandwichDetail | null> {
   const sandwich = await Sandwiches.findOne({
     where: { id },

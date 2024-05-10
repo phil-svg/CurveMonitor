@@ -1,5 +1,5 @@
-import { Server, Socket } from 'socket.io';
-import { getLabelsRankingDescendingAbsOccurrences } from '../../queries/query_sandwiches.js';
+import { Socket } from 'socket.io';
+import { getLabelsRankingDescendingAbsOccurrences } from '../../queries/Sandwiches.js';
 
 export const handleAbsolutLabelsRankingRoom = (socket: Socket) => {
   socket.on('getAbsoluteLabelsRanking', async () => {

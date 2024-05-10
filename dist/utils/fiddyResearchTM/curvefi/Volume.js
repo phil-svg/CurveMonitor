@@ -1,17 +1,17 @@
-import { Op } from "sequelize";
-import { TransactionDetails } from "../../../models/TransactionDetails.js";
-import { Transactions } from "../../../models/Transactions.js";
-import { priceTransactionFromTxId } from "../../TokenPrices/txValue/PriceTransaction.js";
-import { saveMostVolGeneratingToAddressesToExcel } from "../utils/Excel.js";
-import { getTxHashByTxId } from "../../postgresTables/readFunctions/Transactions.js";
-import { getNameBy, getPoolIdsFromPoolAddresses } from "../../postgresTables/readFunctions/Pools.js";
-import { convertDateToUnixTime } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { Pool } from "../../../models/Pools.js";
-import { findPoolId } from "../cexdex/ClusteredTxCoins.js";
-import { TransactionCoins } from "../../../models/TransactionCoins.js";
-import { Coins } from "../../../models/Coins.js";
-import { getFromAddress } from "../../postgresTables/readFunctions/TransactionDetails.js";
-import * as XLSX from "xlsx";
+import { Op } from 'sequelize';
+import { TransactionDetails } from '../../../models/TransactionDetails.js';
+import { Transactions } from '../../../models/Transactions.js';
+import { priceTransactionFromTxId } from '../../TokenPrices/txValue/PriceTransaction.js';
+import { saveMostVolGeneratingToAddressesToExcel } from '../utils/Excel.js';
+import { getTxHashByTxId } from '../../postgresTables/readFunctions/Transactions.js';
+import { getNameBy, getPoolIdsFromPoolAddresses } from '../../postgresTables/readFunctions/Pools.js';
+import { convertDateToUnixTime } from '../../helperFunctions/QualityOfLifeStuff.js';
+import { Pool } from '../../../models/Pools.js';
+import { findPoolId } from '../cexdex/ClusteredTxCoins.js';
+import { TransactionCoins } from '../../../models/TransactionCoins.js';
+import { Coins } from '../../../models/Coins.js';
+import { getFromAddress } from '../../postgresTables/readFunctions/TransactionDetails.js';
+import * as XLSX from 'xlsx';
 async function groupTransactionsByFromAddress(startUnixtime, endUnixtime) {
     let offset = 0;
     const limit = 10000; // Adjust based on your memory constraints
@@ -124,7 +124,7 @@ async function groupTransactionsByToAddressForSelectedPools(poolIds, startUnixti
     return groupedByTo;
 }
 async function calculateTotalVolumeForAddresses(groupedTransactions) {
-    console.log("starting calculateTotalVolumeForAddresses");
+    console.log('starting calculateTotalVolumeForAddresses');
     const volumeForAddress = {};
     let processedCount = 0;
     for (const [address, txIds] of Object.entries(groupedTransactions)) {
@@ -159,7 +159,7 @@ export async function getToAddressVolDistributionPerPools(toAddress, startDate, 
     const volumeForPool = await calculateTotalVolumeForPools(groupedTransactions);
     const rankedPoolsByVolume = rankPoolsByVolume(volumeForPool);
     const res = await enrichPoolDataWithNames(rankedPoolsByVolume);
-    console.log("res:", res);
+    console.log('res:', res);
 }
 async function groupTransactionsByToAddressAndPool(startUnixtime, endUnixtime, toAddress) {
     let offset = 0;
@@ -254,7 +254,7 @@ export async function calculateTotalVolumeForTransactionsInDb() {
     let hasMoreData = true;
     while (hasMoreData) {
         const transactionDetails = await TransactionDetails.findAll({
-            include: [{ model: Transactions, as: "transaction" }],
+            include: [{ model: Transactions, as: 'transaction' }],
             offset,
             limit: batchSize,
         });
@@ -262,7 +262,7 @@ export async function calculateTotalVolumeForTransactionsInDb() {
             const txVolume = await priceTransactionFromTxId(detail.txId);
             if (txVolume && txVolume > 1e9) {
                 const txHash = await getTxHashByTxId(detail.txId);
-                console.log("potentially tx with more than 1B in size:", detail.txId, txHash, txVolume);
+                console.log('potentially tx with more than 1B in size:', detail.txId, txHash, txVolume);
             }
             totalVolume += txVolume || 0;
         }
@@ -274,7 +274,7 @@ export async function calculateTotalVolumeForTransactionsInDb() {
             offset += batchSize;
         }
     }
-    console.log("Final Total Volume Calculated: ", totalVolume);
+    console.log('Final Total Volume Calculated: ', totalVolume);
     return totalVolume;
 }
 export async function getSwapVolumeForPoolAndToAddressForEachSwapDirection(poolAddress, toAddress, startDate, endDate) {
@@ -282,7 +282,7 @@ export async function getSwapVolumeForPoolAndToAddressForEachSwapDirection(poolA
     const endUnixTime = new Date(endDate).getTime() / 1000;
     const poolId = await findPoolId(poolAddress);
     if (poolId === null) {
-        console.log("Pool not found");
+        console.log('Pool not found');
         return {};
     }
     // Fetch transactions for the pool within the time frame
@@ -313,30 +313,30 @@ export async function getSwapVolumeForPoolAndToAddressForEachSwapDirection(poolA
         transaction.transactionCoins.forEach((txCoin) => {
             var _a;
             const direction = txCoin.direction;
-            const coinSymbol = ((_a = txCoin.coin) === null || _a === void 0 ? void 0 : _a.symbol) || "Unknown";
+            const coinSymbol = ((_a = txCoin.coin) === null || _a === void 0 ? void 0 : _a.symbol) || 'Unknown';
             // Instead of filtering transactionCoins again, directly work with already identified txCoin
             // This avoids re-identifying pairs already accounted for
             const otherCoins = transaction.transactionCoins.filter((c) => c.tx_id === txCoin.tx_id && c.coin_id !== txCoin.coin_id);
             otherCoins.forEach((otherCoin) => {
                 var _a, _b;
-                const otherCoinSymbol = ((_a = otherCoin.coin) === null || _a === void 0 ? void 0 : _a.symbol) || "Unknown";
+                const otherCoinSymbol = ((_a = otherCoin.coin) === null || _a === void 0 ? void 0 : _a.symbol) || 'Unknown';
                 // Ensure a unique identifier for each coin pair regardless of direction to prevent double counting
-                const pairIdentifier = direction === "in" ? `${otherCoin.coin_id}-${txCoin.coin_id}` : `${txCoin.coin_id}-${otherCoin.coin_id}`;
+                const pairIdentifier = direction === 'in' ? `${otherCoin.coin_id}-${txCoin.coin_id}` : `${txCoin.coin_id}-${otherCoin.coin_id}`;
                 // Skip this pair if it has already been processed
                 if (processedPairs.has(pairIdentifier))
                     return;
                 processedPairs.add(pairIdentifier); // Mark this pair as processed
-                const swapDirection = direction === "in" ? `${otherCoinSymbol}->${coinSymbol}` : `${coinSymbol}->${otherCoinSymbol}`;
+                const swapDirection = direction === 'in' ? `${otherCoinSymbol}->${coinSymbol}` : `${coinSymbol}->${otherCoinSymbol}`;
                 console.log(`Swap: ${swapDirection} | ID: ${transaction.tx_id}`);
                 if (!swapData[swapDirection]) {
                     swapData[swapDirection] = { count: 0, totalVolume: 0 };
                 }
                 swapData[swapDirection].count += 1;
-                swapData[swapDirection].totalVolume += parseFloat(((_b = txCoin.dollar_value) === null || _b === void 0 ? void 0 : _b.toString()) || "0");
+                swapData[swapDirection].totalVolume += parseFloat(((_b = txCoin.dollar_value) === null || _b === void 0 ? void 0 : _b.toString()) || '0');
             });
         });
     });
-    console.log("swapData", swapData);
+    console.log('swapData', swapData);
     return swapData;
 }
 export async function generateTopFromVolAddressesForSpecificToAddress(startDate, endDate, specificToAddress) {
@@ -372,7 +372,7 @@ export async function generateTopFromVolAddressesForSpecificToAddress(startDate,
         .sort((a, b) => b[1] - a[1])
         .slice(0, 20)
         .map(([address, volume]) => ({ address, volume }));
-    console.log("Top From Addresses by Volume:", topFromAddresses);
+    console.log('Top From Addresses by Volume:', topFromAddresses);
     console.log(`Total different 'from' addresses: ${Object.keys(volumeByFromAddress).length}`);
 }
 export async function getSwapVolumeBucketsForPoolAndToAddress(poolAddress, toAddress, startDate, endDate) {
@@ -380,7 +380,7 @@ export async function getSwapVolumeBucketsForPoolAndToAddress(poolAddress, toAdd
     const endUnixTime = new Date(endDate).getTime() / 1000;
     const poolId = await findPoolId(poolAddress);
     if (poolId === null) {
-        console.log("Pool not found");
+        console.log('Pool not found');
         return {};
     }
     const transactions = await Transactions.findAll({
@@ -428,7 +428,7 @@ export async function getSwapVolumeBucketsForPoolAndToAddress(poolAddress, toAdd
         return {
             Bucket: `${start / 1000}k$-${end / 1000}k$`,
             Count: count,
-            "Total Volume": totalVolume,
+            'Total Volume': totalVolume,
         };
     })
         .sort((a, b) => {
@@ -440,8 +440,8 @@ export async function getSwapVolumeBucketsForPoolAndToAddress(poolAddress, toAdd
     // Create a new workbook and add the data
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Swap Volumes");
-    const excelFileName = "volBuckets.xlsx";
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Swap Volumes');
+    const excelFileName = 'volBuckets.xlsx';
     // Write workbook to file
     XLSX.writeFile(workbook, excelFileName);
     console.log(`Results saved to ${excelFileName}`);

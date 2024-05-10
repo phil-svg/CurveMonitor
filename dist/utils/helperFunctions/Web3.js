@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 import { getAbiBy } from '../postgresTables/Abi.js';
-import { getAddressById, getIdByAddress } from '../postgresTables/readFunctions/Pools.js';
+import { getAddressById, getPoolIdByPoolAddress } from '../postgresTables/readFunctions/Pools.js';
 import { readAbiFromAbisEthereumTable } from '../postgresTables/readFunctions/Abi.js';
 import { WEB3_HTTP_PROVIDER, WEB3_WS_PROVIDER, web3Call } from '../web3Calls/generic.js';
 import { ERC20_ABI } from './Erc20Abis.js';
@@ -50,7 +50,7 @@ export async function getWeb3HttpProvider() {
     throw new Error('Failed to connect to Ethereum node after several attempts. Please check your connection and the status of the Ethereum node.');
 }
 export async function getContractByAddress(poolAddress) {
-    const POOL_ID = await getIdByAddress(poolAddress);
+    const POOL_ID = await getPoolIdByPoolAddress(poolAddress);
     if (!POOL_ID) {
         console.log(`Err fetching ABI for pool ${poolAddress} in getContractByAddress`);
         return;
@@ -59,7 +59,7 @@ export async function getContractByAddress(poolAddress) {
     return CONTRACT;
 }
 export async function getContractByAddressWithWebsocket(poolAddress) {
-    const POOL_ID = await getIdByAddress(poolAddress);
+    const POOL_ID = await getPoolIdByPoolAddress(poolAddress);
     if (!POOL_ID) {
         console.log(`Err fetching ABI for pool ${poolAddress} in getContractByAddressWithWebsocket`);
         return;

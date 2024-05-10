@@ -1,7 +1,7 @@
 import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { Sandwiches } from '../../../models/Sandwiches.js';
 import { Transactions } from '../../../models/Transactions.js';
-import { getIdByAddress } from './Pools.js';
+import { getPoolIdByPoolAddress } from './Pools.js';
 import { getTimeframeTimestamp } from '../../api/utils/Timeframes.js';
 import { enrichSandwiches } from './SandwichDetailEnrichments.js';
 import { sequelize } from '../../../config/Database.js';
@@ -76,7 +76,7 @@ export async function findUniqueSourceOfLossAddresses() {
     return sandwiches.map((sandwich) => sandwich.getDataValue('source_of_loss_contract_address'));
 }
 export async function getAllRawTableEntriesForPoolByPoolAddress(poolAddress) {
-    let poolId = await getIdByAddress(poolAddress);
+    let poolId = await getPoolIdByPoolAddress(poolAddress);
     return await getAllRawSandwichTableEntriesForPoolByPoolId(poolId);
 }
 export async function getAllRawSandwichTableEntriesForPoolByPoolId(poolId) {
@@ -135,8 +135,8 @@ async function getTotalNumberOfSandwichesForTimeDuration(timeDuration) {
             timeframeStartUnix,
         },
     });
-    const totalSandwiches = result[0].total;
-    return totalSandwiches;
+    const totalCount = result[0].total;
+    return totalCount;
 }
 async function getSandwichIdsForTimeframe(timeDuration, page) {
     const recordsPerPage = 10;

@@ -1,11 +1,11 @@
-import { TransactionDetails } from "../../models/TransactionDetails.js";
-import { Transactions } from "../../models/Transactions.js";
-import { findAndCountUniqueCallesPlusCalledContracts } from "../postgresTables/readFunctions/TransactionDetails.js";
-import { priceTransactionFromTxId } from "../TokenPrices/txValue/PriceTransaction.js";
-import { Op } from "sequelize";
-import { Pool } from "../../models/Pools.js";
-import { getIdByAddress } from "../postgresTables/readFunctions/Pools.js";
-import { Receipts } from "../../models/Receipts.js";
+import { TransactionDetails } from '../../models/TransactionDetails.js';
+import { Transactions } from '../../models/Transactions.js';
+import { findAndCountUniqueCallesPlusCalledContracts } from '../postgresTables/readFunctions/TransactionDetails.js';
+import { priceTransactionFromTxId } from '../TokenPrices/txValue/PriceTransaction.js';
+import { Op } from 'sequelize';
+import { Pool } from '../../models/Pools.js';
+import { getPoolIdByPoolAddress } from '../postgresTables/readFunctions/Pools.js';
+import { Receipts } from '../../models/Receipts.js';
 
 interface AddressVolume {
   address: string;
@@ -39,7 +39,7 @@ export async function findAndSortAllVolsPerUniqueAddressesFromAll(): Promise<Add
         raw: true,
       });
 
-      console.log("transactions.length", transactions.length);
+      console.log('transactions.length', transactions.length);
 
       for (let j = 0; j < transactions.length; j++) {
         const transaction = transactions[j];
@@ -60,11 +60,11 @@ export async function findAndSortAllVolsPerUniqueAddressesFromAll(): Promise<Add
     }
 
     addressVolumes.sort((a, b) => b.totalVolume - a.totalVolume);
-    console.log("Completed processing all addresses.");
+    console.log('Completed processing all addresses.');
 
     return addressVolumes;
   } catch (error) {
-    console.error("Error fetching address volumes:", error);
+    console.error('Error fetching address volumes:', error);
     return [];
   }
 }
@@ -91,11 +91,13 @@ export async function getTxIdsForPoolAndTargetAddress(poolAddress: string, targe
     });
 
     // Filter and extract txIds where 'to' matches targetAddress
-    const matchingTxIds = transactions.filter((tx) => tx.transactionDetails && tx.transactionDetails.to.toLowerCase() === targetAddressLower).map((tx) => tx.tx_id);
+    const matchingTxIds = transactions
+      .filter((tx) => tx.transactionDetails && tx.transactionDetails.to.toLowerCase() === targetAddressLower)
+      .map((tx) => tx.tx_id);
 
     return matchingTxIds;
   } catch (error) {
-    console.error("Error fetching transaction IDs:", error);
+    console.error('Error fetching transaction IDs:', error);
     return [];
   }
 }
@@ -106,7 +108,11 @@ const convertDateToUnixTime = (dateString: string) => {
   return Math.floor(date.getTime() / 1000);
 };
 
-export async function getTxIdsForPoolForGiven_Duration(poolAddress: string, startDate: string, endDate: string): Promise<number[]> {
+export async function getTxIdsForPoolForGiven_Duration(
+  poolAddress: string,
+  startDate: string,
+  endDate: string
+): Promise<number[]> {
   try {
     const pool = await Pool.findOne({
       where: { address: { [Op.iLike]: poolAddress.toLowerCase() } },
@@ -128,19 +134,24 @@ export async function getTxIdsForPoolForGiven_Duration(poolAddress: string, star
           [Op.lte]: endUnix,
         },
       },
-      attributes: ["tx_id"],
+      attributes: ['tx_id'],
     });
 
     const txIds = transactions.map((transaction) => transaction.tx_id);
     return txIds;
   } catch (error) {
-    console.error("Error fetching transaction IDs:", error);
+    console.error('Error fetching transaction IDs:', error);
     return [];
   }
 }
 
-export async function getTxIdsForAddressAndPoolAndTimeRange(poolAddress: string, targetAddress: string, startDate: string, endDate: string): Promise<number[]> {
-  const poolId = await getIdByAddress(poolAddress);
+export async function getTxIdsForAddressAndPoolAndTimeRange(
+  poolAddress: string,
+  targetAddress: string,
+  startDate: string,
+  endDate: string
+): Promise<number[]> {
+  const poolId = await getPoolIdByPoolAddress(poolAddress);
   if (poolId === null) {
     console.log(`Pool with address ${poolAddress} not found.`);
     return [];
@@ -158,14 +169,19 @@ export async function getTxIdsForAddressAndPoolAndTimeRange(poolAddress: string,
         [Op.lte]: endUnix,
       },
     },
-    attributes: ["tx_id"],
+    attributes: ['tx_id'],
   });
 
   return transactions.map((tx) => tx.tx_id);
 }
 
-export async function getGasUsedArrayForAllTxForAddressAndPoolAndTimeRange(poolAddress: string, targetAddress: string, startDate: string, endDate: string): Promise<number[]> {
-  const poolId = await getIdByAddress(poolAddress);
+export async function getGasUsedArrayForAllTxForAddressAndPoolAndTimeRange(
+  poolAddress: string,
+  targetAddress: string,
+  startDate: string,
+  endDate: string
+): Promise<number[]> {
+  const poolId = await getPoolIdByPoolAddress(poolAddress);
   if (poolId === null) {
     console.log(`Pool with address ${poolAddress} not found.`);
     return [];
@@ -190,7 +206,7 @@ export async function getGasUsedArrayForAllTxForAddressAndPoolAndTimeRange(poolA
         required: true,
       },
     ],
-    attributes: ["tx_id", "tx_hash"],
+    attributes: ['tx_id', 'tx_hash'],
   });
 
   // Extract gas used from each transaction
@@ -212,7 +228,7 @@ export async function getTxHashExampleArrayForGasUsedForAddressAndPoolAndTimeRan
   lowerGasUsageBoundary: number,
   biggerGasUsageBoundary: number
 ): Promise<string[]> {
-  const poolId = await getIdByAddress(poolAddress);
+  const poolId = await getPoolIdByPoolAddress(poolAddress);
   if (poolId === null) {
     console.log(`Pool with address ${poolAddress} not found.`);
     return [];
@@ -236,7 +252,7 @@ export async function getTxHashExampleArrayForGasUsedForAddressAndPoolAndTimeRan
         required: true,
       },
     ],
-    attributes: ["tx_hash"],
+    attributes: ['tx_hash'],
   });
 
   // Filter transactions based on the gas used in the first receipt

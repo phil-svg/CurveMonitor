@@ -1,14 +1,14 @@
-import { Server } from "socket.io";
-import { startMainEndpoint } from "./handlers/main/Index.js";
+import { Server } from 'socket.io';
+import { startMainEndpoint } from './handlers/main/MainEndpointSetup.js';
 const port = 443;
 export const startAPI = () => {
     const io = new Server(port, {
         cors: {
-            origin: "*",
-            methods: ["GET", "POST"],
+            origin: '*',
+            methods: ['GET', 'POST'],
         },
     });
-    io.on("error", (error) => {
+    io.on('error', (error) => {
         console.error(`Error at the server level: ${error}`);
     });
     startMainEndpoint(io);

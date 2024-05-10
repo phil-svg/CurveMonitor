@@ -1,7 +1,7 @@
 import {
   getAddressesByPoolIds,
   getAllPoolIds,
-  getIdByAddress,
+  getPoolIdByPoolAddress,
   getRelevantPoolIdsForFastMode,
 } from './readFunctions/Pools.js';
 import { getContractByAddress } from '../helperFunctions/Web3.js';
@@ -72,7 +72,7 @@ async function processPastEvents(
 }
 
 export async function processAddress(poolAddress: string, fromBlock: number, toBlock: number): Promise<void> {
-  const POOL_ID = await getIdByAddress(poolAddress);
+  const POOL_ID = await getPoolIdByPoolAddress(poolAddress);
   if (!POOL_ID) return;
 
   const CONTRACT = await getContractByAddress(poolAddress);
@@ -158,7 +158,7 @@ export async function processAllAddressesSequentially(): Promise<void> {
     ].map((address) => address.toLowerCase());
     if (addressesToIgnore.includes(poolAddresses[i].toLowerCase())) continue;
 
-    let poolId = await getIdByAddress(poolAddresses[i]);
+    let poolId = await getPoolIdByPoolAddress(poolAddresses[i]);
     let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId!);
     if (!largestBlockNumberStored) largestBlockNumberStored = dbInceptionBlock;
     await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
@@ -210,7 +210,7 @@ export async function updateRawLogs(): Promise<void> {
     ].map((address) => address.toLowerCase());
     if (addressesToIgnore.includes(poolAddresses[i].toLowerCase())) continue;
 
-    let poolId = await getIdByAddress(poolAddresses[i]);
+    let poolId = await getPoolIdByPoolAddress(poolAddresses[i]);
     let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId!);
     if (!largestBlockNumberStored) largestBlockNumberStored = dbInceptionBlock;
     try {

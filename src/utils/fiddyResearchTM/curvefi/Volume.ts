@@ -1,19 +1,22 @@
-import { Op } from "sequelize";
-import { TransactionDetails } from "../../../models/TransactionDetails.js";
-import { Transactions } from "../../../models/Transactions.js";
-import { priceTransactionFromTxId } from "../../TokenPrices/txValue/PriceTransaction.js";
-import { saveMostVolGeneratingToAddressesToExcel } from "../utils/Excel.js";
-import { getTxHashByTxId } from "../../postgresTables/readFunctions/Transactions.js";
-import { getAddressById, getIdByAddress, getNameBy, getPoolIdsFromPoolAddresses } from "../../postgresTables/readFunctions/Pools.js";
-import { convertDateToUnixTime } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { Pool } from "../../../models/Pools.js";
-import { findPoolId } from "../cexdex/ClusteredTxCoins.js";
-import { TransactionCoins } from "../../../models/TransactionCoins.js";
-import { Coins } from "../../../models/Coins.js";
-import { getFromAddress } from "../../postgresTables/readFunctions/TransactionDetails.js";
-import * as XLSX from "xlsx";
+import { Op } from 'sequelize';
+import { TransactionDetails } from '../../../models/TransactionDetails.js';
+import { Transactions } from '../../../models/Transactions.js';
+import { priceTransactionFromTxId } from '../../TokenPrices/txValue/PriceTransaction.js';
+import { saveMostVolGeneratingToAddressesToExcel } from '../utils/Excel.js';
+import { getTxHashByTxId } from '../../postgresTables/readFunctions/Transactions.js';
+import { getNameBy, getPoolIdsFromPoolAddresses } from '../../postgresTables/readFunctions/Pools.js';
+import { convertDateToUnixTime } from '../../helperFunctions/QualityOfLifeStuff.js';
+import { Pool } from '../../../models/Pools.js';
+import { findPoolId } from '../cexdex/ClusteredTxCoins.js';
+import { TransactionCoins } from '../../../models/TransactionCoins.js';
+import { Coins } from '../../../models/Coins.js';
+import { getFromAddress } from '../../postgresTables/readFunctions/TransactionDetails.js';
+import * as XLSX from 'xlsx';
 
-async function groupTransactionsByFromAddress(startUnixtime: number, endUnixtime: number): Promise<Record<string, number[]>> {
+async function groupTransactionsByFromAddress(
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<Record<string, number[]>> {
   let offset = 0;
   const limit = 10000; // Adjust based on your memory constraints
   let transactions: TransactionDetails[];
@@ -53,7 +56,10 @@ async function groupTransactionsByFromAddress(startUnixtime: number, endUnixtime
   return groupedByTo;
 }
 
-async function groupTransactionsByToAddress(startUnixtime: number, endUnixtime: number): Promise<Record<string, number[]>> {
+async function groupTransactionsByToAddress(
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<Record<string, number[]>> {
   let offset = 0;
   const limit = 10000; // Adjust based on your memory constraints
   let transactions: TransactionDetails[];
@@ -93,7 +99,11 @@ async function groupTransactionsByToAddress(startUnixtime: number, endUnixtime: 
   return groupedByTo;
 }
 
-async function groupTransactionsByToAddressForSelectedPools(poolIds: number[], startUnixtime: number, endUnixtime: number): Promise<Record<string, number[]>> {
+async function groupTransactionsByToAddressForSelectedPools(
+  poolIds: number[],
+  startUnixtime: number,
+  endUnixtime: number
+): Promise<Record<string, number[]>> {
   let offset = 0;
   const limit = 10000; // Adjust based on your memory constraints
   let transactions: TransactionDetails[];
@@ -136,8 +146,10 @@ async function groupTransactionsByToAddressForSelectedPools(poolIds: number[], s
   return groupedByTo;
 }
 
-async function calculateTotalVolumeForAddresses(groupedTransactions: Record<string, number[]>): Promise<Record<string, number>> {
-  console.log("starting calculateTotalVolumeForAddresses");
+async function calculateTotalVolumeForAddresses(
+  groupedTransactions: Record<string, number[]>
+): Promise<Record<string, number>> {
+  console.log('starting calculateTotalVolumeForAddresses');
   const volumeForAddress: Record<string, number> = {};
   let processedCount = 0;
 
@@ -174,14 +186,22 @@ export async function generateTopToVolAddresses(startDate: string, endDate: stri
 export async function getToAddressVolDistributionPerPools(toAddress: string, startDate: string, endDate: string) {
   const startUnixTime = new Date(startDate).getTime() / 1000;
   const endUnixTime = new Date(endDate).getTime() / 1000;
-  const groupedTransactions = await groupTransactionsByToAddressAndPool(startUnixTime, endUnixTime, toAddress.toLowerCase());
+  const groupedTransactions = await groupTransactionsByToAddressAndPool(
+    startUnixTime,
+    endUnixTime,
+    toAddress.toLowerCase()
+  );
   const volumeForPool = await calculateTotalVolumeForPools(groupedTransactions);
   const rankedPoolsByVolume = rankPoolsByVolume(volumeForPool);
   const res = await enrichPoolDataWithNames(rankedPoolsByVolume);
-  console.log("res:", res);
+  console.log('res:', res);
 }
 
-async function groupTransactionsByToAddressAndPool(startUnixtime: number, endUnixtime: number, toAddress: string): Promise<Record<string, number[]>> {
+async function groupTransactionsByToAddressAndPool(
+  startUnixtime: number,
+  endUnixtime: number,
+  toAddress: string
+): Promise<Record<string, number[]>> {
   let offset = 0;
   const limit = 10000; // Adjust based on your memory constraints
   let transactions: any[]; // Adjust the type as needed
@@ -233,7 +253,9 @@ async function groupTransactionsByToAddressAndPool(startUnixtime: number, endUni
   return groupedByPool;
 }
 
-export async function enrichPoolDataWithNames(poolVolumes: [string, number][]): Promise<{ address: string; volume: number; name: string | null }[]> {
+export async function enrichPoolDataWithNames(
+  poolVolumes: [string, number][]
+): Promise<{ address: string; volume: number; name: string | null }[]> {
   const enrichedDataPromises = poolVolumes.slice(0, 18).map(async ([address, volume]) => {
     const name = await getNameBy({ address });
     return { address, volume, name };
@@ -244,7 +266,9 @@ export async function enrichPoolDataWithNames(poolVolumes: [string, number][]): 
   return enrichedData;
 }
 
-async function calculateTotalVolumeForPools(groupedTransactions: Record<string, number[]>): Promise<Record<string, number>> {
+async function calculateTotalVolumeForPools(
+  groupedTransactions: Record<string, number[]>
+): Promise<Record<string, number>> {
   const volumeForPool: Record<string, number> = {};
   for (const [poolAddress, txIds] of Object.entries(groupedTransactions)) {
     let totalVolume = 0;
@@ -261,7 +285,11 @@ function rankPoolsByVolume(volumeForPool: Record<string, number>): [string, numb
   return Object.entries(volumeForPool).sort((a, b) => b[1] - a[1]);
 }
 
-export async function generateTopToVolAddressesForSelectedPools(poolAddresses: string[], startDate: string, endDate: string) {
+export async function generateTopToVolAddressesForSelectedPools(
+  poolAddresses: string[],
+  startDate: string,
+  endDate: string
+) {
   const startUnixTime = new Date(startDate).getTime() / 1000;
   const endUnixTime = new Date(endDate).getTime() / 1000;
   const poolIds = await getPoolIdsFromPoolAddresses(poolAddresses);
@@ -287,7 +315,7 @@ export async function calculateTotalVolumeForTransactionsInDb(): Promise<number>
 
   while (hasMoreData) {
     const transactionDetails = await TransactionDetails.findAll({
-      include: [{ model: Transactions, as: "transaction" }],
+      include: [{ model: Transactions, as: 'transaction' }],
       offset,
       limit: batchSize,
     });
@@ -296,12 +324,14 @@ export async function calculateTotalVolumeForTransactionsInDb(): Promise<number>
       const txVolume = await priceTransactionFromTxId(detail.txId);
       if (txVolume && txVolume > 1e9) {
         const txHash = await getTxHashByTxId(detail.txId);
-        console.log("potentially tx with more than 1B in size:", detail.txId, txHash, txVolume);
+        console.log('potentially tx with more than 1B in size:', detail.txId, txHash, txVolume);
       }
       totalVolume += txVolume || 0;
     }
 
-    console.log(`Processed ${offset + transactionDetails.length} transactions... Total Volume: ${(totalVolume / 1e9).toFixed(0)}B$`);
+    console.log(
+      `Processed ${offset + transactionDetails.length} transactions... Total Volume: ${(totalVolume / 1e9).toFixed(0)}B$`
+    );
 
     if (transactionDetails.length < batchSize) {
       hasMoreData = false;
@@ -310,7 +340,7 @@ export async function calculateTotalVolumeForTransactionsInDb(): Promise<number>
     }
   }
 
-  console.log("Final Total Volume Calculated: ", totalVolume);
+  console.log('Final Total Volume Calculated: ', totalVolume);
 
   return totalVolume;
 }
@@ -326,7 +356,7 @@ export async function getSwapVolumeForPoolAndToAddressForEachSwapDirection(
   const poolId = await findPoolId(poolAddress);
 
   if (poolId === null) {
-    console.log("Pool not found");
+    console.log('Pool not found');
     return {};
   }
 
@@ -355,46 +385,56 @@ export async function getSwapVolumeForPoolAndToAddressForEachSwapDirection(
   const swapData: { [swapDirection: string]: { count: number; totalVolume: number } } = {};
 
   transactions.forEach((transaction) => {
-    console.log(`\nID: ${transaction.tx_id} ${transaction.tx_hash} | Coins involved: ${transaction.transactionCoins.length}`);
+    console.log(
+      `\nID: ${transaction.tx_id} ${transaction.tx_hash} | Coins involved: ${transaction.transactionCoins.length}`
+    );
 
     const processedPairs = new Set(); // Keeps track of processed coin pairs to avoid double counting
 
     transaction.transactionCoins.forEach((txCoin) => {
       const direction = txCoin.direction;
-      const coinSymbol = txCoin.coin?.symbol || "Unknown";
+      const coinSymbol = txCoin.coin?.symbol || 'Unknown';
 
       // Instead of filtering transactionCoins again, directly work with already identified txCoin
       // This avoids re-identifying pairs already accounted for
-      const otherCoins = transaction.transactionCoins.filter((c) => c.tx_id === txCoin.tx_id && c.coin_id !== txCoin.coin_id);
+      const otherCoins = transaction.transactionCoins.filter(
+        (c) => c.tx_id === txCoin.tx_id && c.coin_id !== txCoin.coin_id
+      );
 
       otherCoins.forEach((otherCoin) => {
-        const otherCoinSymbol = otherCoin.coin?.symbol || "Unknown";
+        const otherCoinSymbol = otherCoin.coin?.symbol || 'Unknown';
 
         // Ensure a unique identifier for each coin pair regardless of direction to prevent double counting
-        const pairIdentifier = direction === "in" ? `${otherCoin.coin_id}-${txCoin.coin_id}` : `${txCoin.coin_id}-${otherCoin.coin_id}`;
+        const pairIdentifier =
+          direction === 'in' ? `${otherCoin.coin_id}-${txCoin.coin_id}` : `${txCoin.coin_id}-${otherCoin.coin_id}`;
 
         // Skip this pair if it has already been processed
         if (processedPairs.has(pairIdentifier)) return;
 
         processedPairs.add(pairIdentifier); // Mark this pair as processed
 
-        const swapDirection = direction === "in" ? `${otherCoinSymbol}->${coinSymbol}` : `${coinSymbol}->${otherCoinSymbol}`;
+        const swapDirection =
+          direction === 'in' ? `${otherCoinSymbol}->${coinSymbol}` : `${coinSymbol}->${otherCoinSymbol}`;
         console.log(`Swap: ${swapDirection} | ID: ${transaction.tx_id}`);
 
         if (!swapData[swapDirection]) {
           swapData[swapDirection] = { count: 0, totalVolume: 0 };
         }
         swapData[swapDirection].count += 1;
-        swapData[swapDirection].totalVolume += parseFloat(txCoin.dollar_value?.toString() || "0");
+        swapData[swapDirection].totalVolume += parseFloat(txCoin.dollar_value?.toString() || '0');
       });
     });
   });
 
-  console.log("swapData", swapData);
+  console.log('swapData', swapData);
   return swapData;
 }
 
-export async function generateTopFromVolAddressesForSpecificToAddress(startDate: string, endDate: string, specificToAddress: string) {
+export async function generateTopFromVolAddressesForSpecificToAddress(
+  startDate: string,
+  endDate: string,
+  specificToAddress: string
+) {
   const startUnixtime = convertDateToUnixTime(startDate);
   const endUnixtime = convertDateToUnixTime(endDate);
 
@@ -432,18 +472,23 @@ export async function generateTopFromVolAddressesForSpecificToAddress(startDate:
     .slice(0, 20)
     .map(([address, volume]) => ({ address, volume }));
 
-  console.log("Top From Addresses by Volume:", topFromAddresses);
+  console.log('Top From Addresses by Volume:', topFromAddresses);
 
   console.log(`Total different 'from' addresses: ${Object.keys(volumeByFromAddress).length}`);
 }
 
-export async function getSwapVolumeBucketsForPoolAndToAddress(poolAddress: string, toAddress: string, startDate: string, endDate: string) {
+export async function getSwapVolumeBucketsForPoolAndToAddress(
+  poolAddress: string,
+  toAddress: string,
+  startDate: string,
+  endDate: string
+) {
   const startUnixTime = new Date(startDate).getTime() / 1000;
   const endUnixTime = new Date(endDate).getTime() / 1000;
   const poolId = await findPoolId(poolAddress);
 
   if (poolId === null) {
-    console.log("Pool not found");
+    console.log('Pool not found');
     return {};
   }
 
@@ -498,7 +543,7 @@ export async function getSwapVolumeBucketsForPoolAndToAddress(poolAddress: strin
       return {
         Bucket: `${start / 1000}k$-${end / 1000}k$`, // Format label
         Count: count,
-        "Total Volume": totalVolume,
+        'Total Volume': totalVolume,
       };
     })
     .sort((a, b) => {
@@ -511,9 +556,9 @@ export async function getSwapVolumeBucketsForPoolAndToAddress(poolAddress: strin
   // Create a new workbook and add the data
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Swap Volumes");
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Swap Volumes');
 
-  const excelFileName = "volBuckets.xlsx";
+  const excelFileName = 'volBuckets.xlsx';
 
   // Write workbook to file
   XLSX.writeFile(workbook, excelFileName);
