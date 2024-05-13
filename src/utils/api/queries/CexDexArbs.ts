@@ -4,7 +4,7 @@ import { TotalResult } from '../../postgresTables/readFunctions/Sandwiches.js';
 import { getTimeframeTimestamp } from '../utils/Timeframes.js';
 import { enrichTransactionDetail } from '../../postgresTables/readFunctions/TxDetailEnrichment.js';
 import { getEnrichedCexDexDetails } from '../../postgresTables/mevDetection/cexdex/utils/cexdexDetection.js';
-import { EnrichedCexDexDetails } from '../../Interfaces.js';
+import { ArbBotLeaderBoardbyTxCount, EnrichedCexDexDetails } from '../../Interfaces.js';
 import { CexDexArbs } from '../../../models/CexDexArbs.js';
 import { Transactions } from '../../../models/Transactions.js';
 import { getPoolIdByPoolAddress } from '../../postgresTables/readFunctions/Pools.js';
@@ -157,4 +157,45 @@ export async function getPoolSpecificCexDexArbTable(
   const cexDexArbs: EnrichedCexDexDetails[] = await getCexDexArbsForPoolAndDuration(poolAddress, duration, page);
 
   return { data: cexDexArbs, totalNumberOfCexDexArbs };
+}
+
+export async function getCexDexArbBotLeaderBoardbyTxCountForPoolAndDuration(
+  poolAddress: string,
+  duration: string
+): Promise<ArbBotLeaderBoardbyTxCount[]> {
+  const timeframeStartUnix = getTimeframeTimestamp(duration);
+  const poolId = await getPoolIdByPoolAddress(poolAddress);
+
+  if (!poolId) {
+    throw new Error(`Pool ID not found for address: ${poolAddress}`);
+  }
+
+  const query = `
+    SELECT 
+      cda.bot_address AS contractAddress, 
+      COUNT(*) AS txCount
+    FROM 
+      cex_dex_arbs cda
+    JOIN 
+      transactions t ON cda.tx_id = t.tx_id
+    WHERE 
+      t.block_unixtime >= :timeframeStartUnix
+      AND t.pool_id = :poolId
+      AND cda.bot_address IS NOT NULL
+    GROUP BY 
+      cda.bot_address
+    ORDER BY 
+      txCount DESC
+  `;
+
+  const result: ArbBotLeaderBoardbyTxCount[] = await sequelize.query(query, {
+    type: QueryTypes.SELECT,
+    raw: true,
+    replacements: {
+      timeframeStartUnix,
+      poolId,
+    },
+  });
+
+  return result;
 }

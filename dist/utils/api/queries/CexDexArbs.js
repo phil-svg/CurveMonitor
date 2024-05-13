@@ -118,4 +118,37 @@ export async function getPoolSpecificCexDexArbTable(poolAddress, duration, page)
     const cexDexArbs = await getCexDexArbsForPoolAndDuration(poolAddress, duration, page);
     return { data: cexDexArbs, totalNumberOfCexDexArbs };
 }
+export async function getCexDexArbBotLeaderBoardbyTxCountForPoolAndDuration(poolAddress, duration) {
+    const timeframeStartUnix = getTimeframeTimestamp(duration);
+    const poolId = await getPoolIdByPoolAddress(poolAddress);
+    if (!poolId) {
+        throw new Error(`Pool ID not found for address: ${poolAddress}`);
+    }
+    const query = `
+    SELECT 
+      cda.bot_address AS contractAddress, 
+      COUNT(*) AS txCount
+    FROM 
+      cex_dex_arbs cda
+    JOIN 
+      transactions t ON cda.tx_id = t.tx_id
+    WHERE 
+      t.block_unixtime >= :timeframeStartUnix
+      AND t.pool_id = :poolId
+      AND cda.bot_address IS NOT NULL
+    GROUP BY 
+      cda.bot_address
+    ORDER BY 
+      txCount DESC
+  `;
+    const result = await sequelize.query(query, {
+        type: QueryTypes.SELECT,
+        raw: true,
+        replacements: {
+            timeframeStartUnix,
+            poolId,
+        },
+    });
+    return result;
+}
 //# sourceMappingURL=CexDexArbs.js.map

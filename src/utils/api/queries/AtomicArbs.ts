@@ -1,15 +1,11 @@
 import { Op, QueryTypes } from 'sequelize';
 import { sequelize } from '../../../config/Database.js';
-import { TransactionDetailsForAtomicArbs } from '../../Interfaces.js';
+import { ArbBotLeaderBoardbyTxCount, TransactionDetailsForAtomicArbs } from '../../Interfaces.js';
 import { getTimeframeTimestamp } from '../utils/Timeframes.js';
 import { TotalResult } from '../../postgresTables/readFunctions/Sandwiches.js';
 import { Transactions } from '../../../models/Transactions.js';
 import { AtomicArbs } from '../../../models/AtomicArbs.js';
-import {
-  getPoolIdByPoolAddress,
-  getPoolIdsByAddresses,
-  getPoolIdsFromPoolAddresses,
-} from '../../postgresTables/readFunctions/Pools.js';
+import { getPoolIdByPoolAddress } from '../../postgresTables/readFunctions/Pools.js';
 
 export async function getTotalNumberOfAtomicArbsForDuration(timeDuration: string): Promise<number> {
   const timeframeStartUnix = getTimeframeTimestamp(timeDuration);
@@ -213,4 +209,47 @@ export async function getPoolSpecificAtomicArbTable(
   );
 
   return { data: atomicArbs, totalNumberOfAtomicArbs };
+}
+
+export async function getAtomicArbBotLeaderBoardByTxCountForPoolAndDuration(
+  poolAddress: string,
+  duration: string
+): Promise<ArbBotLeaderBoardbyTxCount[]> {
+  const timeframeStartUnix = getTimeframeTimestamp(duration);
+  const poolId = await getPoolIdByPoolAddress(poolAddress);
+
+  if (!poolId) {
+    throw new Error(`Pool ID not found for address: ${poolAddress}`);
+  }
+
+  const query = `
+    SELECT 
+      td.to AS contractAddress, 
+      COUNT(*) AS txCount
+    FROM 
+      atomic_arbs aa
+    JOIN 
+      transactions t ON aa.tx_id = t.tx_id
+    JOIN 
+      transaction_details td ON t.tx_id = td.tx_id
+    WHERE 
+      t.block_unixtime >= :timeframeStartUnix
+      AND t.pool_id = :poolId
+      AND aa.is_atomic_arb = true
+    GROUP BY 
+      td.to
+    ORDER BY 
+      txCount DESC
+  `;
+
+  const result: ArbBotLeaderBoardbyTxCount[] = await sequelize.query(query, {
+    type: QueryTypes.SELECT,
+    raw: true,
+    replacements: {
+      timeframeStartUnix,
+      poolId,
+    },
+  });
+
+  return result;
 }

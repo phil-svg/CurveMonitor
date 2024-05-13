@@ -5,16 +5,7 @@ const url = 'http://localhost:443';
 // const url = 'wss://api.curvemonitor.com';
 /**
  *
- * Possible Usages of /main
- * emit("Ping")
- * emit("getAbsoluteLabelsRanking")
- * emit("getSandwichLabelOccurrences")
- * emit("getUserSearchResult", userInput)
- * emit("connectToGeneralSandwichLivestream");
- * emit("getFullSandwichTableContent", timeDuration, page);
- * emit("getPoolSpecificSandwichTable", poolAddress, timeDuration, page);
- * emit("connectToGeneralTxLivestream")
- * emit("getPoolSpecificTransactionTable", poolAddress, timeDuration, page)
+ * Find the Endpoint-Overview at the bottom of this file.
  *
  */
 // you say: Ping, I say: Pong. Ping? Pong!
@@ -432,6 +423,65 @@ export function startPoolSpecificCexDexArbTableClient(socket, poolAddress, timeD
         console.log('Total CexDex Arbitrages:', cexDexArbTableContentForPool.totalNumberOfCexDexArbs);
     });
 }
+/*
+Example Response:
+Data: [
+  {
+    contractaddress: '0x00000000009E50a7dDb7a7B0e2ee6604fd120E49',
+    txcount: '389'
+  },
+  {
+    contractaddress: '0x64545160d28Fd0E309277C02D6d73b3923Cc4bFA',
+    txcount: '35'
+  },
+  {
+    contractaddress: '0xbb0f4a10Cc49927572E8ea951CB3b9e5A1F6113d',
+    txcount: '28'
+  },
+  ...
+]
+*/
+export function startAtomicArbBotLeaderBoardByTxCountForPoolAndDuration(socket, poolAddress, timeDuration) {
+    socket.emit('getAtomicArbBotLeaderBoardByTxCountForPoolAndDuration', poolAddress, timeDuration);
+    socket.on('AtomicArbBotLeaderBoardByTxCountForPoolAndDuration', (AtomicArbBotLeaderBoardByTxCountForPoolAndDuration) => {
+        console.log('Received Pool specific Atomic Arb-Table:');
+        console.log('Data:', AtomicArbBotLeaderBoardByTxCountForPoolAndDuration);
+    });
+    handleErrors(socket, '/main');
+}
+/*
+Example Response:
+Data: [
+  {
+    contractaddress: '0x5050e08626c499411B5D0E0b5AF0E83d3fD82EDF',
+    txcount: '332'
+  },
+  {
+    contractaddress: '0x000000000dFDe7deaF24138722987c9a6991e2D4',
+    txcount: '10'
+  },
+  {
+    contractaddress: '0x6F1cDbBb4d53d226CF4B917bF768B94acbAB6168',
+    txcount: '9'
+  },
+  {
+    contractaddress: '0xd42b0ECF8A9f8ba9Db7B0c989d73cf0Bd5f83b66',
+    txcount: '2'
+  },
+  {
+    contractaddress: '0x760762B30991A01F492E9ff067583a0C85d5768F',
+    txcount: '1'
+  }
+]
+*/
+export function startCexDexBotLeaderBoardByTxCountForPoolAndDuration(socket, poolAddress, timeDuration) {
+    socket.emit('getCexDexArbBotLeaderBoardByTxCountForPoolAndDuration', poolAddress, timeDuration);
+    socket.on('CexDexArbBotLeaderBoardByTxCountForPoolAndDuration', (CexDexArbBotLeaderBoardByTxCountForPoolAndDuration) => {
+        console.log('Received Pool specific CexDex Arb-Table:');
+        console.log('Data:', CexDexArbBotLeaderBoardByTxCountForPoolAndDuration);
+    });
+    handleErrors(socket, '/main');
+}
 export async function startTestClient() {
     const mainSocket = io(`${url}/main`);
     console.log(`connecting to ${url}/main`);
@@ -452,9 +502,15 @@ export async function startTestClient() {
         // startFullAtomicArbTableClient(mainSocket, '1 day', 1); // (All Pools)
         // startPoolSpecificAtomicArbTableClient(mainSocket, '0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14', '1 day', 1); // (Pool Specific)
         // startNewAtomicArbClient(mainSocket); // (All Pools, live-feed)
+        // startAtomicArbBotLeaderBoardByTxCountForPoolAndDuration(
+        //   mainSocket,
+        //   '0x02950460e2b9529d0e00284a5fa2d7bdf3fa4d72',
+        //   '1 month'
+        // ); // (Pool Specific)
         // *** cex ***
         // startFullCexDexArbTableClient(mainSocket, '1 day', 1); // (All Pools)
-        startPoolSpecificCexDexArbTableClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', 1); // (Pool Specific)
+        // startPoolSpecificCexDexArbTableClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', 1); // (Pool Specific)
+        startCexDexBotLeaderBoardByTxCountForPoolAndDuration(mainSocket, '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7', '1 month');
         // *************** NOT MEV ********************
         // startNewGeneralTxClient(mainSocket); // (All Pools, live-feed)
         // startPoolSpecificTransactionTable(mainSocket, '0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14', '1 day', 3); // (Pool Specific)

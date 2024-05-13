@@ -335,3 +335,8 @@ export interface CexDexArbTableContent {
   data: EnrichedCexDexDetails[];
   totalNumberOfCexDexArbs: number;
 }
+
+export interface ArbBotLeaderBoardbyTxCount {
+  contractAddress: string;
+  txCount: number;
+}
