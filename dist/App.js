@@ -88,6 +88,7 @@ export async function main() {
     // process.exit();
 }
 // await startTestClient();
+// await runDemoClientForProxyABI();
 startProxyCurvePricesAPI();
 startAPI();
 await main();
