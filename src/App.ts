@@ -119,5 +119,6 @@ export async function main() {
 // await runDemoClientForProxyABI();
 
 startProxyCurvePricesAPI();
-startAPI();
 await main();
+
+// startAPI();

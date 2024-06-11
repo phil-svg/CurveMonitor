@@ -1,11 +1,20 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
 import { fetchChainNames, fetchDataForChain } from './Pools.js';
 export async function startProxyCurvePricesAPI() {
     const app = express();
+    const server = http.createServer(app);
+    const io = new SocketIOServer(server, {
+        cors: {
+            origin: '*',
+            methods: ['GET', 'POST'],
+        },
+    });
     app.use(bodyParser.json());
     const chainDataCache = new Map();
-    // Endpoint for debugging
+    // Debugging endpoint
     app.get('/debug', (req, res) => {
         console.log('Debug endpoint hit');
         res.status(200).send('Debugging endpoint reached successfully!');
@@ -23,6 +32,14 @@ export async function startProxyCurvePricesAPI() {
             res.status(404).send('Data not found for chain: ' + chainName);
         }
     });
+    // WebSocket handling setup
+    io.on('connection', (socket) => {
+        console.log('a user connected via WebSocket');
+        socket.on('disconnect', () => {
+            console.log('user disconnected');
+        });
+        // Other socket event handlers here
+    });
     async function updateDataForAllChains() {
         const chainNames = await fetchChainNames();
         for (const chainName of chainNames) {
@@ -38,9 +55,9 @@ export async function startProxyCurvePricesAPI() {
         }
     }
     setInterval(updateDataForAllChains, 60000);
-    // Start the server
-    const PORT = process.env.PORT || 3000;
-    app.listen(Number(PORT), () => {
+    // Start the server on port 443
+    const PORT = 443;
+    server.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
         updateDataForAllChains(); // Initial data fetch on server start
     });
