@@ -22,8 +22,7 @@ COPY migrations ./migrations
 # Bundle app source inside the docker image (copy dist directory)
 COPY dist ./dist
 
-# Make port 3000 available to the world outside this container
-EXPOSE 3000
+# Make port 8443 available to the world outside this container
 EXPOSE 8443
 
 # Define the command to run the app
