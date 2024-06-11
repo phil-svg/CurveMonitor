@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
-const baseUrl = 'http://localhost:8443';
-// const baseUrl = 'https://api.curvemonitor.com';
+// const baseUrl = 'http://localhost:8443';
+const baseUrl = 'https://api.curvemonitor.com';
 
 async function fetchChainData(chainName: string) {
   const url = `${baseUrl}/proxyCurvePricesAPI/chains/${chainName}`;

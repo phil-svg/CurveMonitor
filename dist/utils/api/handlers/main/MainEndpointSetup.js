@@ -17,7 +17,7 @@ import { handlePoolSpecificCexDexArbRoom } from './CexDexArbsTablePoolSpecific.j
 import { handleAtomicArbBotLeaderBoardByTxCountForPoolAndDuration } from './AtomicArbLeaderboardPoolSpecifcByTxCount.js';
 import { handleCexDexArbBotLeaderBoardByTxCountForPoolAndDuration } from './CexDexArbLeaderboardPoolSpecificByTxCount.js';
 import { handlePoolSpecificAggregatedMevVolume } from './AggregatedMevVolumePoolSpecific.js';
-export function startMainEndpoint(io) {
+export function startMainWsEndpoint(io) {
     const mainRoom = io.of('/main');
     mainRoom.on('connection', (socket) => {
         console.log('Client entered Main-Room.');

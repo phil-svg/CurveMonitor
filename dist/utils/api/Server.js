@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { startMainEndpoint } from './handlers/main/MainEndpointSetup.js';
+import { startMainWsEndpoint } from './handlers/main/MainEndpointSetup.js';
 const port = 443;
 export const startAPI = () => {
     const io = new Server(port, {
@@ -11,7 +11,7 @@ export const startAPI = () => {
     io.on('error', (error) => {
         console.error(`Error at the server level: ${error}`);
     });
-    startMainEndpoint(io);
+    startMainWsEndpoint(io);
     console.log(`Server started on port ${port}`);
 };
 //# sourceMappingURL=Server.js.map

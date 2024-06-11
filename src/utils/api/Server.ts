@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { startMainEndpoint } from './handlers/main/MainEndpointSetup.js';
+import { startMainWsEndpoint } from './handlers/main/MainEndpointSetup.js';
 
 const port = 443;
 
@@ -15,6 +15,6 @@ export const startAPI = (): void => {
     console.error(`Error at the server level: ${error}`);
   });
 
-  startMainEndpoint(io);
+  startMainWsEndpoint(io);
   console.log(`Server started on port ${port}`);
 };

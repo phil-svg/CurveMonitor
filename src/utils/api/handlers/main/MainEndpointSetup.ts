@@ -19,7 +19,7 @@ import { handleAtomicArbBotLeaderBoardByTxCountForPoolAndDuration } from './Atom
 import { handleCexDexArbBotLeaderBoardByTxCountForPoolAndDuration } from './CexDexArbLeaderboardPoolSpecificByTxCount.js';
 import { handlePoolSpecificAggregatedMevVolume } from './AggregatedMevVolumePoolSpecific.js';
 
-export function startMainEndpoint(io: Server): void {
+export function startMainWsEndpoint(io: Server): void {
   const mainRoom = io.of('/main');
 
   mainRoom.on('connection', (socket: Socket) => {

@@ -4,6 +4,7 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 
 import { CurveResponse, fetchChainNames, fetchDataForChain } from './Pools.js';
+import { startMainWsEndpoint } from '../utils/api/handlers/main/MainEndpointSetup.js';
 
 export async function startProxyCurvePricesAPI() {
   const app = express();
@@ -14,6 +15,7 @@ export async function startProxyCurvePricesAPI() {
       methods: ['GET', 'POST'],
     },
   });
+  startMainWsEndpoint(io);
 
   app.use(bodyParser.json());
 
@@ -36,15 +38,6 @@ export async function startProxyCurvePricesAPI() {
     } else {
       res.status(404).send('Data not found for chain: ' + chainName);
     }
-  });
-
-  // WebSocket handling setup
-  io.on('connection', (socket) => {
-    console.log('a user connected via WebSocket');
-    socket.on('disconnect', () => {
-      console.log('user disconnected');
-    });
-    // Other socket event handlers here
   });
 
   async function updateDataForAllChains() {
