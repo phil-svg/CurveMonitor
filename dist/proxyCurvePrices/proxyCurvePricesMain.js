@@ -6,7 +6,7 @@ export async function startProxyCurvePricesAPI() {
     app.use(bodyParser.json());
     const chainDataCache = new Map();
     // Endpoint to get data for a specific chain
-    app.get('/proxyCurvePricesAPI/chains/:chainName', (req, res) => {
+    app.get('proxyCurvePricesAPI/chains/:chainName', (req, res) => {
         console.log('received request: ', req);
         const chainName = req.params.chainName;
         const data = chainDataCache.get(chainName);
@@ -36,7 +36,6 @@ export async function startProxyCurvePricesAPI() {
     // Start the server
     const PORT = process.env.PORT;
     app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
         updateDataForAllChains(); // Initial data fetch on server start
     });
 }
