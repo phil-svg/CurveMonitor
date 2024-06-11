@@ -43,7 +43,7 @@ export async function generateVolumeReportForPoolArr(startDate, endDate) {
     let aggregateDailyAtomicArbVolumes = {};
     let aggregateDailyCexDexArbVolumes = {};
     let poolCounter = 0;
-    const poolArr = stableswapNGPoolAddressArr;
+    const poolArr = stableswapPoolAddressArr;
     for (const poolAddress of poolArr) {
         poolCounter++;
         console.log(poolCounter, poolArr.length);
@@ -155,7 +155,6 @@ export async function calculateAndSaveAggregateWeeklyVolumeReport(startUnixtime,
 }
 function sortWeeklyData(data) {
     return Object.entries(data).sort((a, b) => {
-        // Assuming the week format is sortable as a string, like "2023-W01"
         return a[0].localeCompare(b[0]);
     });
 }

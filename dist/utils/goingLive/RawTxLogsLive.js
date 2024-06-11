@@ -5,8 +5,11 @@ import { insertAtomicArbDetails } from '../postgresTables/AtomicArbs.js';
 import { insertTokenTransfers, solveCleanTransfersForTx } from '../postgresTables/CleanedTransfers.js';
 import { fetchContractAgeInRealtime } from '../postgresTables/ContractCreations.js';
 import { storeCexDexArbFlag } from '../postgresTables/IsCexDexArb.js';
+import { updatePriceMap } from '../postgresTables/PriceMap.js';
 import { storeEvent } from '../postgresTables/RawLogs.js';
 import { fetchAndSaveReceipt } from '../postgresTables/Receipts.js';
+import { populateTransactionCoinsWithDollarValues } from '../postgresTables/TransactionCoins.js';
+import { updateValueUsd } from '../postgresTables/TransactionPricing.js';
 import { saveTransactionTrace } from '../postgresTables/TransactionTraces.js';
 import { solveSingleTdId } from '../postgresTables/TransactionsDetails.js';
 import { fetchDataThenDetectArb } from '../postgresTables/mevDetection/atomic/atomicArb.js';
@@ -109,9 +112,17 @@ async function processBufferedEvents() {
     const eventBlockNumbers = eventBuffer.flatMap((event) => event.event.blockNumber !== undefined ? [event.event.blockNumber] : []);
     const EVENTS = await fetchEventsForChunkParsing(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
     const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
-    const POOL_COINS = await getPoolCoinsForLiveMode();
+    const poolCoins = await getPoolCoinsForLiveMode();
+    // price-update
+    if (eventFlags.txPricing) {
+        // effectively updating coin prices once every 10 minutes (50*12s)
+        if (eventBlockNumbers[0] % 50 === 0)
+            await updatePriceMap();
+        await populateTransactionCoinsWithDollarValues();
+        await updateValueUsd();
+    }
     // Parsing
-    await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, POOL_COINS);
+    await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, poolCoins);
     eventBuffer = [];
     const PARSED_TX = await fetchTransactionsForBlock(eventBlockNumbers[0]);
     // Saving Parsed Tx to db

@@ -19,14 +19,14 @@ import { updateAtomicArbDetection } from './utils/postgresTables/mevDetection/at
 import { updateTxTraces } from './utils/postgresTables/TransactionTraces.js';
 import { updateReceipts } from './utils/postgresTables/Receipts.js';
 import { updateContractCreations } from './utils/postgresTables/ContractCreations.js';
-import { updatePriceMap } from './utils/postgresTables/PriceMap.js';
-import { populateTransactionCoinsWithDollarValues } from './utils/postgresTables/TransactionCoins.js';
 import { updateCexDexArbDetection } from './utils/postgresTables/mevDetection/cexdex/CexDexArb.js';
 import { updateCleanedTransfers } from './utils/postgresTables/CleanedTransfers.js';
 import { bootWsProvider } from './utils/web3Calls/generic.js';
 import { checkWsConnectionViaNewBlocks, eraseWebProvider, setupDeadWebsocketListener, } from './utils/goingLive/WebsocketConnectivityChecks.js';
 import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
+import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
+import { startProxyCurvePricesAPI } from './proxyCurvePrices/proxyCurvePricesMain.js';
 export async function initDatabase() {
     try {
         await db.sync();
@@ -45,6 +45,8 @@ export async function main() {
     eventFlags.canEmitGeneralTx = false;
     eventFlags.canEmitAtomicArb = false;
     eventFlags.canEmitCexDexArb = false;
+    eventFlags.canEmitSandwich = false;
+    eventFlags.txPricing = false;
     await eraseWebProvider(); // cleaning all perhaps existing WS.
     await bootWsProvider(); // starting new WS connection.
     eventEmitter.removeAllListeners();
@@ -64,8 +66,8 @@ export async function main() {
     eventFlags.canEmitCexDexArb = true;
     await updateBlockTimestamps();
     await updateContractCreations();
-    await updatePriceMap(); // has to run before updateAtomicArbDetection
-    await populateTransactionCoinsWithDollarValues();
+    await updateTransactionPricing();
+    eventFlags.txPricing = true;
     await parseEvents();
     await updateTransactionsDetails();
     await updateSandwichDetection();
@@ -86,6 +88,7 @@ export async function main() {
     // process.exit();
 }
 // await startTestClient();
+startProxyCurvePricesAPI();
 startAPI();
 await main();
 //# sourceMappingURL=App.js.map

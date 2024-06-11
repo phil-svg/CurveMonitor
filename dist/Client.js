@@ -482,6 +482,13 @@ export function startCexDexBotLeaderBoardByTxCountForPoolAndDuration(socket, poo
     });
     handleErrors(socket, '/main');
 }
+export function startPoolSpecificAggregatedMevVolumeClient(socket, poolAddress, timeDuration, timeInterval) {
+    socket.emit('getPoolSpecificAggregatedMevVolume', poolAddress, timeDuration, timeInterval);
+    socket.on('poolSpecificAggregatedMevVolume', (aggregatedMevVolumeForPool) => {
+        console.log('Received Pool specific Aggregated MEV Volume:');
+        console.log('Data:', aggregatedMevVolumeForPool.data);
+    });
+}
 export async function startTestClient() {
     const mainSocket = io(`${url}/main`);
     console.log(`connecting to ${url}/main`);
@@ -492,6 +499,11 @@ export async function startTestClient() {
         // startUserSearchClient(mainSocket, 'crvu');
         // startPoolLabel(mainSocket, "0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2");
         // *************** MEV **************************
+        // *** aggregated ***
+        startPoolSpecificAggregatedMevVolumeClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', {
+            value: 1,
+            unit: 'month',
+        }); // (Pool Specific)
         // *** sammich ***
         // startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
         // startAbsoluteLabelsRankingClient(mainSocket); // (All Pools)
@@ -510,7 +522,11 @@ export async function startTestClient() {
         // *** cex ***
         // startFullCexDexArbTableClient(mainSocket, '1 day', 1); // (All Pools)
         // startPoolSpecificCexDexArbTableClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', 1); // (Pool Specific)
-        startCexDexBotLeaderBoardByTxCountForPoolAndDuration(mainSocket, '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7', '1 month');
+        // startCexDexBotLeaderBoardByTxCountForPoolAndDuration(
+        //   mainSocket,
+        //   '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7',
+        //   '1 month'
+        // );
         // *************** NOT MEV ********************
         // startNewGeneralTxClient(mainSocket); // (All Pools, live-feed)
         // startPoolSpecificTransactionTable(mainSocket, '0x4eBdF703948ddCEA3B11f675B4D1Fba9d2414A14', '1 day', 3); // (Pool Specific)

@@ -9,8 +9,10 @@ import {
   AtomicArbTableContent,
   CexDexArbTableContent,
   EnrichedTransactionDetail,
+  IntervalInput,
   TransactionDetailsForAtomicArbs,
 } from './utils/Interfaces.js';
+import { DurationInput } from './utils/api/utils/Timeframes.js';
 
 // Replace with "wss://api.curvemonitor.com" for production
 const url = 'http://localhost:443';
@@ -601,6 +603,20 @@ export function startCexDexBotLeaderBoardByTxCountForPoolAndDuration(
   handleErrors(socket, '/main');
 }
 
+export function startPoolSpecificAggregatedMevVolumeClient(
+  socket: Socket,
+  poolAddress: string,
+  timeDuration: DurationInput,
+  timeInterval: IntervalInput
+) {
+  socket.emit('getPoolSpecificAggregatedMevVolume', poolAddress, timeDuration, timeInterval);
+
+  socket.on('poolSpecificAggregatedMevVolume', (aggregatedMevVolumeForPool: AggregatedMevVolume) => {
+    console.log('Received Pool specific Aggregated MEV Volume:');
+    console.log('Data:', aggregatedMevVolumeForPool.data);
+  });
+}
+
 export async function startTestClient() {
   const mainSocket = io(`${url}/main`);
   console.log(`connecting to ${url}/main`);
@@ -614,6 +630,13 @@ export async function startTestClient() {
     // startPoolLabel(mainSocket, "0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2");
 
     // *************** MEV **************************
+
+    // *** aggregated ***
+
+    startPoolSpecificAggregatedMevVolumeClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', {
+      value: 1,
+      unit: 'month',
+    }); // (Pool Specific)
 
     // *** sammich ***
 
@@ -641,11 +664,11 @@ export async function startTestClient() {
     // startFullCexDexArbTableClient(mainSocket, '1 day', 1); // (All Pools)
     // startPoolSpecificCexDexArbTableClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', 1); // (Pool Specific)
 
-    startCexDexBotLeaderBoardByTxCountForPoolAndDuration(
-      mainSocket,
-      '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7',
-      '1 month'
-    );
+    // startCexDexBotLeaderBoardByTxCountForPoolAndDuration(
+    //   mainSocket,
+    //   '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7',
+    //   '1 month'
+    // );
 
     // *************** NOT MEV ********************
 

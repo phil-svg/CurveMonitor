@@ -259,7 +259,7 @@ async function processEvents(query: string, typesUpForParsing: string) {
 
     batchCount = missingTxHashesWithPoolIds.length;
     if (batchCount > 0) {
-      console.log(batchCount, 'tx to parse', typesUpForParsing);
+      // console.log(batchCount, 'tx to parse', typesUpForParsing);
       await processTxHashesBatchOfRawLogs(missingTxHashesWithPoolIds, typesUpForParsing);
     }
 

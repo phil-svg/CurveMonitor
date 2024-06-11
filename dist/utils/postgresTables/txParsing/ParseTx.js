@@ -199,7 +199,7 @@ async function processEvents(query, typesUpForParsing) {
         });
         batchCount = missingTxHashesWithPoolIds.length;
         if (batchCount > 0) {
-            console.log(batchCount, 'tx to parse', typesUpForParsing);
+            // console.log(batchCount, 'tx to parse', typesUpForParsing);
             await processTxHashesBatchOfRawLogs(missingTxHashesWithPoolIds, typesUpForParsing);
         }
         offset += batchSize; // Prepare the offset for the next batch

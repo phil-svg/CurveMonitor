@@ -17,6 +17,7 @@ import { handlePoolSpecificAtomicArbRoom } from './AtomicArbTablePoolSpecific.js
 import { handlePoolSpecificCexDexArbRoom } from './CexDexArbsTablePoolSpecific.js';
 import { handleAtomicArbBotLeaderBoardByTxCountForPoolAndDuration } from './AtomicArbLeaderboardPoolSpecifcByTxCount.js';
 import { handleCexDexArbBotLeaderBoardByTxCountForPoolAndDuration } from './CexDexArbLeaderboardPoolSpecificByTxCount.js';
+import { handlePoolSpecificAggregatedMevVolume } from './AggregatedMevVolumePoolSpecific.js';
 
 export function startMainEndpoint(io: Server): void {
   const mainRoom = io.of('/main');
@@ -42,6 +43,7 @@ export function startMainEndpoint(io: Server): void {
     handlePoolSpecificCexDexArbRoom(socket);
     handleAtomicArbBotLeaderBoardByTxCountForPoolAndDuration(socket);
     handleCexDexArbBotLeaderBoardByTxCountForPoolAndDuration(socket);
+    handlePoolSpecificAggregatedMevVolume(socket);
   });
 }
 

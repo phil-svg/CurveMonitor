@@ -18,6 +18,7 @@ import { fxThings } from './atomicArb/fxArbs.js';
 import { aggregateCexDexBotVolumeOverTime, writeDBotVolOverTimeataToExcel } from './cexdex/BotVolOverTime.js';
 import { countCoinSwapsForBotAndPool } from './cexdex/ClusteredTxCoins.js';
 import { calculateTotalVolumeAndVolumePerBot } from './cexdex/GlobalVolume.js';
+import { compareOracleAgainstSpot } from './crvUSD/OralceChart.js';
 import { barChartRace } from './curvefi/BarChartRace.js';
 import { gasUsageThings, getGasUsageFromCsvFile } from './curvefi/GasUsage.js';
 import { priceImpactThings } from './curvefi/PriceImpact.js';
@@ -37,6 +38,7 @@ import {
   calculateLossStatistics,
   createSandwichLossInUsdJsonFile,
   createSandwichLossInUsdJsonFileFor2023,
+  exportSandwichDataForToContract,
   fetchSandwichUserLossForAllPoolsForTimePeriod,
   fetchSandwichUserLossForSomePoolsForTimePeriod,
   fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriod,
@@ -88,17 +90,19 @@ export async function research() {
   const bitgetRouter = '0x1A8f43e01B78979EB4Ef7feBEC60F32c9A72f58E';
 
   const startDate = '2023-03-20';
-  const endDate = '2024-04-20';
+  const endDate = '2024-05-30';
 
   const startBlockNumber = 19620526;
   const endBlockNumber = 19625525;
 
-  // const startDate = "2021-01-01";
-  // const endDate = "2022-07-31";
+  const pendleRouterV4 = '0x888888888889758F76e7103c6CbF23ABbF58F946';
 
   console.log('conducting research');
 
-  await studyTokenBalanceOfWallet();
+  await compareOracleAgainstSpot();
+  // await profitableSandwichThings();
+  // await exportSandwichDataForToContract(pendleRouterV4, startDate, endDate);
+  // await studyTokenBalanceOfWallet();
   // await fxThings();
   // await uniswapV3EntryPoint()
   // await oneInchVolThings();
@@ -110,10 +114,9 @@ export async function research() {
   // await generateVolumeReportForPoolArr(startDate, endDate);
   // await getGasUsageFromCsvFile();
   // await fetchSandwichUserLossForSomePoolsForTimePeriod(stableswapPoolAddressArr, startDate, endDate);
-  // await profitableSandwichThings();
   // await gasUsageThings();
   // await createSandwichLossInUsdJsonFileFor2023();
-  // await generateVolumeReportForSinglePool(pyusdFxusdPool, startDate, endDate);
+  // await generateVolumeReportForSinglePool(_3Pool, startDate, endDate);
   // await generateVolumeReportForSinglePoolHighRes(pyusdFxusdPool, startBlockNumber, endBlockNumber, startDate, endDate);
   // await barChartRace();
   // await priceImpactThings();

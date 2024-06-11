@@ -1,5 +1,5 @@
 import { getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
-import { studyTokenBalanceOfWallet } from './DefiMonitooor/DexAggregators/Research/WalletBalanceChanges.js';
+import { compareOracleAgainstSpot } from './crvUSD/OralceChart.js';
 /*
 0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7 3Pool
 0xdc24316b9ae028f1497c275eb9192a3ea0f67022 stETH
@@ -32,13 +32,15 @@ export async function research() {
     const stableswapNGPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP_NG);
     const bitgetRouter = '0x1A8f43e01B78979EB4Ef7feBEC60F32c9A72f58E';
     const startDate = '2023-03-20';
-    const endDate = '2024-04-20';
+    const endDate = '2024-05-30';
     const startBlockNumber = 19620526;
     const endBlockNumber = 19625525;
-    // const startDate = "2021-01-01";
-    // const endDate = "2022-07-31";
+    const pendleRouterV4 = '0x888888888889758F76e7103c6CbF23ABbF58F946';
     console.log('conducting research');
-    await studyTokenBalanceOfWallet();
+    await compareOracleAgainstSpot();
+    // await profitableSandwichThings();
+    // await exportSandwichDataForToContract(pendleRouterV4, startDate, endDate);
+    // await studyTokenBalanceOfWallet();
     // await fxThings();
     // await uniswapV3EntryPoint()
     // await oneInchVolThings();
@@ -50,10 +52,9 @@ export async function research() {
     // await generateVolumeReportForPoolArr(startDate, endDate);
     // await getGasUsageFromCsvFile();
     // await fetchSandwichUserLossForSomePoolsForTimePeriod(stableswapPoolAddressArr, startDate, endDate);
-    // await profitableSandwichThings();
     // await gasUsageThings();
     // await createSandwichLossInUsdJsonFileFor2023();
-    // await generateVolumeReportForSinglePool(pyusdFxusdPool, startDate, endDate);
+    // await generateVolumeReportForSinglePool(_3Pool, startDate, endDate);
     // await generateVolumeReportForSinglePoolHighRes(pyusdFxusdPool, startBlockNumber, endBlockNumber, startDate, endDate);
     // await barChartRace();
     // await priceImpactThings();

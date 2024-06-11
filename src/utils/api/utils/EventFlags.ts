@@ -3,5 +3,6 @@ export const eventFlags = {
   canEmitGeneralTx: false,
   canEmitAtomicArb: false,
   canEmitCexDexArb: false,
+  txPricing: false,
   // Other flags
 };

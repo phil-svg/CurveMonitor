@@ -1,15 +1,15 @@
-import { Op, Sequelize } from "sequelize";
-import { TransactionCoins } from "../../models/TransactionCoins.js";
-import { FirstPriceTimestamp } from "../../models/FirstTokenPrices.js";
-import { getFirstTokenPriceData, getTokenPriceChartData } from "../TokenPrices/txValue/DefiLlama.js";
-import { findCoinAddressById } from "./readFunctions/Coins.js";
-import { dbInceptionBlock } from "./RawLogs.js";
-import { PriceMap } from "../../models/PriceMap.js";
-import { getLatestStoredPriceTimestampForCoin } from "./readFunctions/PriceMap.js";
+import { Op, Sequelize } from 'sequelize';
+import { TransactionCoins } from '../../models/TransactionCoins.js';
+import { FirstPriceTimestamp } from '../../models/FirstTokenPrices.js';
+import { getFirstTokenPriceData, getTokenPriceChartData } from '../TokenPrices/txValue/DefiLlama.js';
+import { findCoinAddressById } from './readFunctions/Coins.js';
+import { dbInceptionBlock } from './RawLogs.js';
+import { PriceMap } from '../../models/PriceMap.js';
+import { getLatestStoredPriceTimestampForCoin } from './readFunctions/PriceMap.js';
 // finds all coins which have been transacted in curve pools.
 async function getUniqueCoinIds() {
     const uniqueCoinIds = await TransactionCoins.findAll({
-        attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("coin_id")), "coin_id"]],
+        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('coin_id')), 'coin_id']],
         raw: true,
     });
     return uniqueCoinIds.map((u) => u.coin_id);
@@ -60,21 +60,23 @@ async function fetchAndStoreEarliestPriceTimestamp() {
         }
     }
     catch (error) {
-        console.error("An error occurred:", error);
+        console.error('An error occurred:', error);
     }
 }
 async function determineStartTime(firstPriceEntry) {
     const currentUnixTime = Math.floor(Date.now() / 1000);
     let startTime = dbInceptionBlock;
-    if (firstPriceEntry && firstPriceEntry.firstTimestampDefillama && firstPriceEntry.firstTimestampDefillama > dbInceptionBlock) {
+    if (firstPriceEntry &&
+        firstPriceEntry.firstTimestampDefillama &&
+        firstPriceEntry.firstTimestampDefillama > dbInceptionBlock) {
         startTime = firstPriceEntry.firstTimestampDefillama;
     }
     const daysSinceStart = Math.floor((currentUnixTime - startTime) / (24 * 60 * 60));
     return { start: startTime, span: daysSinceStart };
 }
 async function handlePriceChartResponse(tokenAddress, coinId, priceChartResponse, latestTimestamp) {
-    if (priceChartResponse === "missing") {
-        console.log("priceChartFromDefiLlama missing for", tokenAddress);
+    if (priceChartResponse === 'missing') {
+        console.log('priceChartFromDefiLlama missing for', tokenAddress);
         await FirstPriceTimestamp.update({ firstTimestampDefillama: 420 }, { where: { coin_id: coinId } });
         return;
     }
@@ -92,16 +94,16 @@ async function handlePriceChartResponse(tokenAddress, coinId, priceChartResponse
         }
     }
 }
-async function processSingleCoin(coinId) {
+export async function processSingleCoinForPriceChart(coinId) {
     try {
         const tokenAddress = await findCoinAddressById(coinId);
         const firstPriceEntry = await FirstPriceTimestamp.findOne({
             where: { coin_id: coinId },
-            attributes: ["firstTimestampDefillama"],
+            attributes: ['firstTimestampDefillama'],
             raw: true,
         });
         if (!firstPriceEntry) {
-            console.log("firstPriceEntry not found for coinId", coinId);
+            console.log('firstPriceEntry not found for coinId', coinId);
             return;
         }
         let { start, span } = await determineStartTime(firstPriceEntry);
@@ -114,7 +116,7 @@ async function processSingleCoin(coinId) {
         // If there is, we calculate a new span from the latest timestamp to now.
         const currentUnixTime = Math.floor(Date.now() / 1000);
         span = latestTimestamp ? Math.floor((currentUnixTime - newStart) / (24 * 60 * 60)) : span;
-        const period = "1d";
+        const period = '1d';
         const searchWidth = 600;
         // Only fetch if we have a span of at least one day
         if (span > 0) {
@@ -135,10 +137,10 @@ async function logTransactionCoinsStats() {
         console.log(`Priced entries: ${totalPricedEntries} of ${totalEntries} (${((totalPricedEntries / totalEntries) * 100).toFixed(2)}%)`);
     }
     catch (error) {
-        console.error("Error calculating stats:", error);
+        console.error('Error calculating stats:', error);
     }
 }
-async function fetchAndStorePriceCharts() {
+export async function fetchAndStorePriceCharts() {
     try {
         const uniqueCoinIds = await getUniqueCoinIds();
         const coinIdsToProcess = await filterCoinIds(uniqueCoinIds);
@@ -146,19 +148,19 @@ async function fetchAndStorePriceCharts() {
         for (const coinId of coinIdsToProcess) {
             counter++;
             if (counter % 100 === 0 && coinIdsToProcess.length > 201)
-                console.log("Fetching Price Charts", counter, coinIdsToProcess.length);
-            await processSingleCoin(coinId);
+                console.log('Fetching Price Charts', counter, coinIdsToProcess.length);
+            await processSingleCoinForPriceChart(coinId);
         }
-        console.log("[✓] Price charts fetched and stored successfully.");
+        // console.log('[✓] Price charts fetched and stored successfully.');
     }
     catch (error) {
-        console.error("An error occurred while fetching price charts:", error);
+        console.error('An error occurred while fetching price charts:', error);
     }
 }
 export async function updatePriceMap() {
     await fetchAndStoreEarliestPriceTimestamp();
     await fetchAndStorePriceCharts();
     // await logTransactionCoinsStats();
-    console.log(`[✓] Price Map updated successfully.`);
+    // console.log(`[✓] Price Map updated successfully.`);
 }
 //# sourceMappingURL=PriceMap.js.map

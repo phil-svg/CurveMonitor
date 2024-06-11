@@ -70,7 +70,7 @@ export async function generateVolumeReportForPoolArr(startDate: string, endDate:
 
   let poolCounter = 0;
 
-  const poolArr = stableswapNGPoolAddressArr;
+  const poolArr = stableswapPoolAddressArr;
 
   for (const poolAddress of poolArr) {
     poolCounter++;
@@ -227,7 +227,6 @@ type WeeklyVolumeData = {
 
 function sortWeeklyData(data: WeeklyVolumeData): [string, number[]][] {
   return Object.entries(data).sort((a, b) => {
-    // Assuming the week format is sortable as a string, like "2023-W01"
     return a[0].localeCompare(b[0]);
   });
 }

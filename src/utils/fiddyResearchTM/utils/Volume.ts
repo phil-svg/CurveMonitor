@@ -5,7 +5,6 @@ import { fetchAtomicArbsForPoolAndTime } from '../../postgresTables/readFunction
 import {
   fetchTransactionsForPoolAndTime,
   fetchTransactionsWithCoinsByTxIds,
-  getTxHashByTxId,
 } from '../../postgresTables/readFunctions/Transactions.js';
 import { fetchCexDexArbTxIdsForPoolAndTime } from '../../postgresTables/readFunctions/CexDexArbs.js';
 import { solveRevenueLowerBoundInUSD } from '../../postgresTables/mevDetection/cexdex/utils/revenueProfitThings/LowerBoundSolver.js';
@@ -72,10 +71,13 @@ export async function calculateDailyVolumes(
     transaction.transactionCoins.forEach((coin) => {
       if (coin.dollar_value != null) {
         const valueToAdd = Number(coin.dollar_value);
+        if (valueToAdd > 100 * 1e6) {
+          console.log(transaction.tx_hash, Number((valueToAdd / 1e6).toFixed(0)));
+        }
         if (valueToAdd < 50 * 1e9) {
           if (transaction.transaction_type === TransactionType.Swap && coin.direction === 'out') {
             // if (valueToAdd > 100000) {
-            //   console.log(Number(valueToAdd.toFixed(0)), transaction.tx_hash);
+            //   console.log(transaction.tx_hash, Number((valueToAdd / 1e6).toFixed(3)));
             // }
             acc[day] += valueToAdd;
           } else if (transaction.transaction_type === TransactionType.Deposit && coin.direction === 'in') {

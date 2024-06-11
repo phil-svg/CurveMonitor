@@ -17,23 +17,55 @@ export async function updateSandwichFlagForSingleTx(txID, isSandwich) {
     }
 }
 export async function getUncheckedTransactionsForSandwichDetection(offset, BATCH_SIZE) {
-    const query = `
-        SELECT 
-            t.tx_id, t.pool_id, t.event_id, t.tx_hash, t.block_number, t.block_unixtime,
-            t.transaction_type, t.trader, t.tx_position, t.raw_fees, t.fee_usd, t.value_usd
-        FROM 
-            transactions t
-        LEFT JOIN 
-            is_sandwich isw ON t.tx_id = isw.tx_id
-        WHERE 
-            isw.tx_id IS NULL
-        ORDER BY 
-            t.block_number ASC, t.pool_id ASC
-        LIMIT 
-            :BATCH_SIZE
-        OFFSET 
-            :offset;
+    // Check if the 'is_sandwich' table exists
+    const checkTableExists = `
+    SELECT EXISTS (
+      SELECT FROM 
+        information_schema.tables 
+      WHERE 
+        table_schema = 'public' AND 
+        table_name = 'is_sandwich'
+    );
+  `;
+    const tableExists = await sequelize.query(checkTableExists, {
+        type: QueryTypes.SELECT,
+        raw: true,
+    });
+    let query;
+    if (tableExists[0].exists) {
+        query = `
+      SELECT 
+          t.tx_id, t.pool_id, t.event_id, t.tx_hash, t.block_number, t.block_unixtime,
+          t.transaction_type, t.trader, t.tx_position, t.raw_fees, t.fee_usd, t.value_usd
+      FROM 
+          transactions t
+      LEFT JOIN 
+          is_sandwich isw ON t.tx_id = isw.tx_id
+      WHERE 
+          isw.tx_id IS NULL
+      ORDER BY 
+          t.block_number ASC, t.pool_id ASC
+      LIMIT 
+          :BATCH_SIZE
+      OFFSET 
+          :offset;
     `;
+    }
+    else {
+        query = `
+      SELECT 
+          t.tx_id, t.pool_id, t.event_id, t.tx_hash, t.block_number, t.block_unixtime,
+          t.transaction_type, t.trader, t.tx_position, t.raw_fees, t.fee_usd, t.value_usd
+      FROM 
+          transactions t
+      ORDER BY 
+          t.block_number ASC, t.pool_id ASC
+      LIMIT 
+          :BATCH_SIZE
+      OFFSET 
+          :offset;
+    `;
+    }
     const result = await sequelize.query(query, {
         type: QueryTypes.SELECT,
         raw: true,
@@ -69,7 +101,13 @@ export async function getUncheckedTransactionCount() {
  */
 // queries the db, and runs the parsed tx in batches through the detection process.
 async function detectSandwichesInAllTransactions() {
-    const totalUncheckedCount = await getUncheckedTransactionCount();
+    let totalUncheckedCount;
+    try {
+        totalUncheckedCount = await getUncheckedTransactionCount();
+    }
+    catch (error) {
+        totalUncheckedCount = 0;
+    }
     let totalTransactionsCount = await getTotalTransactionsCount();
     let batchSize;
     if (totalUncheckedCount < 10000) {

@@ -1,10 +1,10 @@
-import { Op } from "sequelize";
-import { PriceMap } from "../../models/PriceMap.js";
-import { TransactionCoins } from "../../models/TransactionCoins.js";
-import { Transactions } from "../../models/Transactions.js";
-import { logProgress } from "../helperFunctions/QualityOfLifeStuff.js";
-import { getAllUniqueCoinIds } from "./readFunctions/PriceMap.js";
-import { FirstPriceTimestamp } from "../../models/FirstTokenPrices.js";
+import { Op } from 'sequelize';
+import { PriceMap } from '../../models/PriceMap.js';
+import { TransactionCoins } from '../../models/TransactionCoins.js';
+import { Transactions } from '../../models/Transactions.js';
+import { logProgress } from '../helperFunctions/QualityOfLifeStuff.js';
+import { getAllUniqueCoinIds } from './readFunctions/PriceMap.js';
+import { FirstPriceTimestamp } from '../../models/FirstTokenPrices.js';
 
 async function txOlderThanFirstPrice(transactionCoin: TransactionCoins): Promise<boolean> {
   // Extract coin_id and block_unixtime from the transaction
@@ -19,7 +19,11 @@ async function txOlderThanFirstPrice(transactionCoin: TransactionCoins): Promise
   });
 
   // If there's no first price timestamp entry for the coin or if firstTimestampDefillama is null or undefined, return false
-  if (!firstPriceEntry || firstPriceEntry.firstTimestampDefillama === null || firstPriceEntry.firstTimestampDefillama === undefined) {
+  if (
+    !firstPriceEntry ||
+    firstPriceEntry.firstTimestampDefillama === null ||
+    firstPriceEntry.firstTimestampDefillama === undefined
+  ) {
     return false;
   }
 
@@ -39,13 +43,13 @@ async function filterForPricedByDefiLlama(uniqueCoinIds: number[]): Promise<numb
           [Op.ne]: 420,
         },
       },
-      attributes: ["coin_id"],
+      attributes: ['coin_id'],
     });
 
     const pricedCoinIds = pricedCoins.map((entry) => entry.coin_id);
     return pricedCoinIds;
   } catch (error) {
-    console.error("Error filtering for priced by DeFiLlama:", error);
+    console.error('Error filtering for priced by DeFiLlama:', error);
     return [];
   }
 }
@@ -69,7 +73,7 @@ export async function populateTransactionCoinsWithDollarValues(): Promise<void> 
           [Op.in]: uniquePricedCoinIds, // Filter by coin_ids that are in the uniquePricedCoinIds array
         },
       },
-      include: [{ model: Transactions, attributes: ["block_unixtime", "tx_hash"], required: true }],
+      include: [{ model: Transactions, attributes: ['block_unixtime', 'tx_hash'], required: true }],
       limit: batchSize,
       offset: offset,
     });
@@ -82,14 +86,14 @@ export async function populateTransactionCoinsWithDollarValues(): Promise<void> 
       counter++;
       const transactionUnixTime = transactionCoin.transaction.block_unixtime;
 
-      logProgress("Populating prices", 1000, counter, totalTimeTaken, totalRecordsProcessed + transactions.length);
+      logProgress('Populating prices', 1000, counter, totalTimeTaken, totalRecordsProcessed + transactions.length);
 
       let priceEntry = await PriceMap.findOne({
         where: {
           coin_id: transactionCoin.coin_id,
           price_timestamp: { [Op.lte]: transactionUnixTime },
         },
-        order: [["price_timestamp", "DESC"]],
+        order: [['price_timestamp', 'DESC']],
         limit: 1,
       });
 
@@ -101,7 +105,7 @@ export async function populateTransactionCoinsWithDollarValues(): Promise<void> 
           try {
             await transactionCoin.save();
           } catch (err) {
-            console.error("Error updating transaction coin:", err);
+            console.error('Error updating transaction coin:', err);
           }
         }
       }
@@ -116,10 +120,10 @@ export async function populateTransactionCoinsWithDollarValues(): Promise<void> 
           try {
             await transactionCoin.save();
           } catch (err) {
-            console.error("Error updating transaction coin:", err);
+            console.error('Error updating transaction coin:', err);
           }
         } else {
-          console.log("funny price");
+          console.log('funny price');
         }
       } else {
         // console.log("missing priceEntry", transactionCoin.coin_id, transactionCoin.transaction.tx_hash);
@@ -132,5 +136,5 @@ export async function populateTransactionCoinsWithDollarValues(): Promise<void> 
     offset += batchSize;
   }
 
-  console.log(`[✓] Prices populated successfully.`);
+  // console.log(`[✓] Prices populated successfully.`);
 }

@@ -1,14 +1,42 @@
-export const getTimeframeTimestamp = (duration: string): number => {
-  const now = Math.floor(Date.now() / 1000); // Convert milliseconds to seconds
-  switch (duration) {
-    case "1 day":
-      return now - 24 * 60 * 60;
-    case "1 week":
-      return now - 7 * 24 * 60 * 60;
-    case "1 month":
-      return now - 30 * 24 * 60 * 60;
-    case "full":
-    default:
-      return 0; // Return earliest possible timestamp for "full" history
+import { DurationInput, DurationType } from '../../Interfaces.js';
+
+function parseDuration(input: DurationInput): DurationType {
+  if (typeof input === 'string') {
+    const match = input.match(/(\d+)\s*(minute|minutes|hour|hours|day|days|week|weeks|month|months|year|years|full)/i);
+    if (match) {
+      const value = parseInt(match[1], 10);
+      const unit = match[2].toLowerCase() as DurationType['unit'];
+      return { value, unit };
+    }
+    throw new Error('Invalid duration string format');
   }
-};
+  return input as DurationType;
+}
+
+export function getTimeframeTimestamp(durationInput: DurationInput): number {
+  const now = Math.floor(Date.now() / 1000); // Convert milliseconds to seconds
+  const duration = parseDuration(durationInput);
+
+  if (duration.unit === 'full') {
+    return 0; // Return earliest possible timestamp for "full" history
+  }
+
+  const unitSeconds = {
+    minute: 60,
+    minutes: 60,
+    hour: 60 * 60,
+    hours: 60 * 60,
+    day: 24 * 60 * 60,
+    days: 24 * 60 * 60,
+    week: 7 * 24 * 60 * 60,
+    weeks: 7 * 24 * 60 * 60,
+    month: 30 * 24 * 60 * 60,
+    months: 30 * 24 * 60 * 60,
+    year: 365 * 24 * 60 * 60,
+    years: 365 * 24 * 60 * 60,
+  };
+
+  const durationInSeconds = duration.value * unitSeconds[duration.unit];
+
+  return now - durationInSeconds;
+}

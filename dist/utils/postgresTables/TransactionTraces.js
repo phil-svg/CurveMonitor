@@ -27,7 +27,8 @@ export async function saveTransactionTrace(txHash, transactionTrace) {
         }
     }
     else {
-        console.log(`failed to fetch trace for tx ${txHash}`);
+        // console.log(`failed to fetch trace for tx ${txHash}`);
+        console.log(`failed to fetch some trace`);
     }
 }
 export async function getTxTracesToBeFetchedSet() {

@@ -340,3 +340,25 @@ export interface ArbBotLeaderBoardbyTxCount {
   contractAddress: string;
   txCount: number;
 }
+
+export interface DurationType {
+  value: number;
+  unit:
+    | 'minute'
+    | 'minutes'
+    | 'hour'
+    | 'hours'
+    | 'day'
+    | 'days'
+    | 'week'
+    | 'weeks'
+    | 'month'
+    | 'months'
+    | 'year'
+    | 'years'
+    | 'full';
+}
+
+export type DurationInput = DurationType | string;
+
+export type IntervalInput = DurationType | 'max';

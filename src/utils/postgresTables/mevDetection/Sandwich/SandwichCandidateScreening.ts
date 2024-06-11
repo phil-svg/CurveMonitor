@@ -1,11 +1,11 @@
-import { ExtendedTransactionData } from "../../../Interfaces.js";
-import { calcTheLossOfCurveUserFromSandwich, saveSandwich } from "./SandwichUtils.js";
-import { Transactions } from "../../../../models/Transactions.js";
-import { eventFlags } from "../../../api/utils/EventFlags.js";
-import eventEmitter from "../../../goingLive/EventEmitter.js";
-import { Sandwiches } from "../../../../models/Sandwiches.js";
-import { priceTransaction } from "../../../TokenPrices/txValue/PriceTransaction.js";
-import { updateSandwichFlagForSingleTx } from "./SandwichDetection.js";
+import { ExtendedTransactionData } from '../../../Interfaces.js';
+import { calcTheLossOfCurveUserFromSandwich, saveSandwich } from './SandwichUtils.js';
+import { Transactions } from '../../../../models/Transactions.js';
+import { eventFlags } from '../../../api/utils/EventFlags.js';
+import eventEmitter from '../../../goingLive/EventEmitter.js';
+import { Sandwiches } from '../../../../models/Sandwiches.js';
+import { priceTransaction } from '../../../TokenPrices/txValue/PriceTransaction.js';
+import { updateSandwichFlagForSingleTx } from './SandwichDetection.js';
 
 /**
  * Function: getBotTransactions
@@ -41,11 +41,11 @@ async function getBotTransactions(candidate: ExtendedTransactionData[]): Promise
       const tx2 = candidate[j];
 
       // Check if the transactions have the same trader and are both swaps
-      if (tx1.trader === tx2.trader && tx1.transaction_type === "swap" && tx2.transaction_type === "swap") {
-        const tx1InCoin = tx1.transactionCoins.find((coin) => coin.direction === "in");
-        const tx1OutCoin = tx1.transactionCoins.find((coin) => coin.direction === "out");
-        const tx2InCoin = tx2.transactionCoins.find((coin) => coin.direction === "in");
-        const tx2OutCoin = tx2.transactionCoins.find((coin) => coin.direction === "out");
+      if (tx1.trader === tx2.trader && tx1.transaction_type === 'swap' && tx2.transaction_type === 'swap') {
+        const tx1InCoin = tx1.transactionCoins.find((coin) => coin.direction === 'in');
+        const tx1OutCoin = tx1.transactionCoins.find((coin) => coin.direction === 'out');
+        const tx2InCoin = tx2.transactionCoins.find((coin) => coin.direction === 'in');
+        const tx2OutCoin = tx2.transactionCoins.find((coin) => coin.direction === 'out');
 
         // Check if the trade route was coinA -> coinB, then coinB -> coinA
         if (tx1InCoin && tx1OutCoin && tx2InCoin && tx2OutCoin) {
@@ -108,9 +108,12 @@ async function getBotTransactions(candidate: ExtendedTransactionData[]): Promise
  * Returns:
  * @returns {Promise<ExtendedTransactionData[]>} - An array of transaction data objects identified as potential loss transactions.
  */
-async function findPotentialLossTransactions(botTransaction: ExtendedTransactionData[], candidate: ExtendedTransactionData[]): Promise<ExtendedTransactionData[]> {
+async function findPotentialLossTransactions(
+  botTransaction: ExtendedTransactionData[],
+  candidate: ExtendedTransactionData[]
+): Promise<ExtendedTransactionData[]> {
   if (botTransaction.length !== 2) {
-    throw new Error("botTransaction array must contain exactly two transactions");
+    throw new Error('botTransaction array must contain exactly two transactions');
   }
 
   let potentialLossTx: ExtendedTransactionData[] = [];
@@ -129,7 +132,10 @@ async function findPotentialLossTransactions(botTransaction: ExtendedTransaction
   return potentialLossTx;
 }
 
-async function processSingleSandwich(botTransaction: ExtendedTransactionData[], candidate: ExtendedTransactionData[]): Promise<void> {
+async function processSingleSandwich(
+  botTransaction: ExtendedTransactionData[],
+  candidate: ExtendedTransactionData[]
+): Promise<void> {
   const frontrunTxId = botTransaction[0].tx_id!;
   const frontrunTransaction = await Transactions.findOne({ where: { tx_id: frontrunTxId } });
 
@@ -140,6 +146,7 @@ async function processSingleSandwich(botTransaction: ExtendedTransactionData[], 
   const potentialLossTransactions = await findPotentialLossTransactions(botTransaction, candidate);
   let extractedFromCurve = false;
   let lossTransactions: any = [];
+  let sandwichCenterTxId = null;
 
   for (const potentialLossTransaction of potentialLossTransactions) {
     let lossInfo = await calcTheLossOfCurveUserFromSandwich(potentialLossTransaction);
@@ -159,6 +166,7 @@ async function processSingleSandwich(botTransaction: ExtendedTransactionData[], 
         lossInUsd: lossInUsd,
       });
       extractedFromCurve = true;
+      sandwichCenterTxId = potentialLossTransaction.tx_id;
     }
   }
 
@@ -167,20 +175,27 @@ async function processSingleSandwich(botTransaction: ExtendedTransactionData[], 
   }
 
   // Save sandwich with pool_id
-  await saveSandwich(frontrunTransaction.pool_id, botTransaction[0].tx_id!, botTransaction[1].tx_id!, extractedFromCurve, lossTransactions);
+  await saveSandwich(
+    frontrunTransaction.pool_id,
+    botTransaction[0].tx_id!,
+    botTransaction[1].tx_id!,
+    extractedFromCurve,
+    lossTransactions
+  );
   await updateSandwichFlagForSingleTx(botTransaction[0].tx_id!, false);
   await updateSandwichFlagForSingleTx(botTransaction[1].tx_id!, false);
+  await updateSandwichFlagForSingleTx(sandwichCenterTxId!, true);
 
   // If everything is up to date, we livestream new sandwiches to clients.
   if (eventFlags.canEmitSandwich) {
     const latestSandwich = await Sandwiches.findOne({
-      order: [["id", "DESC"]],
-      attributes: ["id"],
+      order: [['id', 'DESC']],
+      attributes: ['id'],
       raw: true,
     });
 
     const latestSandwichId = latestSandwich ? latestSandwich.id : null;
-    eventEmitter.emit("New Sandwich for General-Sandwich-Livestream-Subscribers", latestSandwichId);
+    eventEmitter.emit('New Sandwich for General-Sandwich-Livestream-Subscribers', latestSandwichId);
   }
 }
 

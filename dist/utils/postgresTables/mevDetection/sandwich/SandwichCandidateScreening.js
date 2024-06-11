@@ -1,10 +1,10 @@
-import { calcTheLossOfCurveUserFromSandwich, saveSandwich } from "./SandwichUtils.js";
-import { Transactions } from "../../../../models/Transactions.js";
-import { eventFlags } from "../../../api/utils/EventFlags.js";
-import eventEmitter from "../../../goingLive/EventEmitter.js";
-import { Sandwiches } from "../../../../models/Sandwiches.js";
-import { priceTransaction } from "../../../TokenPrices/txValue/PriceTransaction.js";
-import { updateSandwichFlagForSingleTx } from "./SandwichDetection.js";
+import { calcTheLossOfCurveUserFromSandwich, saveSandwich } from './SandwichUtils.js';
+import { Transactions } from '../../../../models/Transactions.js';
+import { eventFlags } from '../../../api/utils/EventFlags.js';
+import eventEmitter from '../../../goingLive/EventEmitter.js';
+import { Sandwiches } from '../../../../models/Sandwiches.js';
+import { priceTransaction } from '../../../TokenPrices/txValue/PriceTransaction.js';
+import { updateSandwichFlagForSingleTx } from './SandwichDetection.js';
 /**
  * Function: getBotTransactions
  *
@@ -36,11 +36,11 @@ async function getBotTransactions(candidate) {
             const tx1 = candidate[i];
             const tx2 = candidate[j];
             // Check if the transactions have the same trader and are both swaps
-            if (tx1.trader === tx2.trader && tx1.transaction_type === "swap" && tx2.transaction_type === "swap") {
-                const tx1InCoin = tx1.transactionCoins.find((coin) => coin.direction === "in");
-                const tx1OutCoin = tx1.transactionCoins.find((coin) => coin.direction === "out");
-                const tx2InCoin = tx2.transactionCoins.find((coin) => coin.direction === "in");
-                const tx2OutCoin = tx2.transactionCoins.find((coin) => coin.direction === "out");
+            if (tx1.trader === tx2.trader && tx1.transaction_type === 'swap' && tx2.transaction_type === 'swap') {
+                const tx1InCoin = tx1.transactionCoins.find((coin) => coin.direction === 'in');
+                const tx1OutCoin = tx1.transactionCoins.find((coin) => coin.direction === 'out');
+                const tx2InCoin = tx2.transactionCoins.find((coin) => coin.direction === 'in');
+                const tx2OutCoin = tx2.transactionCoins.find((coin) => coin.direction === 'out');
                 // Check if the trade route was coinA -> coinB, then coinB -> coinA
                 if (tx1InCoin && tx1OutCoin && tx2InCoin && tx2OutCoin) {
                     if (tx1InCoin.coin_id === tx2OutCoin.coin_id && tx1OutCoin.coin_id === tx2InCoin.coin_id) {
@@ -100,7 +100,7 @@ async function getBotTransactions(candidate) {
  */
 async function findPotentialLossTransactions(botTransaction, candidate) {
     if (botTransaction.length !== 2) {
-        throw new Error("botTransaction array must contain exactly two transactions");
+        throw new Error('botTransaction array must contain exactly two transactions');
     }
     let potentialLossTx = [];
     let botTxPosition1 = botTransaction[0].tx_position;
@@ -122,6 +122,7 @@ async function processSingleSandwich(botTransaction, candidate) {
     const potentialLossTransactions = await findPotentialLossTransactions(botTransaction, candidate);
     let extractedFromCurve = false;
     let lossTransactions = [];
+    let sandwichCenterTxId = null;
     for (const potentialLossTransaction of potentialLossTransactions) {
         let lossInfo = await calcTheLossOfCurveUserFromSandwich(potentialLossTransaction);
         if (!lossInfo) {
@@ -140,6 +141,7 @@ async function processSingleSandwich(botTransaction, candidate) {
                 lossInUsd: lossInUsd,
             });
             extractedFromCurve = true;
+            sandwichCenterTxId = potentialLossTransaction.tx_id;
         }
     }
     if (lossTransactions.length === 0) {
@@ -149,15 +151,16 @@ async function processSingleSandwich(botTransaction, candidate) {
     await saveSandwich(frontrunTransaction.pool_id, botTransaction[0].tx_id, botTransaction[1].tx_id, extractedFromCurve, lossTransactions);
     await updateSandwichFlagForSingleTx(botTransaction[0].tx_id, false);
     await updateSandwichFlagForSingleTx(botTransaction[1].tx_id, false);
+    await updateSandwichFlagForSingleTx(sandwichCenterTxId, true);
     // If everything is up to date, we livestream new sandwiches to clients.
     if (eventFlags.canEmitSandwich) {
         const latestSandwich = await Sandwiches.findOne({
-            order: [["id", "DESC"]],
-            attributes: ["id"],
+            order: [['id', 'DESC']],
+            attributes: ['id'],
             raw: true,
         });
         const latestSandwichId = latestSandwich ? latestSandwich.id : null;
-        eventEmitter.emit("New Sandwich for General-Sandwich-Livestream-Subscribers", latestSandwichId);
+        eventEmitter.emit('New Sandwich for General-Sandwich-Livestream-Subscribers', latestSandwichId);
     }
 }
 export async function screenCandidate(candidate) {

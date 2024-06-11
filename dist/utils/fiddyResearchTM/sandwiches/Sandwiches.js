@@ -1,16 +1,17 @@
-import { Op } from "sequelize";
-import { Pool } from "../../../models/Pools.js";
-import { Sandwiches } from "../../../models/Sandwiches.js";
-import { Transactions } from "../../../models/Transactions.js";
-import { getTxIdsForPoolForGiven_Duration } from "../../helperFunctions/CrossQueries.js";
-import ExcelJS from "exceljs";
-import { priceTransactionFromTxId } from "../../TokenPrices/txValue/PriceTransaction.js";
-import { convertDateToUnixTime } from "../../helperFunctions/QualityOfLifeStuff.js";
-import { TransactionDetails } from "../../../models/TransactionDetails.js";
-import { getPoolIdsByAddresses } from "../../postgresTables/readFunctions/Pools.js";
-import { writeFileSync } from "fs";
-import { getBlockNumberFromTxId } from "../../postgresTables/readFunctions/Transactions.js";
-import { getTimestampByBlockNumber } from "../../postgresTables/readFunctions/Blocks.js";
+import { Op } from 'sequelize';
+import { Pool } from '../../../models/Pools.js';
+import { Sandwiches } from '../../../models/Sandwiches.js';
+import { Transactions } from '../../../models/Transactions.js';
+import { getTxIdsForPoolForGiven_Duration } from '../../helperFunctions/CrossQueries.js';
+import ExcelJS from 'exceljs';
+import { priceTransactionFromTxId } from '../../TokenPrices/txValue/PriceTransaction.js';
+import { convertDateToUnixTime } from '../../helperFunctions/QualityOfLifeStuff.js';
+import { TransactionDetails } from '../../../models/TransactionDetails.js';
+import { getPoolIdsByAddresses } from '../../postgresTables/readFunctions/Pools.js';
+import { writeFileSync } from 'fs';
+import { getBlockNumberFromTxId } from '../../postgresTables/readFunctions/Transactions.js';
+import { getTimestampByBlockNumber } from '../../postgresTables/readFunctions/Blocks.js';
+import * as fs from 'fs';
 export async function fetchSandwichUserLossForAllPoolsForTimePeriod(startDate, endDate) {
     const startUnixtime = convertDateToUnixTime(startDate);
     const endUnixtime = convertDateToUnixTime(endDate);
@@ -19,7 +20,7 @@ export async function fetchSandwichUserLossForAllPoolsForTimePeriod(startDate, e
         include: [
             {
                 model: Transactions,
-                as: "frontrunTransaction",
+                as: 'frontrunTransaction',
                 where: {
                     block_unixtime: {
                         [Op.gte]: startUnixtime,
@@ -29,7 +30,7 @@ export async function fetchSandwichUserLossForAllPoolsForTimePeriod(startDate, e
                 required: true,
             },
         ],
-        order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+        order: [[{ model: Transactions, as: 'frontrunTransaction' }, 'block_unixtime', 'DESC']],
     });
     let totalLossInUsd = 0;
     // Iterate over each sandwich to sum up the lossInUsd from loss_transactions
@@ -41,7 +42,7 @@ export async function fetchSandwichUserLossForAllPoolsForTimePeriod(startDate, e
             });
         }
     });
-    console.log("totalLossInUsd", totalLossInUsd);
+    console.log('totalLossInUsd', totalLossInUsd);
     return totalLossInUsd;
 }
 export async function fetchSandwichUserLossForSomePoolsForTimePeriod(poolAddresses, startDate, endDate) {
@@ -58,7 +59,7 @@ export async function fetchSandwichUserLossForSomePoolsForTimePeriod(poolAddress
         include: [
             {
                 model: Transactions,
-                as: "frontrunTransaction",
+                as: 'frontrunTransaction',
                 where: {
                     block_unixtime: {
                         [Op.gte]: startUnixtime,
@@ -68,7 +69,7 @@ export async function fetchSandwichUserLossForSomePoolsForTimePeriod(poolAddress
                 required: true,
             },
         ],
-        order: [[{ model: Transactions, as: "frontrunTransaction" }, "block_unixtime", "DESC"]],
+        order: [[{ model: Transactions, as: 'frontrunTransaction' }, 'block_unixtime', 'DESC']],
     });
     let totalLossInUsd = 0;
     let numberOfSandwichedCurveTx = 0;
@@ -82,7 +83,7 @@ export async function fetchSandwichUserLossForSomePoolsForTimePeriod(poolAddress
             });
         }
     });
-    console.log("Total loss in USD for selected pools", totalLossInUsd, "amongst", numberOfSandwichedCurveTx, "sandwiched curve-tx.");
+    console.log('Total loss in USD for selected pools', totalLossInUsd, 'amongst', numberOfSandwichedCurveTx, 'sandwiched curve-tx.');
     return totalLossInUsd;
 }
 export async function fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriod(poolAddress, startDate, endDate) {
@@ -95,14 +96,14 @@ export async function fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriod(pool
         where: { address: { [Op.iLike]: poolAddress.toLowerCase() } },
     });
     if (!pool) {
-        throw new Error("Pool not found");
+        throw new Error('Pool not found');
     }
     // Fetch sandwiches related to the specific pool and within the specified time period with loss_transactions
     const sandwiches = await Sandwiches.findAll({
         include: [
             {
                 model: Transactions,
-                as: "frontrunTransaction",
+                as: 'frontrunTransaction',
                 include: [
                     {
                         model: TransactionDetails,
@@ -115,7 +116,7 @@ export async function fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriod(pool
         where: {
             pool_id: pool.id,
             loss_transactions: { [Op.not]: null },
-            "$frontrunTransaction.block_unixtime$": {
+            '$frontrunTransaction.block_unixtime$': {
                 [Op.gte]: startUnixTime,
                 [Op.lt]: endUnixTime,
             },
@@ -128,7 +129,7 @@ export async function fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriod(pool
             botOccurrences.set(botAddress, (botOccurrences.get(botAddress) || 0) + 1);
         }
     }
-    console.log("botOccurrences", [...botOccurrences]);
+    console.log('botOccurrences', [...botOccurrences]);
     return botOccurrences;
 }
 export async function fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriodAndCalledContract(poolAddress, startDate, endDate, calledContract) {
@@ -140,12 +141,12 @@ export async function fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriodAndCa
         where: { address: { [Op.iLike]: poolAddress.toLowerCase() } },
     });
     if (!pool)
-        throw new Error("Pool not found");
+        throw new Error('Pool not found');
     const sandwiches = await Sandwiches.findAll({
         where: {
             pool_id: pool.id,
             loss_transactions: { [Op.not]: null },
-            "$frontrunTransaction.block_unixtime$": {
+            '$frontrunTransaction.block_unixtime$': {
                 [Op.gte]: startUnixTime,
                 [Op.lt]: endUnixTime,
             },
@@ -153,7 +154,7 @@ export async function fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriodAndCa
         include: [
             {
                 model: Transactions,
-                as: "frontrunTransaction",
+                as: 'frontrunTransaction',
                 include: [
                     {
                         model: TransactionDetails,
@@ -186,7 +187,7 @@ export async function fetchUniqueSandwichBotOccurrencesForPoolAndTimePeriodAndCa
             }
         }
     }
-    console.log("botOccurrences", botOccurrences);
+    console.log('botOccurrences', botOccurrences);
     return botOccurrences;
 }
 export async function getSandwichTxIdsForGiven_Pool_Duration_VictimToContract(poolAddress, startDate, endDate, victimTo) {
@@ -234,15 +235,15 @@ export async function getSandwichTxIdsForGiven_Pool_Duration_VictimToContract(po
         };
     }
     catch (error) {
-        console.error("Error fetching sandwich transaction IDs:", error);
+        console.error('Error fetching sandwich transaction IDs:', error);
         return { victimTxIds: [], frontrunBackrunTxIds: [] };
     }
 }
 export async function sandwichVictimTo_Plots(fullTxIds, sandwichTxIds, relatedTxIds, timeInterval, saveToExcelFlag = false) {
     let aggregatedData = { fullSet: {}, sandwichSet: {}, relatedSet: {} };
     const timeIntervalInSeconds = {
-        "1h": 3600,
-        "4h": 14400,
+        '1h': 3600,
+        '4h': 14400,
         daily: 86400,
         weekly: 604800,
         monthly: 2592000,
@@ -265,9 +266,9 @@ export async function sandwichVictimTo_Plots(fullTxIds, sandwichTxIds, relatedTx
             }
         }
     };
-    await aggregateTxIds(fullTxIds, "fullSet");
-    await aggregateTxIds(sandwichTxIds, "sandwichSet");
-    await aggregateTxIds(relatedTxIds, "relatedSet");
+    await aggregateTxIds(fullTxIds, 'fullSet');
+    await aggregateTxIds(sandwichTxIds, 'sandwichSet');
+    await aggregateTxIds(relatedTxIds, 'relatedSet');
     if (saveToExcelFlag) {
         await saveToExcel(aggregatedData);
     }
@@ -288,12 +289,12 @@ function unixToExcelDate(unixTimestamp) {
 }
 async function saveToExcel(data) {
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Data");
+    const sheet = workbook.addWorksheet('Data');
     sheet.columns = [
-        { header: "Time", key: "time", width: 20 },
-        { header: "Full Set Volume", key: "fullSetVolume", width: 20 },
-        { header: "Sandwich Set Volume", key: "sandwichSetVolume", width: 20 },
-        { header: "Related Set Volume", key: "relatedSetVolume", width: 20 },
+        { header: 'Time', key: 'time', width: 20 },
+        { header: 'Full Set Volume', key: 'fullSetVolume', width: 20 },
+        { header: 'Sandwich Set Volume', key: 'sandwichSetVolume', width: 20 },
+        { header: 'Related Set Volume', key: 'relatedSetVolume', width: 20 },
     ];
     // Combine and sort data based on the timestamps
     const combinedData = {};
@@ -318,18 +319,18 @@ async function saveToExcel(data) {
         });
     });
     // Format the 'time' column to display as date
-    sheet.getColumn("time").numFmt = "mm/dd/yyyy";
-    const fileName = "sandwichVictimToPlots.xlsx";
+    sheet.getColumn('time').numFmt = 'mm/dd/yyyy';
+    const fileName = 'sandwichVictimToPlots.xlsx';
     await workbook.xlsx.writeFile(fileName);
     console.log(`Data saved to ${fileName}`);
 }
 export async function mosRequest_SandwichVolShareDueToMisconfigRouters() {
-    const poolAddress = "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46";
-    const targetAddress = "0x22cE84A7F86662b78E49C6ec9E51D60FddE7b70A";
-    const allTxIds = await getTxIdsForPoolForGiven_Duration(poolAddress, "2023-09-28", "2024-01-28");
-    const foundSandwichTxIds = await getSandwichTxIdsForGiven_Pool_Duration_VictimToContract(poolAddress, "2023-09-28", "2024-01-28", targetAddress);
-    await sandwichVictimTo_Plots(allTxIds, foundSandwichTxIds.victimTxIds, foundSandwichTxIds.frontrunBackrunTxIds, "daily", true);
-    console.log("done");
+    const poolAddress = '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46';
+    const targetAddress = '0x22cE84A7F86662b78E49C6ec9E51D60FddE7b70A';
+    const allTxIds = await getTxIdsForPoolForGiven_Duration(poolAddress, '2023-09-28', '2024-01-28');
+    const foundSandwichTxIds = await getSandwichTxIdsForGiven_Pool_Duration_VictimToContract(poolAddress, '2023-09-28', '2024-01-28', targetAddress);
+    await sandwichVictimTo_Plots(allTxIds, foundSandwichTxIds.victimTxIds, foundSandwichTxIds.frontrunBackrunTxIds, 'daily', true);
+    console.log('done');
 }
 // prints stats on user loss in usd, average, min, max, etc
 export async function calculateLossStatistics() {
@@ -340,7 +341,7 @@ export async function calculateLossStatistics() {
                     [Op.not]: null,
                 },
             },
-            attributes: ["loss_transactions"],
+            attributes: ['loss_transactions'],
         });
         // Flatten all lossInUsd values into a single array
         const allLossesInUsd = sandwiches.flatMap((sandwich) => sandwich.loss_transactions.map((lossTx) => lossTx.lossInUsd));
@@ -372,7 +373,7 @@ export async function calculateLossStatistics() {
         console.log(`Standard Deviation of Loss in USD: ${stdDeviation}`);
     }
     catch (error) {
-        console.error("Failed to calculate loss statistics:", error);
+        console.error('Failed to calculate loss statistics:', error);
     }
 }
 export async function createSandwichLossInUsdJsonFile() {
@@ -382,20 +383,20 @@ export async function createSandwichLossInUsdJsonFile() {
             where: {
                 loss_transactions: { [Op.not]: null },
             },
-            attributes: ["loss_transactions"],
+            attributes: ['loss_transactions'],
         });
         // Transform the data
         const lossInUsdArray = sandwiches.flatMap((sandwich) => sandwich.loss_transactions.map((lossTx) => lossTx.lossInUsd));
         // Prepare the data for the JSON file
         const jsonData = JSON.stringify(lossInUsdArray, null, 2);
         // Define the JSON file name and path
-        const filePath = "./lossInUsdData.json";
+        const filePath = './lossInUsdData.json';
         // Write to a JSON file
-        writeFileSync(filePath, jsonData, "utf-8");
+        writeFileSync(filePath, jsonData, 'utf-8');
         console.log(`Data successfully written to ${filePath}`);
     }
     catch (error) {
-        console.error("Failed to create JSON file:", error);
+        console.error('Failed to create JSON file:', error);
     }
 }
 export async function createSandwichLossInUsdJsonFileFor2023() {
@@ -404,7 +405,7 @@ export async function createSandwichLossInUsdJsonFileFor2023() {
             where: {
                 loss_transactions: { [Op.not]: null },
             },
-            attributes: ["loss_transactions"],
+            attributes: ['loss_transactions'],
         });
         let lossInUsdArrayFor2023 = [];
         // Sequentially process each sandwich to await asynchronous operations
@@ -425,13 +426,43 @@ export async function createSandwichLossInUsdJsonFileFor2023() {
         // Prepare the data for the JSON file
         const jsonData = JSON.stringify(lossInUsdArrayFor2023, null, 2);
         // Define the JSON file name and path
-        const filePath = "./lossInUsdData2023.json"; // Changed file name to reflect the year
+        const filePath = './lossInUsdData2023.json'; // Changed file name to reflect the year
         // Write to a JSON file
-        writeFileSync(filePath, jsonData, "utf-8");
+        writeFileSync(filePath, jsonData, 'utf-8');
         console.log(`Data successfully written to ${filePath}`);
     }
     catch (error) {
-        console.error("Failed to create JSON file for 2023:", error);
+        console.error('Failed to create JSON file for 2023:', error);
+    }
+}
+export async function exportSandwichDataForToContract(contractAddress, startDate, endDate) {
+    const startUnixtime = convertDateToUnixTime(startDate);
+    const endUnixtime = convertDateToUnixTime(endDate);
+    try {
+        const sandwiches = await Sandwiches.findAll({
+            where: {
+                source_of_loss_contract_address: {
+                    [Op.iLike]: contractAddress,
+                },
+                extracted_from_curve: true,
+            },
+        });
+        let results = [];
+        for (const sandwich of sandwiches) {
+            const victimTx = await Transactions.findByPk(sandwich.loss_transactions[0].tx_id);
+            if (victimTx && victimTx.block_unixtime >= startUnixtime && victimTx.block_unixtime <= endUnixtime) {
+                results.push({
+                    txHash: victimTx.tx_hash,
+                    lossInUSD: sandwich.loss_transactions[0].lossInUsd,
+                });
+            }
+        }
+        results.sort((a, b) => a.lossInUSD - b.lossInUSD);
+        fs.writeFileSync('sandwiches_output.json', JSON.stringify(results, null, 2));
+        console.log('Data exported successfully to sandwiches_output.json');
+    }
+    catch (error) {
+        console.error('Error fetching sandwich data:', error);
     }
 }
 //# sourceMappingURL=Sandwiches.js.map
