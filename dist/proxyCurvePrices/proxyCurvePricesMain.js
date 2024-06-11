@@ -5,9 +5,14 @@ export async function startProxyCurvePricesAPI() {
     const app = express();
     app.use(bodyParser.json());
     const chainDataCache = new Map();
+    // Endpoint for debugging
+    app.get('/debug', (req, res) => {
+        console.log('Debug endpoint hit');
+        res.status(200).send('Debugging endpoint reached successfully!');
+    });
     // Endpoint to get data for a specific chain
     app.get('/proxyCurvePricesAPI/chains/:chainName', (req, res) => {
-        console.log('received request: ', req);
+        console.log('received request: ', req.params.chainName);
         const chainName = req.params.chainName;
         const data = chainDataCache.get(chainName);
         console.log('data: ', data);
@@ -36,6 +41,7 @@ export async function startProxyCurvePricesAPI() {
     // Start the server
     const PORT = process.env.PORT || 3000;
     app.listen(Number(PORT), () => {
+        console.log(`Server running on port ${PORT}`);
         updateDataForAllChains(); // Initial data fetch on server start
     });
 }
