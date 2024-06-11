@@ -10,6 +10,7 @@ import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
 import { addCustomLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
 import { preparingLiveModeForRawEvents } from './utils/goingLive/RawTxLogsLive.js';
+import { startAPI } from './utils/api/Server.js';
 import { updateTransactionsDetails } from './utils/postgresTables/TransactionsDetails.js';
 import { updateAddressCounts } from './utils/postgresTables/CalledAddressCounts.js';
 import { eventFlags } from './utils/api/utils/EventFlags.js';
@@ -89,6 +90,6 @@ export async function main() {
 // await startTestClient();
 // await runDemoClientForProxyABI();
 startProxyCurvePricesAPI();
-// startAPI();
+startAPI();
 await main();
 //# sourceMappingURL=App.js.map
