@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 const baseUrl = 'https://api.curvemonitor.com';
 
 async function fetchChainData(chainName: string) {
-  const url = `${baseUrl}/proxyCurvePricesAPI/chains/${chainName}`;
+  const url = `${baseUrl}/proxyCurvePricesAPI/${chainName}`;
   console.log('url: ', url);
 
   try {
