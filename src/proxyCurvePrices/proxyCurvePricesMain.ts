@@ -10,7 +10,7 @@ export async function startProxyCurvePricesAPI() {
   const chainDataCache = new Map<string, CurveResponse>();
 
   // Endpoint to get data for a specific chain
-  app.get('proxyCurvePricesAPI/chains/:chainName', (req, res) => {
+  app.get('/proxyCurvePricesAPI/:chainName', (req, res) => {
     console.log('received request: ', req);
     const chainName = req.params.chainName;
     const data = chainDataCache.get(chainName);
