@@ -1,8 +1,8 @@
 import { io } from 'socket.io-client';
 import { topBestPerformingLabels, topWorstPerformingLabels } from './utils/helperFunctions/Client.js';
 // Replace with "wss://api.curvemonitor.com" for production
-const url = 'http://localhost:443';
-// const url = 'wss://api.curvemonitor.com';
+// const url = 'http://localhost:443';
+const url = 'wss://api.curvemonitor.com';
 /**
  *
  * Find the Endpoint-Overview at the bottom of this file.
@@ -497,13 +497,13 @@ export async function startTestClient() {
         //  *************** GENERAL STUFF ***************
         // startPingClient(mainSocket);
         // startUserSearchClient(mainSocket, 'crvu');
-        // startPoolLabel(mainSocket, "0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2");
+        startPoolLabel(mainSocket, '0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2');
         // *************** MEV **************************
         // *** aggregated ***
-        startPoolSpecificAggregatedMevVolumeClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', {
-            value: 1,
-            unit: 'month',
-        }); // (Pool Specific)
+        // startPoolSpecificAggregatedMevVolumeClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', {
+        //   value: 1,
+        //   unit: 'month',
+        // }); // (Pool Specific)
         // *** sammich ***
         // startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
         // startAbsoluteLabelsRankingClient(mainSocket); // (All Pools)

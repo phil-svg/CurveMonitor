@@ -35,7 +35,7 @@ export async function startProxyCurvePricesAPI() {
     setInterval(updateDataForAllChains, 60000);
     // Start the server
     const PORT = process.env.PORT || 3000;
-    app.listen(Number(PORT), '0.0.0.0', () => {
+    app.listen(Number(PORT), () => {
         updateDataForAllChains(); // Initial data fetch on server start
     });
 }
