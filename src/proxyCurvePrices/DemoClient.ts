@@ -5,6 +5,7 @@ const baseUrl = 'https://api.curvemonitor.com';
 
 async function fetchChainData(chainName: string) {
   const url = `${baseUrl}/proxyCurvePricesAPI/chains/${chainName}`;
+  console.log('url: ', url);
 
   try {
     const response = await fetch(url, {
@@ -27,15 +28,8 @@ async function fetchChainData(chainName: string) {
   }
 }
 
-// Usage: Fetch data for "ethereum"
-fetchChainData('ethereum').then((data) => {
-  if (data) {
-    console.log('Successfully fetched chain data:', data);
-  }
-});
-
 export async function runDemoClientForProxyABI() {
-  const chainName = 'base';
+  const chainName = 'ethereum';
   const chainData = await fetchChainData(chainName);
   console.log(chainData);
 }
