@@ -118,7 +118,5 @@ export async function main() {
 // await startTestClient();
 // await runDemoClientForProxyABI();
 
-startProxyCurvePricesAPI();
+startAPI({ wsBool: true }, { httpBool: true });
 await main();
-
-// startAPI();
