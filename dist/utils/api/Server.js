@@ -1,23 +1,8 @@
-import { Server } from 'socket.io';
 import { startMainWsEndpoint } from './handlers/main/MainEndpointSetup.js';
 import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { startHttpEndpoint } from '../../proxyCurvePrices/proxyCurvePricesMain.js';
-const port = 443;
-export const startAPIOld = () => {
-    const io = new Server(port, {
-        cors: {
-            origin: '*',
-            methods: ['GET', 'POST'],
-        },
-    });
-    io.on('error', (error) => {
-        console.error(`Error at the server level: ${error}`);
-    });
-    startMainWsEndpoint(io);
-    console.log(`Server started on port ${port}`);
-};
 export const startAPI = ({ wsBool }, { httpBool }) => {
     const app = express();
     const server = http.createServer(app);

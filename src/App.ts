@@ -33,7 +33,6 @@ import {
 import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
 import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
-import { startProxyCurvePricesAPI } from './proxyCurvePrices/proxyCurvePricesMain.js';
 import { runDemoClientForProxyABI } from './proxyCurvePrices/DemoClient.js';
 
 export async function initDatabase() {

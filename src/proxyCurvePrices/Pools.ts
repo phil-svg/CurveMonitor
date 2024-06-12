@@ -61,8 +61,8 @@ export async function fetchChainNames(): Promise<string[]> {
 }
 
 export async function fetchDataForChain(chainName: string): Promise<CurveResponse | null> {
-  console.log(`Fetching data for ${chainName}...`);
-  const url = `https://prices.curve.fi/v1/chains/${chainName}?page=1&per_page=100`;
+  // console.log(`Fetching data for ${chainName}...`);
+  const url = `https://prices.curve.fi/v1/chains/${chainName}?page=1&per_page=9999`;
 
   try {
     const response = await fetch(url, {
