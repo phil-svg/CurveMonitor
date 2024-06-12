@@ -1,10 +1,18 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 
 import { CurveResponse, fetchChainNames, fetchDataForChain } from './Pools.js';
 
 export async function startHttpEndpoint(app: express.Application) {
   app.use(bodyParser.json());
+
+  const corsOptions = {
+    origin: ['http://localhost:8080', 'https://api.curvemonitor.com'],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  };
+  app.use(cors(corsOptions));
 
   const cache_curveprices_endpoint_chains = new Map<string, CurveResponse>();
   async function update_cache_curveprices_endpoint_chains() {
