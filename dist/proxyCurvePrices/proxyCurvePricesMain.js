@@ -4,7 +4,7 @@ import { fetchChainNames, fetchDataForChain } from './Pools.js';
 export async function startHttpEndpoint(app) {
     app.use(bodyParser.json());
     const corsOptions = {
-        origin: ['http://localhost:8080', 'https://api.curvemonitor.com'],
+        origin: ['http://localhost:8080', 'https://api.curvemonitor.com', 'https://curvemonitor.com'],
         methods: ['GET', 'POST'],
         credentials: true,
     };
