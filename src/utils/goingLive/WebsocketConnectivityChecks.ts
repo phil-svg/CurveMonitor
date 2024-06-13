@@ -11,7 +11,7 @@ export async function checkWsConnectionViaNewBlocks() {
   let lastReveivedBlockNumber = 0;
   subscription = WEB3_WS_PROVIDER.eth.subscribe('newBlockHeaders', async (err, blockHeader) => {
     lastReveivedBlockNumber = blockHeader.number;
-    // console.log("New block", blockHeader.number);
+    console.log('New block', blockHeader.number);
     if (blockHeader.number) {
       logMemoryUsage(blockHeader.number.toString());
     } else {

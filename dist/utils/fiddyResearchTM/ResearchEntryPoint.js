@@ -1,5 +1,5 @@
 import { getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
-import { compareOracleAgainstSpot } from './crvUSD/OralceChart.js';
+import { getPegKeeperAndCrvUSDPriceData } from './crvUSD/PegKeeperAndCrvUSDPrice.js';
 /*
 0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7 3Pool
 0xdc24316b9ae028f1497c275eb9192a3ea0f67022 stETH
@@ -37,7 +37,8 @@ export async function research() {
     const endBlockNumber = 19625525;
     const pendleRouterV4 = '0x888888888889758F76e7103c6CbF23ABbF58F946';
     console.log('conducting research');
-    await compareOracleAgainstSpot();
+    await getPegKeeperAndCrvUSDPriceData();
+    // await compareOracleAgainstSpot();
     // await profitableSandwichThings();
     // await exportSandwichDataForToContract(pendleRouterV4, startDate, endDate);
     // await studyTokenBalanceOfWallet();

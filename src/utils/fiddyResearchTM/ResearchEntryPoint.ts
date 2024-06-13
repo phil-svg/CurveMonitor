@@ -19,6 +19,7 @@ import { aggregateCexDexBotVolumeOverTime, writeDBotVolOverTimeataToExcel } from
 import { countCoinSwapsForBotAndPool } from './cexdex/ClusteredTxCoins.js';
 import { calculateTotalVolumeAndVolumePerBot } from './cexdex/GlobalVolume.js';
 import { compareOracleAgainstSpot } from './crvUSD/OralceChart.js';
+import { getPegKeeperAndCrvUSDPriceData } from './crvUSD/PegKeeperAndCrvUSDPrice.js';
 import { barChartRace } from './curvefi/BarChartRace.js';
 import { gasUsageThings, getGasUsageFromCsvFile } from './curvefi/GasUsage.js';
 import { priceImpactThings } from './curvefi/PriceImpact.js';
@@ -99,7 +100,8 @@ export async function research() {
 
   console.log('conducting research');
 
-  await compareOracleAgainstSpot();
+  await getPegKeeperAndCrvUSDPriceData();
+  // await compareOracleAgainstSpot();
   // await profitableSandwichThings();
   // await exportSandwichDataForToContract(pendleRouterV4, startDate, endDate);
   // await studyTokenBalanceOfWallet();
