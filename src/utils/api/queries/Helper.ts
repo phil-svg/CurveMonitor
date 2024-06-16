@@ -1,4 +1,3 @@
-import { copyFileSync } from 'fs';
 import { DurationType, IntervalInput } from '../../Interfaces.js';
 import { VolumeData } from './AggregatedMevVolume.js';
 import moment from 'moment-timezone';

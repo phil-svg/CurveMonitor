@@ -2,7 +2,7 @@ import { startMainWsEndpoint } from './handlers/main/MainEndpointSetup.js';
 import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { startHttpEndpoint } from '../../proxyCurvePrices/proxyCurvePricesMain.js';
+import { startHttpEndpoint } from '../../proxyCurvePrices/StaticAPI.js';
 export const startAPI = ({ wsBool }, { httpBool }) => {
     const app = express();
     const server = http.createServer(app);

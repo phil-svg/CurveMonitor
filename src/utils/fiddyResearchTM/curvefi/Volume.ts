@@ -18,7 +18,7 @@ async function groupTransactionsByFromAddress(
   endUnixtime: number
 ): Promise<Record<string, number[]>> {
   let offset = 0;
-  const limit = 10000; // Adjust based on your memory constraints
+  const limit = 10000;
   let transactions: TransactionDetails[];
   const groupedByTo: Record<string, number[]> = {};
 
@@ -61,7 +61,7 @@ async function groupTransactionsByToAddress(
   endUnixtime: number
 ): Promise<Record<string, number[]>> {
   let offset = 0;
-  const limit = 10000; // Adjust based on your memory constraints
+  const limit = 10000;
   let transactions: TransactionDetails[];
   const groupedByTo: Record<string, number[]> = {};
 
@@ -105,7 +105,7 @@ async function groupTransactionsByToAddressForSelectedPools(
   endUnixtime: number
 ): Promise<Record<string, number[]>> {
   let offset = 0;
-  const limit = 10000; // Adjust based on your memory constraints
+  const limit = 10000;
   let transactions: TransactionDetails[];
   const groupedByTo: Record<string, number[]> = {};
 
@@ -203,8 +203,8 @@ async function groupTransactionsByToAddressAndPool(
   toAddress: string
 ): Promise<Record<string, number[]>> {
   let offset = 0;
-  const limit = 10000; // Adjust based on your memory constraints
-  let transactions: any[]; // Adjust the type as needed
+  const limit = 10000;
+  let transactions: any[];
   const groupedByPool: Record<string, number[]> = {};
 
   do {
@@ -229,7 +229,7 @@ async function groupTransactionsByToAddressAndPool(
       ],
       where: {
         to: {
-          [Op.iLike]: toAddress, // Case-insensitive match
+          [Op.iLike]: toAddress,
         },
       },
       limit,
@@ -377,7 +377,7 @@ export async function getSwapVolumeForPoolAndToAddressForEachSwapDirection(
       },
       {
         model: TransactionCoins,
-        include: [Coins], // Include Coins to get coin symbols
+        include: [Coins],
       },
     ],
   });

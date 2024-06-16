@@ -1,7 +1,7 @@
 import { db } from '../../config/Database.js';
 import { Coins } from '../../models/Coins.js';
 import { Op, QueryTypes } from 'sequelize';
-import { WEB3_HTTP_PROVIDER, WEB3_WS_PROVIDER } from '../web3Calls/generic.js';
+import { WEB3_HTTP_PROVIDER } from '../web3Calls/generic.js';
 const ABI_SYMBOL = [
     {
         name: 'symbol',
@@ -97,7 +97,7 @@ export async function fetchSymbolFromChain(coinAddress) {
         return 'MKR';
     if (coinAddress === ADDRESS_REUSD)
         return 'REUSD';
-    const CONTRACT = new WEB3_WS_PROVIDER.eth.Contract(ABI_SYMBOL, coinAddress);
+    const CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(ABI_SYMBOL, coinAddress);
     return CONTRACT.methods.symbol().call();
 }
 export async function updateSymbols() {

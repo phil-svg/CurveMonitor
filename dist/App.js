@@ -35,7 +35,7 @@ export async function initDatabase() {
         console.error('Error syncing database:', err);
     }
 }
-// await initDatabase();
+await initDatabase();
 // await updateProxiesFromManualList();
 export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.
 // await research(); // opening function for queries for a bunch of statistics
@@ -90,4 +90,6 @@ export async function main() {
 // await runDemoClientForProxyABI();
 startAPI({ wsBool: true }, { httpBool: true });
 await main();
+// const data = await getPoolLaunchesLast7Days();
+// console.dir(data, { depth: null, colors: true });
 //# sourceMappingURL=App.js.map

@@ -14,7 +14,7 @@ import { getFromAddress } from '../../postgresTables/readFunctions/TransactionDe
 import * as XLSX from 'xlsx';
 async function groupTransactionsByFromAddress(startUnixtime, endUnixtime) {
     let offset = 0;
-    const limit = 10000; // Adjust based on your memory constraints
+    const limit = 10000;
     let transactions;
     const groupedByTo = {};
     do {
@@ -50,7 +50,7 @@ async function groupTransactionsByFromAddress(startUnixtime, endUnixtime) {
 }
 async function groupTransactionsByToAddress(startUnixtime, endUnixtime) {
     let offset = 0;
-    const limit = 10000; // Adjust based on your memory constraints
+    const limit = 10000;
     let transactions;
     const groupedByTo = {};
     do {
@@ -86,7 +86,7 @@ async function groupTransactionsByToAddress(startUnixtime, endUnixtime) {
 }
 async function groupTransactionsByToAddressForSelectedPools(poolIds, startUnixtime, endUnixtime) {
     let offset = 0;
-    const limit = 10000; // Adjust based on your memory constraints
+    const limit = 10000;
     let transactions;
     const groupedByTo = {};
     do {
@@ -163,8 +163,8 @@ export async function getToAddressVolDistributionPerPools(toAddress, startDate, 
 }
 async function groupTransactionsByToAddressAndPool(startUnixtime, endUnixtime, toAddress) {
     let offset = 0;
-    const limit = 10000; // Adjust based on your memory constraints
-    let transactions; // Adjust the type as needed
+    const limit = 10000;
+    let transactions;
     const groupedByPool = {};
     do {
         transactions = await TransactionDetails.findAll({
@@ -188,7 +188,7 @@ async function groupTransactionsByToAddressAndPool(startUnixtime, endUnixtime, t
             ],
             where: {
                 to: {
-                    [Op.iLike]: toAddress, // Case-insensitive match
+                    [Op.iLike]: toAddress,
                 },
             },
             limit,
@@ -302,7 +302,7 @@ export async function getSwapVolumeForPoolAndToAddressForEachSwapDirection(poolA
             },
             {
                 model: TransactionCoins,
-                include: [Coins], // Include Coins to get coin symbols
+                include: [Coins],
             },
         ],
     });

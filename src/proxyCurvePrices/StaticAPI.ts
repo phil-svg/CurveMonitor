@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 
 import { CurveResponse, fetchChainNames, fetchDataForChain } from './Pools.js';
+import { getPoolLaunchesLast7Days } from '../utils/api/queries/Pools.js';
 
 export async function startHttpEndpoint(app: express.Application) {
   app.use(bodyParser.json());
@@ -46,6 +47,22 @@ export async function startHttpEndpoint(app: express.Application) {
       res.json(data);
     } else {
       res.status(404).send('Data not found for chain: ' + chainName);
+    }
+  });
+
+  // returns info about the most recent pools created. 7 days.
+  app.get('/getPoolLaunchesLast7Days', async (req, res) => {
+    console.log('getPoolLaunchesLast7Days endpoint hit');
+    try {
+      const data = await getPoolLaunchesLast7Days();
+      if (data) {
+        res.json(data);
+      } else {
+        res.status(404).send('Data not found');
+      }
+    } catch (error) {
+      console.error('Error fetching pool launches:', error);
+      res.status(500).send('Internal Server Error');
     }
   });
 }
