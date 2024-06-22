@@ -10,7 +10,7 @@ import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
 import { addCustomLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
 import { preparingLiveModeForRawEvents } from './utils/goingLive/RawTxLogsLive.js';
-import { startTestClient } from './Client.js';
+import { startAPI } from './utils/api/Server.js';
 import { updateTransactionsDetails } from './utils/postgresTables/TransactionsDetails.js';
 import { updateAddressCounts } from './utils/postgresTables/CalledAddressCounts.js';
 import { eventFlags } from './utils/api/utils/EventFlags.js';
@@ -86,10 +86,10 @@ export async function main() {
     await checkWsConnectionViaNewBlocks(); // restarts main if WS dead for 30s.
     // process.exit();
 }
-await startTestClient();
+// await startTestClient();
 // await runDemoClientForProxyABI();
-// startAPI({ wsBool: true }, { httpBool: true });
-// await main();
+startAPI({ wsBool: true }, { httpBool: true });
+await main();
 // await updateBlockTimestamps();
 // const data = await getPoolLaunchesLast7Days();
 // console.dir(data, { depth: null, colors: true });

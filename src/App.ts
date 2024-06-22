@@ -113,11 +113,11 @@ export async function main() {
   // process.exit();
 }
 
-await startTestClient();
+// await startTestClient();
 // await runDemoClientForProxyABI();
 
-// startAPI({ wsBool: true }, { httpBool: true });
-// await main();
+startAPI({ wsBool: true }, { httpBool: true });
+await main();
 // await updateBlockTimestamps();
 
 // const data = await getPoolLaunchesLast7Days();
