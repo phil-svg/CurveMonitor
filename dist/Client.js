@@ -489,15 +489,66 @@ export function startPoolSpecificAggregatedMevVolumeClient(socket, poolAddress, 
         console.log('Data:', aggregatedMevVolumeForPool.data);
     });
 }
+/*
+User requests real time data on health for lending.
+Will ping the last 5 blocks, and ship that at once, and from there for each new block on message.
+message contains info for all markets of user.
+
+Example:
+Received  New User Health Data: [
+  {
+    marketName: 'CRV-long',
+    userAddress: '0xAAE2957078351c5b2fa93774329ceba4F4270011',
+    controllerAddress: '0xEdA215b7666936DEd834f76f3fBC6F323295110A',
+    health: 5.178899865334133,
+    timestamp: 1719093231
+  },
+  {
+    marketName: 'WETH-long',
+    userAddress: '0xAAE2957078351c5b2fa93774329ceba4F4270011',
+    controllerAddress: '0xaade9230AA9161880E13a38C83400d3D1995267b',
+    health: 4.604163703072967,
+    timestamp: 1719093231
+  }
+]
+Received  New User Health Data: [
+  {
+    marketName: 'CRV-long',
+    userAddress: '0xAAE2957078351c5b2fa93774329ceba4F4270011',
+    controllerAddress: '0xEdA215b7666936DEd834f76f3fBC6F323295110A',
+    health: 5.178899865334133,
+    timestamp: 1719093243
+  },
+  {
+    marketName: 'WETH-long',
+    userAddress: '0xAAE2957078351c5b2fa93774329ceba4F4270011',
+    controllerAddress: '0xaade9230AA9161880E13a38C83400d3D1995267b',
+    health: 4.604163703072967,
+    timestamp: 1719093243
+  }
+]
+*/
+export function startUserHealthLendingClient(socket, userAddress) {
+    socket.emit('subscribeToUserHealthLendingStream', userAddress);
+    socket.on('UserHealthData', (UserHealthData) => {
+        console.log('Received Histo User Health Data:');
+        console.dir(UserHealthData, { depth: null });
+    });
+    socket.on('RealTimeHealthUpdate', (realTimeHealthUpdate) => {
+        console.log('Received  New User Health Data:', realTimeHealthUpdate);
+    });
+}
 export async function startTestClient() {
     const mainSocket = io(`${url}/main`);
     console.log(`connecting to ${url}/main`);
     mainSocket.on('connect', () => {
         console.log('connected');
+        //  *************** Curve Lending ***************
+        startUserHealthLendingClient(mainSocket, '0xAAE2957078351c5b2fa93774329ceba4F4270011');
         //  *************** GENERAL STUFF ***************
         // startPingClient(mainSocket);
         // startUserSearchClient(mainSocket, 'crvu');
-        startPoolLabel(mainSocket, '0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2');
+        // startPoolLabel(mainSocket, '0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2');
         // *************** MEV **************************
         // *** aggregated ***
         // startPoolSpecificAggregatedMevVolumeClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', {

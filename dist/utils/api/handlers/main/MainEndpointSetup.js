@@ -17,6 +17,7 @@ import { handlePoolSpecificCexDexArbRoom } from './CexDexArbsTablePoolSpecific.j
 import { handleAtomicArbBotLeaderBoardByTxCountForPoolAndDuration } from './AtomicArbLeaderboardPoolSpecifcByTxCount.js';
 import { handleCexDexArbBotLeaderBoardByTxCountForPoolAndDuration } from './CexDexArbLeaderboardPoolSpecificByTxCount.js';
 import { handlePoolSpecificAggregatedMevVolume } from './AggregatedMevVolumePoolSpecific.js';
+import { handleUserLendingHealth } from './lending/Health.js';
 export function startMainWsEndpoint(io) {
     const mainRoom = io.of('/main');
     mainRoom.on('connection', (socket) => {
@@ -41,6 +42,7 @@ export function startMainWsEndpoint(io) {
         handleAtomicArbBotLeaderBoardByTxCountForPoolAndDuration(socket);
         handleCexDexArbBotLeaderBoardByTxCountForPoolAndDuration(socket);
         handlePoolSpecificAggregatedMevVolume(socket);
+        handleUserLendingHealth(socket);
     });
 }
 function handleErrors(socket) {
