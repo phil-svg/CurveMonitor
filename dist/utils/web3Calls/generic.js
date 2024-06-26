@@ -145,7 +145,7 @@ export async function web3CallLogFree(CONTRACT, method, params, blockNumber = { 
         }
     }
 }
-export async function getBlockTimeStamp(blockNumber) {
+export async function getBlockTimeStampFromNode(blockNumber) {
     const MAX_RETRIES = 5; // Maximum number of retries
     const RETRY_DELAY = 600; // Delay between retries in milliseconds
     let retries = 0;
@@ -158,11 +158,11 @@ export async function getBlockTimeStamp(blockNumber) {
             if (error instanceof Error) {
                 const err = error;
                 if (err.code === 'ECONNABORTED') {
-                    console.log(`getBlockTimeStamp connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                    console.log(`getBlockTimeStampFromNode connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                 }
                 else if (err.message && err.message.includes('CONNECTION ERROR')) {
                     if (retries > 3) {
-                        console.log(`getBlockTimeStamp connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                        console.log(`getBlockTimeStampFromNode connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                     }
                 }
                 else {

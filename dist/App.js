@@ -90,7 +90,4 @@ export async function main() {
 // await runDemoClientForProxyABI();
 startAPI({ wsBool: true }, { httpBool: true });
 await main();
-// await updateBlockTimestamps();
-// const data = await getPoolLaunchesLast7Days();
-// console.dir(data, { depth: null, colors: true });
 //# sourceMappingURL=App.js.map

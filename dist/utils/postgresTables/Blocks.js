@@ -1,7 +1,8 @@
 import { Blocks } from '../../models/Blocks.js';
 import { updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
-import { getBlockTimestamps } from '../subgraph/Blocktimestamps.js';
+// import { getBlockTimestamps } from '../subgraph/Blocktimestamps.js';
 import { sequelize } from '../../config/Database.js';
+import { getBlockTimeStampFromNode } from '../web3Calls/generic.js';
 export async function writeBlock(block_number, timestamp) {
     await Blocks.upsert({ block_number, timestamp });
 }
@@ -23,20 +24,29 @@ export async function getAllBlockNumbersToFetchForTimestamps() {
     // Map the result to return an array of block numbers only
     return result.map((row) => row.block_number);
 }
-async function main() {
-    const blockNumbersToFetch = await getAllBlockNumbersToFetchForTimestamps();
-    // Fetch the block timestamps from The Graph
-    const blocks = await getBlockTimestamps(blockNumbersToFetch);
-    // Prepare the data for bulk insertion
-    const blocksForInsertion = blocks.map((block) => ({
-        block_number: parseInt(block.number),
-        timestamp: parseInt(block.timestamp),
-    }));
-    // Write the blocks to the Blocks table
-    await writeBlocks(blocksForInsertion);
-}
 export async function updateBlockTimestamps() {
-    await main();
+    const blockNumbersToFetch = await getAllBlockNumbersToFetchForTimestamps();
+    console.log('updating timestampts for', blockNumbersToFetch.length, 'blocks');
+    let counter = 0;
+    for (const blockNumber of blockNumbersToFetch) {
+        counter++;
+        if (counter % 100 === 0) {
+            console.log(`Process block unixtimes: ${counter} / ${blockNumbersToFetch.length}`);
+        }
+        const blockUnixtime = await getBlockTimeStampFromNode(blockNumber);
+        if (!blockUnixtime)
+            continue;
+        await writeBlocks([{ block_number: blockNumber, timestamp: blockUnixtime }]);
+    }
+    // // Fetch the block timestamps from The Graph
+    // const blocks = await getBlockTimestamps(blockNumbersToFetch);
+    // // Prepare the data for bulk insertion
+    // const blocksForInsertion = blocks.map((block) => ({
+    //   block_number: parseInt(block.number),
+    //   timestamp: parseInt(block.timestamp),
+    // }));
+    // // Write the blocks to the Blocks table
+    // await writeBlocks(blocksForInsertion);
     updateConsoleOutput('[✓] Timestamps synced successfully.\n');
 }
 //# sourceMappingURL=Blocks.js.map

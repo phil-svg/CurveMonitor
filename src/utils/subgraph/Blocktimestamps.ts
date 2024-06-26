@@ -1,5 +1,6 @@
-import axios, { AxiosResponse } from "axios";
-import { default as PQueue } from "p-queue";
+/*
+import axios, { AxiosResponse } from 'axios';
+import { default as PQueue } from 'p-queue';
 
 // Define the structure of the response data
 interface Block {
@@ -15,12 +16,12 @@ interface QueryResponse {
 
 // Function to perform the GraphQL query
 async function fetchGraphQLData(query: string): Promise<QueryResponse> {
-  const url = "https://api.thegraph.com/subgraphs/name/rebase-agency/ethereum-blocks";
+  const url = 'https://api.thegraph.com/subgraphs/name/rebase-agency/ethereum-blocks';
   try {
     const response: AxiosResponse<QueryResponse> = await axios.post(url, { query });
     return response.data;
   } catch (error) {
-    if (error instanceof Error) console.log("Error message:", error.message);
+    if (error instanceof Error) console.log('Error message:', error.message);
     throw error;
   }
 }
@@ -37,7 +38,7 @@ export async function getBlockTimestamps(blockNumbers: number[]) {
 
     // Convert the block numbers to strings and format them for inclusion in the GraphQL query
     const blockNumberStrings = batch.map((number) => `"${number}"`);
-    const blockNumbersQuery = `[${blockNumberStrings.join(", ")}]`;
+    const blockNumbersQuery = `[${blockNumberStrings.join(', ')}]`;
 
     const query = `{
       blocks(where: { number_in: ${blockNumbersQuery} }) {
@@ -56,3 +57,4 @@ export async function getBlockTimestamps(blockNumbers: number[]) {
 
   return blocks;
 }
+*/

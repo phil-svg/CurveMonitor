@@ -1,6 +1,6 @@
 import { getPoolIdByPoolAddress } from '../../postgresTables/readFunctions/Pools.js';
 import { formatVolumeDataToJson, getTransactionVolume } from '../utils/Volume.js';
-import { getBlockTimeStamp } from '../../web3Calls/generic.js';
+import { getBlockTimeStampFromNode } from '../../web3Calls/generic.js';
 import { fetchTransactionsForPoolAndTime, fetchTransactionsWithCoinsByTxIds, } from '../../postgresTables/readFunctions/Transactions.js';
 import { getSandwichContentForPoolAndTime } from '../../postgresTables/readFunctions/Sandwiches.js';
 import { fetchAtomicArbsForPoolAndTime } from '../../postgresTables/readFunctions/AtomicArbs.js';
@@ -41,8 +41,8 @@ export async function generateVolumeReportForSinglePoolHighRes(poolAddress, star
         endUnixTime = new Date(endDate).getTime() / 1000;
     }
     else {
-        startUnixTime = await getBlockTimeStamp(startBlockNumber);
-        endUnixTime = await getBlockTimeStamp(endBlockNumber);
+        startUnixTime = await getBlockTimeStampFromNode(startBlockNumber);
+        endUnixTime = await getBlockTimeStampFromNode(endBlockNumber);
     }
     if (!startUnixTime || !endUnixTime)
         return;

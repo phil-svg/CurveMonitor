@@ -1,18 +1,21 @@
-import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
-import { TransactionDetails } from "../../models/TransactionDetails.js";
-import { Contracts } from "../../models/Contracts.js";
-import axios from "axios";
-import { WEB3_HTTP_PROVIDER, getTxWithLimiter } from "../web3Calls/generic.js";
-import { ContractDetail } from "../Interfaces.js";
-import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
-import { getInceptionBlock } from "./Pools.js";
-import { Op } from "sequelize";
+import { logProgress, updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { TransactionDetails } from '../../models/TransactionDetails.js';
+import { Contracts } from '../../models/Contracts.js';
+import axios from 'axios';
+import { WEB3_HTTP_PROVIDER, getBlockTimeStampFromNode, getTxWithLimiter } from '../web3Calls/generic.js';
+import { ContractDetail } from '../Interfaces.js';
+// import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
+import { getInceptionBlock } from './Pools.js';
+import { Op } from 'sequelize';
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function fetchContractAgeInRealtime(txHash: string, calledContractAddress: string): Promise<{ blockNumber: number; timestamp: number }> {
+export async function fetchContractAgeInRealtime(
+  txHash: string,
+  calledContractAddress: string
+): Promise<{ blockNumber: number; timestamp: number }> {
   try {
     // Convert the provided address to lowercase for the check
     const lowerCasedAddress = calledContractAddress.toLowerCase();
@@ -36,18 +39,21 @@ export async function fetchContractAgeInRealtime(txHash: string, calledContractA
     // If we don't have the data in the database, we use our primary method to fetch it
     return await fetchContractInception(txHash, calledContractAddress);
   } catch (error) {
-    console.error("Error in fetchContractAgeInRealtime:", error);
+    console.error('Error in fetchContractAgeInRealtime:', error);
     throw error;
   }
 }
 
-async function fetchContractInception(txHash: string, calledContractAddress: string): Promise<{ blockNumber: number; timestamp: number }> {
+async function fetchContractInception(
+  txHash: string,
+  calledContractAddress: string
+): Promise<{ blockNumber: number; timestamp: number }> {
   const highestBlock = await WEB3_HTTP_PROVIDER.eth.getBlockNumber();
 
   const inceptionBlock: number | null = await getInceptionBlock(highestBlock, calledContractAddress);
 
   if (inceptionBlock === null) {
-    throw new Error("Failed to get the inception block.");
+    throw new Error('Failed to get the inception block.');
   }
 
   const block = await WEB3_HTTP_PROVIDER.eth.getBlock(inceptionBlock);
@@ -60,17 +66,17 @@ async function fetchContractInception(txHash: string, calledContractAddress: str
 
 export async function fetchContractDetailsFromEtherscan(contractAddresses: string[]): Promise<ContractDetail[]> {
   try {
-    const response = await axios.get("https://api.etherscan.io/api", {
+    const response = await axios.get('https://api.etherscan.io/api', {
       params: {
-        module: "contract",
-        action: "getcontractcreation",
-        contractaddresses: contractAddresses.join(","),
+        module: 'contract',
+        action: 'getcontractcreation',
+        contractaddresses: contractAddresses.join(','),
         apikey: process.env.ETHERSCAN_KEY,
       },
     });
 
-    if (response.data.status !== "1") {
-      throw new Error(`Failed to fetch contract details from Etherscan: ${response.data.message || "Unknown error"}`);
+    if (response.data.status !== '1') {
+      throw new Error(`Failed to fetch contract details from Etherscan: ${response.data.message || 'Unknown error'}`);
     }
 
     return response.data.result;
@@ -95,7 +101,10 @@ async function fetchMissingBlockNumbers(): Promise<void> {
   for (let contract of contractsMissingBlocks) {
     const tx = await getTxWithLimiter(contract.creationTransactionHash);
     if (tx && tx.blockNumber) {
-      await Contracts.update({ contractCreationBlock: tx.blockNumber }, { where: { contractAddress: contract.contractAddress } });
+      await Contracts.update(
+        { contractCreationBlock: tx.blockNumber },
+        { where: { contractAddress: contract.contractAddress } }
+      );
     }
   }
 }
@@ -123,10 +132,10 @@ export async function saveContractDetails(contractData: any[]): Promise<void> {
 
       const tx = await getTxWithLimiter(contract.txHash);
       if (tx && tx.blockNumber) {
-        const blockTimestamps = await getBlockTimestamps([tx.blockNumber]);
+        const blockTimestamps = await getBlockTimeStampFromNode(Number(tx.blockNumber));
         await newContract.update({
           contractCreationBlock: tx.blockNumber,
-          contractCreationTimestamp: blockTimestamps[0].timestamp,
+          contractCreationTimestamp: Number(blockTimestamps),
         });
       }
     }
@@ -135,8 +144,8 @@ export async function saveContractDetails(contractData: any[]): Promise<void> {
 
 async function getUniqueContractAddressesFromTxDetails(): Promise<string[]> {
   const result = await TransactionDetails.findAll({
-    attributes: ["to"],
-    group: ["to"],
+    attributes: ['to'],
+    group: ['to'],
     raw: true,
   });
 
@@ -145,7 +154,7 @@ async function getUniqueContractAddressesFromTxDetails(): Promise<string[]> {
 
 async function getStoredContractAddresses(): Promise<string[]> {
   const contracts = await Contracts.findAll({
-    attributes: ["contractAddress"],
+    attributes: ['contractAddress'],
     raw: true,
   });
 
@@ -176,15 +185,17 @@ async function solveMissingContracts(): Promise<void> {
 
       const endTime = new Date().getTime();
       totalTimeTaken += endTime - startTime;
-      logProgress("solveMissingContracts", 50, fetchedCount, totalTimeTaken, totalToBeFetched);
+      logProgress('solveMissingContracts', 50, fetchedCount, totalTimeTaken, totalToBeFetched);
     } catch (error) {
-      console.error("Error processing missing contracts batch:", batch, (error as any).response?.data || error);
+      console.error('Error processing missing contracts batch:', batch, (error as any).response?.data || error);
     }
   }
 }
 
 async function getMissingAddresses(): Promise<string[]> {
-  const txDetailsAddresses = (await getUniqueContractAddressesFromTxDetails()).filter((addr) => addr !== null && addr !== undefined).map((addr) => addr.toLowerCase());
+  const txDetailsAddresses = (await getUniqueContractAddressesFromTxDetails())
+    .filter((addr) => addr !== null && addr !== undefined)
+    .map((addr) => addr.toLowerCase());
 
   const storedAddressesSet = new Set((await getStoredContractAddresses()).map((addr) => addr.toLowerCase()));
 
@@ -200,5 +211,5 @@ async function main() {
 
 export async function updateContractCreations(): Promise<void> {
   await main();
-  updateConsoleOutput("[✓] Contract creations synced successfully.\n");
+  updateConsoleOutput('[✓] Contract creations synced successfully.\n');
 }

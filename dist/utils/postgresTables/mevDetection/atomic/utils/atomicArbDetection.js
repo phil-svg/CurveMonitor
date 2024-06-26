@@ -5,7 +5,7 @@ import { Transactions } from '../../../../../models/Transactions.js';
 import { Op } from 'sequelize';
 import { isActuallyBackrun } from '../../../readFunctions/Sandwiches.js';
 import { enrichTransactionDetail } from '../../../readFunctions/TxDetailEnrichment.js';
-import { getBlockBuilderFromBlockNumber, getBlockTimeStamp, getLastTxValue, getTransactionTraceViaWeb3Provider, getTxFromTxHash, getTxHashAtBlockPosition, } from '../../../../web3Calls/generic.js';
+import { getBlockBuilderFromBlockNumber, getBlockTimeStampFromNode, getLastTxValue, getTransactionTraceViaWeb3Provider, getTxFromTxHash, getTxHashAtBlockPosition, } from '../../../../web3Calls/generic.js';
 import { saveTransactionTrace } from '../../../TransactionTraces.js';
 import { getTransactionTraceFromDb } from '../../../readFunctions/TransactionTrace.js';
 import { fetchAndSaveReceipt } from '../../../Receipts.js';
@@ -14,6 +14,7 @@ import { getEthPriceWithTimestampFromTable, getTokenPriceWithTimestampFromDb, } 
 import { getCoinIdByAddress } from '../../../readFunctions/Coins.js';
 import { getBlockNumberFromTxId, getTxIdByTxHash } from '../../../readFunctions/Transactions.js';
 import { getCleanedTransfers } from '../../../CleanedTransfers.js';
+import { getTimestampByBlockNumber } from '../../../readFunctions/Blocks.js';
 async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) {
     const enrichedTransaction = await enrichTransactionDetail(txId);
     if (!enrichedTransaction) {
@@ -588,7 +589,10 @@ export async function getTransactionCostInUSD(txHash) {
     const blockNumber = await getBlockNumberFromTxId(txId);
     if (!blockNumber)
         return null;
-    const unixtime = await getBlockTimeStamp(blockNumber);
+    let unixtime = await getTimestampByBlockNumber(blockNumber);
+    if (!unixtime) {
+        unixtime = await getBlockTimeStampFromNode(blockNumber);
+    }
     if (!unixtime)
         return null;
     const ethInUsd = await getEthPriceWithTimestampFromTable(unixtime);

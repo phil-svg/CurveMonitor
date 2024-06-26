@@ -1,11 +1,11 @@
-import { logProgress, updateConsoleOutput } from "../helperFunctions/QualityOfLifeStuff.js";
-import { TransactionDetails } from "../../models/TransactionDetails.js";
-import { Contracts } from "../../models/Contracts.js";
-import axios from "axios";
-import { WEB3_HTTP_PROVIDER, getTxWithLimiter } from "../web3Calls/generic.js";
-import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
-import { getInceptionBlock } from "./Pools.js";
-import { Op } from "sequelize";
+import { logProgress, updateConsoleOutput } from '../helperFunctions/QualityOfLifeStuff.js';
+import { TransactionDetails } from '../../models/TransactionDetails.js';
+import { Contracts } from '../../models/Contracts.js';
+import axios from 'axios';
+import { WEB3_HTTP_PROVIDER, getBlockTimeStampFromNode, getTxWithLimiter } from '../web3Calls/generic.js';
+// import { getBlockTimestamps } from "../subgraph/Blocktimestamps.js";
+import { getInceptionBlock } from './Pools.js';
+import { Op } from 'sequelize';
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -31,7 +31,7 @@ export async function fetchContractAgeInRealtime(txHash, calledContractAddress) 
         return await fetchContractInception(txHash, calledContractAddress);
     }
     catch (error) {
-        console.error("Error in fetchContractAgeInRealtime:", error);
+        console.error('Error in fetchContractAgeInRealtime:', error);
         throw error;
     }
 }
@@ -39,7 +39,7 @@ async function fetchContractInception(txHash, calledContractAddress) {
     const highestBlock = await WEB3_HTTP_PROVIDER.eth.getBlockNumber();
     const inceptionBlock = await getInceptionBlock(highestBlock, calledContractAddress);
     if (inceptionBlock === null) {
-        throw new Error("Failed to get the inception block.");
+        throw new Error('Failed to get the inception block.');
     }
     const block = await WEB3_HTTP_PROVIDER.eth.getBlock(inceptionBlock);
     return {
@@ -49,16 +49,16 @@ async function fetchContractInception(txHash, calledContractAddress) {
 }
 export async function fetchContractDetailsFromEtherscan(contractAddresses) {
     try {
-        const response = await axios.get("https://api.etherscan.io/api", {
+        const response = await axios.get('https://api.etherscan.io/api', {
             params: {
-                module: "contract",
-                action: "getcontractcreation",
-                contractaddresses: contractAddresses.join(","),
+                module: 'contract',
+                action: 'getcontractcreation',
+                contractaddresses: contractAddresses.join(','),
                 apikey: process.env.ETHERSCAN_KEY,
             },
         });
-        if (response.data.status !== "1") {
-            throw new Error(`Failed to fetch contract details from Etherscan: ${response.data.message || "Unknown error"}`);
+        if (response.data.status !== '1') {
+            throw new Error(`Failed to fetch contract details from Etherscan: ${response.data.message || 'Unknown error'}`);
         }
         return response.data.result;
     }
@@ -105,10 +105,10 @@ export async function saveContractDetails(contractData) {
             });
             const tx = await getTxWithLimiter(contract.txHash);
             if (tx && tx.blockNumber) {
-                const blockTimestamps = await getBlockTimestamps([tx.blockNumber]);
+                const blockTimestamps = await getBlockTimeStampFromNode(Number(tx.blockNumber));
                 await newContract.update({
                     contractCreationBlock: tx.blockNumber,
-                    contractCreationTimestamp: blockTimestamps[0].timestamp,
+                    contractCreationTimestamp: Number(blockTimestamps),
                 });
             }
         }
@@ -116,15 +116,15 @@ export async function saveContractDetails(contractData) {
 }
 async function getUniqueContractAddressesFromTxDetails() {
     const result = await TransactionDetails.findAll({
-        attributes: ["to"],
-        group: ["to"],
+        attributes: ['to'],
+        group: ['to'],
         raw: true,
     });
     return result.map((entry) => entry.to);
 }
 async function getStoredContractAddresses() {
     const contracts = await Contracts.findAll({
-        attributes: ["contractAddress"],
+        attributes: ['contractAddress'],
         raw: true,
     });
     return contracts.map((contract) => contract.contractAddress);
@@ -148,15 +148,17 @@ async function solveMissingContracts() {
             }
             const endTime = new Date().getTime();
             totalTimeTaken += endTime - startTime;
-            logProgress("solveMissingContracts", 50, fetchedCount, totalTimeTaken, totalToBeFetched);
+            logProgress('solveMissingContracts', 50, fetchedCount, totalTimeTaken, totalToBeFetched);
         }
         catch (error) {
-            console.error("Error processing missing contracts batch:", batch, ((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) || error);
+            console.error('Error processing missing contracts batch:', batch, ((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) || error);
         }
     }
 }
 async function getMissingAddresses() {
-    const txDetailsAddresses = (await getUniqueContractAddressesFromTxDetails()).filter((addr) => addr !== null && addr !== undefined).map((addr) => addr.toLowerCase());
+    const txDetailsAddresses = (await getUniqueContractAddressesFromTxDetails())
+        .filter((addr) => addr !== null && addr !== undefined)
+        .map((addr) => addr.toLowerCase());
     const storedAddressesSet = new Set((await getStoredContractAddresses()).map((addr) => addr.toLowerCase()));
     const missingAddresses = txDetailsAddresses.filter((addr) => !storedAddressesSet.has(addr));
     return missingAddresses;
@@ -167,6 +169,6 @@ async function main() {
 }
 export async function updateContractCreations() {
     await main();
-    updateConsoleOutput("[✓] Contract creations synced successfully.\n");
+    updateConsoleOutput('[✓] Contract creations synced successfully.\n');
 }
 //# sourceMappingURL=ContractCreations.js.map

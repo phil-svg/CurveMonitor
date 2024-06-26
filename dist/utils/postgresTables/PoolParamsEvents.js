@@ -1,5 +1,5 @@
 import { getVersionBy, getInceptionBlockBy, getAllPoolIds, getAddressById } from './readFunctions/Pools.js';
-import { getPastEvents, getBlockTimeStamp, WEB3_HTTP_PROVIDER } from '../web3Calls/generic.js';
+import { getBlockTimeStampFromNode, getPastEvents, WEB3_HTTP_PROVIDER } from '../web3Calls/generic.js';
 import { getAbiBy } from './Abi.js';
 import { PoolParamsEvents } from '../../models/PoolParamsEvents.js';
 import { retry } from '../helperFunctions/Web3Retry.js';
@@ -32,7 +32,7 @@ async function handleEvent(poolId, eventName, EVENT) {
     const EVENT_NAME = eventName;
     const RAW_LOG = EVENT;
     const EVENT_BLOCK = EVENT.blockNumber;
-    const EVENT_TIMESTAMP = await getBlockTimeStamp(EVENT_BLOCK);
+    const EVENT_TIMESTAMP = await getBlockTimeStampFromNode(EVENT_BLOCK);
     await addPoolParamsEvent(POOL_ID, LOG_INDEX, EVENT_NAME, RAW_LOG, EVENT_BLOCK, EVENT_TIMESTAMP);
     console.log('saving', POOL_ID, LOG_INDEX);
 }
@@ -86,7 +86,7 @@ async function solveParamEvents(poolId, CURRENT_BLOCK) {
 export async function updatePoolParamsEvents() {
     const latestEventTimestampFromSubgraph = Number(await getLatestEventTimestampFromSubgraph());
     const LAST_BLOCK_CHECKED = (await PoolParamsEvents.min('last_block_checked'));
-    const LAST_UNIXTIME_CHECKED = await getBlockTimeStamp(LAST_BLOCK_CHECKED);
+    const LAST_UNIXTIME_CHECKED = await getBlockTimeStampFromNode(LAST_BLOCK_CHECKED);
     if (!LAST_UNIXTIME_CHECKED)
         return;
     // gets triggered if say the last check was Monday, it is now Friday, and Subgraph shows Event for Wednesday.

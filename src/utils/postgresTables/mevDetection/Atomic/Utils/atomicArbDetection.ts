@@ -29,7 +29,7 @@ import { isActuallyBackrun } from '../../../readFunctions/Sandwiches.js';
 import { enrichTransactionDetail } from '../../../readFunctions/TxDetailEnrichment.js';
 import {
   getBlockBuilderFromBlockNumber,
-  getBlockTimeStamp,
+  getBlockTimeStampFromNode,
   getLastTxValue,
   getTransactionTraceViaWeb3Provider,
   getTxFromTxHash,
@@ -46,6 +46,7 @@ import {
 import { getCoinIdByAddress } from '../../../readFunctions/Coins.js';
 import { getBlockNumberFromTxId, getTxIdByTxHash } from '../../../readFunctions/Transactions.js';
 import { getCleanedTransfers } from '../../../CleanedTransfers.js';
+import { getTimestampByBlockNumber } from '../../../readFunctions/Blocks.js';
 
 async function buildAtomicArbDetails(
   txId: number,
@@ -838,7 +839,10 @@ export async function getTransactionCostInUSD(txHash: string): Promise<number | 
   const gasCostETH = (gasUsed * gasPrice) / 1e18;
   const blockNumber = await getBlockNumberFromTxId(txId);
   if (!blockNumber) return null;
-  const unixtime = await getBlockTimeStamp(blockNumber);
+  let unixtime = await getTimestampByBlockNumber(blockNumber);
+  if (!unixtime) {
+    unixtime = await getBlockTimeStampFromNode(blockNumber);
+  }
   if (!unixtime) return null;
   const ethInUsd = await getEthPriceWithTimestampFromTable(unixtime);
   if (!ethInUsd) return null;
