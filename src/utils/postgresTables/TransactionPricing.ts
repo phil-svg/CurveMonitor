@@ -1,5 +1,5 @@
 import { sequelize } from '../../config/Database.js';
-import { TransactionType, Transactions } from '../../models/Transactions.js';
+import { TransactionData, TransactionType, Transactions } from '../../models/Transactions.js';
 import { QueryTypes } from 'sequelize';
 import { updatePriceMap } from './PriceMap.js';
 import { populateTransactionCoinsWithDollarValues } from './TransactionCoins.js';
@@ -110,8 +110,8 @@ export async function updateValueUsd() {
     // used to retry to price all tx were pricing had failed before. -end-
     */
 
+    // console.log('Pricing batch of', batch.length, 'tx.');
     if (batch.length > 0) {
-      // console.log('Pricing batch of', batch.length, 'tx.');
       const transactions = batch.reduce(
         (acc, row) => {
           const { tx_id, transaction_type, dollar_value, direction } = row;
@@ -132,11 +132,53 @@ export async function updateValueUsd() {
 
       await calculateAndUpdateValueUsd(missingTxToBePriced);
     } else {
-      // console.log('No transactions to be priced found.', batch.length);
+      // console.log('No transactions to be priced found.');
       remaining = false;
     }
     progressCounter += batch.length;
     // console.log(`priced ${progressCounter} transactions`);
+  }
+}
+
+export async function updateValueUsdForSingleTx(tx: TransactionData) {
+  const batch = await sequelize.query<TransactionWithCoins & Coin>(
+    `
+      SELECT 
+        t.tx_id, 
+        t.transaction_type, 
+        tc.dollar_value, 
+        tc.direction 
+      FROM transactions t
+      LEFT JOIN transaction_coins tc ON t.tx_id = tc.tx_id
+      WHERE t.tx_id = :tx_id
+      `,
+    {
+      replacements: { tx_id: tx.tx_id },
+      type: QueryTypes.SELECT,
+    }
+  );
+
+  // console.log('Pricing batch of', batch.length, 'tx.');
+  if (batch.length > 0) {
+    const transactions = batch.reduce(
+      (acc, row) => {
+        const { tx_id, transaction_type, dollar_value, direction } = row;
+        if (!acc[tx_id]) {
+          acc[tx_id] = {
+            tx_id,
+            transaction_type,
+            coins: [],
+          };
+        }
+        acc[tx_id].coins.push({ dollar_value, direction });
+        return acc;
+      },
+      {} as Record<number, TransactionWithCoins>
+    );
+
+    const missingTxToBePriced = Object.values(transactions);
+
+    await calculateAndUpdateValueUsd(missingTxToBePriced);
   }
 }
 

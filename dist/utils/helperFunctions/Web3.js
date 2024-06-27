@@ -135,7 +135,7 @@ export function toChecksumAddress(address) {
         return Web3.utils.toChecksumAddress(address);
     }
     catch (err) {
-        console.log('err in toChecksumAddress', err);
+        // console.log('err in toChecksumAddress', err);
         return address;
     }
 }

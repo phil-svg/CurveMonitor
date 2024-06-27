@@ -84,7 +84,7 @@ export async function main() {
   await updateBlockTimestamps();
   await updateContractCreations();
   await updateTransactionPricing();
-  eventFlags.txPricing = false; // temp fix
+  eventFlags.txPricing = true;
 
   await parseEvents();
   await updateTransactionsDetails();

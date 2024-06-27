@@ -9,8 +9,8 @@ import { storeCexDexArbFlag } from '../postgresTables/IsCexDexArb.js';
 import { updatePriceMap } from '../postgresTables/PriceMap.js';
 import { storeEvent } from '../postgresTables/RawLogs.js';
 import { fetchAndSaveReceipt } from '../postgresTables/Receipts.js';
-import { populateTransactionCoinsWithDollarValues } from '../postgresTables/TransactionCoins.js';
-import { updateTransactionPricing, updateValueUsd } from '../postgresTables/TransactionPricing.js';
+import { populateTransactionCoinsWithDollarValuesForSingleTx } from '../postgresTables/TransactionCoins.js';
+import { updateValueUsdForSingleTx } from '../postgresTables/TransactionPricing.js';
 import { saveTransactionTrace } from '../postgresTables/TransactionTraces.js';
 import { TransactionDetailsCreationAttributes, solveSingleTdId } from '../postgresTables/TransactionsDetails.js';
 import { fetchDataThenDetectArb } from '../postgresTables/mevDetection/atomic/atomicArb.js';
@@ -139,19 +139,14 @@ async function processBufferedEvents() {
   const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
   const poolCoins = await getPoolCoinsForLiveMode();
 
-  // price-update
-  if (eventFlags.txPricing) {
-    // effectively updating coin prices once every 10 minutes (50*12s)
-    if (eventBlockNumbers[0] % 50 === 0) await updatePriceMap();
-    await populateTransactionCoinsWithDollarValues();
-    await updateValueUsd();
-  }
-
   // Parsing
   await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, poolCoins);
   eventBuffer = [];
 
   const PARSED_TX = await fetchTransactionsForBlock(eventBlockNumbers[0]);
+
+  // effectively updating coin prices once every 10 minutes (50*12s)
+  if (eventBlockNumbers[0] % 50 === 0) await updatePriceMap();
 
   // Saving Parsed Tx to db
   try {
@@ -175,6 +170,12 @@ async function processBufferedEvents() {
   for (const tx of uniqueTransactions) {
     const txId = tx.tx_id;
     if (!txId || processedTxHashes.has(tx.tx_hash.toLowerCase())) continue;
+
+    // price-update
+    if (eventFlags.txPricing) {
+      await populateTransactionCoinsWithDollarValuesForSingleTx(tx);
+      await updateValueUsdForSingleTx(tx);
+    }
 
     // fetching and saving of the transaction-trace
     const transactionTrace = await retryGetTransactionTraceViaWeb3Provider(tx.tx_hash);

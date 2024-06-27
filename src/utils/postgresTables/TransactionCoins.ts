@@ -1,10 +1,11 @@
 import { Op } from 'sequelize';
 import { PriceMap } from '../../models/PriceMap.js';
 import { TransactionCoins } from '../../models/TransactionCoins.js';
-import { Transactions } from '../../models/Transactions.js';
-import { logProgress } from '../helperFunctions/QualityOfLifeStuff.js';
+import { TransactionData, Transactions } from '../../models/Transactions.js';
+import { logMemoryUsage, logProgress } from '../helperFunctions/QualityOfLifeStuff.js';
 import { getAllUniqueCoinIds } from './readFunctions/PriceMap.js';
 import { FirstPriceTimestamp } from '../../models/FirstTokenPrices.js';
+import { copyFileSync } from 'fs';
 
 async function txOlderThanFirstPrice(transactionCoin: TransactionCoins): Promise<boolean> {
   // Extract coin_id and block_unixtime from the transaction
@@ -136,5 +137,58 @@ export async function populateTransactionCoinsWithDollarValues(): Promise<void> 
     offset += batchSize;
   }
 
-  // console.log(`[✓] Prices populated successfully.`);
+  console.log(`[✓] TransactionCoin Prices populated successfully.`);
+}
+
+// Fetching all transaction coins entries that don't have a dollar value
+export async function populateTransactionCoinsWithDollarValuesForSingleTx(tx: TransactionData): Promise<void> {
+  const transactions = await TransactionCoins.findAll({
+    where: {
+      tx_id: tx.tx_id,
+    },
+    include: [{ model: Transactions, attributes: ['block_unixtime', 'tx_hash'], required: true }],
+  });
+
+  for (const transactionCoin of transactions) {
+    const transactionUnixTime = transactionCoin.transaction.block_unixtime;
+
+    let priceEntry = await PriceMap.findOne({
+      where: {
+        coin_id: transactionCoin.coin_id,
+        price_timestamp: { [Op.lte]: transactionUnixTime },
+      },
+      order: [['price_timestamp', 'DESC']],
+      limit: 1,
+    });
+
+    if (!priceEntry) {
+      const tooOld = await txOlderThanFirstPrice(transactionCoin);
+      if (tooOld) {
+        const dollarValue = 0.000000042; // mock number in case of different solution which covers pricing of super early/old tx.
+        transactionCoin.dollar_value = dollarValue;
+        try {
+          await transactionCoin.save();
+        } catch (err) {
+          console.error('Error updating transaction coin:', err);
+        }
+      }
+    }
+
+    if (priceEntry) {
+      let dollarValue = priceEntry.coinPriceUsd * transactionCoin.amount;
+      if (isNaN(transactionCoin.amount)) {
+        dollarValue = 0.000000043; // mock number in case of different solution which covers NaN tx (5,000/3,600,000).
+      }
+      if (dollarValue <= 1e12 * 15) {
+        transactionCoin.dollar_value = dollarValue;
+        try {
+          await transactionCoin.save();
+        } catch (err) {
+          console.error('Error updating transaction coin:', err);
+        }
+      } else {
+        console.log('funny price');
+      }
+    }
+  }
 }

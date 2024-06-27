@@ -163,7 +163,7 @@ export function toChecksumAddress(address: string): string {
   try {
     return Web3.utils.toChecksumAddress(address);
   } catch (err) {
-    console.log('err in toChecksumAddress', err);
+    // console.log('err in toChecksumAddress', err);
     return address;
   }
 }
