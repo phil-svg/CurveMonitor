@@ -33,6 +33,7 @@ import {
 import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
 import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
+import { getPoolSpecificAggregatedMevVolume } from './utils/api/queries/AggregatedMevVolume.js';
 
 export async function initDatabase() {
   try {
@@ -118,3 +119,10 @@ export async function main() {
 
 startAPI({ wsBool: true }, { httpBool: true });
 await main();
+
+// const data = await getPoolSpecificAggregatedMevVolume('0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7', '1 week', {
+//   value: 1,
+//   unit: 'day',
+// });
+// console.log('data', data);
+// process.exit();

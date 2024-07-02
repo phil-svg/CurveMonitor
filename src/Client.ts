@@ -8,10 +8,12 @@ import {
   ArbBotLeaderBoardbyTxCount,
   AtomicArbTableContent,
   CexDexArbTableContent,
+  DurationInput,
   EnrichedTransactionDetail,
   IntervalInput,
   TransactionDetailsForAtomicArbs,
 } from './utils/Interfaces.js';
+import { AggregatedVolumeData } from './utils/api/queries/AggregatedMevVolume.js';
 
 // Replace with "wss://api.curvemonitor.com" for production
 // const url = 'http://localhost:443';
@@ -602,6 +604,50 @@ export function startCexDexBotLeaderBoardByTxCountForPoolAndDuration(
   handleErrors(socket, '/main');
 }
 
+/*
+Example Response:
+Result: {
+  data: [
+    {
+      interval_start: '2024-06-26T00:00:00.000Z',
+      interval_start_unixtime: 1719360000,
+      full_volume: 50756190,
+      atomicArbVolume: 2095437,
+      cexDexArbVolume: 1229048,
+      sandwichVolume_LossWithin: 0,
+      sandwichVolume_LossOutside: 0
+    },
+    {
+      interval_start: '2024-06-27T00:00:00.000Z',
+      interval_start_unixtime: 1719446400,
+      full_volume: 53463163,
+      atomicArbVolume: 2792455,
+      cexDexArbVolume: 3087824,
+      sandwichVolume_LossWithin: 0,
+      sandwichVolume_LossOutside: 0
+    },
+    {
+      interval_start: '2024-06-28T00:00:00.000Z',
+      interval_start_unixtime: 1719532800,
+      full_volume: 49660573,
+      atomicArbVolume: 3570325,
+      cexDexArbVolume: 958132,
+      sandwichVolume_LossWithin: 0,
+      sandwichVolume_LossOutside: 0
+    },
+    {
+      interval_start: '2024-06-29T00:00:00.000Z',
+      interval_start_unixtime: 1719619200,
+      full_volume: 21178782,
+      atomicArbVolume: 449907,
+      cexDexArbVolume: 981858,
+      sandwichVolume_LossWithin: 0,
+      sandwichVolume_LossOutside: 547292
+    },...
+*/
+
+// time duration examples: 1 week, 2 weeks, 1 hour, 1 year, 4 hours,...
+// interval examples: {value: 1,unit: 'day',} or: {value: 2,unit: 'weeks',} (chunks the stuff in n weeks, or years, months, days, etc)
 export function startPoolSpecificAggregatedMevVolumeClient(
   socket: Socket,
   poolAddress: string,
@@ -610,9 +656,9 @@ export function startPoolSpecificAggregatedMevVolumeClient(
 ) {
   socket.emit('getPoolSpecificAggregatedMevVolume', poolAddress, timeDuration, timeInterval);
 
-  socket.on('poolSpecificAggregatedMevVolume', (aggregatedMevVolumeForPool: AggregatedMevVolume) => {
+  socket.on('poolSpecificAggregatedMevVolume', (aggregatedMevVolumeForPool: AggregatedVolumeData[]) => {
     console.log('Received Pool specific Aggregated MEV Volume:');
-    console.log('Data:', aggregatedMevVolumeForPool.data);
+    console.log('Result:', aggregatedMevVolumeForPool);
   });
 }
 
@@ -697,7 +743,7 @@ export async function startTestClient() {
     console.log('connected');
 
     //  *************** Curve Lending ***************
-    startUserHealthLendingClient(mainSocket, '0xAAE2957078351c5b2fa93774329ceba4F4270011');
+    // startUserHealthLendingClient(mainSocket, '0xAAE2957078351c5b2fa93774329ceba4F4270011');
 
     //  *************** GENERAL STUFF ***************
     // startPingClient(mainSocket);
@@ -708,10 +754,12 @@ export async function startTestClient() {
 
     // *** aggregated ***
 
-    // startPoolSpecificAggregatedMevVolumeClient(mainSocket, '0x7F86Bf177Dd4F3494b841a37e810A34dD56c829B', '1 year', {
-    //   value: 1,
-    //   unit: 'month',
-    // }); // (Pool Specific)
+    const poolAddress = '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7';
+    const duration = '1 week';
+    startPoolSpecificAggregatedMevVolumeClient(mainSocket, poolAddress, duration, {
+      value: 1,
+      unit: 'day',
+    }); // (Pool Specific)
 
     // *** sammich ***
 

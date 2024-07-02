@@ -249,6 +249,8 @@ async function getPoolSpecificSandwichVolume_LossWithin(poolId, timeframeStartUn
     const fetchInterval = interval.split(' ')[1];
     // const fetchIntervalNum = Number(interval.split(' ')[0]);
     const sandwichTxIdsByBot = await findPoolSpecificFrontAndBackrunTxIdsForDuration_LossWithin(poolId, timeframeStartUnix, timeframeEndUnix);
+    if (sandwichTxIdsByBot.length === 0)
+        return [];
     const txIdsString = sandwichTxIdsByBot.join(', ');
     const query = `
     SELECT 
@@ -282,6 +284,8 @@ async function getPoolSpecificSandwichVolume_LossOutside(poolId, timeframeStartU
     const fetchInterval = interval.split(' ')[1];
     // const fetchIntervalNum = Number(interval.split(' ')[0]);
     const sandwichTxIdsByBot = await findPoolSpecificFrontAndBackrunTxIdsForDuration_LossOutside(poolId, timeframeStartUnix, timeframeEndUnix);
+    if (sandwichTxIdsByBot.length === 0)
+        return [];
     const txIdsString = sandwichTxIdsByBot.join(', ');
     const query = `
     SELECT 
@@ -315,6 +319,30 @@ function determineNumberOfDataPoints(timeframeStartUnix, timeframeEndUnix, timeI
     const secondsPerInterval = secondsPerUnit(interval.split(' ')[1]) * parseInt(interval.split(' ')[0]);
     return Math.floor((timeframeEndUnix - timeframeStartUnix) / secondsPerInterval);
 }
+function aggregateVolumes(dataArrays) {
+    const aggregatedMap = new Map();
+    dataArrays.forEach(({ data, category }) => {
+        data.forEach((item) => {
+            let aggregate = aggregatedMap.get(item.interval_start_unixtime);
+            if (!aggregate) {
+                aggregate = {
+                    interval_start: new Date(item.interval_start),
+                    interval_start_unixtime: item.interval_start_unixtime,
+                    full_volume: 0,
+                    atomicArbVolume: 0,
+                    cexDexArbVolume: 0,
+                    sandwichVolume_LossWithin: 0,
+                    sandwichVolume_LossOutside: 0,
+                };
+                aggregatedMap.set(item.interval_start_unixtime, aggregate);
+            }
+            if (typeof aggregate[category] === 'number') {
+                aggregate[category] += item.total_volume;
+            }
+        });
+    });
+    return Array.from(aggregatedMap.values()).sort((a, b) => a.interval_start_unixtime - b.interval_start_unixtime);
+}
 export async function getPoolSpecificAggregatedMevVolume(poolAddress, timeDuration, timeInterval, startUnixtimeViaInput, endUnixtimeViaInput) {
     const poolId = await getPoolIdByPoolAddress(poolAddress);
     if (!poolId) {
@@ -346,11 +374,13 @@ export async function getPoolSpecificAggregatedMevVolume(poolAddress, timeDurati
             Number(dataPoints - 10000).toFixed(0) +
             ' data points';
         console.log(info);
-        return info;
+        // return info;
+        return [];
     }
     else {
         console.log('requested fetch of', dataPoints, 'data points');
     }
+    console.log('Received Request with timeframe', timeDuration, 'and interval', timeInterval);
     console.time('Full Volume Calculation');
     const fullVolumeData = await getPoolSpecificFullVolumeData(poolId, timeframeStartUnix, timeframeEndUnix, timeInterval);
     console.timeEnd('Full Volume Calculation');
@@ -371,13 +401,13 @@ export async function getPoolSpecificAggregatedMevVolume(poolAddress, timeDurati
     const sandwichVolume_LossOutside = await getPoolSpecificSandwichVolume_LossOutside(poolId, timeframeStartUnix, timeframeEndUnix, timeInterval);
     console.timeEnd('Sandwich Volume Calculation (Loss Outside)');
     // console.log("sandwichVolume_LossOutside", sandwichVolume_LossOutside);
-    // const txCountsFull = await getTransactionCountsForFull(poolId, timeframeStartUnix, timeInterval);
-    // console.log(txCountsFull);
-    // const txHashesFull = await getTransactionHashesForFull(poolId, timeframeStartUnix, timeInterval);
-    // console.log(txHashesFull);
-    // const txCountsAtomic = await getTransactionCountsForAtomicArbs(poolId, timeframeStartUnix, timeInterval);
-    // console.log(txCountsAtomic);
-    // const txHashesAtomic = await getTransactionHashesForAtomicArbs(poolId, timeframeStartUnix, timeInterval);
-    // console.log(txHashesAtomic);
+    const aggregatedData = aggregateVolumes([
+        { data: fullVolumeData, category: 'full_volume' },
+        { data: atomicArbVolume, category: 'atomicArbVolume' },
+        { data: cexDexArbVolume, category: 'cexDexArbVolume' },
+        { data: sandwichVolume_LossWithin, category: 'sandwichVolume_LossWithin' },
+        { data: sandwichVolume_LossOutside, category: 'sandwichVolume_LossOutside' },
+    ]);
+    return aggregatedData.slice(1);
 }
 //# sourceMappingURL=AggregatedMevVolume.js.map

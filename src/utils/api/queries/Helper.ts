@@ -118,39 +118,6 @@ export function createIntervalBlueprint(
   return blueprint;
 }
 
-function mergeAndChunkDataOld(blueprint: VolumeData[], data: VolumeData[], fetchIntervalNum: number): VolumeData[] {
-  const dataMap = new Map<number, number>(
-    data.map((item) => [item.interval_start_unixtime, parseFloat(item.total_volume as unknown as string)])
-  );
-
-  return blueprint.map((item, index) => {
-    let totalVolume = 0;
-
-    for (let i = 1; i < fetchIntervalNum; i++) {
-      let stopAggregating = false;
-      let dataIndex = index * fetchIntervalNum + i;
-
-      for (let entry of blueprint) {
-        if (dataIndex < data.length) {
-          if (dataMap.get(data[dataIndex].interval_start_unixtime) === entry.interval_start_unixtime) {
-            stopAggregating = true;
-            break;
-          }
-        }
-      }
-
-      if (dataIndex < data.length && !stopAggregating) {
-        totalVolume += dataMap.get(data[dataIndex].interval_start_unixtime) || 0;
-      }
-    }
-
-    return {
-      ...item,
-      total_volume: totalVolume,
-    };
-  });
-}
-
 export function mergeData(blueprint: VolumeData[], sqlData: VolumeData[]): VolumeData[] {
   let mergedData: VolumeData[] = blueprint;
   for (const sqlEntry of sqlData) {

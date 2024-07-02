@@ -90,4 +90,10 @@ export async function main() {
 // await runDemoClientForProxyABI();
 startAPI({ wsBool: true }, { httpBool: true });
 await main();
+// const data = await getPoolSpecificAggregatedMevVolume('0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7', '1 week', {
+//   value: 1,
+//   unit: 'day',
+// });
+// console.log('data', data);
+// process.exit();
 //# sourceMappingURL=App.js.map

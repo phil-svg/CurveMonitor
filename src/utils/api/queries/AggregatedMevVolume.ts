@@ -361,6 +361,7 @@ async function getPoolSpecificSandwichVolume_LossWithin(
     timeframeStartUnix,
     timeframeEndUnix
   );
+  if (sandwichTxIdsByBot.length === 0) return [];
 
   const txIdsString = sandwichTxIdsByBot.join(', ');
 
@@ -413,6 +414,7 @@ async function getPoolSpecificSandwichVolume_LossOutside(
     timeframeEndUnix
   );
 
+  if (sandwichTxIdsByBot.length === 0) return [];
   const txIdsString = sandwichTxIdsByBot.join(', ');
 
   const query = `
@@ -458,13 +460,52 @@ function determineNumberOfDataPoints(
   return Math.floor((timeframeEndUnix - timeframeStartUnix) / secondsPerInterval);
 }
 
+function aggregateVolumes(
+  dataArrays: { data: VolumeData[]; category: keyof Omit<AggregatedVolumeData, 'interval_start'> }[]
+): AggregatedVolumeData[] {
+  const aggregatedMap = new Map<number, AggregatedVolumeData>();
+
+  dataArrays.forEach(({ data, category }) => {
+    data.forEach((item) => {
+      let aggregate = aggregatedMap.get(item.interval_start_unixtime);
+      if (!aggregate) {
+        aggregate = {
+          interval_start: new Date(item.interval_start),
+          interval_start_unixtime: item.interval_start_unixtime,
+          full_volume: 0,
+          atomicArbVolume: 0,
+          cexDexArbVolume: 0,
+          sandwichVolume_LossWithin: 0,
+          sandwichVolume_LossOutside: 0,
+        };
+        aggregatedMap.set(item.interval_start_unixtime, aggregate);
+      }
+      if (typeof aggregate[category] === 'number') {
+        aggregate[category] += item.total_volume;
+      }
+    });
+  });
+
+  return Array.from(aggregatedMap.values()).sort((a, b) => a.interval_start_unixtime - b.interval_start_unixtime);
+}
+
+export interface AggregatedVolumeData {
+  interval_start: Date;
+  interval_start_unixtime: number;
+  full_volume: number;
+  atomicArbVolume: number;
+  cexDexArbVolume: number;
+  sandwichVolume_LossWithin: number;
+  sandwichVolume_LossOutside: number;
+}
+
 export async function getPoolSpecificAggregatedMevVolume(
   poolAddress: string,
   timeDuration: DurationInput,
   timeInterval: IntervalInput,
   startUnixtimeViaInput?: number,
   endUnixtimeViaInput?: number
-) {
+): Promise<AggregatedVolumeData[]> {
   const poolId = await getPoolIdByPoolAddress(poolAddress);
   if (!poolId) {
     throw new Error(`Pool ID not found for address: ${poolAddress}`);
@@ -496,10 +537,13 @@ export async function getPoolSpecificAggregatedMevVolume(
       Number(dataPoints - 10000).toFixed(0) +
       ' data points';
     console.log(info);
-    return info;
+    // return info;
+    return [];
   } else {
     console.log('requested fetch of', dataPoints, 'data points');
   }
+
+  console.log('Received Request with timeframe', timeDuration, 'and interval', timeInterval);
 
   console.time('Full Volume Calculation');
   const fullVolumeData = await getPoolSpecificFullVolumeData(
@@ -551,15 +595,13 @@ export async function getPoolSpecificAggregatedMevVolume(
   console.timeEnd('Sandwich Volume Calculation (Loss Outside)');
   // console.log("sandwichVolume_LossOutside", sandwichVolume_LossOutside);
 
-  // const txCountsFull = await getTransactionCountsForFull(poolId, timeframeStartUnix, timeInterval);
-  // console.log(txCountsFull);
+  const aggregatedData = aggregateVolumes([
+    { data: fullVolumeData, category: 'full_volume' },
+    { data: atomicArbVolume, category: 'atomicArbVolume' },
+    { data: cexDexArbVolume, category: 'cexDexArbVolume' },
+    { data: sandwichVolume_LossWithin, category: 'sandwichVolume_LossWithin' },
+    { data: sandwichVolume_LossOutside, category: 'sandwichVolume_LossOutside' },
+  ]);
 
-  // const txHashesFull = await getTransactionHashesForFull(poolId, timeframeStartUnix, timeInterval);
-  // console.log(txHashesFull);
-
-  // const txCountsAtomic = await getTransactionCountsForAtomicArbs(poolId, timeframeStartUnix, timeInterval);
-  // console.log(txCountsAtomic);
-
-  // const txHashesAtomic = await getTransactionHashesForAtomicArbs(poolId, timeframeStartUnix, timeInterval);
-  // console.log(txHashesAtomic);
+  return aggregatedData.slice(1);
 }
