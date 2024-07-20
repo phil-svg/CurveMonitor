@@ -157,12 +157,12 @@ export function removeDuplicatesAndUpdatePositions(transfers) {
 export function filterNullSymbols(readableTransfersRaw) {
     return readableTransfersRaw.filter((transfer) => transfer.tokenSymbol !== null && transfer.tokenSymbol !== '' && transfer.tokenSymbol !== ' ');
 }
-function addPositionField(readableTransfers) {
+export function addPositionField(readableTransfers) {
     return readableTransfers.map((transfer, index) => {
         return Object.assign(Object.assign({}, transfer), { position: index });
     });
 }
-function findTokenDetails(tokenAddress, tokenDetailsArray) {
+export function findTokenDetails(tokenAddress, tokenDetailsArray) {
     const addressLowerCase = tokenAddress.toLowerCase();
     const details = tokenDetailsArray.find((detail) => detail.address.toLowerCase() === addressLowerCase);
     return details ? { symbol: details.symbol, decimals: details.decimals } : null;

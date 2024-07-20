@@ -14,10 +14,11 @@ import {
   TransactionDetailsForAtomicArbs,
 } from './utils/Interfaces.js';
 import { AggregatedVolumeData } from './utils/api/queries/AggregatedMevVolume.js';
+import fs from 'fs';
 
 // Replace with "wss://api.curvemonitor.com" for production
-// const url = 'http://localhost:443';
-const url = 'wss://api.curvemonitor.com';
+const url = 'http://localhost:443';
+// const url = 'wss://api.curvemonitor.com';
 
 /**
  *
@@ -659,6 +660,7 @@ export function startPoolSpecificAggregatedMevVolumeClient(
   socket.on('poolSpecificAggregatedMevVolume', (aggregatedMevVolumeForPool: AggregatedVolumeData[]) => {
     console.log('Received Pool specific Aggregated MEV Volume:');
     console.log('Result:', aggregatedMevVolumeForPool);
+    fs.writeFileSync('fiddy.json', JSON.stringify(aggregatedMevVolumeForPool, null, 2));
   });
 }
 
@@ -754,16 +756,17 @@ export async function startTestClient() {
 
     // *** aggregated ***
 
-    const poolAddress = '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7';
-    const duration = '1 week';
-    startPoolSpecificAggregatedMevVolumeClient(mainSocket, poolAddress, duration, {
-      value: 1,
-      unit: 'day',
-    }); // (Pool Specific)
+    // const tricryptoUSDC = '0x7f86bf177dd4f3494b841a37e810a34dd56c829b';
+    // const poolAddress = '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7';
+    // const duration = '4 days';
+    // startPoolSpecificAggregatedMevVolumeClient(mainSocket, tricryptoUSDC, duration, {
+    //   value: 1,
+    //   unit: 'hour',
+    // }); // (Pool Specific)
 
     // *** sammich ***
 
-    // startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
+    startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
     // startAbsoluteLabelsRankingClient(mainSocket); // (All Pools)
     // startSandwichLabelOccurrencesClient(mainSocket); // (All Pools)
 

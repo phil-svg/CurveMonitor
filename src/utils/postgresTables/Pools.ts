@@ -242,7 +242,7 @@ async function updateNames(): Promise<void> {
     }
   } catch (error) {
     console.error('Error updating names:', error);
-    throw error;
+    return;
   }
 }
 

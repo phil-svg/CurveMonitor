@@ -2,7 +2,7 @@ import { db } from '../../config/Database.js';
 import { Coins } from '../../models/Coins.js';
 import { Op, QueryTypes } from 'sequelize';
 import { WEB3_HTTP_PROVIDER } from '../web3Calls/generic.js';
-const ABI_SYMBOL = [
+export const ABI_SYMBOL = [
     {
         name: 'symbol',
         outputs: [
@@ -17,7 +17,7 @@ const ABI_SYMBOL = [
         gas: 6876,
     },
 ];
-const ABI_DECIMALS = [
+export const ABI_DECIMALS = [
     {
         name: 'decimals',
         outputs: [
@@ -32,9 +32,9 @@ const ABI_DECIMALS = [
         gas: 1481,
     },
 ];
-const ADDRESS_ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-const ADDRESS_MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
-const ADDRESS_REUSD = '0x6b8734ad31D42F5c05A86594314837C416ADA984';
+export const ADDRESS_ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+export const ADDRESS_MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
+export const ADDRESS_REUSD = '0x6b8734ad31D42F5c05A86594314837C416ADA984';
 export async function addNewTokenToDbFromCoinAddress(coinAddress) {
     try {
         await Coins.create({ address: coinAddress });

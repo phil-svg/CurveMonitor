@@ -3,11 +3,7 @@ import { LossTransaction, Sandwiches } from '../../../models/Sandwiches.js';
 import { Transactions } from '../../../models/Transactions.js';
 import { fetchAllTransactionCoinData } from '../../postgresTables/readFunctions/TransactionCoins.js';
 import { TransactionCoins } from '../../../models/TransactionCoins.js';
-import {
-  fetchTxPositionByTxId,
-  getTxHashByTxId,
-  getUnixTimestampByTxId,
-} from '../../postgresTables/readFunctions/Transactions.js';
+import { fetchTxPositionByTxId, getTxHashByTxId } from '../../postgresTables/readFunctions/Transactions.js';
 import { IsSandwich } from '../../../models/IsSandwich.js';
 
 export interface ExtendedLossTransaction extends LossTransaction {
@@ -150,6 +146,7 @@ import {
   getTransactionCostInUSD,
 } from '../../postgresTables/mevDetection/atomic/utils/atomicArbDetection.js';
 import { getEthPriceWithTimestampFromTable } from '../../postgresTables/readFunctions/PriceMap.js';
+import { WEB3_HTTP_PROVIDER } from '../../web3Calls/generic.js';
 
 function readDataFile() {
   const dataFilePath = '../sandwichData.json';
@@ -163,6 +160,32 @@ function readDataFile() {
 function writeDataFile(data: any) {
   const dataFilePath = '../sandwichData.json';
   fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+}
+
+interface GasInfo {
+  gas: number;
+  gasPrice: string;
+  maxFeePerGas: string;
+  maxPriorityFeePerGas: string;
+}
+
+async function getBlockTransactionDetails(blockNumber: number, position: number): Promise<any | null> {
+  try {
+    const transaction = await WEB3_HTTP_PROVIDER.eth.getTransactionFromBlock(blockNumber, position);
+    return transaction;
+  } catch (error) {
+    return null;
+  }
+}
+
+async function getExtendedGasInfo(blockNumber: number, position: number): Promise<GasInfo> {
+  const transaction = await getBlockTransactionDetails(blockNumber, position);
+  return {
+    gas: transaction.gas,
+    gasPrice: transaction.gasPrice,
+    maxFeePerGas: transaction.maxFeePerGas,
+    maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
+  };
 }
 
 async function checkSingleTx(
@@ -220,7 +243,13 @@ async function checkSingleTx(
   if (resultForSandwichedUserIfExchangeRateOfLaterTrade < 0) {
     const txHashCenter = await getTxHashByTxId(sandwichedTxSwap[0].tx_id);
 
-    if (txHashCenter === transaction.tx_hash) {
+    const extendedGasInfoVictim = await getExtendedGasInfo(transaction.block_number, positionCenter);
+    const extendedGasInfo2ndTx = await getExtendedGasInfo(transaction.block_number, positionLater);
+
+    if (
+      txHashCenter === transaction.tx_hash ||
+      extendedGasInfoVictim.maxFeePerGas >= extendedGasInfo2ndTx.maxFeePerGas
+    ) {
       sandwichwasBadCounter++;
     } else {
       sandwichWasGoodCounter++;
@@ -258,6 +287,8 @@ async function checkSingleTx(
         gasCostInUSDBackrun,
         gasCostInUSDSandwichCenter,
         gasCostInUSDMatchLater,
+        extendedGasInfoVictim,
+        extendedGasInfo2ndTx,
       };
       data.push(entry);
       writeDataFile(data);

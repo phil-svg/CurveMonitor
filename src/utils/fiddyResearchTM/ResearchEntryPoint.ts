@@ -12,6 +12,7 @@ import { getCleanedTransfersForTxHashFromTable } from '../postgresTables/readFun
 import { getPoolIdByPoolAddress, getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
 import { getTxIdByTxHash } from '../postgresTables/readFunctions/Transactions.js';
 import { oneInchVolThings, whatWasSwappedAnalytics } from './DefiMonitooor/DexAggregators/1Inch/oneInch.js';
+import { anyPoolMevCheck } from './DefiMonitooor/DexAggregators/Research/AnyMEV/AnyAddressMev.js';
 import { studyTokenBalanceOfWallet } from './DefiMonitooor/DexAggregators/Research/WalletBalanceChanges.js';
 import { uniswapV3EntryPoint } from './DefiMonitooor/DexAggregators/uniswapV3/UniV3EntryPoint.js';
 import { fxThings } from './atomicArb/fxArbs.js';
@@ -21,6 +22,7 @@ import { calculateTotalVolumeAndVolumePerBot } from './cexdex/GlobalVolume.js';
 import { compareOracleAgainstSpot } from './crvUSD/OralceChart.js';
 import { getPegKeeperAndCrvUSDPriceData } from './crvUSD/PegKeeperAndCrvUSDPrice.js';
 import { barChartRace } from './curvefi/BarChartRace.js';
+import { dailyTxCount } from './curvefi/DailyTxCountHisto.js';
 import { gasUsageThings, getGasUsageFromCsvFile } from './curvefi/GasUsage.js';
 import { priceImpactThings } from './curvefi/PriceImpact.js';
 import { tvlThings } from './curvefi/Tvl.js';
@@ -87,11 +89,14 @@ export async function research() {
   const ADDRESS_STABESWAP_NG = '0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf';
   const stableswapPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP);
   const stableswapNGPoolAddressArr = await getPoolsBySourceAddress(ADDRESS_STABESWAP_NG);
+  const address_sUSDe_crvUSD = '0x57064f49ad7123c92560882a45518374ad982e85';
+  const address_weETHs_WETH = '0xb92b054b9cc33685e7f8c3f85177c4b6dc061391';
+  const addressUSD0_USDC = '0x14100f81e33c33ecc7cdac70181fb45b6e78569f';
 
   const bitgetRouter = '0x1A8f43e01B78979EB4Ef7feBEC60F32c9A72f58E';
 
-  const startDate = '2023-03-20';
-  const endDate = '2024-05-30';
+  const startDate = '2024-07-16';
+  const endDate = '2024-07-17';
 
   const startBlockNumber = 19620526;
   const endBlockNumber = 19625525;
@@ -100,7 +105,9 @@ export async function research() {
 
   console.log('conducting research');
 
-  await getPegKeeperAndCrvUSDPriceData();
+  // await anyPoolMevCheck();
+  // await dailyTxCount();
+  // await getPegKeeperAndCrvUSDPriceData();
   // await compareOracleAgainstSpot();
   // await profitableSandwichThings();
   // await exportSandwichDataForToContract(pendleRouterV4, startDate, endDate);
@@ -111,14 +118,14 @@ export async function research() {
   // await whatWasSwappedAnalytics(_3Pool, CoWProtocolGPv2Settlement, startDate, endDate);
   // await getSwapVolumeBucketsForPoolAndToAddress(_3Pool, _1InchV5, startDate, endDate);
   // await getSwapVolumeForPoolAndToAddressForEachSwapDirection(_3Pool, _1InchV5, startDate, endDate);
-  // await getToAddressVolDistributionPerPools(_1InchV5, startDate, endDate);
+  // await getToAddressVolDistributionPerPools(address_sUSDe_crvUSD, startDate, endDate);
   // await getTvlForPoolArrFromChain(stableswapNGPoolAddressArr, 19319850);
   // await generateVolumeReportForPoolArr(startDate, endDate);
   // await getGasUsageFromCsvFile();
   // await fetchSandwichUserLossForSomePoolsForTimePeriod(stableswapPoolAddressArr, startDate, endDate);
   // await gasUsageThings();
   // await createSandwichLossInUsdJsonFileFor2023();
-  // await generateVolumeReportForSinglePool(_3Pool, startDate, endDate);
+  await generateVolumeReportForSinglePool(tricryptoUSDC, startDate, endDate);
   // await generateVolumeReportForSinglePoolHighRes(pyusdFxusdPool, startBlockNumber, endBlockNumber, startDate, endDate);
   // await barChartRace();
   // await priceImpactThings();
@@ -128,7 +135,7 @@ export async function research() {
   // await fetchSandwichUserLossForAllPoolsForTimePeriod("2023-12-31", "2024-02-01");
   // await calculateAndSaveDailyAggregateVolumeReport(startDate, endDate);
   // await calculateAndSaveAggregateWeeklyVolumeReport(1692099809, 1703335409);
-  // await generateTopToVolAddressesForSelectedPools([_3Pool], startDate, endDate);
+  //  await generateTopToVolAddressesForSelectedPools([addressUSD0_USDC], startDate, endDate);
   // await calculateLossStatistics();
   // await createSandwichLossInUsdJsonFile();
   // await generateTopFromVolAddressesForSpecificToAddress(startDate, endDate, curveRouterV1);
@@ -248,4 +255,5 @@ export async function research() {
   // console.log("foundAndSortedAllVolsPerUniqueAddressesFromAll", foundAndSortedAllVolsPerUniqueAddressesFromAll);
 
   ///***///***///***///***///*** */ */ */ */ */
+  console.log('Research complete');
 }

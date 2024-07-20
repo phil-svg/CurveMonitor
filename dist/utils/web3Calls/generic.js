@@ -176,6 +176,37 @@ export async function getBlockTimeStampFromNode(blockNumber) {
     console.log('Failed to get block timestamp after several attempts. Please check your connection and the status of the Ethereum node.');
     return null;
 }
+export async function getBlockTimeStampFromProvider(blockNumber, web3HttpProvider) {
+    const MAX_RETRIES = 5; // Maximum number of retries
+    const RETRY_DELAY = 600; // Delay between retries in milliseconds
+    let retries = 0;
+    while (retries < MAX_RETRIES) {
+        try {
+            const BLOCK = await web3HttpProvider.eth.getBlock(blockNumber);
+            return Number(BLOCK.timestamp);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                const err = error;
+                if (err.code === 'ECONNABORTED') {
+                    console.log(`getBlockTimeStampFromNode connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                }
+                else if (err.message && err.message.includes('CONNECTION ERROR')) {
+                    if (retries > 3) {
+                        console.log(`getBlockTimeStampFromNode connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                    }
+                }
+                else {
+                    console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                }
+                retries++;
+                await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+            }
+        }
+    }
+    console.log('Failed to get block timestamp after several attempts. Please check your connection and the status of the Ethereum node.');
+    return null;
+}
 export async function getBlockTimeStampsInBatches(blockNumbers) {
     const blockTimestamps = {};
     const MAX_RETRIES = 5; // Maximum number of retries
@@ -281,6 +312,37 @@ export async function getTxFromTxHash(txHash) {
     while (retries < MAX_RETRIES) {
         try {
             const TX = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash);
+            return TX;
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                const err = error;
+                if (err.code === 'ECONNABORTED') {
+                    console.log(`getTxFromTxId connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                }
+                else if (err.message && err.message.includes('CONNECTION ERROR')) {
+                    if (retries > 3) {
+                        console.log(`getTxFromTxId connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                    }
+                }
+                else {
+                    console.log(`Failed to get transaction by ID. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                }
+                retries++;
+                await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+            }
+        }
+    }
+    console.log(`Failed to get transaction by txHash ${txHash} after several attempts. Please check your connection and the status of the Ethereum node.`);
+    return null;
+}
+export async function getTxFromTxHashAndProvider(txHash, web3HttpProvider) {
+    const MAX_RETRIES = 5; // Maximum number of retries
+    const RETRY_DELAY = 5000; // Delay between retries in milliseconds
+    let retries = 0;
+    while (retries < MAX_RETRIES) {
+        try {
+            const TX = await web3HttpProvider.eth.getTransaction(txHash);
             return TX;
         }
         catch (error) {
@@ -439,6 +501,19 @@ export async function getBlockBuilderFromBlockNumber(blockNumber) {
 export async function getTxHashAtBlockPosition(blockNumber, position) {
     try {
         const block = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
+        if (block && block.transactions.length > position) {
+            return block.transactions[position];
+        }
+        return null;
+    }
+    catch (err) {
+        console.error('Error in getTxHashAtPosition:', err);
+        return null;
+    }
+}
+export async function getTxHashAtBlockPositionWithProvider(blockNumber, position, web3HttpProvider) {
+    try {
+        const block = await web3HttpProvider.eth.getBlock(blockNumber);
         if (block && block.transactions.length > position) {
             return block.transactions[position];
         }

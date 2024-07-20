@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 export async function getCurrentTokenPriceFromDefiLlama(token) {
     try {
         const url = `https://coins.llama.fi/prices/current/ethereum:${token}?searchWidth=4h`;
@@ -36,7 +36,7 @@ export async function getHistoricalTokenPriceFromDefiLlama(tokenAddress, unixTim
 // Fetches the first recorded price data for a given token from the DeFiLlama API.
 export async function getFirstTokenPriceData(tokenAddress) {
     try {
-        const prefixedTokenAddress = tokenAddress.startsWith("ethereum:") ? tokenAddress : `ethereum:${tokenAddress}`;
+        const prefixedTokenAddress = tokenAddress.startsWith('ethereum:') ? tokenAddress : `ethereum:${tokenAddress}`;
         const url = `https://coins.llama.fi/prices/first/${prefixedTokenAddress}`;
         const response = await axios.get(url);
         if (response.data.coins[prefixedTokenAddress]) {
@@ -49,11 +49,11 @@ export async function getFirstTokenPriceData(tokenAddress) {
     }
     catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error response:", error.response);
-            console.error("Axios error request:", error.request);
+            console.error('Axios error response:', error.response);
+            console.error('Axios error request:', error.request);
         }
         else {
-            console.error("An unexpected error occurred:", error);
+            console.error('An unexpected error occurred:', error);
         }
         return null;
     }
@@ -80,7 +80,7 @@ export async function getTokenPriceChartData(tokenAddress, start, span, period, 
         };
         const response = await axios.get(url, { params });
         if (response.data.coins && Object.keys(response.data.coins).length === 0) {
-            return "missing"; // (response.data.coins = {})
+            return 'missing'; // (response.data.coins = {})
         }
         else if (response.data.coins && response.data.coins[tokenQueryParam]) {
             return response.data.coins[tokenQueryParam];
@@ -93,11 +93,11 @@ export async function getTokenPriceChartData(tokenAddress, start, span, period, 
     }
     catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error response:", error.response);
-            console.error("Axios error request:", error.request);
+            console.error('Axios error response:', error.response);
+            console.error('Axios error request:', error.request);
         }
         else {
-            console.error("An unexpected error occurred:", error);
+            console.error('An unexpected error occurred:', error);
         }
         return null;
     }
@@ -118,7 +118,7 @@ export async function getPricesForAllTokensFromDefiLlama(tokens, block_unixtime)
         return prices;
     }
     catch (error) {
-        console.log("Error fetching prices for tokens: ", error);
+        console.log('Error fetching prices for tokens: ', error);
         return null;
     }
 }

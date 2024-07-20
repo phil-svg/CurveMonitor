@@ -1,6 +1,6 @@
 import { AbisPools, AbisRelatedToAddressProvider } from '../../models/Abi.js';
 import axios, { AxiosError } from 'axios';
-import { getAddressById, getAllPoolIds } from './readFunctions/Pools.js';
+import { getAddressById, getAllPoolIds, getPoolBy } from './readFunctions/Pools.js';
 import { NULL_ADDRESS } from '../helperFunctions/Constants.js';
 import Bottleneck from 'bottleneck';
 
@@ -37,11 +37,6 @@ export const getAbiByForAddressProvider = async (options: { address?: string; id
   return abiRecord ? abiRecord.abi : null;
 };
 
-const etherscanLimiter = new Bottleneck({
-  maxConcurrent: 1, // Max number of concurrent requests
-  minTime: 200, // Minimum time between requests
-});
-
 // this function returning null means sc not verified
 export async function fetchAbiFromEtherscan(address: string): Promise<any[] | null> {
   // console.log("Called fetchAbiFromEtherscan for contract", address);
@@ -72,6 +67,11 @@ export async function fetchAbiFromEtherscan(address: string): Promise<any[] | nu
       }
     }
   };
+
+  const etherscanLimiter = new Bottleneck({
+    maxConcurrent: 1, // Max number of concurrent requests
+    minTime: 200, // Minimum time between requests
+  });
 
   const ABIString = await etherscanLimiter.schedule(() => fetchAbi());
   if (ABIString === 'Contract source code not verified') return null;
@@ -201,6 +201,8 @@ export async function fetchMissingPoolAbisFromEtherscan(): Promise<void> {
         const abi = await fetchAbiFromEtherscan(address);
         if (abi) {
           await storeAbiForPools(poolId, abi);
+        } else {
+          console.log('no abi for', poolId, address);
         }
       } catch (err) {
         console.log('err fetching abi for ', address, err);
@@ -216,7 +218,98 @@ export async function fetchMissingPoolAbisFromEtherscan(): Promise<void> {
   }
 }
 
+async function getAllBytecodesWithPoolIds(): Promise<{ poolId: number; bytecode: string }[]> {
+  try {
+    // Fetch all entries from the Bytecode table, including related pool IDs
+    const bytecodes = await Bytecode.findAll({
+      attributes: ['poolId', 'bytecode'], // Select only the poolId and bytecode fields
+      include: {
+        model: Pool,
+        attributes: [], // No attributes from Pool are needed, just the association
+      },
+    });
+
+    // Map the Sequelize model instances to plain objects
+    const results = bytecodes.map((bc) => ({
+      poolId: bc.poolId,
+      bytecode: bc.bytecode,
+    }));
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch bytecodes with pool IDs:', error);
+    throw error; // Rethrow or handle as needed
+  }
+}
+
+export async function fetchMissingPoolAbisViaBytecode() {
+  // Fetch all pool_ids from the database
+  const allPoolIdsInDB = await AbisPools.findAll({ attributes: ['pool_id'] });
+  const allPoolIdsInDBArray = allPoolIdsInDB.map((pool) => pool.pool_id);
+
+  // Get all pool_ids
+  const ALL_POOL_IDS = (await getAllPoolIds()).sort((a, b) => a - b);
+
+  // Find missing pool_ids
+  const missingPoolIds = ALL_POOL_IDS.filter((poolId) => !allPoolIdsInDBArray.includes(poolId));
+
+  // console.log('Missing pool IDs:', missingPoolIds);
+
+  const allBytecodesWithPoolIds = await getAllBytecodesWithPoolIds();
+
+  for (const poolIdWithoutAbi of missingPoolIds) {
+    const bytecodeOfPoolWithMissingABI = await getBytecodeByPoolId(poolIdWithoutAbi);
+    if (!bytecodeOfPoolWithMissingABI) {
+      console.log('No bytecode found for', poolIdWithoutAbi);
+      continue;
+    }
+
+    for (const bytecodeWithPoolId of allBytecodesWithPoolIds) {
+      if (missingPoolIds.includes(bytecodeWithPoolId.poolId)) continue;
+
+      const matchLength = longestCommonPrefixLength(bytecodeWithPoolId.bytecode, bytecodeOfPoolWithMissingABI);
+      if (matchLength > 42000) {
+        // console.log(
+        //   `Partial match found: Pool ID ${bytecodeWithPoolId.poolId} has ${matchLength} matching characters with Pool ID ${poolIdWithoutAbi}`
+        // );
+        try {
+          const abi = await readAbiFromAbisPoolsTable(bytecodeWithPoolId.poolId);
+          if (!abi) continue;
+          await storeAbiForPools(poolIdWithoutAbi, abi);
+          // console.log('Stored ABI for', poolIdWithoutAbi, 'using similar bytecode.');
+          continue;
+        } catch (err) {
+          console.log('Err in fetchMissingPoolAbisViaBytecode', err);
+          continue;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Finds the longest common prefix between two strings.
+ * @param {string} s1 - First string to compare.
+ * @param {string} s2 - Second string to compare.
+ * @returns {number} - The length of the longest common prefix.
+ */
+function longestCommonPrefixLength(s1: string, s2: string): number {
+  const minLength = Math.min(s1.length, s2.length);
+  let count = 0;
+
+  for (let i = 0; i < minLength; i++) {
+    if (s1[i] === s2[i]) {
+      count++;
+    } else {
+      break; // Stop comparing once a mismatch is found
+    }
+  }
+
+  return count;
+}
+
 export async function updatePoolAbis(): Promise<void> {
+  await fetchMissingPoolAbisViaBytecode();
   await fetchMissingPoolAbisFromEtherscan();
   console.log(`[✓] Pool-ABIs' synced successfully.`);
 }
@@ -224,6 +317,10 @@ export async function updatePoolAbis(): Promise<void> {
 import { decode } from '@ipld/dag-cbor';
 import { CID } from 'multiformats/cid';
 import { base58btc } from 'multiformats/bases/base58';
+import { Pool } from '../../models/Pools.js';
+import { Bytecode } from '../../models/PoolsByteCode.js';
+import { getBytecodeByPoolId } from './readFunctions/PoolsBytecode.js';
+import { readAbiFromAbisPoolsTable } from './readFunctions/Abi.js';
 
 async function getContractABIfromMetadata(contractAddress: string): Promise<any> {
   try {

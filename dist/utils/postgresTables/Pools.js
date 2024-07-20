@@ -227,7 +227,7 @@ async function updateNames() {
     }
     catch (error) {
         console.error('Error updating names:', error);
-        throw error;
+        return;
     }
 }
 /** *********************** Adding Coins *********************** */

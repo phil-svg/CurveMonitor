@@ -214,7 +214,7 @@ export function filterNullSymbols(readableTransfersRaw: ReadableTokenTransfer[])
   );
 }
 
-function addPositionField(readableTransfers: ReadableTokenTransfer[]): ReadableTokenTransfer[] {
+export function addPositionField(readableTransfers: ReadableTokenTransfer[]): ReadableTokenTransfer[] {
   return readableTransfers.map((transfer, index) => {
     return {
       ...transfer,
@@ -223,7 +223,7 @@ function addPositionField(readableTransfers: ReadableTokenTransfer[]): ReadableT
   });
 }
 
-function findTokenDetails(
+export function findTokenDetails(
   tokenAddress: string,
   tokenDetailsArray: CoinDetails[]
 ): { symbol: string | null; decimals: number | null } | null {

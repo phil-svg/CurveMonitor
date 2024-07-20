@@ -15,7 +15,7 @@ import { getCoinIdByAddress } from '../../../readFunctions/Coins.js';
 import { getBlockNumberFromTxId, getTxIdByTxHash } from '../../../readFunctions/Transactions.js';
 import { getCleanedTransfers } from '../../../CleanedTransfers.js';
 import { getTimestampByBlockNumber } from '../../../readFunctions/Blocks.js';
-async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) {
+export async function buildAtomicArbDetails(txId, profitDetails, validatorPayOffInUSD) {
     const enrichedTransaction = await enrichTransactionDetail(txId);
     if (!enrichedTransaction) {
         console.log('enrichedTransaction are missing for txId', txId, 'profitDetails:', profitDetails);
@@ -43,7 +43,7 @@ function hasRelevantNegativeBalanceChange(balanceChanges) {
     }
     return false;
 }
-async function isGlobalBackrun(transaction, txId) {
+export async function isGlobalBackrun(transaction, txId) {
     if (transaction.tx_position <= 1)
         return false;
     const previousTxHash = await getTxHashAtBlockPosition(transaction.block_number, transaction.tx_position - 2);
@@ -219,7 +219,7 @@ export function hasIllegalOutboundsToFrom(transfers, from) {
  * @param to the bots' address
  * @returns
  */
-function isAtomicArbCaseValueStaysWithFromOrTo(cleanedTransfers, balanceChangesFrom, balanceChangesTo, from, to) {
+export function isAtomicArbCaseValueStaysWithFromOrTo(cleanedTransfers, balanceChangesFrom, balanceChangesTo, from, to) {
     if (balanceChangesFrom.length === 0 && balanceChangesTo.length === 0)
         return false;
     let hasNegativeEthChangeFrom = false;
@@ -332,7 +332,7 @@ export function isTrueLeaf(cleanedTransfers, transfer, address) {
  * @param cleanedTransfers - All transfers to check against for the leaf node.
  * @returns true if the transfer is from the bot or bot operator to a different address, which is a leaf node.
  */
-function botOrFromTransferToLeaf(transfer, from, to, cleanedTransfers) {
+export function botOrFromTransferToLeaf(transfer, from, to, cleanedTransfers) {
     return ((transfer.from.toLowerCase() === from.toLowerCase() || transfer.from.toLowerCase() === to.toLowerCase()) &&
         transfer.to.toLowerCase() !== from.toLowerCase() &&
         transfer.to.toLowerCase() !== to.toLowerCase() &&
@@ -709,7 +709,7 @@ export async function wasTxAtomicArb(transfersCategorized, fromAddress, calledCo
     }
     return false;
 }
-async function augmentWithUSDValuesCaseValueStaysWithFromOrTo(formattedArbitrageResult, block_unixtime) {
+export async function augmentWithUSDValuesCaseValueStaysWithFromOrTo(formattedArbitrageResult, block_unixtime) {
     const uniqueTokens = new Set([ETH_ADDRESS]);
     formattedArbitrageResult.extractedValue.forEach((item) => uniqueTokens.add(item.address));
     if (Array.isArray(formattedArbitrageResult.bribe)) {
@@ -768,7 +768,7 @@ async function augmentWithUSDValuesCaseValueStaysWithFromOrTo(formattedArbitrage
 function isUnknown(value) {
     return value === 'unknown';
 }
-async function augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(formattedArbitrageResult, block_unixtime) {
+export async function augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(formattedArbitrageResult, block_unixtime) {
     const uniqueTokens = new Set([ETH_ADDRESS]);
     if (!isUnknown(formattedArbitrageResult.extractedValue)) {
         formattedArbitrageResult.extractedValue.forEach((item) => uniqueTokens.add(item.address));
@@ -829,7 +829,7 @@ async function augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(formattedArbitra
         blockBuilder: isUnknown(formattedArbitrageResult.bribe) ? 'unknown' : formattedArbitrageResult.blockBuilder,
     };
 }
-function calculateProfitDetails(usdValuedArbitrageResult, dollarValueInflowFromLeaf) {
+export function calculateProfitDetails(usdValuedArbitrageResult, dollarValueInflowFromLeaf) {
     let netWin = 'unknown';
     let revenue = 'unknown';
     let totalCost = 'unknown';
@@ -921,7 +921,7 @@ export function hasEnoughSwaps(balanceChangeTo, cleanedTransfers) {
  * @param from - The address to check as the receiver of ETH transfers.
  * @returns A new array with false duplicates removed.
  */
-function removeFalseDupes(cleanedTransfers, from) {
+export function removeFalseDupes(cleanedTransfers, from) {
     // Filter transfers where 'from' is the receiver and token is ETH
     const fromLowerCase = from.toLowerCase();
     // Filter transfers where 'from' is the receiver and token is ETH
@@ -947,7 +947,7 @@ function removeFalseDupes(cleanedTransfers, from) {
     });
     return cleanedTransfers;
 }
-function toHasInflowFromLeafOtherThanFrom(cleanedTransfers, fromAddress, toAddress) {
+export function toHasInflowFromLeafOtherThanFrom(cleanedTransfers, fromAddress, toAddress) {
     const fromAddressLowerCase = fromAddress.toLowerCase();
     const toAddressLowerCase = toAddress.toLowerCase();
     const transfersExcludingFrom = cleanedTransfers.filter((t) => t.from && t.from.toLowerCase() !== fromAddressLowerCase && t.to && t.to.toLowerCase() !== fromAddressLowerCase);
@@ -960,7 +960,7 @@ function toHasInflowFromLeafOtherThanFrom(cleanedTransfers, fromAddress, toAddre
     });
 }
 // Function to check if an address is a leaf in the entire transfers array
-function isLeaf(address, transfers) {
+export function isLeaf(address, transfers) {
     const addressToCheck = address.toLowerCase();
     return !transfers.some((t) => t.to.toLowerCase() === addressToCheck || t.from.toLowerCase() === addressToCheck);
 }
@@ -980,7 +980,7 @@ export async function isMakerProxy(contractAddress) {
     const requiredFunctions = ['cache', 'owner', 'authority'];
     return requiredFunctions.every((funcName) => abi.some((item) => item.type === 'function' && item.name === funcName && item.stateMutability === 'view'));
 }
-function hasMissmatchingForOriginLeafesToTo(onlyToTransfers, allTransfers, formAddress) {
+export function hasMissmatchingForOriginLeafesToTo(onlyToTransfers, allTransfers, formAddress) {
     const fromAddressLowerCase = formAddress.toLowerCase();
     const filteredOnlyToTransfers = onlyToTransfers.filter((t) => t.from.toLowerCase() !== fromAddressLowerCase);
     const numOfLeafOrigins = countLeafOrigins(filteredOnlyToTransfers, allTransfers);

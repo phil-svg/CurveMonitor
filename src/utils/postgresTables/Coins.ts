@@ -4,7 +4,7 @@ import { Op, QueryTypes } from 'sequelize';
 import { AbiItem } from 'web3-utils';
 import { WEB3_HTTP_PROVIDER } from '../web3Calls/generic.js';
 
-const ABI_SYMBOL: AbiItem[] = [
+export const ABI_SYMBOL: AbiItem[] = [
   {
     name: 'symbol',
     outputs: [
@@ -20,7 +20,7 @@ const ABI_SYMBOL: AbiItem[] = [
   } as AbiItem,
 ];
 
-const ABI_DECIMALS: AbiItem[] = [
+export const ABI_DECIMALS: AbiItem[] = [
   {
     name: 'decimals',
     outputs: [
@@ -36,9 +36,9 @@ const ABI_DECIMALS: AbiItem[] = [
   } as AbiItem,
 ];
 
-const ADDRESS_ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-const ADDRESS_MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
-const ADDRESS_REUSD = '0x6b8734ad31D42F5c05A86594314837C416ADA984';
+export const ADDRESS_ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+export const ADDRESS_MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
+export const ADDRESS_REUSD = '0x6b8734ad31D42F5c05A86594314837C416ADA984';
 
 export async function addNewTokenToDbFromCoinAddress(coinAddress: string): Promise<void> {
   try {

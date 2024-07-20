@@ -1,14 +1,26 @@
 // pools.ts
-import { Table, Column, Model, PrimaryKey, AutoIncrement, DataType, CreatedAt, AllowNull, HasMany, HasOne } from "sequelize-typescript";
-import { PoolParamsEvents } from "./PoolParamsEvents.js";
-import { InitialParams } from "./InitialParams.js";
+import {
+  Table,
+  Column,
+  Model,
+  PrimaryKey,
+  AutoIncrement,
+  DataType,
+  CreatedAt,
+  AllowNull,
+  HasMany,
+  HasOne,
+} from 'sequelize-typescript';
+import { PoolParamsEvents } from './PoolParamsEvents.js';
+import { InitialParams } from './InitialParams.js';
+import { Bytecode } from './PoolsByteCode.js';
 
 export enum PoolVersion {
-  v1 = "v1",
-  v2 = "v2",
+  v1 = 'v1',
+  v2 = 'v2',
 }
 
-@Table({ tableName: "pools" })
+@Table({ tableName: 'pools' })
 export class Pool extends Model {
   @PrimaryKey
   @AutoIncrement
@@ -55,7 +67,7 @@ export class Pool extends Model {
 
   @AllowNull(true)
   @Column({
-    field: "creation_timestamp",
+    field: 'creation_timestamp',
     type: DataType.INTEGER,
   })
   creation_timestamp?: number;
@@ -63,7 +75,7 @@ export class Pool extends Model {
   @AllowNull(true)
   @CreatedAt
   @Column({
-    field: "creation_date",
+    field: 'creation_date',
     type: DataType.DATE,
   })
   creation_date?: Date;
@@ -73,4 +85,7 @@ export class Pool extends Model {
 
   @HasOne(() => InitialParams)
   initialParams?: InitialParams;
+
+  @HasOne(() => Bytecode)
+  bytecode!: Bytecode;
 }

@@ -14,14 +14,13 @@ import {
 import { whitelistedAddress } from './Constants.js';
 import { getTxHashByTxId, getUnixTimestampByTxId } from '../../../readFunctions/Transactions.js';
 import { readAbiFromAbisEthereumTable } from '../../../readFunctions/Abi.js';
-import { calculateGasInfo, getBlockBuilderAddress, getValidatorPayOff } from '../../atomic/utils/atomicArbDetection.js';
+import { calculateGasInfo } from '../../atomic/utils/atomicArbDetection.js';
 import { getBribeInUSDfromTx } from './revenueProfitThings/LowerBoundSolver.js';
 import { getEthPriceWithTimestampFromTable } from '../../../readFunctions/PriceMap.js';
-import { getNonceWithLimiter } from '../../../../web3Calls/generic.js';
 import { ETH_ADDRESS, WETH_ADDRESS } from '../../../../helperFunctions/Constants.js';
 import { getAllPoolAddresses } from '../../../readFunctions/Pools.js';
 
-function hasIllegalOutbound(from: string, to: string, cleanedTransfers: ReadableTokenTransfer[]): boolean {
+export function hasIllegalOutbound(from: string, to: string, cleanedTransfers: ReadableTokenTransfer[]): boolean {
   const lowerCaseFrom = from.toLowerCase();
   const lowerCaseTo = to.toLowerCase();
 
@@ -99,7 +98,7 @@ export async function isCexDexArbCandidate(txId: number, numOfTransfers: number)
   }
 }
 
-function removeEthWrapsAndUnwraps(cleanedTransfers: ReadableTokenTransfer[]): ReadableTokenTransfer[] {
+export function removeEthWrapsAndUnwraps(cleanedTransfers: ReadableTokenTransfer[]): ReadableTokenTransfer[] {
   const hasInvalidTransfer = cleanedTransfers.some((transfer) => transfer.from == null || transfer.to == null);
   if (hasInvalidTransfer) return cleanedTransfers;
 
@@ -126,7 +125,7 @@ function removeEthWrapsAndUnwraps(cleanedTransfers: ReadableTokenTransfer[]): Re
   return convertedTransfers;
 }
 
-function isLeafAddress(address: string, cleanedTransfers: ReadableTokenTransfer[]): boolean {
+export function isLeafAddress(address: string, cleanedTransfers: ReadableTokenTransfer[]): boolean {
   const lowerCaseAddress = address.toLowerCase();
   const occurrences = cleanedTransfers.reduce((acc, transfer) => {
     if (transfer.from.toLowerCase() === lowerCaseAddress || transfer.to.toLowerCase() === lowerCaseAddress) {

@@ -1,0 +1,868 @@
+{
+  "data": [
+    {
+      "interval_start": "2024-07-14T11:00:00.000Z",
+      "interval_start_unixtime": 1720954800,
+      "full_volume": 60377,
+      "atomicArbVolume": 2446,
+      "cexDexArbVolume": 33539,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 171
+    },
+    {
+      "interval_start": "2024-07-14T12:00:00.000Z",
+      "interval_start_unixtime": 1720958400,
+      "full_volume": 49862,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 45177,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T13:00:00.000Z",
+      "interval_start_unixtime": 1720962000,
+      "full_volume": 41592,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 41592,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T14:00:00.000Z",
+      "interval_start_unixtime": 1720965600,
+      "full_volume": 176954,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 146459,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T15:00:00.000Z",
+      "interval_start_unixtime": 1720969200,
+      "full_volume": 66579,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 24514,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T16:00:00.000Z",
+      "interval_start_unixtime": 1720972800,
+      "full_volume": 30258,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 9969,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T17:00:00.000Z",
+      "interval_start_unixtime": 1720976400,
+      "full_volume": 40348,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 35598,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T18:00:00.000Z",
+      "interval_start_unixtime": 1720980000,
+      "full_volume": 154988,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 43197,
+      "sandwichVolume_LossWithin": 74695,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T19:00:00.000Z",
+      "interval_start_unixtime": 1720983600,
+      "full_volume": 51714,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 22672,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 4183
+    },
+    {
+      "interval_start": "2024-07-14T20:00:00.000Z",
+      "interval_start_unixtime": 1720987200,
+      "full_volume": 59379,
+      "atomicArbVolume": 8762,
+      "cexDexArbVolume": 47736,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T21:00:00.000Z",
+      "interval_start_unixtime": 1720990800,
+      "full_volume": 191660,
+      "atomicArbVolume": 21417,
+      "cexDexArbVolume": 164985,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T22:00:00.000Z",
+      "interval_start_unixtime": 1720994400,
+      "full_volume": 708207,
+      "atomicArbVolume": 3860,
+      "cexDexArbVolume": 250451,
+      "sandwichVolume_LossWithin": 153547,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-14T23:00:00.000Z",
+      "interval_start_unixtime": 1720998000,
+      "full_volume": 85680,
+      "atomicArbVolume": 1882,
+      "cexDexArbVolume": 73824,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T00:00:00.000Z",
+      "interval_start_unixtime": 1721001600,
+      "full_volume": 210831,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 152743,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T01:00:00.000Z",
+      "interval_start_unixtime": 1721005200,
+      "full_volume": 132110,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 85516,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T02:00:00.000Z",
+      "interval_start_unixtime": 1721008800,
+      "full_volume": 210268,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 166028,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T03:00:00.000Z",
+      "interval_start_unixtime": 1721012400,
+      "full_volume": 98817,
+      "atomicArbVolume": 9999,
+      "cexDexArbVolume": 55159,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T04:00:00.000Z",
+      "interval_start_unixtime": 1721016000,
+      "full_volume": 140320,
+      "atomicArbVolume": 41358,
+      "cexDexArbVolume": 57503,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T05:00:00.000Z",
+      "interval_start_unixtime": 1721019600,
+      "full_volume": 105914,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 44879,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T06:00:00.000Z",
+      "interval_start_unixtime": 1721023200,
+      "full_volume": 170658,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 50824,
+      "sandwichVolume_LossWithin": 10129,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T07:00:00.000Z",
+      "interval_start_unixtime": 1721026800,
+      "full_volume": 29641,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 29641,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T08:00:00.000Z",
+      "interval_start_unixtime": 1721030400,
+      "full_volume": 34590,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 34590,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T09:00:00.000Z",
+      "interval_start_unixtime": 1721034000,
+      "full_volume": 51903,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 51033,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T10:00:00.000Z",
+      "interval_start_unixtime": 1721037600,
+      "full_volume": 24592,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 17520,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T11:00:00.000Z",
+      "interval_start_unixtime": 1721041200,
+      "full_volume": 52282,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 40866,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T12:00:00.000Z",
+      "interval_start_unixtime": 1721044800,
+      "full_volume": 48259,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 40808,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T13:00:00.000Z",
+      "interval_start_unixtime": 1721048400,
+      "full_volume": 64332,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 52553,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T14:00:00.000Z",
+      "interval_start_unixtime": 1721052000,
+      "full_volume": 53637,
+      "atomicArbVolume": 10048,
+      "cexDexArbVolume": 35939,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T15:00:00.000Z",
+      "interval_start_unixtime": 1721055600,
+      "full_volume": 62160,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 45788,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T16:00:00.000Z",
+      "interval_start_unixtime": 1721059200,
+      "full_volume": 101060,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 68672,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T17:00:00.000Z",
+      "interval_start_unixtime": 1721062800,
+      "full_volume": 211814,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 93492,
+      "sandwichVolume_LossWithin": 57014,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T18:00:00.000Z",
+      "interval_start_unixtime": 1721066400,
+      "full_volume": 124949,
+      "atomicArbVolume": 8683,
+      "cexDexArbVolume": 53590,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T19:00:00.000Z",
+      "interval_start_unixtime": 1721070000,
+      "full_volume": 115635,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 113135,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T20:00:00.000Z",
+      "interval_start_unixtime": 1721073600,
+      "full_volume": 198364,
+      "atomicArbVolume": 46368,
+      "cexDexArbVolume": 51030,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T21:00:00.000Z",
+      "interval_start_unixtime": 1721077200,
+      "full_volume": 19993,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 9809,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T22:00:00.000Z",
+      "interval_start_unixtime": 1721080800,
+      "full_volume": 433922,
+      "atomicArbVolume": 3407,
+      "cexDexArbVolume": 198483,
+      "sandwichVolume_LossWithin": 88003,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-15T23:00:00.000Z",
+      "interval_start_unixtime": 1721084400,
+      "full_volume": 162076,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 55460,
+      "sandwichVolume_LossWithin": 43850,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T00:00:00.000Z",
+      "interval_start_unixtime": 1721088000,
+      "full_volume": 125978,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 78777,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T01:00:00.000Z",
+      "interval_start_unixtime": 1721091600,
+      "full_volume": 74385,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 47743,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T02:00:00.000Z",
+      "interval_start_unixtime": 1721095200,
+      "full_volume": 73065,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 34501,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T03:00:00.000Z",
+      "interval_start_unixtime": 1721098800,
+      "full_volume": 18805,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 17672,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T04:00:00.000Z",
+      "interval_start_unixtime": 1721102400,
+      "full_volume": 48192,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 39561,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T05:00:00.000Z",
+      "interval_start_unixtime": 1721106000,
+      "full_volume": 1031163,
+      "atomicArbVolume": 334124,
+      "cexDexArbVolume": 335855,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T06:00:00.000Z",
+      "interval_start_unixtime": 1721109600,
+      "full_volume": 169364,
+      "atomicArbVolume": 5715,
+      "cexDexArbVolume": 145922,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T07:00:00.000Z",
+      "interval_start_unixtime": 1721113200,
+      "full_volume": 102125,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 93582,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T08:00:00.000Z",
+      "interval_start_unixtime": 1721116800,
+      "full_volume": 83892,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 83892,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T09:00:00.000Z",
+      "interval_start_unixtime": 1721120400,
+      "full_volume": 61511,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 55057,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T10:00:00.000Z",
+      "interval_start_unixtime": 1721124000,
+      "full_volume": 111367,
+      "atomicArbVolume": 10241,
+      "cexDexArbVolume": 71829,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T11:00:00.000Z",
+      "interval_start_unixtime": 1721127600,
+      "full_volume": 241936,
+      "atomicArbVolume": 13435,
+      "cexDexArbVolume": 179841,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T12:00:00.000Z",
+      "interval_start_unixtime": 1721131200,
+      "full_volume": 664266,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 452157,
+      "sandwichVolume_LossWithin": 79452,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T13:00:00.000Z",
+      "interval_start_unixtime": 1721134800,
+      "full_volume": 648225,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 531691,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T14:00:00.000Z",
+      "interval_start_unixtime": 1721138400,
+      "full_volume": 501136,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 457001,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T15:00:00.000Z",
+      "interval_start_unixtime": 1721142000,
+      "full_volume": 191402,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 179027,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T16:00:00.000Z",
+      "interval_start_unixtime": 1721145600,
+      "full_volume": 139272,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 122077,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T17:00:00.000Z",
+      "interval_start_unixtime": 1721149200,
+      "full_volume": 73216,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 64556,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T18:00:00.000Z",
+      "interval_start_unixtime": 1721152800,
+      "full_volume": 172956,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 105274,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T19:00:00.000Z",
+      "interval_start_unixtime": 1721156400,
+      "full_volume": 85354,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 69752,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T20:00:00.000Z",
+      "interval_start_unixtime": 1721160000,
+      "full_volume": 92616,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 63003,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T21:00:00.000Z",
+      "interval_start_unixtime": 1721163600,
+      "full_volume": 103565,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 92514,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T22:00:00.000Z",
+      "interval_start_unixtime": 1721167200,
+      "full_volume": 556085,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 390879,
+      "sandwichVolume_LossWithin": 141648,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-16T23:00:00.000Z",
+      "interval_start_unixtime": 1721170800,
+      "full_volume": 244474,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 118738,
+      "sandwichVolume_LossWithin": 59098,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T00:00:00.000Z",
+      "interval_start_unixtime": 1721174400,
+      "full_volume": 273818,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 80778,
+      "sandwichVolume_LossWithin": 98246,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T01:00:00.000Z",
+      "interval_start_unixtime": 1721178000,
+      "full_volume": 238422,
+      "atomicArbVolume": 4337,
+      "cexDexArbVolume": 159095,
+      "sandwichVolume_LossWithin": 16563,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T02:00:00.000Z",
+      "interval_start_unixtime": 1721181600,
+      "full_volume": 94455,
+      "atomicArbVolume": 1867,
+      "cexDexArbVolume": 75586,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T03:00:00.000Z",
+      "interval_start_unixtime": 1721185200,
+      "full_volume": 69405,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 61170,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T04:00:00.000Z",
+      "interval_start_unixtime": 1721188800,
+      "full_volume": 52832,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 44737,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T05:00:00.000Z",
+      "interval_start_unixtime": 1721192400,
+      "full_volume": 52844,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 42378,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T06:00:00.000Z",
+      "interval_start_unixtime": 1721196000,
+      "full_volume": 36039,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 30555,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T07:00:00.000Z",
+      "interval_start_unixtime": 1721199600,
+      "full_volume": 70389,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 56441,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T08:00:00.000Z",
+      "interval_start_unixtime": 1721203200,
+      "full_volume": 899719,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 543257,
+      "sandwichVolume_LossWithin": 304168,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T09:00:00.000Z",
+      "interval_start_unixtime": 1721206800,
+      "full_volume": 571376,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 365556,
+      "sandwichVolume_LossWithin": 126498,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T10:00:00.000Z",
+      "interval_start_unixtime": 1721210400,
+      "full_volume": 447129,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 408344,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T11:00:00.000Z",
+      "interval_start_unixtime": 1721214000,
+      "full_volume": 2732120,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 174865,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 270
+    },
+    {
+      "interval_start": "2024-07-17T12:00:00.000Z",
+      "interval_start_unixtime": 1721217600,
+      "full_volume": 308923,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 66506,
+      "sandwichVolume_LossWithin": 96310,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T13:00:00.000Z",
+      "interval_start_unixtime": 1721221200,
+      "full_volume": 341913,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 288261,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T14:00:00.000Z",
+      "interval_start_unixtime": 1721224800,
+      "full_volume": 408553,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 341263,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T15:00:00.000Z",
+      "interval_start_unixtime": 1721228400,
+      "full_volume": 425143,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 333162,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T16:00:00.000Z",
+      "interval_start_unixtime": 1721232000,
+      "full_volume": 118478,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 118478,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T17:00:00.000Z",
+      "interval_start_unixtime": 1721235600,
+      "full_volume": 56565,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 29776,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T18:00:00.000Z",
+      "interval_start_unixtime": 1721239200,
+      "full_volume": 36531,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 36531,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T19:00:00.000Z",
+      "interval_start_unixtime": 1721242800,
+      "full_volume": 44578,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 39855,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T20:00:00.000Z",
+      "interval_start_unixtime": 1721246400,
+      "full_volume": 0,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 0,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T21:00:00.000Z",
+      "interval_start_unixtime": 1721250000,
+      "full_volume": 240903,
+      "atomicArbVolume": 65625,
+      "cexDexArbVolume": 77521,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T22:00:00.000Z",
+      "interval_start_unixtime": 1721253600,
+      "full_volume": 38593,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 38593,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-17T23:00:00.000Z",
+      "interval_start_unixtime": 1721257200,
+      "full_volume": 38471,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 30193,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T00:00:00.000Z",
+      "interval_start_unixtime": 1721260800,
+      "full_volume": 67984,
+      "atomicArbVolume": 8335,
+      "cexDexArbVolume": 59574,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T01:00:00.000Z",
+      "interval_start_unixtime": 1721264400,
+      "full_volume": 64233,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 64212,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T02:00:00.000Z",
+      "interval_start_unixtime": 1721268000,
+      "full_volume": 442576,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 408561,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T03:00:00.000Z",
+      "interval_start_unixtime": 1721271600,
+      "full_volume": 201088,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 182693,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T04:00:00.000Z",
+      "interval_start_unixtime": 1721275200,
+      "full_volume": 250651,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 213792,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T05:00:00.000Z",
+      "interval_start_unixtime": 1721278800,
+      "full_volume": 191971,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 177253,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T06:00:00.000Z",
+      "interval_start_unixtime": 1721282400,
+      "full_volume": 99426,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 88156,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T07:00:00.000Z",
+      "interval_start_unixtime": 1721286000,
+      "full_volume": 32677,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 32677,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T08:00:00.000Z",
+      "interval_start_unixtime": 1721289600,
+      "full_volume": 54002,
+      "atomicArbVolume": 3136,
+      "cexDexArbVolume": 50866,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T09:00:00.000Z",
+      "interval_start_unixtime": 1721293200,
+      "full_volume": 12811,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 9469,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    },
+    {
+      "interval_start": "2024-07-18T10:00:00.000Z",
+      "interval_start_unixtime": 1721296800,
+      "full_volume": 0,
+      "atomicArbVolume": 0,
+      "cexDexArbVolume": 0,
+      "sandwichVolume_LossWithin": 0,
+      "sandwichVolume_LossOutside": 0
+    }
+  ]
+}

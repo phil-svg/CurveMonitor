@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 interface LlamaPriceResponse {
   coins: {
@@ -30,7 +30,10 @@ export async function getCurrentTokenPriceFromDefiLlama(token: string): Promise<
   return null;
 }
 
-export async function getHistoricalTokenPriceFromDefiLlama(tokenAddress: string, unixTimestamp: number): Promise<number | null> {
+export async function getHistoricalTokenPriceFromDefiLlama(
+  tokenAddress: string,
+  unixTimestamp: number
+): Promise<number | null> {
   try {
     const url = `https://coins.llama.fi/prices/historical/${unixTimestamp}/ethereum:${tokenAddress}?searchWidth=4h`;
     const response = await axios.get<LlamaPriceResponse>(url);
@@ -42,7 +45,9 @@ export async function getHistoricalTokenPriceFromDefiLlama(tokenAddress: string,
       console.log(`No historical price data for token: ${tokenAddress} at timestamp: ${unixTimestamp}`);
     }
   } catch (err) {
-    console.log(`Failed to fetch historical price from DefiLlama for token: ${tokenAddress} at timestamp: ${unixTimestamp}, error: ${err}`);
+    console.log(
+      `Failed to fetch historical price from DefiLlama for token: ${tokenAddress} at timestamp: ${unixTimestamp}, error: ${err}`
+    );
   }
 
   return null;
@@ -63,7 +68,7 @@ interface FirstPricesApiResponse {
 // Fetches the first recorded price data for a given token from the DeFiLlama API.
 export async function getFirstTokenPriceData(tokenAddress: string): Promise<FirstPriceResponse | null> {
   try {
-    const prefixedTokenAddress = tokenAddress.startsWith("ethereum:") ? tokenAddress : `ethereum:${tokenAddress}`;
+    const prefixedTokenAddress = tokenAddress.startsWith('ethereum:') ? tokenAddress : `ethereum:${tokenAddress}`;
 
     const url = `https://coins.llama.fi/prices/first/${prefixedTokenAddress}`;
 
@@ -77,10 +82,10 @@ export async function getFirstTokenPriceData(tokenAddress: string): Promise<Firs
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error("Axios error response:", error.response);
-      console.error("Axios error request:", error.request);
+      console.error('Axios error response:', error.response);
+      console.error('Axios error request:', error.request);
     } else {
-      console.error("An unexpected error occurred:", error);
+      console.error('An unexpected error occurred:', error);
     }
     return null;
   }
@@ -120,7 +125,7 @@ export async function getTokenPriceChartData(
   span: number,
   period: string,
   searchWidth: number
-): Promise<LlamaCoinResponse | null | "missing"> {
+): Promise<LlamaCoinResponse | null | 'missing'> {
   const tokenQueryParam = `ethereum:${tokenAddress}`;
   const url = `https://coins.llama.fi/chart/${tokenQueryParam}`;
 
@@ -135,7 +140,7 @@ export async function getTokenPriceChartData(
     const response = await axios.get<LlamaChartResponse>(url, { params });
 
     if (response.data.coins && Object.keys(response.data.coins).length === 0) {
-      return "missing"; // (response.data.coins = {})
+      return 'missing'; // (response.data.coins = {})
     } else if (response.data.coins && response.data.coins[tokenQueryParam]) {
       return response.data.coins[tokenQueryParam];
     } else {
@@ -145,16 +150,19 @@ export async function getTokenPriceChartData(
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error("Axios error response:", error.response);
-      console.error("Axios error request:", error.request);
+      console.error('Axios error response:', error.response);
+      console.error('Axios error request:', error.request);
     } else {
-      console.error("An unexpected error occurred:", error);
+      console.error('An unexpected error occurred:', error);
     }
     return null;
   }
 }
 
-export async function getPricesForAllTokensFromDefiLlama(tokens: Set<string>, block_unixtime: number): Promise<Map<string, number> | null> {
+export async function getPricesForAllTokensFromDefiLlama(
+  tokens: Set<string>,
+  block_unixtime: number
+): Promise<Map<string, number> | null> {
   try {
     const prices = new Map<string, number>();
 
@@ -173,7 +181,7 @@ export async function getPricesForAllTokensFromDefiLlama(tokens: Set<string>, bl
 
     return prices;
   } catch (error) {
-    console.log("Error fetching prices for tokens: ", error);
+    console.log('Error fetching prices for tokens: ', error);
     return null;
   }
 }

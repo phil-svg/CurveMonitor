@@ -1,13 +1,13 @@
-import { TransactionCoins } from "../../../models/TransactionCoins.js";
-import { Transactions } from "../../../models/Transactions.js";
-import { getTokenPriceWithTimestampFromDb } from "../../postgresTables/readFunctions/PriceMap.js";
+import { TransactionCoins } from '../../../models/TransactionCoins.js';
+import { Transactions } from '../../../models/Transactions.js';
+import { getTokenPriceWithTimestampFromDb } from '../../postgresTables/readFunctions/PriceMap.js';
 export async function priceTransaction(transactionData) {
     let coins = [];
     if (Array.isArray(transactionData.transactionCoins)) {
         coins = [...coins, ...transactionData.transactionCoins];
     }
     switch (transactionData.transaction_type) {
-        case "swap":
+        case 'swap':
             for (const coin of coins) {
                 const price = await getTokenPriceWithTimestampFromDb(coin.coin_id, transactionData.block_unixtime);
                 if (price !== null) {
@@ -15,8 +15,8 @@ export async function priceTransaction(transactionData) {
                 }
             }
             break;
-        case "deposit":
-        case "remove":
+        case 'deposit':
+        case 'remove':
             let totalValue = 0;
             for (const coin of coins) {
                 const price = await getTokenPriceWithTimestampFromDb(coin.coin_id, transactionData.block_unixtime);
@@ -52,7 +52,7 @@ export async function priceTransactionFromTxId(txId) {
         // console.log("transaction.tx_hash", transaction.tx_hash);
         let totalVolume = 0;
         transaction.transactionCoins.forEach((coin) => {
-            if (coin.direction === "out" && coin.dollar_value != null) {
+            if (coin.direction === 'out' && coin.dollar_value != null) {
                 totalVolume += Number(coin.dollar_value);
             }
         });

@@ -1,8 +1,9 @@
 import { io } from 'socket.io-client';
 import { topBestPerformingLabels, topWorstPerformingLabels } from './utils/helperFunctions/Client.js';
+import fs from 'fs';
 // Replace with "wss://api.curvemonitor.com" for production
-// const url = 'http://localhost:443';
-const url = 'wss://api.curvemonitor.com';
+const url = 'http://localhost:443';
+// const url = 'wss://api.curvemonitor.com';
 /**
  *
  * Find the Endpoint-Overview at the bottom of this file.
@@ -530,6 +531,7 @@ export function startPoolSpecificAggregatedMevVolumeClient(socket, poolAddress, 
     socket.on('poolSpecificAggregatedMevVolume', (aggregatedMevVolumeForPool) => {
         console.log('Received Pool specific Aggregated MEV Volume:');
         console.log('Result:', aggregatedMevVolumeForPool);
+        fs.writeFileSync('fiddy.json', JSON.stringify(aggregatedMevVolumeForPool, null, 2));
     });
 }
 /*
@@ -594,14 +596,15 @@ export async function startTestClient() {
         // startPoolLabel(mainSocket, '0x6a6283aB6e31C2AeC3fA08697A8F806b740660b2');
         // *************** MEV **************************
         // *** aggregated ***
-        const poolAddress = '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7';
-        const duration = '1 week';
-        startPoolSpecificAggregatedMevVolumeClient(mainSocket, poolAddress, duration, {
-            value: 1,
-            unit: 'day',
-        }); // (Pool Specific)
+        // const tricryptoUSDC = '0x7f86bf177dd4f3494b841a37e810a34dd56c829b';
+        // const poolAddress = '0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7';
+        // const duration = '4 days';
+        // startPoolSpecificAggregatedMevVolumeClient(mainSocket, tricryptoUSDC, duration, {
+        //   value: 1,
+        //   unit: 'hour',
+        // }); // (Pool Specific)
         // *** sammich ***
-        // startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
+        startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
         // startAbsoluteLabelsRankingClient(mainSocket); // (All Pools)
         // startSandwichLabelOccurrencesClient(mainSocket); // (All Pools)
         // startNewSandwichClient(mainSocket); // (All Pools, live-feed)

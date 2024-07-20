@@ -48,7 +48,7 @@ import { getBlockNumberFromTxId, getTxIdByTxHash } from '../../../readFunctions/
 import { getCleanedTransfers } from '../../../CleanedTransfers.js';
 import { getTimestampByBlockNumber } from '../../../readFunctions/Blocks.js';
 
-async function buildAtomicArbDetails(
+export async function buildAtomicArbDetails(
   txId: number,
   profitDetails: ProfitDetails,
   validatorPayOffInUSD: number | null
@@ -101,7 +101,7 @@ function hasRelevantNegativeBalanceChange(balanceChanges: BalanceChange[]): bool
   return false;
 }
 
-async function isGlobalBackrun(transaction: TransactionData, txId: number): Promise<boolean | null> {
+export async function isGlobalBackrun(transaction: TransactionData, txId: number): Promise<boolean | null> {
   if (transaction.tx_position <= 1) return false;
 
   const previousTxHash = await getTxHashAtBlockPosition(transaction.block_number, transaction.tx_position - 2);
@@ -325,7 +325,7 @@ export function hasIllegalOutboundsToFrom(transfers: ReadableTokenTransfer[], fr
  * @param to the bots' address
  * @returns
  */
-function isAtomicArbCaseValueStaysWithFromOrTo(
+export function isAtomicArbCaseValueStaysWithFromOrTo(
   cleanedTransfers: ReadableTokenTransfer[],
   balanceChangesFrom: BalanceChange[],
   balanceChangesTo: BalanceChange[],
@@ -458,7 +458,7 @@ export function isTrueLeaf(
  * @param cleanedTransfers - All transfers to check against for the leaf node.
  * @returns true if the transfer is from the bot or bot operator to a different address, which is a leaf node.
  */
-function botOrFromTransferToLeaf(
+export function botOrFromTransferToLeaf(
   transfer: ReadableTokenTransfer,
   from: string,
   to: string,
@@ -1008,7 +1008,7 @@ export async function wasTxAtomicArb(
   return false;
 }
 
-async function augmentWithUSDValuesCaseValueStaysWithFromOrTo(
+export async function augmentWithUSDValuesCaseValueStaysWithFromOrTo(
   formattedArbitrageResult: FormattedArbitrageResult,
   block_unixtime: number
 ): Promise<USDValuedArbitrageResult | null> {
@@ -1088,7 +1088,7 @@ function isUnknown<T>(value: T | 'unknown'): value is 'unknown' {
   return value === 'unknown';
 }
 
-async function augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(
+export async function augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(
   formattedArbitrageResult: FormattedArbitrageResult,
   block_unixtime: number
 ): Promise<USDValuedArbitrageResult | null> {
@@ -1169,7 +1169,7 @@ async function augmentWithUSDValuesCaseValueGoesOutsideFromOrTo(
   };
 }
 
-function calculateProfitDetails(
+export function calculateProfitDetails(
   usdValuedArbitrageResult: USDValuedArbitrageResult,
   dollarValueInflowFromLeaf: number
 ): ProfitDetails | null {
@@ -1312,7 +1312,7 @@ export function hasEnoughSwaps(balanceChangeTo: BalanceChange[], cleanedTransfer
  * @param from - The address to check as the receiver of ETH transfers.
  * @returns A new array with false duplicates removed.
  */
-function removeFalseDupes(cleanedTransfers: ReadableTokenTransfer[], from: string): ReadableTokenTransfer[] {
+export function removeFalseDupes(cleanedTransfers: ReadableTokenTransfer[], from: string): ReadableTokenTransfer[] {
   // Filter transfers where 'from' is the receiver and token is ETH
   const fromLowerCase = from.toLowerCase();
 
@@ -1345,7 +1345,7 @@ function removeFalseDupes(cleanedTransfers: ReadableTokenTransfer[], from: strin
   return cleanedTransfers;
 }
 
-function toHasInflowFromLeafOtherThanFrom(
+export function toHasInflowFromLeafOtherThanFrom(
   cleanedTransfers: ReadableTokenTransfer[],
   fromAddress: string,
   toAddress: string
@@ -1368,7 +1368,7 @@ function toHasInflowFromLeafOtherThanFrom(
 }
 
 // Function to check if an address is a leaf in the entire transfers array
-function isLeaf(address: string, transfers: ReadableTokenTransfer[]): boolean {
+export function isLeaf(address: string, transfers: ReadableTokenTransfer[]): boolean {
   const addressToCheck = address.toLowerCase();
 
   return !transfers.some((t) => t.to.toLowerCase() === addressToCheck || t.from.toLowerCase() === addressToCheck);
@@ -1399,7 +1399,7 @@ export async function isMakerProxy(contractAddress: string): Promise<boolean> {
   );
 }
 
-function hasMissmatchingForOriginLeafesToTo(
+export function hasMissmatchingForOriginLeafesToTo(
   onlyToTransfers: ReadableTokenTransfer[],
   allTransfers: ReadableTokenTransfer[],
   formAddress: string

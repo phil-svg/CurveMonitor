@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 import { Sandwiches } from '../../../models/Sandwiches.js';
 import { Transactions } from '../../../models/Transactions.js';
 import { fetchAllTransactionCoinData } from '../../postgresTables/readFunctions/TransactionCoins.js';
-import { fetchTxPositionByTxId, getTxHashByTxId, } from '../../postgresTables/readFunctions/Transactions.js';
+import { fetchTxPositionByTxId, getTxHashByTxId } from '../../postgresTables/readFunctions/Transactions.js';
 import { IsSandwich } from '../../../models/IsSandwich.js';
 export async function getSandwichLossInfoArrForAll() {
     const sandwiches = await Sandwiches.findAll({
@@ -94,6 +94,7 @@ function findEntryByDirection(entries, direction) {
 }
 import fs from 'fs';
 import { getTransactionCostInUSD, } from '../../postgresTables/mevDetection/atomic/utils/atomicArbDetection.js';
+import { WEB3_HTTP_PROVIDER } from '../../web3Calls/generic.js';
 function readDataFile() {
     const dataFilePath = '../sandwichData.json';
     if (!fs.existsSync(dataFilePath)) {
@@ -105,6 +106,24 @@ function readDataFile() {
 function writeDataFile(data) {
     const dataFilePath = '../sandwichData.json';
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+}
+async function getBlockTransactionDetails(blockNumber, position) {
+    try {
+        const transaction = await WEB3_HTTP_PROVIDER.eth.getTransactionFromBlock(blockNumber, position);
+        return transaction;
+    }
+    catch (error) {
+        return null;
+    }
+}
+async function getExtendedGasInfo(blockNumber, position) {
+    const transaction = await getBlockTransactionDetails(blockNumber, position);
+    return {
+        gas: transaction.gas,
+        gasPrice: transaction.gasPrice,
+        maxFeePerGas: transaction.maxFeePerGas,
+        maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
+    };
 }
 async function checkSingleTx(transaction, simplifiedSandwichTxData, lossInfo, sandwichedTxSwap) {
     if (transaction.transaction_type !== 'swap')
@@ -146,7 +165,10 @@ async function checkSingleTx(transaction, simplifiedSandwichTxData, lossInfo, sa
     // if this number is negative, it means the guy got less for the later exchange rate.
     if (resultForSandwichedUserIfExchangeRateOfLaterTrade < 0) {
         const txHashCenter = await getTxHashByTxId(sandwichedTxSwap[0].tx_id);
-        if (txHashCenter === transaction.tx_hash) {
+        const extendedGasInfoVictim = await getExtendedGasInfo(transaction.block_number, positionCenter);
+        const extendedGasInfo2ndTx = await getExtendedGasInfo(transaction.block_number, positionLater);
+        if (txHashCenter === transaction.tx_hash ||
+            extendedGasInfoVictim.maxFeePerGas >= extendedGasInfo2ndTx.maxFeePerGas) {
             sandwichwasBadCounter++;
         }
         else {
@@ -179,6 +201,8 @@ async function checkSingleTx(transaction, simplifiedSandwichTxData, lossInfo, sa
                 gasCostInUSDBackrun,
                 gasCostInUSDSandwichCenter,
                 gasCostInUSDMatchLater,
+                extendedGasInfoVictim,
+                extendedGasInfo2ndTx,
             };
             data.push(entry);
             writeDataFile(data);

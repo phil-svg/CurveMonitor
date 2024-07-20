@@ -1,5 +1,5 @@
 import { Op, QueryTypes } from 'sequelize';
-import { AbisEthereum } from '../../../models/Abi.js';
+import { AbisEthereum, AbisPools } from '../../../models/Abi.js';
 import { sequelize } from '../../../config/Database.js';
 export async function readAbiFromAbisEthereumTable(contractAddress) {
     const record = await AbisEthereum.findOne({
@@ -7,6 +7,20 @@ export async function readAbiFromAbisEthereumTable(contractAddress) {
             contract_address: {
                 [Op.iLike]: contractAddress,
             },
+        },
+    });
+    // Return the ABI if found, otherwise return null
+    return record ? record.abi : null;
+}
+/**
+ * Reads the ABI associated with a given pool ID from the AbisPools table.
+ * @param {number} poolId - The ID of the pool for which to retrieve the ABI.
+ * @returns {Promise<any[] | null>} - A promise that resolves to the ABI array if found, or null otherwise.
+ */
+export async function readAbiFromAbisPoolsTable(poolId) {
+    const record = await AbisPools.findOne({
+        where: {
+            pool_id: poolId, // Corrected to use pool_id and direct comparison
         },
     });
     // Return the ABI if found, otherwise return null

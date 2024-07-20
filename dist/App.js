@@ -5,7 +5,7 @@ import { updatePools } from './utils/postgresTables/Pools.js';
 import { updateCoinTable } from './utils/postgresTables/Coins.js';
 import { updatePoolAbis } from './utils/postgresTables/Abi.js';
 import { updateBlockTimestamps } from './utils/postgresTables/Blocks.js';
-import { updateRawLogsForLiveMode } from './utils/postgresTables/RawLogs.js';
+import { updateRawLogs, updateRawLogsForLiveMode } from './utils/postgresTables/RawLogs.js';
 import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
 import { addCustomLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
@@ -26,6 +26,7 @@ import { checkWsConnectionViaNewBlocks, eraseWebProvider, setupDeadWebsocketList
 import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
 import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
+import { updatePoolsBytecode } from './utils/postgresTables/ByteCode.js';
 export async function initDatabase() {
     try {
         await db.sync();
@@ -53,11 +54,12 @@ export async function main() {
     await loadAddressProvider();
     await updatePools();
     await updateCoinTable();
+    await updatePoolsBytecode();
     await updatePoolAbis();
     await subscribeToNewBlocks();
     // await updateInitialPoolParams(); // muted until useful
     // await updatePoolParamsEvents(); // muted until useful
-    // await updateRawLogs();
+    await updateRawLogs();
     await preparingLiveModeForRawEvents();
     await updateRawLogsForLiveMode();
     eventFlags.canEmitGeneralTx = true;
@@ -90,10 +92,4 @@ export async function main() {
 // await runDemoClientForProxyABI();
 startAPI({ wsBool: true }, { httpBool: true });
 await main();
-// const data = await getPoolSpecificAggregatedMevVolume('0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7', '1 week', {
-//   value: 1,
-//   unit: 'day',
-// });
-// console.log('data', data);
-// process.exit();
 //# sourceMappingURL=App.js.map

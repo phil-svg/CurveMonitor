@@ -9,7 +9,7 @@ import { getBribeInUSDfromTx } from './revenueProfitThings/LowerBoundSolver.js';
 import { getEthPriceWithTimestampFromTable } from '../../../readFunctions/PriceMap.js';
 import { ETH_ADDRESS, WETH_ADDRESS } from '../../../../helperFunctions/Constants.js';
 import { getAllPoolAddresses } from '../../../readFunctions/Pools.js';
-function hasIllegalOutbound(from, to, cleanedTransfers) {
+export function hasIllegalOutbound(from, to, cleanedTransfers) {
     const lowerCaseFrom = from.toLowerCase();
     const lowerCaseTo = to.toLowerCase();
     return cleanedTransfers.some((transfer) => transfer.from.toLowerCase() === lowerCaseFrom &&
@@ -64,7 +64,7 @@ export async function isCexDexArbCandidate(txId, numOfTransfers) {
             return false; // If none of the above cases match, return false
     }
 }
-function removeEthWrapsAndUnwraps(cleanedTransfers) {
+export function removeEthWrapsAndUnwraps(cleanedTransfers) {
     const hasInvalidTransfer = cleanedTransfers.some((transfer) => transfer.from == null || transfer.to == null);
     if (hasInvalidTransfer)
         return cleanedTransfers;
@@ -82,7 +82,7 @@ function removeEthWrapsAndUnwraps(cleanedTransfers) {
     });
     return convertedTransfers;
 }
-function isLeafAddress(address, cleanedTransfers) {
+export function isLeafAddress(address, cleanedTransfers) {
     const lowerCaseAddress = address.toLowerCase();
     const occurrences = cleanedTransfers.reduce((acc, transfer) => {
         if (transfer.from.toLowerCase() === lowerCaseAddress || transfer.to.toLowerCase() === lowerCaseAddress) {

@@ -40,7 +40,48 @@ export async function getWeb3HttpProvider() {
                     console.log(`HTTP Provider connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                 }
                 else {
-                    console.log(`Failed to connect to Ethereum node. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                    // console.log(
+                    //   `Failed to connect to Ethereum node. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`
+                    // );
+                }
+                retries++;
+                await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+            }
+        }
+    }
+    throw new Error('Failed to connect to Ethereum node after several attempts. Please check your connection and the status of the Ethereum node.');
+}
+export async function getWeb3HttpProviderForChain(chain) {
+    let web3HttpProvider = null;
+    const MAX_RETRIES = 5; // Maximum number of retries
+    const RETRY_DELAY = 5000; // Delay between retries in milliseconds
+    let retries = 0;
+    let WEB3_HTTP_MAINNET;
+    if (chain === 'ethereum') {
+        WEB3_HTTP_MAINNET = process.env.WEB3_HTTP_ETHEREUM_DWELLIR;
+    }
+    else if (chain === 'base') {
+        WEB3_HTTP_MAINNET = process.env.WEB3_HTTP_BASE_DWELLIR;
+    }
+    while (retries < MAX_RETRIES) {
+        try {
+            web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_MAINNET));
+            await web3HttpProvider.eth.net.isListening(); // This will throw an error if it can't connect
+            return web3HttpProvider;
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                const err = error;
+                if (err.code === 'ECONNABORTED') {
+                    console.log(`HTTP Provider connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                }
+                else if (err.message && err.message.includes('CONNECTION ERROR')) {
+                    console.log(`HTTP Provider connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                }
+                else {
+                    // console.log(
+                    //   `Failed to connect to Ethereum node. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`
+                    // );
                 }
                 retries++;
                 await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
