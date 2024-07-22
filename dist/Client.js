@@ -2,8 +2,8 @@ import { io } from 'socket.io-client';
 import { topBestPerformingLabels, topWorstPerformingLabels } from './utils/helperFunctions/Client.js';
 import fs from 'fs';
 // Replace with "wss://api.curvemonitor.com" for production
-const url = 'http://localhost:443';
-// const url = 'wss://api.curvemonitor.com';
+// const url = 'http://localhost:443';
+const url = 'wss://api.curvemonitor.com';
 /**
  *
  * Find the Endpoint-Overview at the bottom of this file.

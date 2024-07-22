@@ -33,7 +33,7 @@ export async function getTransactionTraceViaWeb3ProviderForChain(
 ): Promise<ITransactionTrace[] | null> {
   let url;
   if (chain === 'ethereum') {
-    url = `${process.env.WEB3_HTTP_ETHEREUM_DWELLIR}`;
+    url = `${process.env.WEB3_HTTP_MAINNET_PROVIDER_URL_ERIGON}`;
   } else if (chain === 'base') {
     url = `${process.env.WEB3_HTTP_BASE_DWELLIR}`;
   } else {

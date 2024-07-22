@@ -1,6 +1,8 @@
 import { Op, QueryTypes } from 'sequelize';
 import { AbisEthereum, AbisPools } from '../../../models/Abi.js';
 import { sequelize } from '../../../config/Database.js';
+import { getPoolIdByPoolAddress } from './Pools.js';
+import { getAbiBy } from '../Abi.js';
 export async function readAbiFromAbisEthereumTable(contractAddress) {
     const record = await AbisEthereum.findOne({
         where: {
@@ -125,4 +127,30 @@ export async function contractAbiExistsInTable(contractAddress) {
         return false; // Return false on error
     }
 }
+/**
+ * Fetches the ABI for a pool based on its Ethereum address.
+ * @param {string} poolAddress The Ethereum address of the pool.
+ * @return {Promise<object | null>} The ABI object or null if not found.
+ */
+export const getPoolAbiByPoolAddress = async (poolAddress) => {
+    try {
+        // Convert the pool address to pool ID
+        const poolId = await getPoolIdByPoolAddress(poolAddress);
+        if (poolId === null) {
+            console.log(`No pool found with the address ${poolAddress}`);
+            return null;
+        }
+        // Fetch the ABI using the pool ID
+        const poolAbi = await getAbiBy('AbisPools', { id: poolId });
+        if (!poolAbi) {
+            console.log(`Err fetching ABI for pool with address ${poolAddress} and ID ${poolId}`);
+            return null;
+        }
+        return poolAbi;
+    }
+    catch (err) {
+        console.log(`Error in getPoolAbiByPoolAddress with address ${poolAddress}: ${err}`);
+        return null;
+    }
+};
 //# sourceMappingURL=Abi.js.map

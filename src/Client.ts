@@ -17,8 +17,8 @@ import { AggregatedVolumeData } from './utils/api/queries/AggregatedMevVolume.js
 import fs from 'fs';
 
 // Replace with "wss://api.curvemonitor.com" for production
-const url = 'http://localhost:443';
-// const url = 'wss://api.curvemonitor.com';
+// const url = 'http://localhost:443';
+const url = 'wss://api.curvemonitor.com';
 
 /**
  *

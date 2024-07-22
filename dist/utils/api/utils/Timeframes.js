@@ -1,9 +1,7 @@
 function parseDuration(input) {
-    console.log('input', input);
     if (typeof input === 'string') {
         // Updated regex to include an option for "full" as a standalone match
         const match = input.match(/(\d+)\s*(minute|minutes|hour|hours|day|days|week|weeks|month|months|year|years)|^full$/i);
-        console.log('match', match);
         if (match) {
             if (match[0].toLowerCase() === 'full') {
                 return { value: 1, unit: 'full' };
