@@ -10,8 +10,7 @@
     "sourceMap": true,
     "target": "es2017",
     "outDir": "./dist",
-    "experimentalDecorators": true,
-    "watch": true
+    "experimentalDecorators": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
