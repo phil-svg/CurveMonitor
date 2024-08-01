@@ -3,7 +3,7 @@ import { topBestPerformingLabels, topWorstPerformingLabels } from './utils/helpe
 import {
   SandwichDetail,
   SandwichTableContent,
-} from './utils/postgresTables/readFunctions/SandwichDetailEnrichments.js';
+} from './utils/postgresTables/readFunctions/SandwichDetail.js';
 import {
   ArbBotLeaderBoardbyTxCount,
   AtomicArbTableContent,
@@ -11,7 +11,10 @@ import {
   DurationInput,
   EnrichedTransactionDetail,
   IntervalInput,
+  LabelRankingExtended,
+  LabelRankingShort,
   TransactionDetailsForAtomicArbs,
+  UserSearchResult,
 } from './utils/Interfaces.js';
 import { AggregatedVolumeData } from './utils/api/queries/AggregatedMevVolume.js';
 import fs from 'fs';
@@ -87,12 +90,6 @@ export function startAbsoluteLabelsRankingClient(socket: Socket) {
   handleErrors(socket, '/main');
 }
 
-export interface LabelRankingShort {
-  address: string;
-  label: string;
-  occurrences: number;
-}
-
 /**
  * same as startAbsoluteLabelsRankingClient with an additional field numOfAllTx
  * Example:
@@ -120,12 +117,6 @@ export function startSandwichLabelOccurrencesClient(socket: Socket) {
 
   handleErrors(socket, '/main');
 }
-export interface LabelRankingExtended {
-  address: string;
-  label: string;
-  occurrences: number;
-  numOfAllTx: number;
-}
 
 // Convert user input into pool-suggestions, returns ranked pool suggestions (Pool-Name and Pool-Address)
 export function startUserSearchClient(socket: Socket, userInput: string) {
@@ -138,10 +129,7 @@ export function startUserSearchClient(socket: Socket, userInput: string) {
   handleErrors(socket, '/main');
 }
 
-export interface UserSearchResult {
-  address: string;
-  name: string | null;
-}
+
 
 /**
  * Example for enrichedSandwich

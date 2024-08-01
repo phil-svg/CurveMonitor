@@ -3,7 +3,8 @@ import { LossTransaction, Sandwiches } from '../../../models/Sandwiches.js';
 import { Transactions } from '../../../models/Transactions.js';
 import { getPoolIdByPoolAddress } from './Pools.js';
 import { getTimeframeTimestamp } from '../../api/utils/Timeframes.js';
-import { SandwichDetail, enrichSandwiches } from './SandwichDetailEnrichments.js';
+import { SandwichDetail } from './SandwichDetail.js';
+import { enrichSandwiches } from './SandwichDetailEnrichments.js';
 import { sequelize } from '../../../config/Database.js';
 
 export async function readSandwichesInBatches(

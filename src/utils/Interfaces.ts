@@ -1,4 +1,4 @@
-import { TransactionData, TransactionType } from '../models/Transactions.js';
+import { TransactionType } from '../models/TransactionType.js';
 
 export interface EventObject {
   address: string;
@@ -81,19 +81,6 @@ export interface TransactionCoinRecord {
   dollar_value?: number | null;
   direction: 'in' | 'out';
   coin_symbol: string | null;
-}
-
-export interface TransactionCoin {
-  tx_id: number;
-  coin_id: number;
-  amount: string;
-  dollar_value: null | string;
-  direction: 'in' | 'out';
-  coin_symbol: string | null;
-}
-
-export interface ExtendedTransactionData extends TransactionData {
-  transactionCoins: TransactionCoin[];
 }
 
 export interface SandwichLoss {
@@ -362,3 +349,21 @@ export interface DurationType {
 export type DurationInput = DurationType | string;
 
 export type IntervalInput = DurationType | 'max';
+
+export interface LabelRankingShort {
+  address: string;
+  label: string;
+  occurrences: number;
+}
+
+export interface LabelRankingExtended {
+  address: string;
+  label: string;
+  occurrences: number;
+  numOfAllTx: number;
+}
+
+export interface UserSearchResult {
+  address: string;
+  name: string | null;
+}

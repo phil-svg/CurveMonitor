@@ -1,5 +1,6 @@
 import { Op, Sequelize, col, fn } from 'sequelize';
-import { Transactions, TransactionData, TransactionType } from '../../../models/Transactions.js';
+import { TransactionType } from '../../../models/TransactionType.js';
+import { Transactions, TransactionData } from '../../../models/Transactions.js';
 import { TransactionCoins } from '../../../models/TransactionCoins.js';
 
 export async function findTransactionsByPoolIdAndHash(pool_id: number, tx_hash: string): Promise<TransactionData[]> {

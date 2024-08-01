@@ -6,7 +6,8 @@ import {
   getIdsForFullSandwichTable,
   getIdsForFullSandwichTableForPool,
 } from '../../postgresTables/readFunctions/Sandwiches.js';
-import { SandwichDetail, enrichSandwiches } from '../../postgresTables/readFunctions/SandwichDetailEnrichments.js';
+import { enrichSandwiches } from '../../postgresTables/readFunctions/SandwichDetailEnrichments.js';
+import type { SandwichDetail } from '../../postgresTables/readFunctions/SandwichDetail.js';
 import { getIdByAddressCaseInsensitive } from '../../postgresTables/readFunctions/Pools.js';
 import { sequelize } from '../../../config/Database.js';
 
