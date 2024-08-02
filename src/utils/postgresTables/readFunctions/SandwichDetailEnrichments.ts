@@ -3,31 +3,9 @@ import { TransactionDetail } from '../../Interfaces.js';
 import { getModifiedPoolName } from '../../api/utils/SearchBar.js';
 import { getLabelNameFromAddress } from './Labels.js';
 import { getAddressById } from './Pools.js';
+import { SandwichDetail, UserLossDetail } from './SandwichDetail.js';
 import { getLossInUsdForSandwich } from './Sandwiches.js';
 import { txDetailEnrichment } from './TxDetailEnrichment.js';
-
-export interface UserLossDetail {
-  unit: string;
-  unitAddress: string;
-  amount: number;
-  lossInPercentage: number;
-}
-
-export interface SandwichDetail {
-  frontrun: TransactionDetail;
-  center: TransactionDetail[];
-  backrun: TransactionDetail;
-  user_losses_details: UserLossDetail[];
-  label: string;
-  poolAddress: string;
-  poolName: string;
-  lossInUsd: number;
-}
-
-export interface SandwichTableContent {
-  data: SandwichDetail[];
-  totalSandwiches: number;
-}
 
 export async function SandwichDetailEnrichment(id: number): Promise<SandwichDetail | null> {
   const sandwich = await Sandwiches.findOne({

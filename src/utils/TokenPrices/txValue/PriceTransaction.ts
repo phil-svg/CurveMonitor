@@ -1,6 +1,5 @@
 import { TransactionCoins } from '../../../models/TransactionCoins.js';
-import { Transactions } from '../../../models/Transactions.js';
-import { ExtendedTransactionData, TransactionCoin } from '../../Interfaces.js';
+import { Transactions, ExtendedTransactionData, TransactionCoin } from '../../../models/Transactions.js';
 import { getTokenPriceWithTimestampFromDb } from '../../postgresTables/readFunctions/PriceMap.js';
 
 export async function priceTransaction(transactionData: ExtendedTransactionData): Promise<number | null> {

@@ -18,13 +18,8 @@ import { RawTxLogs } from './RawTxLogs.js';
 import { TransactionCoins } from './TransactionCoins.js';
 import { TransactionDetails } from './TransactionDetails.js'; // Import TransactionDetails
 import { TransactionTrace } from './TransactionTrace.js';
+import { TransactionType } from './TransactionType.js';
 import { Receipts } from './Receipts.js';
-
-export enum TransactionType {
-  Swap = 'swap',
-  Deposit = 'deposit',
-  Remove = 'remove',
-}
 
 @Index(['event_id'])
 @Table({ tableName: 'transactions' })
@@ -118,3 +113,16 @@ export type TransactionData = Pick<
   | 'value_usd'
   | 'event_id'
 > & { tx_id?: number };
+
+export interface TransactionCoin {
+  tx_id: number;
+  coin_id: number;
+  amount: string;
+  dollar_value: null | string;
+  direction: 'in' | 'out';
+  coin_symbol: string | null;
+}
+
+export interface ExtendedTransactionData extends TransactionData {
+  transactionCoins: TransactionCoin[];
+}

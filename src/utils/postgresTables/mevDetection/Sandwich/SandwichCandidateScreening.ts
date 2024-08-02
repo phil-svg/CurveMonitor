@@ -1,6 +1,5 @@
-import { ExtendedTransactionData } from '../../../Interfaces.js';
 import { calcTheLossOfCurveUserFromSandwich, saveSandwich } from './SandwichUtils.js';
-import { Transactions } from '../../../../models/Transactions.js';
+import { ExtendedTransactionData, Transactions } from '../../../../models/Transactions.js';
 import { eventFlags } from '../../../api/utils/EventFlags.js';
 import eventEmitter from '../../../goingLive/EventEmitter.js';
 import { Sandwiches } from '../../../../models/Sandwiches.js';

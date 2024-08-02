@@ -1,4 +1,4 @@
-import { LabelRankingExtended } from "../../Client";
+import type { LabelRankingExtended } from '../Interfaces';
 
 export function topBestPerformingLabels(labelsOccurrence: LabelRankingExtended[]): LabelRankingExtended[] {
   const topLabels = labelsOccurrence
