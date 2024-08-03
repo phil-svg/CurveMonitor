@@ -1,5 +1,6 @@
 import { Op, Sequelize, col, fn } from 'sequelize';
-import { Transactions, TransactionType } from '../../../models/Transactions.js';
+import { TransactionType } from '../../../models/TransactionType.js';
+import { Transactions } from '../../../models/Transactions.js';
 import { TransactionCoins } from '../../../models/TransactionCoins.js';
 export async function findTransactionsByPoolIdAndHash(pool_id, tx_hash) {
     const transactions = await Transactions.findAll({

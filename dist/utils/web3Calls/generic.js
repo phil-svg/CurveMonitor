@@ -432,7 +432,7 @@ export async function retryGetTransactionTraceViaWeb3Provider(txHash, maxRetries
     }
 }
 export async function getTransactionTraceViaWeb3Provider(txHash, attempt = 0) {
-    const url = `${process.env.WEB3_HTTP_MAINNET_PROVIDER_URL_ALCHEMY1}`;
+    const url = `${process.env.WEB3_HTTP_MAINNET}`;
     const maxAttempts = 3;
     try {
         const response = await fetch(url, {

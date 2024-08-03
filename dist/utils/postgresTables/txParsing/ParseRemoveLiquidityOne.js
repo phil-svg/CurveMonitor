@@ -1,5 +1,5 @@
 import { saveTransaction, saveCoins } from './ParsingHelper.js';
-import { TransactionType } from '../../../models/Transactions.js';
+import { TransactionType } from '../../../models/TransactionType.js';
 import { getTxReceiptClassic } from '../../web3Calls/generic.js';
 import { getCoinIdByAddress, findCoinDecimalsById } from '../readFunctions/Coins.js';
 import { decodeTransferEventFromReceipt } from '../../helperFunctions/Web3.js';

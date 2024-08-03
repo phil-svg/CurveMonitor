@@ -10,13 +10,8 @@ import { RawTxLogs } from './RawTxLogs.js';
 import { TransactionCoins } from './TransactionCoins.js';
 import { TransactionDetails } from './TransactionDetails.js'; // Import TransactionDetails
 import { TransactionTrace } from './TransactionTrace.js';
+import { TransactionType } from './TransactionType.js';
 import { Receipts } from './Receipts.js';
-export var TransactionType;
-(function (TransactionType) {
-    TransactionType["Swap"] = "swap";
-    TransactionType["Deposit"] = "deposit";
-    TransactionType["Remove"] = "remove";
-})(TransactionType || (TransactionType = {}));
 let Transactions = class Transactions extends Model {
 };
 __decorate([

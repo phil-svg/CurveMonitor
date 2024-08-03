@@ -1,4 +1,5 @@
-import { TransactionType, Transactions } from '../../../models/Transactions.js';
+import { TransactionType } from '../../../models/TransactionType.js';
+import { Transactions } from '../../../models/Transactions.js';
 import { TransactionCoins } from '../../../models/TransactionCoins.js';
 import { getSandwichContentForPoolAndTime } from '../../postgresTables/readFunctions/Sandwiches.js';
 import { fetchAtomicArbsForPoolAndTime } from '../../postgresTables/readFunctions/AtomicArbs.js';

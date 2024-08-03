@@ -1,5 +1,6 @@
 import { sequelize } from '../../config/Database.js';
-import { TransactionType, Transactions } from '../../models/Transactions.js';
+import { TransactionType } from '../../models/TransactionType.js';
+import { Transactions } from '../../models/Transactions.js';
 import { QueryTypes } from 'sequelize';
 import { updatePriceMap } from './PriceMap.js';
 import { populateTransactionCoinsWithDollarValues } from './TransactionCoins.js';

@@ -538,7 +538,7 @@ export async function getTransactionTraceViaWeb3Provider(
   txHash: string,
   attempt = 0
 ): Promise<ITransactionTrace[] | null> {
-  const url = `${process.env.WEB3_HTTP_MAINNET_PROVIDER_URL_ALCHEMY1}`;
+  const url = `${process.env.WEB3_HTTP_MAINNET}`;
 
   const maxAttempts = 3;
   try {

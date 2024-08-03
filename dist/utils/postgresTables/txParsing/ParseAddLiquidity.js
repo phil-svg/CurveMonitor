@@ -1,5 +1,5 @@
 import { saveCoins, saveTransaction } from './ParsingHelper.js';
-import { TransactionType } from '../../../models/Transactions.js';
+import { TransactionType } from '../../../models/TransactionType.js';
 import { getCoinsBy } from '../readFunctions/Pools.js';
 import { getCoinIdByAddress, findCoinDecimalsById } from '../readFunctions/Coins.js';
 export async function parseAddLiquidity(event, BLOCK_UNIXTIME, POOL_COINS) {
