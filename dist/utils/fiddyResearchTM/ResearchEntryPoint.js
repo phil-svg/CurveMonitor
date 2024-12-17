@@ -1,5 +1,5 @@
 import { getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
-import { generateVolumeReportForSinglePool, } from './tricryptoVariations/VolFetch.js';
+import { uniswapV2positiveSandwichThings } from './DefiMonitooor/DexAggregators/uniswapV3/positiveSandwiches/SandwicheResearchUniV2.js';
 /*
 0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7 3Pool
 0xdc24316b9ae028f1497c275eb9192a3ea0f67022 stETH
@@ -34,12 +34,15 @@ export async function research() {
     const address_weETHs_WETH = '0xb92b054b9cc33685e7f8c3f85177c4b6dc061391';
     const addressUSD0_USDC = '0x14100f81e33c33ecc7cdac70181fb45b6e78569f';
     const bitgetRouter = '0x1A8f43e01B78979EB4Ef7feBEC60F32c9A72f58E';
-    const startDate = '2024-07-16';
-    const endDate = '2024-07-17';
+    const startDate = '2024-01-01';
+    const endDate = '2024-07-30';
     const startBlockNumber = 19620526;
     const endBlockNumber = 19625525;
     const pendleRouterV4 = '0x888888888889758F76e7103c6CbF23ABbF58F946';
     console.log('conducting research');
+    await uniswapV2positiveSandwichThings();
+    // await fullSandwichJson();
+    // await uniswapV3positiveSandwichThings();
     // await anyPoolMevCheck();
     // await dailyTxCount();
     // await getPegKeeperAndCrvUSDPriceData();
@@ -60,7 +63,7 @@ export async function research() {
     // await fetchSandwichUserLossForSomePoolsForTimePeriod(stableswapPoolAddressArr, startDate, endDate);
     // await gasUsageThings();
     // await createSandwichLossInUsdJsonFileFor2023();
-    await generateVolumeReportForSinglePool(tricryptoUSDC, startDate, endDate);
+    // await generateVolumeReportForSinglePool(tricryptoUSDC, startDate, endDate);
     // await generateVolumeReportForSinglePoolHighRes(pyusdFxusdPool, startBlockNumber, endBlockNumber, startDate, endDate);
     // await barChartRace();
     // await priceImpactThings();
@@ -75,7 +78,7 @@ export async function research() {
     // await createSandwichLossInUsdJsonFile();
     // await generateTopFromVolAddressesForSpecificToAddress(startDate, endDate, curveRouterV1);
     // await generateTopToVolAddresses(startDate, endDate);
-    // await generateTopFromVolAddresses(1692099809, 1703335409);
+    // await generateTopFromVolAddresses(startDate, endDate);
     // await calculateTotalVolumeAndVolumePerBot();
     // await calculateTotalVolumeForTransactionsInDb();
     // await mosRequest_SandwichVolShareDueToMisconfigRouters(); // see => https://twitter.com/phil_00Llama/status/1752327902249492519

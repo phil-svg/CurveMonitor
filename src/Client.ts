@@ -1,9 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { topBestPerformingLabels, topWorstPerformingLabels } from './utils/helperFunctions/Client.js';
-import {
-  SandwichDetail,
-  SandwichTableContent,
-} from './utils/postgresTables/readFunctions/SandwichDetail.js';
+import { SandwichDetail, SandwichTableContent } from './utils/postgresTables/readFunctions/SandwichDetail.js';
 import {
   ArbBotLeaderBoardbyTxCount,
   AtomicArbTableContent,
@@ -128,8 +125,6 @@ export function startUserSearchClient(socket: Socket, userInput: string) {
 
   handleErrors(socket, '/main');
 }
-
-
 
 /**
  * Example for enrichedSandwich
@@ -732,6 +727,8 @@ export async function startTestClient() {
   mainSocket.on('connect', () => {
     console.log('connected');
 
+    //  *************** Risk ***************
+
     //  *************** Curve Lending ***************
     // startUserHealthLendingClient(mainSocket, '0xAAE2957078351c5b2fa93774329ceba4F4270011');
 
@@ -754,7 +751,7 @@ export async function startTestClient() {
 
     // *** sammich ***
 
-    startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
+    // startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
     // startAbsoluteLabelsRankingClient(mainSocket); // (All Pools)
     // startSandwichLabelOccurrencesClient(mainSocket); // (All Pools)
 

@@ -2,8 +2,11 @@ import { Op } from 'sequelize';
 import { Sandwiches } from '../../../models/Sandwiches.js';
 import { Transactions } from '../../../models/Transactions.js';
 import { fetchAllTransactionCoinData } from '../../postgresTables/readFunctions/TransactionCoins.js';
-import { fetchTxPositionByTxId, getTxHashByTxId } from '../../postgresTables/readFunctions/Transactions.js';
+import { fetchTransactionPosition, fetchTxPositionByTxId, getTxHashByTxId, } from '../../postgresTables/readFunctions/Transactions.js';
 import { IsSandwich } from '../../../models/IsSandwich.js';
+import fs from 'fs';
+import { getTransactionCostInUSD } from '../../postgresTables/mevDetection/atomic/utils/atomicArbDetection.js';
+import { WEB3_HTTP_PROVIDER } from '../../web3Calls/generic.js';
 export async function getSandwichLossInfoArrForAll() {
     const sandwiches = await Sandwiches.findAll({
         where: {
@@ -41,10 +44,12 @@ async function getAllTxForSameBlockAndPoolWithoutTheSandwich(txId, poolId, exclu
 }
 function simplifyTransactionCoinData(transactionCoinsData) {
     return transactionCoinsData.map((coin) => ({
-        symbol: coin.coin.dataValues.symbol,
+        symbol: coin.coin.symbol,
+        decimals: coin.coin.decimals,
+        coinAddress: coin.coin.address,
         direction: coin.direction,
         amount: coin.amount,
-        dollarValue: coin.dollar_value ? coin.dollar_value : 0,
+        dollarValue: coin.dollar_value ? coin.dollar_value : 0, // Default to 0 if dollar_value is null
     }));
 }
 /**
@@ -92,9 +97,6 @@ function checkMatchingSymbolsAndDirections(simplifiedTxData, simplifiedSandwichT
 function findEntryByDirection(entries, direction) {
     return entries.find((entry) => entry.direction === direction);
 }
-import fs from 'fs';
-import { getTransactionCostInUSD, } from '../../postgresTables/mevDetection/atomic/utils/atomicArbDetection.js';
-import { WEB3_HTTP_PROVIDER } from '../../web3Calls/generic.js';
 function readDataFile() {
     const dataFilePath = '../sandwichData.json';
     if (!fs.existsSync(dataFilePath)) {
@@ -107,7 +109,7 @@ function writeDataFile(data) {
     const dataFilePath = '../sandwichData.json';
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
 }
-async function getBlockTransactionDetails(blockNumber, position) {
+export async function getBlockTransactionDetails(blockNumber, position) {
     try {
         const transaction = await WEB3_HTTP_PROVIDER.eth.getTransactionFromBlock(blockNumber, position);
         return transaction;
@@ -117,13 +119,19 @@ async function getBlockTransactionDetails(blockNumber, position) {
     }
 }
 async function getExtendedGasInfo(blockNumber, position) {
-    const transaction = await getBlockTransactionDetails(blockNumber, position);
-    return {
-        gas: transaction.gas,
-        gasPrice: transaction.gasPrice,
-        maxFeePerGas: transaction.maxFeePerGas,
-        maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
-    };
+    try {
+        const transaction = await getBlockTransactionDetails(blockNumber, position);
+        return {
+            gas: transaction.gas,
+            gasPrice: transaction.gasPrice,
+            maxFeePerGas: transaction.maxFeePerGas,
+            maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
+        };
+    }
+    catch (err) {
+        console.log('gas failed');
+        return null;
+    }
 }
 async function checkSingleTx(transaction, simplifiedSandwichTxData, lossInfo, sandwichedTxSwap) {
     if (transaction.transaction_type !== 'swap')
@@ -240,5 +248,105 @@ export async function profitableSandwichThings() {
         }
     }
     console.log('Went through', sandwichLossInfoArrForAll.length, 'Curve User Loss Sandwiches.');
+}
+async function solveSingleSandwich(simplifiedSandwichTxData, lossInfo, sandwichedTxSwap) {
+    const transaction = await Transactions.findByPk(lossInfo.tx_id);
+    if (!transaction) {
+        console.log('Transaction not found');
+        return;
+    }
+    const positionCenter = sandwichedTxSwap[0].transaction.tx_position;
+    const frontrunTxId = lossInfo.frontrunTxId;
+    const backrunTxId = lossInfo.backrunTxId;
+    const txHashCenter = await getTxHashByTxId(sandwichedTxSwap[0].tx_id);
+    const extendedGasInfoVictim = await getExtendedGasInfo(transaction.block_number, positionCenter);
+    if (!extendedGasInfoVictim) {
+        console.log('Extended gas info for victim not found');
+        return;
+    }
+    const positionFrontrun = await fetchTransactionPosition(frontrunTxId);
+    if (positionFrontrun !== 0 && !positionFrontrun) {
+        console.log('Frontrun transaction position not found', frontrunTxId);
+        return;
+    }
+    const extendedGasInfoFrontrun = await getExtendedGasInfo(transaction.block_number, positionFrontrun);
+    if (!extendedGasInfoFrontrun) {
+        console.log('Extended gas info for frontrun not found');
+        return;
+    }
+    const positionBackrun = await fetchTransactionPosition(backrunTxId);
+    if (!positionBackrun) {
+        console.log('Backrun transaction position not found');
+        return;
+    }
+    const extendedGasInfoBackrun = await getExtendedGasInfo(transaction.block_number, positionBackrun);
+    if (!extendedGasInfoBackrun) {
+        console.log('Extended gas info for backrun not found');
+        return;
+    }
+    const txHashFrontrun = await getTxHashByTxId(frontrunTxId);
+    const txHashBackrun = await getTxHashByTxId(backrunTxId);
+    const txCoinsFrontrun = await fetchAllTransactionCoinData(frontrunTxId);
+    const simplifiedTxDataFrontrun = simplifyTransactionCoinData(txCoinsFrontrun);
+    const txCoinsBackrun = await fetchAllTransactionCoinData(backrunTxId);
+    const simplifiedTxDataBackrun = simplifyTransactionCoinData(txCoinsBackrun);
+    const gasCostInUSDFrontrun = await getTransactionCostInUSD(txHashFrontrun);
+    const gasCostInUSDBackrun = await getTransactionCostInUSD(txHashBackrun);
+    const gasCostInUSDSandwichCenter = await getTransactionCostInUSD(txHashCenter);
+    const data = readDataFile();
+    const entry = {
+        txHashSandwich: txHashCenter,
+        sandwichSwapData: simplifiedSandwichTxData,
+        frontrunTxHash: txHashFrontrun,
+        frontrunSwapData: simplifiedTxDataFrontrun,
+        backrunTxHash: txHashBackrun,
+        backrunSwapData: simplifiedTxDataBackrun,
+        gasCostInUSDFrontrun,
+        gasCostInUSDBackrun,
+        gasCostInUSDSandwichCenter,
+        extendedGasInfoVictim,
+        extendedGasInfoFrontrun,
+        extendedGasInfoBackrun,
+    };
+    data.push(entry);
+    writeDataFile(data);
+}
+function chunkArray(arr, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += chunkSize) {
+        chunks.push(arr.slice(i, i + chunkSize));
+    }
+    return chunks;
+}
+export async function checkSingleSandwichForJson(lossInfo) {
+    if (lossInfo.frontrunTxId === 3309906) {
+        console.log('lossInfo', lossInfo);
+    }
+    const allTransactionCoinData = await fetchAllTransactionCoinData(lossInfo.tx_id);
+    const simplifiedSandwichTxData = simplifyTransactionCoinData(allTransactionCoinData);
+    await solveSingleSandwich(simplifiedSandwichTxData, lossInfo, allTransactionCoinData);
+}
+export async function fullSandwichJson() {
+    console.time('full');
+    const sandwichLossInfoArrForAll = await getSandwichLossInfoArrForAll(); // found 18648 entries
+    const chunkSize = 25; // Number of tasks to run in parallel
+    const chunks = chunkArray(sandwichLossInfoArrForAll, chunkSize);
+    let counter = 0;
+    // Process each chunk sequentially, but process eachlossInfo chunk in parallel
+    for (const chunk of chunks) {
+        console.time('check');
+        // Run the tasks in this chunk in parallel
+        await Promise.all(chunk.map(async (singleSandwichLossInfo) => {
+            counter++;
+            await checkSingleSandwichForJson(singleSandwichLossInfo);
+            // console.log(counter, sandwichLossInfoArrForAll.length);
+        }));
+        console.timeEnd('check');
+    }
+    console.log('Went through', sandwichLossInfoArrForAll.length, 'Curve User Loss Sandwiches.');
+    console.log('finished');
+    console.timeEnd('full');
+    // const data = readDataFile();
+    // console.log(data.length);
 }
 //# sourceMappingURL=GoodSandwiches.js.map

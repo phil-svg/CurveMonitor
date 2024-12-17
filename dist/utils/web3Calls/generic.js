@@ -25,6 +25,22 @@ async function delay() {
 async function randomDelay() {
     await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (400 - 200 + 1) + 200)));
 }
+export async function getCurrentBlockNumberWithRetry() {
+    const maxRetries = 5;
+    let retries = 0;
+    let blockNumber = null;
+    while (retries < maxRetries) {
+        blockNumber = await getCurrentBlockNumber();
+        if (typeof blockNumber === 'number' && blockNumber > 0) {
+            return blockNumber;
+        }
+        retries++;
+        console.warn(`Retrying getCurrentBlockNumber... Attempt ${retries}/${maxRetries}`);
+        await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (500 - 200 + 1) + 200))); // Retry with delay
+    }
+    console.error('getCurrentBlockNumberWithRetry failed after maximum retries.');
+    return null;
+}
 export async function getCurrentBlockNumber() {
     let shouldContinue = true;
     let retries = 0;
@@ -559,5 +575,16 @@ export async function getNonceWithLimiter(address) {
         console.log(`Failed to get nonce for address ${address} after several attempts. Please check your connection and the status of the Ethereum node.`);
         return null;
     });
+}
+export async function getCalledContractOnChain(txHash) {
+    var _a;
+    try {
+        const tx = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash);
+        return ((_a = tx === null || tx === void 0 ? void 0 : tx.to) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || null; // Ensure address is in lowercase for comparison
+    }
+    catch (error) {
+        // console.error(`Failed to retrieve 'to' address for txHash ${txHash}:`, error);
+        return null;
+    }
 }
 //# sourceMappingURL=generic.js.map

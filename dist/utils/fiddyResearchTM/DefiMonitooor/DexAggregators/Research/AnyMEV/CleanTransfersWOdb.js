@@ -131,7 +131,6 @@ export async function parseEventsFromReceiptForEntireTxWOdb(txHash, chain, web3H
     // This set will store topics we've already processed
     const processedTopics = new Set();
     const parsedEventsPromises = receipt.logs.map(async (log) => {
-        let contractAddress = log.address;
         // Add the topic to the set of processed topics
         processedTopics.add(log.topics[0]);
         // let contractAbi = await fetchAbiFromEtherscanForChain(contractAddress, chain);

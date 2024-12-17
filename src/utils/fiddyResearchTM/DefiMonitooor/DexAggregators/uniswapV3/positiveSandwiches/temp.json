@@ -1,0 +1,70 @@
+[
+  {
+    "blockNumber": 20843183,
+    "frontrun": {
+      "txHash": "0xc932ce17c4bdd2b40e1ea7caa9528f184c946e45ada699fc027ea80493d05bc7",
+      "blockNumber": 20843183,
+      "position": 0,
+      "unixTime": 1727454827,
+      "sold": "Wrapped Ether",
+      "bought": "SPX6900",
+      "swap": "Wrapped Ether -> SPX6900",
+      "inputTokenId": "token0",
+      "outputTokenId": "token1",
+      "soldAmount": 1.2543912709109841,
+      "boughtAmount": 49747.82971904,
+      "user": "0x1f2F10D1C40777AE1Da742455c65828FF36Df387",
+      "label": "frontrun",
+      "gasInfo": {
+        "gas": 254601,
+        "gasPrice": "23762923293",
+        "maxFeePerGas": "23762923293",
+        "maxPriorityFeePerGas": "0"
+      }
+    },
+    "center": [
+      {
+        "txHash": "0xbe0060fc6adda61ff321277e849c9658add2743276fb480ca356f489448be002",
+        "blockNumber": 20843183,
+        "position": 2,
+        "unixTime": 1727454827,
+        "sold": "Wrapped Ether",
+        "bought": "SPX6900",
+        "swap": "Wrapped Ether -> SPX6900",
+        "inputTokenId": "token0",
+        "outputTokenId": "token1",
+        "soldAmount": 3.0212725852418454,
+        "boughtAmount": 118806.93187542,
+        "user": "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD",
+        "label": "center",
+        "gasInfo": {
+          "gas": 371211,
+          "gasPrice": "25770791365",
+          "maxFeePerGas": "34162542713",
+          "maxPriorityFeePerGas": "2007868072"
+        }
+      }
+    ],
+    "backrun": {
+      "txHash": "0x3a20b73b695021c2aaebecd1d6092a1920e41139781c50725b8de85277680a70",
+      "blockNumber": 20843183,
+      "position": 3,
+      "unixTime": 1727454827,
+      "sold": "SPX6900",
+      "bought": "Wrapped Ether",
+      "swap": "SPX6900 -> Wrapped Ether",
+      "inputTokenId": "token1",
+      "outputTokenId": "token0",
+      "soldAmount": 49747.82906368,
+      "boughtAmount": 1.2619258375490765,
+      "user": "0x1f2F10D1C40777AE1Da742455c65828FF36Df387",
+      "label": "backrun",
+      "gasInfo": {
+        "gas": 543981,
+        "gasPrice": "218028581009",
+        "maxFeePerGas": "218028581009",
+        "maxPriorityFeePerGas": "218028581009"
+      }
+    }
+  }
+]

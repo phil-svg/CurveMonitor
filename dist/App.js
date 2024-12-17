@@ -5,7 +5,7 @@ import { updatePools } from './utils/postgresTables/Pools.js';
 import { updateCoinTable } from './utils/postgresTables/Coins.js';
 import { updatePoolAbis } from './utils/postgresTables/Abi.js';
 import { updateBlockTimestamps } from './utils/postgresTables/Blocks.js';
-import { updateRawLogsForLiveMode } from './utils/postgresTables/RawLogs.js';
+import { updateRawLogs, updateRawLogsForLiveMode } from './utils/postgresTables/RawLogs.js';
 import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
 import { addCustomLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
@@ -27,6 +27,7 @@ import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
 import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
 import { updatePoolsBytecode } from './utils/postgresTables/ByteCode.js';
+import { updateMintMarketForMevScoring } from './utils/risk/MintMarkets.js';
 export async function initDatabase() {
     try {
         await db.sync();
@@ -36,7 +37,7 @@ export async function initDatabase() {
         console.error('Error syncing database:', err);
     }
 }
-// await initDatabase();
+await initDatabase();
 // await updateProxiesFromManualList();
 export const solveTransfersOnTheFlyFlag = false; // true = debugging. for debugging, if true, it means we ignore the db and do a fresh parse.
 // await research(); // opening function for queries for a bunch of statistics
@@ -52,6 +53,7 @@ export async function main() {
     await bootWsProvider(); // starting new WS connection.
     eventEmitter.removeAllListeners();
     setupDeadWebsocketListener();
+    await updateMintMarketForMevScoring();
     await loadAddressProvider();
     await updatePools();
     await updateCoinTable();
@@ -60,7 +62,7 @@ export async function main() {
     await subscribeToNewBlocks();
     // await updateInitialPoolParams(); // muted until useful
     // await updatePoolParamsEvents(); // muted until useful
-    // await updateRawLogs();
+    await updateRawLogs();
     await preparingLiveModeForRawEvents();
     await updateRawLogsForLiveMode();
     eventFlags.canEmitGeneralTx = true;

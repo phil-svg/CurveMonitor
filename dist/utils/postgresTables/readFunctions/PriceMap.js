@@ -1,14 +1,15 @@
-import { Op, Sequelize } from "sequelize";
-import { PriceMap } from "../../../models/PriceMap.js";
+import { Op, Sequelize } from 'sequelize';
+import { PriceMap } from '../../../models/PriceMap.js';
+import { getCoinIdByAddress } from './Coins.js';
 export async function getLatestStoredPriceTimestampForCoin(coinId) {
     const latestPriceEntry = await PriceMap.findOne({
         where: {
             coin_id: coinId,
         },
-        order: [["price_timestamp", "DESC"]],
-        attributes: ["price_timestamp"],
+        order: [['price_timestamp', 'DESC']],
+        attributes: ['price_timestamp'],
     });
-    return latestPriceEntry ? latestPriceEntry.getDataValue("price_timestamp") : null;
+    return latestPriceEntry ? latestPriceEntry.getDataValue('price_timestamp') : null;
 }
 export async function getEthPriceWithTimestampFromTable(unixtime) {
     try {
@@ -19,7 +20,7 @@ export async function getEthPriceWithTimestampFromTable(unixtime) {
                     [Op.lte]: unixtime,
                 },
             },
-            order: [["priceTimestamp", "DESC"]],
+            order: [['priceTimestamp', 'DESC']],
             limit: 1,
         });
         if (ethPriceData) {
@@ -28,9 +29,15 @@ export async function getEthPriceWithTimestampFromTable(unixtime) {
         return null;
     }
     catch (error) {
-        console.error("Error fetching ETH price data:", error);
+        console.error('Error fetching ETH price data:', error);
         throw error;
     }
+}
+export async function getPriceFromDb(tokenAddress, unixtime) {
+    const coinId = await getCoinIdByAddress(tokenAddress);
+    if (!coinId)
+        return null;
+    return await getTokenPriceWithTimestampFromDb(coinId, unixtime);
 }
 /**
  * Fetches the price with a timestamp for a specified token.
@@ -47,7 +54,7 @@ export async function getTokenPriceWithTimestampFromDb(tokenId, unixtime) {
                     [Op.lte]: unixtime,
                 },
             },
-            order: [["priceTimestamp", "DESC"]],
+            order: [['priceTimestamp', 'DESC']],
             limit: 1,
         });
         if (tokenPriceData) {
@@ -63,13 +70,13 @@ export async function getTokenPriceWithTimestampFromDb(tokenId, unixtime) {
 export async function getAllUniqueCoinIds() {
     try {
         const uniqueCoinIds = await PriceMap.findAll({
-            attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("coin_id")), "coin_id"]],
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('coin_id')), 'coin_id']],
             raw: true,
         });
         return uniqueCoinIds.map((entry) => entry.coin_id);
     }
     catch (error) {
-        console.error("Error fetching unique coin IDs:", error);
+        console.error('Error fetching unique coin IDs:', error);
         return [];
     }
 }

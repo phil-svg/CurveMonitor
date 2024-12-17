@@ -36,6 +36,27 @@ async function randomDelay(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (400 - 200 + 1) + 200)));
 }
 
+export async function getCurrentBlockNumberWithRetry(): Promise<number | null> {
+  const maxRetries = 5;
+  let retries = 0;
+  let blockNumber: number | null = null;
+
+  while (retries < maxRetries) {
+    blockNumber = await getCurrentBlockNumber();
+
+    if (typeof blockNumber === 'number' && blockNumber > 0) {
+      return blockNumber;
+    }
+
+    retries++;
+    console.warn(`Retrying getCurrentBlockNumber... Attempt ${retries}/${maxRetries}`);
+    await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (500 - 200 + 1) + 200))); // Retry with delay
+  }
+
+  console.error('getCurrentBlockNumberWithRetry failed after maximum retries.');
+  return null;
+}
+
 export async function getCurrentBlockNumber(): Promise<number | null> {
   let shouldContinue = true;
   let retries = 0;
@@ -678,4 +699,14 @@ export async function getNonceWithLimiter(address: string): Promise<number | nul
     );
     return null;
   });
+}
+
+export async function getCalledContractOnChain(txHash: string): Promise<string | null> {
+  try {
+    const tx = await WEB3_HTTP_PROVIDER.eth.getTransaction(txHash);
+    return tx?.to?.toLowerCase() || null; // Ensure address is in lowercase for comparison
+  } catch (error) {
+    // console.error(`Failed to retrieve 'to' address for txHash ${txHash}:`, error);
+    return null;
+  }
 }

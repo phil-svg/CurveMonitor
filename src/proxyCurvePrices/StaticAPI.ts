@@ -5,6 +5,7 @@ import cors from 'cors';
 import { getPoolLaunchesLast7Days } from '../utils/api/queries/Pools.js';
 import { fetchPoolsWithCoins } from './Endpoints/AllPoolsInfo.js';
 import { getPoolAbiByPoolAddress } from '../utils/postgresTables/readFunctions/Abi.js';
+import { getMintMarketRiskInfo } from '../utils/risk/MintMarkets.js';
 
 export async function startHttpEndpoint(app: express.Application) {
   app.use(bodyParser.json());
@@ -74,6 +75,22 @@ export async function startHttpEndpoint(app: express.Application) {
     } catch (error) {
       console.error('Error fetching ABI for address:', error);
       res.status(500).send('Internal Server Error while fetching ABI');
+    }
+  });
+
+  // Endpoint to get Info on Mint markets for the last 3 months, per 1 controller-address
+  app.get('/mintMarketRiskInfo/:address', async (req, res) => {
+    const { address } = req.params;
+    try {
+      const data = await getMintMarketRiskInfo(address);
+      if (data) {
+        res.json(data);
+      } else {
+        res.status(404).send(`Fetch failed for mintMarketRiskInfo ${address}`);
+      }
+    } catch (error) {
+      console.error(`Fetch failed for mintMarketRiskInfo ${address}`, error);
+      res.status(500).send('Internal Server Error while fetching data for mintMarketRiskInfo');
     }
   });
 }

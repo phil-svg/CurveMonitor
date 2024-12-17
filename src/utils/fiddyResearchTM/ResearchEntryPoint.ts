@@ -15,6 +15,8 @@ import { oneInchVolThings, whatWasSwappedAnalytics } from './DefiMonitooor/DexAg
 import { anyPoolMevCheck } from './DefiMonitooor/DexAggregators/Research/AnyMEV/AnyAddressMev.js';
 import { studyTokenBalanceOfWallet } from './DefiMonitooor/DexAggregators/Research/WalletBalanceChanges.js';
 import { uniswapV3EntryPoint } from './DefiMonitooor/DexAggregators/uniswapV3/UniV3EntryPoint.js';
+import { uniswapV3positiveSandwichThings } from './DefiMonitooor/DexAggregators/uniswapV3/positiveSandwiches/SandwicheResearch.js';
+import { uniswapV2positiveSandwichThings } from './DefiMonitooor/DexAggregators/uniswapV3/positiveSandwiches/SandwicheResearchUniV2.js';
 import { fxThings } from './atomicArb/fxArbs.js';
 import { aggregateCexDexBotVolumeOverTime, writeDBotVolOverTimeataToExcel } from './cexdex/BotVolOverTime.js';
 import { countCoinSwapsForBotAndPool } from './cexdex/ClusteredTxCoins.js';
@@ -36,7 +38,7 @@ import {
   getSwapVolumeForPoolAndToAddressForEachSwapDirection,
   getToAddressVolDistributionPerPools,
 } from './curvefi/Volume.js';
-import { profitableSandwichThings } from './sandwiches/GoodSandwiches.js';
+import { fullSandwichJson, profitableSandwichThings } from './sandwiches/GoodSandwiches.js';
 import {
   calculateLossStatistics,
   createSandwichLossInUsdJsonFile,
@@ -95,8 +97,8 @@ export async function research() {
 
   const bitgetRouter = '0x1A8f43e01B78979EB4Ef7feBEC60F32c9A72f58E';
 
-  const startDate = '2024-07-16';
-  const endDate = '2024-07-17';
+  const startDate = '2024-01-01';
+  const endDate = '2024-07-30';
 
   const startBlockNumber = 19620526;
   const endBlockNumber = 19625525;
@@ -105,6 +107,9 @@ export async function research() {
 
   console.log('conducting research');
 
+  await uniswapV2positiveSandwichThings();
+  // await fullSandwichJson();
+  // await uniswapV3positiveSandwichThings();
   // await anyPoolMevCheck();
   // await dailyTxCount();
   // await getPegKeeperAndCrvUSDPriceData();
@@ -125,7 +130,7 @@ export async function research() {
   // await fetchSandwichUserLossForSomePoolsForTimePeriod(stableswapPoolAddressArr, startDate, endDate);
   // await gasUsageThings();
   // await createSandwichLossInUsdJsonFileFor2023();
-  await generateVolumeReportForSinglePool(tricryptoUSDC, startDate, endDate);
+  // await generateVolumeReportForSinglePool(tricryptoUSDC, startDate, endDate);
   // await generateVolumeReportForSinglePoolHighRes(pyusdFxusdPool, startBlockNumber, endBlockNumber, startDate, endDate);
   // await barChartRace();
   // await priceImpactThings();
@@ -140,7 +145,7 @@ export async function research() {
   // await createSandwichLossInUsdJsonFile();
   // await generateTopFromVolAddressesForSpecificToAddress(startDate, endDate, curveRouterV1);
   // await generateTopToVolAddresses(startDate, endDate);
-  // await generateTopFromVolAddresses(1692099809, 1703335409);
+  // await generateTopFromVolAddresses(startDate, endDate);
   // await calculateTotalVolumeAndVolumePerBot();
   // await calculateTotalVolumeForTransactionsInDb();
   // await mosRequest_SandwichVolShareDueToMisconfigRouters(); // see => https://twitter.com/phil_00Llama/status/1752327902249492519

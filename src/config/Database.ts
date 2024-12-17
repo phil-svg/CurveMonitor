@@ -31,6 +31,7 @@ import { IsCexDexArb } from '../models/IsCexDexArb.js';
 import { CexDexArbs } from '../models/CexDexArbs.js';
 import { IsSandwich } from '../models/IsSandwich.js';
 import { Bytecode } from '../models/PoolsByteCode.js';
+import { RiskMintMarketInfo } from '../models/RiskMintMarkets.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -74,6 +75,7 @@ export const sequelize = new Sequelize({
     CexDexArbs,
     IsSandwich,
     Bytecode,
+    RiskMintMarketInfo,
   ],
   logging: false,
 });

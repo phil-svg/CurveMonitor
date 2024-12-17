@@ -106,9 +106,7 @@ export async function getPricesForAllTokensFromDefiLlama(tokens, block_unixtime)
     try {
         const prices = new Map();
         for (const token of tokens) {
-            console.log(token, block_unixtime);
             const price = await getHistoricalTokenPriceFromDefiLlama(token, block_unixtime);
-            console.log(price);
             if (!price) {
                 console.log(`Failed to fetch price in getPricesForAllTokensFromDefiLlama for token: ${token}`);
                 return null;

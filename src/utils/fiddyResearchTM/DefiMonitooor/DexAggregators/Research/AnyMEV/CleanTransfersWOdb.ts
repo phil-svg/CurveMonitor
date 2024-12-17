@@ -165,8 +165,6 @@ export async function parseEventsFromReceiptForEntireTxWOdb(
   const processedTopics = new Set<string>();
 
   const parsedEventsPromises = receipt!.logs.map(async (log: any) => {
-    let contractAddress = log.address;
-
     // Add the topic to the set of processed topics
     processedTopics.add(log.topics[0]);
 

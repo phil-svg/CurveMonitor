@@ -3,8 +3,15 @@ import { LossTransaction, Sandwiches } from '../../../models/Sandwiches.js';
 import { Transactions } from '../../../models/Transactions.js';
 import { fetchAllTransactionCoinData } from '../../postgresTables/readFunctions/TransactionCoins.js';
 import { TransactionCoins } from '../../../models/TransactionCoins.js';
-import { fetchTxPositionByTxId, getTxHashByTxId } from '../../postgresTables/readFunctions/Transactions.js';
+import {
+  fetchTransactionPosition,
+  fetchTxPositionByTxId,
+  getTxHashByTxId,
+} from '../../postgresTables/readFunctions/Transactions.js';
 import { IsSandwich } from '../../../models/IsSandwich.js';
+import fs from 'fs';
+import { getTransactionCostInUSD } from '../../postgresTables/mevDetection/atomic/utils/atomicArbDetection.js';
+import { WEB3_HTTP_PROVIDER } from '../../web3Calls/generic.js';
 
 export interface ExtendedLossTransaction extends LossTransaction {
   poolId: number;
@@ -65,10 +72,12 @@ async function getAllTxForSameBlockAndPoolWithoutTheSandwich(
 
 function simplifyTransactionCoinData(transactionCoinsData: TransactionCoins[]): SimplifiedSandwichTxData[] {
   return transactionCoinsData.map((coin) => ({
-    symbol: coin.coin.dataValues.symbol,
+    symbol: coin.coin.symbol, // Access coin symbol
+    decimals: coin.coin.decimals, // Access coin symbol
+    coinAddress: coin.coin.address, // Access coin address
     direction: coin.direction,
     amount: coin.amount,
-    dollarValue: coin.dollar_value ? coin.dollar_value : 0,
+    dollarValue: coin.dollar_value ? coin.dollar_value : 0, // Default to 0 if dollar_value is null
   }));
 }
 
@@ -139,15 +148,6 @@ function findEntryByDirection(
   return entries.find((entry) => entry.direction === direction);
 }
 
-import fs from 'fs';
-import { getGasUsedFromReceipt } from '../../postgresTables/readFunctions/Receipts.js';
-import {
-  getGasPriceInGwei,
-  getTransactionCostInUSD,
-} from '../../postgresTables/mevDetection/atomic/utils/atomicArbDetection.js';
-import { getEthPriceWithTimestampFromTable } from '../../postgresTables/readFunctions/PriceMap.js';
-import { WEB3_HTTP_PROVIDER } from '../../web3Calls/generic.js';
-
 function readDataFile() {
   const dataFilePath = '../sandwichData.json';
   if (!fs.existsSync(dataFilePath)) {
@@ -169,7 +169,7 @@ interface GasInfo {
   maxPriorityFeePerGas: string;
 }
 
-async function getBlockTransactionDetails(blockNumber: number, position: number): Promise<any | null> {
+export async function getBlockTransactionDetails(blockNumber: number, position: number): Promise<any | null> {
   try {
     const transaction = await WEB3_HTTP_PROVIDER.eth.getTransactionFromBlock(blockNumber, position);
     return transaction;
@@ -178,14 +178,19 @@ async function getBlockTransactionDetails(blockNumber: number, position: number)
   }
 }
 
-async function getExtendedGasInfo(blockNumber: number, position: number): Promise<GasInfo> {
-  const transaction = await getBlockTransactionDetails(blockNumber, position);
-  return {
-    gas: transaction.gas,
-    gasPrice: transaction.gasPrice,
-    maxFeePerGas: transaction.maxFeePerGas,
-    maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
-  };
+async function getExtendedGasInfo(blockNumber: number, position: number): Promise<GasInfo | null> {
+  try {
+    const transaction = await getBlockTransactionDetails(blockNumber, position);
+    return {
+      gas: transaction.gas,
+      gasPrice: transaction.gasPrice,
+      maxFeePerGas: transaction.maxFeePerGas,
+      maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
+    };
+  } catch (err) {
+    console.log('gas failed');
+    return null;
+  }
 }
 
 async function checkSingleTx(
@@ -248,7 +253,7 @@ async function checkSingleTx(
 
     if (
       txHashCenter === transaction.tx_hash ||
-      extendedGasInfoVictim.maxFeePerGas >= extendedGasInfo2ndTx.maxFeePerGas
+      extendedGasInfoVictim!.maxFeePerGas >= extendedGasInfo2ndTx!.maxFeePerGas
     ) {
       sandwichwasBadCounter++;
     } else {
@@ -329,4 +334,133 @@ export async function profitableSandwichThings(): Promise<void> {
     }
   }
   console.log('Went through', sandwichLossInfoArrForAll.length, 'Curve User Loss Sandwiches.');
+}
+
+async function solveSingleSandwich(
+  simplifiedSandwichTxData: SimplifiedSandwichTxData[],
+  lossInfo: ExtendedLossTransaction,
+  sandwichedTxSwap: TransactionCoins[]
+) {
+  const transaction = await Transactions.findByPk(lossInfo.tx_id);
+  if (!transaction) {
+    console.log('Transaction not found');
+    return;
+  }
+
+  const positionCenter = sandwichedTxSwap[0].transaction.tx_position;
+
+  const frontrunTxId = lossInfo.frontrunTxId;
+  const backrunTxId = lossInfo.backrunTxId;
+
+  const txHashCenter = await getTxHashByTxId(sandwichedTxSwap[0].tx_id);
+
+  const extendedGasInfoVictim = await getExtendedGasInfo(transaction.block_number, positionCenter);
+  if (!extendedGasInfoVictim) {
+    console.log('Extended gas info for victim not found');
+    return;
+  }
+
+  const positionFrontrun = await fetchTransactionPosition(frontrunTxId);
+  if (positionFrontrun !== 0 && !positionFrontrun) {
+    console.log('Frontrun transaction position not found', frontrunTxId);
+    return;
+  }
+
+  const extendedGasInfoFrontrun = await getExtendedGasInfo(transaction.block_number, positionFrontrun);
+  if (!extendedGasInfoFrontrun) {
+    console.log('Extended gas info for frontrun not found');
+    return;
+  }
+
+  const positionBackrun = await fetchTransactionPosition(backrunTxId);
+  if (!positionBackrun) {
+    console.log('Backrun transaction position not found');
+    return;
+  }
+
+  const extendedGasInfoBackrun = await getExtendedGasInfo(transaction.block_number, positionBackrun);
+  if (!extendedGasInfoBackrun) {
+    console.log('Extended gas info for backrun not found');
+    return;
+  }
+
+  const txHashFrontrun = await getTxHashByTxId(frontrunTxId);
+  const txHashBackrun = await getTxHashByTxId(backrunTxId);
+
+  const txCoinsFrontrun = await fetchAllTransactionCoinData(frontrunTxId);
+  const simplifiedTxDataFrontrun = simplifyTransactionCoinData(txCoinsFrontrun);
+
+  const txCoinsBackrun = await fetchAllTransactionCoinData(backrunTxId);
+  const simplifiedTxDataBackrun = simplifyTransactionCoinData(txCoinsBackrun);
+
+  const gasCostInUSDFrontrun = await getTransactionCostInUSD(txHashFrontrun!);
+  const gasCostInUSDBackrun = await getTransactionCostInUSD(txHashBackrun!);
+
+  const gasCostInUSDSandwichCenter = await getTransactionCostInUSD(txHashCenter!);
+
+  const data = readDataFile();
+  const entry = {
+    txHashSandwich: txHashCenter,
+    sandwichSwapData: simplifiedSandwichTxData,
+    frontrunTxHash: txHashFrontrun,
+    frontrunSwapData: simplifiedTxDataFrontrun,
+    backrunTxHash: txHashBackrun,
+    backrunSwapData: simplifiedTxDataBackrun,
+    gasCostInUSDFrontrun,
+    gasCostInUSDBackrun,
+    gasCostInUSDSandwichCenter,
+    extendedGasInfoVictim,
+    extendedGasInfoFrontrun,
+    extendedGasInfoBackrun,
+  };
+  data.push(entry);
+  writeDataFile(data);
+}
+
+function chunkArray<T>(arr: T[], chunkSize: number): T[][] {
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += chunkSize) {
+    chunks.push(arr.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+export async function checkSingleSandwichForJson(lossInfo: ExtendedLossTransaction) {
+  if (lossInfo.frontrunTxId === 3309906) {
+    console.log('lossInfo', lossInfo);
+  }
+  const allTransactionCoinData = await fetchAllTransactionCoinData(lossInfo.tx_id);
+  const simplifiedSandwichTxData = simplifyTransactionCoinData(allTransactionCoinData);
+  await solveSingleSandwich(simplifiedSandwichTxData, lossInfo, allTransactionCoinData);
+}
+
+export async function fullSandwichJson() {
+  console.time('full');
+  const sandwichLossInfoArrForAll = await getSandwichLossInfoArrForAll(); // found 18648 entries
+  const chunkSize = 25; // Number of tasks to run in parallel
+  const chunks = chunkArray(sandwichLossInfoArrForAll, chunkSize);
+  let counter = 0;
+
+  // Process each chunk sequentially, but process eachlossInfo chunk in parallel
+  for (const chunk of chunks) {
+    console.time('check');
+
+    // Run the tasks in this chunk in parallel
+    await Promise.all(
+      chunk.map(async (singleSandwichLossInfo) => {
+        counter++;
+        await checkSingleSandwichForJson(singleSandwichLossInfo);
+        // console.log(counter, sandwichLossInfoArrForAll.length);
+      })
+    );
+
+    console.timeEnd('check');
+  }
+
+  console.log('Went through', sandwichLossInfoArrForAll.length, 'Curve User Loss Sandwiches.');
+  console.log('finished');
+  console.timeEnd('full');
+
+  // const data = readDataFile();
+  // console.log(data.length);
 }

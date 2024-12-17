@@ -1,0 +1,695 @@
+[
+  {
+    "victimTxHash": "0x2025e09f54e68168d5f682a9558b491f072b6882c903c6f36a70c83894e7a3f9",
+    "actualOutputAmount": 3762491.839547611,
+    "victimSimAmountOut": 2353896.031626795,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x797cd24fd8465c009d7ad4588caed7eda47ebd5b92985ed401bf2e39f33ce6fb",
+    "actualOutputAmount": 261005.734784538,
+    "victimSimAmountOut": 257821.44123460547,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x7dd4fbaad3cfa65c330c78b661c2a456c2f31fa5c95999f77dcca98c10289e5c",
+    "actualOutputAmount": 0.1451190982128199,
+    "victimSimAmountOut": 0.12497807241356425,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x45eceb430d1959ea935a78d08b9a2569523414f096d07efb8c77db9328ebaf87",
+    "actualOutputAmount": 170082.878412234,
+    "victimSimAmountOut": 168524.09437522336,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xa8bb2f4d1565b3ca5f679719c5c07c0cab0a971c53ed4ba66b4ff3498c95113f",
+    "actualOutputAmount": 69849.871550967,
+    "victimSimAmountOut": 68528.91356166822,
+    "min": 69849830291294,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x848f7c6630ee64f58cecc7b65f7ffb971f7835dadaac861a54d89bf4539a7366",
+    "actualOutputAmount": 176241.434755072,
+    "victimSimAmountOut": 163217.62768698562,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x34d400cdc84c75d484ca0ece9af1100f793da373536a4421ae45fe69fef713ce",
+    "actualOutputAmount": 0.23674371444138015,
+    "victimSimAmountOut": 0.22483105540029766,
+    "min": 236743697244668985,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x59763d2916e64552ced83e3d3634613a9b669aa24a1d1215566e096a59b2ec40",
+    "actualOutputAmount": 6274.989408726,
+    "victimSimAmountOut": 6246.357102625721,
+    "min": 6274713806826,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x25d5f97d9dc56c20e4505dd318054c869ef2bbef6b9d3df220f7b0848d7e1da9",
+    "actualOutputAmount": 0.20581782425478426,
+    "victimSimAmountOut": 0.20076781459356016,
+    "min": 205817602046868469,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xe224a022c0e1d90f9a2d23ad6bef42cb2c0cf12b98e9059a1b0e069ca326a2cd",
+    "actualOutputAmount": 1.0025000000000035,
+    "victimSimAmountOut": 0.9591720245702794,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x786772d16ce4e29af357263ceeb16eaf22357e451c1dd2a7fb7d82613e670a1a",
+    "actualOutputAmount": 0.3007500000000071,
+    "victimSimAmountOut": 0.2707296514234085,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x5720c042027d5faa245e402c4b920e308375d856d05f0bce63725fcab6655bab",
+    "actualOutputAmount": 18107.755164631,
+    "victimSimAmountOut": 17484.288922632855,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x6e9ec4a9602a6a9204f291ee2e06a5c7818cd27497a23fc45d46c241551d2b4e",
+    "actualOutputAmount": 65108.639762732,
+    "victimSimAmountOut": 64778.31806051744,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xd2b46a7fa796ffac2426eebe171dd762858e90142837a3eb79587d81fec42799",
+    "actualOutputAmount": 0.9712629147266214,
+    "victimSimAmountOut": 0.9451344485650103,
+    "min": 971262824704557811,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x7d33d38e1a16c0d55c7d71788c608cfdad287e22322801aab1be19d4d5e0ff03",
+    "actualOutputAmount": 0.10603356996046655,
+    "victimSimAmountOut": 0.10263665682608802,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x84756656dfc5f2ec60b68857ae901a92b08dd69ed7fa3bc54290a29b02446b0d",
+    "actualOutputAmount": 0.31402070468057103,
+    "victimSimAmountOut": 0.3086046381297681,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x2cbcb7724d24c8f7fd6856cdcbf12ff7df472e281858652057c28253b940dda8",
+    "actualOutputAmount": 35874.693471346,
+    "victimSimAmountOut": 35782.58930764721,
+    "min": 35874663085755,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xa49e94ac6bbdfa20fe006f5696bc8e5985b0a3dbc4585cba1a2f372125f6fb6f",
+    "actualOutputAmount": 25341.41122886,
+    "victimSimAmountOut": 24339.765048899004,
+    "min": 25341390280546,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x9e3de5457d532a5aec7fb590d271e83bc86ee035ab8ff7b378117a822d3d206c",
+    "actualOutputAmount": 21293.471076404,
+    "victimSimAmountOut": 19757.976722876276,
+    "min": 21293465527512,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x260ad75863bba6cd2130b073d7db0c014cb14ff40063151df1257e8aaa5a1440",
+    "actualOutputAmount": 0.16041555871236948,
+    "victimSimAmountOut": 0.15616184241196168,
+    "min": 158784045963107934,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x9bbf7003ea2781995e748de9a0c8d36d07272d7ed1f8d1897f00fc5ab66ed310",
+    "actualOutputAmount": 0.3749574268196209,
+    "victimSimAmountOut": 0.3597696324450404,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x8e0085294e7ef3fcc7d864dfc3e154e22353a7d97b56a21de56d1e2bd7d76629",
+    "actualOutputAmount": 88655.130701066,
+    "victimSimAmountOut": 85261.67651791203,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xf340e3ef164946b7dde62dacee15ec70096e9c1c0832b2b4513dc5bf2ad7a131",
+    "actualOutputAmount": 15999.192562646,
+    "victimSimAmountOut": 15169.019247071865,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x86b637a483ce91f681fcf3ddc53c022ecf6b908538aab262984805f624fc3e27",
+    "actualOutputAmount": 0.10813006168621923,
+    "victimSimAmountOut": 0.10467959186796069,
+    "min": 108129967893483390,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x5d300c9d4148f62216fa0cd85ac8be05d033845450da35b802c3c070a352f402",
+    "actualOutputAmount": 0.50406258977975,
+    "victimSimAmountOut": 0.5028034074182671,
+    "min": 504062497024759376,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x0221bc7a6ba2d24c56fcbf28bdb375ebd0dd2fecebafa38c362ae79795cf527c",
+    "actualOutputAmount": 0.32156810417601045,
+    "victimSimAmountOut": 0.3018149523943158,
+    "min": 321568067045314351,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x5e72882cde67099d60f814fd494bd9e02a7f329d3432b56e953d649161737a7e",
+    "actualOutputAmount": 0.5900805495456376,
+    "victimSimAmountOut": 0.5858898065610317,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x364871450369758a0110f10224022bc261f15cd8fef3f32ecc093706bcd96f93",
+    "actualOutputAmount": 4756.661050866,
+    "victimSimAmountOut": 4247.240928783805,
+    "min": 4579363777492,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x53808d32f70e5c20fa7573dffb5b6118be3b0b9c5c9da3321938c7e1299e2fad",
+    "actualOutputAmount": 0.29974694176783423,
+    "victimSimAmountOut": 0.2923481293194267,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xd9c8b8a97b6b91eede768fb477cb43fa29bb0213e0682dd2161c099c53beaaa9",
+    "actualOutputAmount": 5960.740066479,
+    "victimSimAmountOut": 5752.301500988582,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x2da88d45f5879003255f91977da1723b850887315e0883512b34f5115c648a4d",
+    "actualOutputAmount": 0.4920405505000096,
+    "victimSimAmountOut": 0.45844786109664354,
+    "min": 492040308972799060,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xad2bc52fd0534d4dbe6b2d6275ba65f4c5573aa932634f1e2cde4215f412a70f",
+    "actualOutputAmount": 23566.336635103,
+    "victimSimAmountOut": 22808.308895091057,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xc9b296eb647f455199cc2f2bbcb33af30e41dba1670a5fe44a00ab64f1e7dc39",
+    "actualOutputAmount": 2664.273247817,
+    "victimSimAmountOut": 2586.4124207550894,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x3ce5dca9eec4370a15b9b68a524566542b1a8aa504d937bfb2aa93a8183c156e",
+    "actualOutputAmount": 0.20316080569568137,
+    "victimSimAmountOut": 0.20254368001996334,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x936de57af29b3149d52d4f91b275a48e8518e51874d394d90b645b844a630fd5",
+    "actualOutputAmount": 31916.40162304,
+    "victimSimAmountOut": 31178.815563826396,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x62729c84d77aaa5c6849ad239f9b285b03055be131cf013470fadfc806ea23f3",
+    "actualOutputAmount": 16059.912047573,
+    "victimSimAmountOut": 14770.183878681424,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xd24341235fa8e1ffd60f6ab248668722b37eefd467274ccc9e9529ff35666f32",
+    "actualOutputAmount": 0.49884514474753977,
+    "victimSimAmountOut": 0.47864527116195305,
+    "min": 498844984037005571,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xc7fce0029258b77f3da6d41c3e0dc2a7b20ac9a0d1fd92ac3040a9fb846829c2",
+    "actualOutputAmount": 33994.925388947,
+    "victimSimAmountOut": 32985.38853047131,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x512498435030f4980d937897edc43d3983bcae2b0b00a6ee81936a3e1876e0c5",
+    "actualOutputAmount": 33864.033606095,
+    "victimSimAmountOut": 31971.437657129834,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x741ba483311ddaed5454e79f4cf59fd2eccc672b90ba0a209fa78d62aaaf39b9",
+    "actualOutputAmount": 30821.800218842,
+    "victimSimAmountOut": 29055.893011793003,
+    "min": 30821794215039,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x103d5451539145b6f92f753baca7e0dc24ae029fa6a3d58dda94797315edee32",
+    "actualOutputAmount": 18771.808520172,
+    "victimSimAmountOut": 18310.161803537245,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x80ae30eec6ed3e56c0ef6bc43e394ef0e9af741d865da73c9025c720c6a7e46c",
+    "actualOutputAmount": 34085,
+    "victimSimAmountOut": 32923.44351813022,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x5ed3fc5f2edf0e6d60e00436328326b5cc74af88732b8481305b28361c19be3f",
+    "actualOutputAmount": 10914.113201327,
+    "victimSimAmountOut": 10712.583752821556,
+    "min": 10914111156469,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x9f5af78562b671fb94eacf137a7b4a01985c7a27d22dce54e64e1af4ebe3dd43",
+    "actualOutputAmount": 39074.741934818,
+    "victimSimAmountOut": 37466.50655197254,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x10664e934dc975b45f3d88c0c258a4d5198d309b062de58911a4f055647fb9a8",
+    "actualOutputAmount": 17239.052905799,
+    "victimSimAmountOut": 16388.74458944221,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xd126eb281dc8c1b20f95fd443c0064a0e5a324f5baa97bf90a2f193b447340db",
+    "actualOutputAmount": 0.4010325450322328,
+    "victimSimAmountOut": 0.3939450504524382,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x162892df8f47f9c4f43933f456fc73812d08690814e2f3d4d55c4856afacd716",
+    "actualOutputAmount": 19125.39796363,
+    "victimSimAmountOut": 18349.286253903203,
+    "min": 19125395540043,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x7c9e26ff5ee99fd1c1c4341beb81671e867578d5beadaedb0937111e561376a9",
+    "actualOutputAmount": 0.2610262342941034,
+    "victimSimAmountOut": 0.2592928021731714,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xa35ee87948ddd4ed2f5bdc1d18b5396b6903dad3784cb9ddf98c7b38fb5cf206",
+    "actualOutputAmount": 20029.628649786,
+    "victimSimAmountOut": 19988.46821088185,
+    "min": 20029626174543,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x847a61af91b3740462090b1528bff289eee6ad3e8752ad9c0ddb4c53800ae770",
+    "actualOutputAmount": 14131.378779727,
+    "victimSimAmountOut": 14111.988672950381,
+    "min": 14073821309041,
+    "status": "success"
+  },
+  {
+    "victimTxHash": "0x58199ce6faf1335932215167bc75e720ff26ebe504375cf9a414a52e592b78ed",
+    "actualOutputAmount": 0.31250060576617567,
+    "victimSimAmountOut": 0.29711593551530835,
+    "min": 312500559683971168,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xb81895653095e0a71fefdb9f72b472bfbf9c2660ab508f05a6e8dc553bc1f40d",
+    "actualOutputAmount": 8874.573395817,
+    "victimSimAmountOut": 8832.576787744105,
+    "min": 8874572112812,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xb32cf86a93337fb85847178fd21a2f7ee539ae852b846906c34919d4b3cf4003",
+    "actualOutputAmount": 10322.464660102,
+    "victimSimAmountOut": 9350.232118009664,
+    "min": 10322461496064,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xd002bedd324c894a68948ae75a93a516fa4ade234d921b8bc83f81093ceed261",
+    "actualOutputAmount": 0.48540609367179255,
+    "victimSimAmountOut": 0.47054947444091433,
+    "min": 485405967180294254,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x6da026353e781efb3e3a12010b4fdc99551ba2776478477c960101fcbd7b04fa",
+    "actualOutputAmount": 0.3075454906342677,
+    "victimSimAmountOut": 0.2950360590787468,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xd186f9d6847ef3b4d2b065b60d1fa79a61c33a7d62de1361dd0841968d291f27",
+    "actualOutputAmount": 4.91605256603009,
+    "victimSimAmountOut": 4.84538906986589,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xfed7e4d4c6d31e0c335a0c242122d3cfa562ce98e63c319a01c37a4f217a139f",
+    "actualOutputAmount": 0.45431044637061846,
+    "victimSimAmountOut": 0.4325914466552851,
+    "min": 454310357887784864,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x05cafaf556bd88151242796d54cd6ef83ffa0d5cc034d369e35b4fca05d81432",
+    "actualOutputAmount": 0.3735153036868044,
+    "victimSimAmountOut": 0.3702740036648928,
+    "min": 373515223787196320,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xa893e12aadada872561a26f1594517a1982ce1ab8afff71673c9487411286458",
+    "actualOutputAmount": 2.132148263966163,
+    "victimSimAmountOut": 1.8884389267694044,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xafd0186623d6a71d5fdf1cefa1ea9df76f39d71d05f28abd2df369bbca389c48",
+    "actualOutputAmount": 0.996253786012118,
+    "victimSimAmountOut": 0.9570154424131124,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xade7511246e798a306fff1f9804a81b73de2304d83dbd7ce20fc95ea8743dd4e",
+    "actualOutputAmount": 4687.255564488,
+    "victimSimAmountOut": 4671.690895491401,
+    "min": 4687255280121,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x6fea53056520506a03b759ea479f8887c3755ce89e55fc7babc28a8fbc5a30c6",
+    "actualOutputAmount": 1.002500000000026,
+    "victimSimAmountOut": 0.9441829300601426,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x04d0916663e39028448b72f44e30510362dc8acd08e3505c7eef84c20876f1fc",
+    "actualOutputAmount": 0.5012500000000081,
+    "victimSimAmountOut": 0.499118903582573,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x0e4eb75214a04d3091b971dde6acc0b69b080fb0d3acb4cc8821701466c0bf8e",
+    "actualOutputAmount": 287.282228992,
+    "victimSimAmountOut": 282.8349997570237,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xaf622753fc3e594a396f6051945a3f8bf620f45708da5b4a76c8fd3fd5fc77b5",
+    "actualOutputAmount": 11299.677623843,
+    "victimSimAmountOut": 11263.851967507571,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x632197e2d0be3631cb2b6093bc4b595103db9bdbd243bc2274906eaf9d307065",
+    "actualOutputAmount": 910.39243105,
+    "victimSimAmountOut": 905.0236427590123,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xf206f84d1956c23e600fef76416b3ecebef098f590580d6ba85f36b45738702e",
+    "actualOutputAmount": 4392.394461657,
+    "victimSimAmountOut": 3914.968035257667,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x75d79fcddf6e05627d400c91b8ebc24ce17e10946403a8108c92c91717a9ba79",
+    "actualOutputAmount": 332.986372638,
+    "victimSimAmountOut": 332.651062048618,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x208613400c371f76215fdb7091d68997e85fb5cb1ef8c69e154206bf92ef7fbc",
+    "actualOutputAmount": 0.7934548174617903,
+    "victimSimAmountOut": 0.779536562084497,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x948a4fa695b647313f4fc5b77de3e5b64cc3460ac981942f6b3a47323d0cb5e7",
+    "actualOutputAmount": 43944.513498303,
+    "victimSimAmountOut": 43404.49436436011,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x5577d03ae55fd77a93c17e0856053401a3248560e1238a1856d9857e6cb3d18f",
+    "actualOutputAmount": 0.7425241390065178,
+    "victimSimAmountOut": 0.7302271685190648,
+    "min": 742524127756533980,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xbbaaccf8f074631b1ba8bbb96f2bbf59358b8a5daf36d7618d2b56f36f93fd91",
+    "actualOutputAmount": 4420.02423002,
+    "victimSimAmountOut": 4227.287705596132,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x741508872c40f820b568b1c4d3c5e5aca2d91fbd79a4e82a2f74268524c00d55",
+    "actualOutputAmount": 0.3934829490709699,
+    "victimSimAmountOut": 0.38766845777456765,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xa8823304b1b4f28cf9d0857960263d5666a101573dd0da0268e520836ac102a3",
+    "actualOutputAmount": 0.35105315947849497,
+    "victimSimAmountOut": 0.33481764937274106,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x83de124b201f85380a05a7472feb47c70701d94757461cd976b9454e216b521f",
+    "actualOutputAmount": 11716.695223099,
+    "victimSimAmountOut": 11654.685347081122,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x81cb253a33263af1590aa648b983012e524578186290863f675a2005c532526a",
+    "actualOutputAmount": 39930.565445604,
+    "victimSimAmountOut": 39165.91300027032,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x767cc280e2ae275277cf3c4267dcc7c5500d84525641480c82a160a883da1b37",
+    "actualOutputAmount": 6747.706055998,
+    "victimSimAmountOut": 6671.098308291942,
+    "min": 6735805718263,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xa7c5cf2243c2702abb1addd6eaee9047023950f6e40351c06669e3038243753c",
+    "actualOutputAmount": 8801.329861048,
+    "victimSimAmountOut": 8738.350207362975,
+    "min": 8801302469044,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x24bbcb8d8fc2b1ec300d1f581036ff255e875b3715bdc7538793dce015e5b84e",
+    "actualOutputAmount": 27065.03898404,
+    "victimSimAmountOut": 26656.92140679135,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xc6c4042d4cbb8b500bc5eed52fefb2957d2e55ed0c43485065f4bd956aa9788f",
+    "actualOutputAmount": 3615.47592745,
+    "victimSimAmountOut": 3473.7234221367958,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xd13ea9a10011e4aae65ee6f8f547b68a940d2c709a4b621c77ddb1eb3524d255",
+    "actualOutputAmount": 24379.23362055,
+    "victimSimAmountOut": 24337.32402466666,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x0d14cc22ea20c55865aa2487925351fb59354f376f1738254b0ff1efe2fb8cd9",
+    "actualOutputAmount": 10583.321661857,
+    "victimSimAmountOut": 10549.913491559688,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xbf1c9b9a72c93261f39061df8ba4e88bd46debbefc2b80a59f179558188862f0",
+    "actualOutputAmount": 7315.229891991,
+    "victimSimAmountOut": 6678.376187602992,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x5898060b203874f0a8647596c3b3f3ece2ef3242c0a30151111dffbdf3ca1a0b",
+    "actualOutputAmount": 10791.093688512,
+    "victimSimAmountOut": 10005.468380332995,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x65222c05a84ea3631a4cb6d48002b7fe2067f97f56e887c49970678cbf6af01b",
+    "actualOutputAmount": 10000.123141543,
+    "victimSimAmountOut": 9759.141422344195,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xd1d92d14bd9b8a50a483e1a1e05521e50edc025bf004b766d4ef803551be238a",
+    "actualOutputAmount": 4040.66908605,
+    "victimSimAmountOut": 3954.689615796267,
+    "min": 4040668322696,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0xee0a4e18cb6120d2fc1b5de293b06ebee9f4e38855279decb3fc935c7e65de31",
+    "actualOutputAmount": 8390.604756188,
+    "victimSimAmountOut": 7917.544111129261,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x204385834105864e0846a13b805ce4c1bbcafe05b908718d3a860f402b211293",
+    "actualOutputAmount": 14981.840431063,
+    "victimSimAmountOut": 14785.509613830298,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xecbbbdcaf6de10714c1fa02326b79b41a7e6ffa228a244ee354a700e1c734584",
+    "actualOutputAmount": 2678.453133734,
+    "victimSimAmountOut": 2657.3908209808164,
+    "min": 2678452821420,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x1b029a186a1c263331866e6f79e05ce8e41e2ee8e8c460958a6312329698829b",
+    "actualOutputAmount": 3.236885250213491,
+    "victimSimAmountOut": 3.227700781183,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xcaa2259db1343bb95972c216e454280c74477ca102a71d26a2450a3ff1c1baf3",
+    "actualOutputAmount": 13168.336020914,
+    "victimSimAmountOut": 13135.626679735477,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x67fd451cc47e095043b9acfb2dccaa139fb1034106c4d2917c6268f74955252d",
+    "actualOutputAmount": 9.656890072430379,
+    "victimSimAmountOut": 9.257648688602954,
+    "min": 9656807283710453760,
+    "status": "revert"
+  },
+  {
+    "victimTxHash": "0x4682ff3edba8ac40637029cc89e327e5d2aafd6096ac9880e70d782e17591f8c",
+    "actualOutputAmount": 2073.467057792,
+    "victimSimAmountOut": 2072.4842668785104,
+    "min": 2065407671130,
+    "status": "success"
+  },
+  {
+    "victimTxHash": "0xb6dbe542c3678a6f31c9133a328c61783548ddde69e274bae70d72a5bc5a20e2",
+    "actualOutputAmount": 32007.962822532,
+    "victimSimAmountOut": 30658.542696904828,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xebefec642281f3bbeaf18c6f8a6681c3ece9663d771cca44eea097c2231ae4f7",
+    "actualOutputAmount": 31545.490083286,
+    "victimSimAmountOut": 29277.089324533532,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x5f05cf3f109e0840c5626cb90c5fce3ad9d33a28bc0206a0247d60798e6c7dce",
+    "actualOutputAmount": 13132.924432962,
+    "victimSimAmountOut": 13084.92410994699,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0x538ed2b2a78492cc4dbc559ee0b47b39f40c426a16c5a4d4bea78a83101876ae",
+    "actualOutputAmount": 2918.950412823,
+    "victimSimAmountOut": 2911.387824966806,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xc898d9fdd9967d25b5c57b5d549b07225970f41ef9309df381ece0e79536eb3f",
+    "actualOutputAmount": 7574.241913499,
+    "victimSimAmountOut": 7288.069138452668,
+    "min": "unknown",
+    "status": "unknown"
+  },
+  {
+    "victimTxHash": "0xff6df27b9f1fdeb99b1b9dd0f584309d67424037368c403666884852df16c78d",
+    "actualOutputAmount": 1.3306120503852756,
+    "victimSimAmountOut": 1.3297051733725505,
+    "min": 1330611957278202880,
+    "status": "revert"
+  }
+]

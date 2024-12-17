@@ -241,7 +241,9 @@ export async function generateTopToVolAddressesForSelectedPools(poolAddresses, s
     const topAddresses = await findTop20AddressesByVolume(volumeForAddress);
     await saveMostVolGeneratingToAddressesToExcel(topAddresses);
 }
-export async function generateTopFromVolAddresses(startUnixtime, endUnixtime) {
+export async function generateTopFromVolAddresses(startDate, endDate) {
+    const startUnixtime = convertDateToUnixTime(startDate);
+    const endUnixtime = convertDateToUnixTime(endDate);
     const groupedTransactions = await groupTransactionsByFromAddress(startUnixtime, endUnixtime);
     const volumeForAddress = await calculateTotalVolumeForAddresses(groupedTransactions);
     const topAddresses = await findTop20AddressesByVolume(volumeForAddress);

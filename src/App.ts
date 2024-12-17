@@ -6,7 +6,7 @@ import { updatePools } from './utils/postgresTables/Pools.js';
 import { updateCoinTable } from './utils/postgresTables/Coins.js';
 import { updatePoolAbis } from './utils/postgresTables/Abi.js';
 import { updateBlockTimestamps } from './utils/postgresTables/Blocks.js';
-import { updateRawLogsForLiveMode } from './utils/postgresTables/RawLogs.js';
+import { updateRawLogs, updateRawLogsForLiveMode } from './utils/postgresTables/RawLogs.js';
 import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
 import { addCustomLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
@@ -34,6 +34,7 @@ import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
 import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
 import { updatePoolsBytecode } from './utils/postgresTables/ByteCode.js';
+import { updateMintMarketForMevScoring } from './utils/risk/MintMarkets.js';
 
 export async function initDatabase() {
   try {
@@ -44,7 +45,7 @@ export async function initDatabase() {
   }
 }
 
-// await initDatabase();
+await initDatabase();
 
 // await updateProxiesFromManualList();
 
@@ -66,6 +67,8 @@ export async function main() {
   eventEmitter.removeAllListeners();
   setupDeadWebsocketListener();
 
+  await updateMintMarketForMevScoring();
+
   await loadAddressProvider();
   await updatePools();
   await updateCoinTable();
@@ -76,7 +79,7 @@ export async function main() {
   // await updateInitialPoolParams(); // muted until useful
   // await updatePoolParamsEvents(); // muted until useful
 
-  // await updateRawLogs();
+  await updateRawLogs();
   await preparingLiveModeForRawEvents();
   await updateRawLogsForLiveMode();
 

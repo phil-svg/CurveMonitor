@@ -365,4 +365,21 @@ export async function fetchTxPositionByTxId(txId) {
         return null;
     }
 }
+export async function fetchTransactionPosition(txId) {
+    try {
+        // Fetch the transaction from the Transactions table
+        const transaction = await Transactions.findOne({
+            where: { tx_id: txId },
+            attributes: ['tx_position'], // Only select tx_position field
+        });
+        // Explicitly check if transaction is null, otherwise return tx_position
+        if (transaction.tx_position === 0)
+            return 0;
+        return transaction !== null ? transaction.tx_position : null;
+    }
+    catch (error) {
+        console.error('Error fetching transaction position:', error);
+        return null;
+    }
+}
 //# sourceMappingURL=Transactions.js.map

@@ -588,6 +588,7 @@ export async function startTestClient() {
     console.log(`connecting to ${url}/main`);
     mainSocket.on('connect', () => {
         console.log('connected');
+        //  *************** Risk ***************
         //  *************** Curve Lending ***************
         // startUserHealthLendingClient(mainSocket, '0xAAE2957078351c5b2fa93774329ceba4F4270011');
         //  *************** GENERAL STUFF ***************
@@ -604,7 +605,7 @@ export async function startTestClient() {
         //   unit: 'hour',
         // }); // (Pool Specific)
         // *** sammich ***
-        startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
+        // startFullSandwichTableClient(mainSocket, 'full', 1); // (All Pools)
         // startAbsoluteLabelsRankingClient(mainSocket); // (All Pools)
         // startSandwichLabelOccurrencesClient(mainSocket); // (All Pools)
         // startNewSandwichClient(mainSocket); // (All Pools, live-feed)

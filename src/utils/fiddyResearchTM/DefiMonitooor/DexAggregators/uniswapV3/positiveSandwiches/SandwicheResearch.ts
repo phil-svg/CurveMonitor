@@ -1,7 +1,7 @@
 import { getUniswapV3Contract } from '../ContractGetter.js';
-import { SimplifiedUniV3SwapEvent, SwapEventUniV3 } from './Utils.js';
+import { MintEventUniV3, SimplifiedUniV3SwapEvent, SwapEventUniV3 } from './Utils.js';
 
-function findAllSandwiches(events: SimplifiedUniV3SwapEvent[]) {
+function findGroupsWithDoubledUser(events: SimplifiedUniV3SwapEvent[]) {
   // Group by blockNumber
   const groupedByBlock = events.reduce(
     (acc, event) => {
@@ -75,10 +75,7 @@ function findAllSandwiches(events: SimplifiedUniV3SwapEvent[]) {
     })
     .filter((group) => group.consecutiveGroups.length > 0); // Filter out any groups that now have no consecutive groups
 
-  console.dir(groupsWithDoubledUser, { depth: null, colors: true });
-  console.log('Found', Object.keys(groupsWithDoubledUser).length, 'groups with doubled user');
-
-  return 'foo';
+  return groupsWithDoubledUser;
 }
 
 // Function to determine swap direction and calculate amounts
@@ -106,8 +103,96 @@ function formatEvents(events: SwapEventUniV3[]): SimplifiedUniV3SwapEvent[] {
       soldAmount: formattedSoldAmount,
       boughtAmount: formattedBoughtAmount,
       user: event.returnValues.sender,
+      inputTokenId: soldToken === 'WETH' ? 'token0' : 'token1',
+      outputTokenId: soldToken === 'WETH' ? 'token1' : 'token0',
     };
   });
+}
+
+async function getMintEvents(allEvents: any[]): Promise<MintEventUniV3[]> {
+  // Filter events to only include those with the event name 'Mint'
+  const mintEvents = allEvents
+    .filter((event) => event.event === 'Mint')
+    .map((event) => {
+      return {
+        address: event.address,
+        blockHash: event.blockHash,
+        blockNumber: event.blockNumber,
+        blockTimestamp: event.blockTimestamp,
+        transactionHash: event.transactionHash,
+        transactionIndex: event.transactionIndex,
+        logIndex: event.logIndex,
+        removed: event.removed,
+        id: event.id,
+        returnValues: {
+          '0': event.returnValues['0'],
+          '1': event.returnValues['1'],
+          '2': event.returnValues['2'],
+          '3': event.returnValues['3'],
+          '4': event.returnValues['4'],
+          '5': event.returnValues['5'],
+          '6': event.returnValues['6'],
+          sender: event.returnValues.sender,
+          owner: event.returnValues.owner,
+          tickLower: event.returnValues.tickLower,
+          tickUpper: event.returnValues.tickUpper,
+          amount: event.returnValues.amount,
+          amount0: event.returnValues.amount0,
+          amount1: event.returnValues.amount1,
+        },
+        event: event.event,
+        signature: event.signature,
+        raw: {
+          data: event.raw.data,
+          topics: event.raw.topics,
+        },
+      };
+    });
+
+  return mintEvents;
+}
+
+async function getSwapEvents(allEvents: any[]): Promise<SwapEventUniV3[]> {
+  // Filter events to only include those with the event name 'Swap'
+  const swapEvents = allEvents
+    .filter((event) => event.event === 'Swap')
+    .map((event) => {
+      return {
+        address: event.address,
+        blockHash: event.blockHash,
+        blockNumber: event.blockNumber,
+        blockTimestamp: event.blockTimestamp,
+        transactionHash: event.transactionHash,
+        transactionIndex: event.transactionIndex,
+        logIndex: event.logIndex,
+        removed: event.removed,
+        id: event.id,
+        returnValues: {
+          '0': event.returnValues['0'],
+          '1': event.returnValues['1'],
+          '2': event.returnValues['2'],
+          '3': event.returnValues['3'],
+          '4': event.returnValues['4'],
+          '5': event.returnValues['5'],
+          '6': event.returnValues['6'],
+          sender: event.returnValues.sender,
+          recipient: event.returnValues.recipient,
+          amount0: event.returnValues.amount0,
+          amount1: event.returnValues.amount1,
+          sqrtPriceX96: event.returnValues.sqrtPriceX96,
+          liquidity: event.returnValues.liquidity,
+          tick: event.returnValues.tick,
+        },
+        event: event.event,
+        signature: event.signature,
+        raw: {
+          data: event.raw.data,
+          topics: event.raw.topics,
+        },
+      };
+    });
+
+  return swapEvents;
 }
 
 async function getEvents(): Promise<SwapEventUniV3[]> {
@@ -119,18 +204,54 @@ async function getEvents(): Promise<SwapEventUniV3[]> {
   const toBlock = 20425147;
   const fromBlock = toBlock - blocksPerMinute * minutes;
 
-  //   const toBlock = 20422753;
-  //   const fromBlock = 20422753;
+  // const toBlock = 20422753;
+  // const fromBlock = 20422753;
 
-  const swapEvents: SwapEventUniV3[] = await poolContract.getPastEvents('Swap', { fromBlock, toBlock });
+  const swapEvents: any[] = await poolContract.getPastEvents('allEvents', { fromBlock, toBlock });
   return swapEvents;
+}
+
+function filterGroupsWithoutMintedTxHash(
+  mintEvents: MintEventUniV3[],
+  groupsWithDoubledUser: {
+    blockNumber: string;
+    consecutiveGroups: SimplifiedUniV3SwapEvent[][];
+  }[]
+): {
+  blockNumber: string;
+  consecutiveGroups: SimplifiedUniV3SwapEvent[][];
+}[] {
+  const mintTxHashes = mintEvents.map((mint) => mint.transactionHash);
+
+  return groupsWithDoubledUser
+    .map((group) => {
+      return {
+        blockNumber: group.blockNumber,
+        consecutiveGroups: group.consecutiveGroups.filter((groupArray) => {
+          const firstTxHash = groupArray[0].txHash;
+          const lastTxHash = groupArray[groupArray.length - 1].txHash;
+          return !mintTxHashes.includes(firstTxHash) && !mintTxHashes.includes(lastTxHash);
+        }),
+      };
+    })
+    .filter((group) => group.consecutiveGroups.length > 0);
 }
 
 export async function uniswapV3positiveSandwichThings() {
   console.log('fetching...');
-  const swapEvents = await getEvents();
+  const allEvents = await getEvents();
+  const swapEvents = await getSwapEvents(allEvents);
+  const mintEvents = await getMintEvents(allEvents);
 
   const formattedEvents = formatEvents(swapEvents);
-  const foo = findAllSandwiches(formattedEvents);
+
+  const groupsWithDoubledUser = findGroupsWithDoubledUser(formattedEvents);
+  // console.dir(groupsWithDoubledUser, { depth: null, colors: true });
+  console.log('Found', Object.keys(groupsWithDoubledUser).length, 'groups with doubled user');
+
+  const probSammich = filterGroupsWithoutMintedTxHash(mintEvents, groupsWithDoubledUser);
+  // console.dir(probSammich, { depth: null, colors: true });
+  console.log('found', mintEvents.length, 'Mint-Events');
   console.log('found', swapEvents.length, 'Swap-Events');
+  console.log('Found', Object.keys(probSammich).length, 'potential sandwiches');
 }

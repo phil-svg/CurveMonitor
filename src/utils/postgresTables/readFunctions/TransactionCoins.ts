@@ -1,8 +1,8 @@
-import { TransactionCoins } from "../../../models/TransactionCoins.js";
-import { Coins } from "../../../models/Coins.js";
-import { Op, QueryTypes, Sequelize } from "sequelize";
-import { CoinMovement } from "../../Interfaces.js";
-import { Transactions } from "../../../models/Transactions.js";
+import { TransactionCoins } from '../../../models/TransactionCoins.js';
+import { Coins } from '../../../models/Coins.js';
+import { Op, QueryTypes, Sequelize } from 'sequelize';
+import { CoinMovement } from '../../Interfaces.js';
+import { Transactions } from '../../../models/Transactions.js';
 
 export async function findTransactionCoinsByTxIds(tx_ids: number[]): Promise<CoinMovement[]> {
   const transactionCoins = await TransactionCoins.findAll({
@@ -17,7 +17,7 @@ export async function findTransactionCoinsByTxIds(tx_ids: number[]): Promise<Coi
     include: [
       {
         model: Coins,
-        as: "coin",
+        as: 'coin',
       },
     ],
   });
@@ -38,8 +38,8 @@ export async function findTransactionCoinsByTxIds(tx_ids: number[]): Promise<Coi
 
 export async function getAllCoinIds(): Promise<number[]> {
   const coinIds = await TransactionCoins.findAll({
-    attributes: ["coin_id"],
-    group: ["coin_id"],
+    attributes: ['coin_id'],
+    group: ['coin_id'],
   });
 
   return coinIds.map((transactionCoin) => transactionCoin.coin_id);
@@ -189,17 +189,17 @@ export async function findSwapsForCoin(coinId: number): Promise<number[]> {
   // Then find all tx_ids that have both 'in' and 'out' directions among those involving the input coin
   const swapTransactionIds = (
     await TransactionCoins.findAll({
-      attributes: ["tx_id"],
+      attributes: ['tx_id'],
       where: {
         tx_id: {
           [Op.in]: transactionIdsInvolvingCoin,
         },
         direction: {
-          [Op.in]: ["in", "out"],
+          [Op.in]: ['in', 'out'],
         },
       },
-      group: ["tx_id"],
-      having: Sequelize.where(Sequelize.fn("COUNT", Sequelize.col("direction")), 2),
+      group: ['tx_id'],
+      having: Sequelize.where(Sequelize.fn('COUNT', Sequelize.col('direction')), 2),
     })
   ).map((transaction) => transaction.tx_id);
 
@@ -228,17 +228,17 @@ export async function findSwapTransactionsForTwoCoins(coinId1: number, coinId2: 
 
   const swapTransactionIds = (
     await TransactionCoins.findAll({
-      attributes: ["tx_id"],
+      attributes: ['tx_id'],
       where: {
         tx_id: {
           [Op.in]: commonTransactionIds,
         },
         direction: {
-          [Op.in]: ["in", "out"],
+          [Op.in]: ['in', 'out'],
         },
       },
-      group: ["tx_id"],
-      having: Sequelize.where(Sequelize.fn("COUNT", Sequelize.col("direction")), 2),
+      group: ['tx_id'],
+      having: Sequelize.where(Sequelize.fn('COUNT', Sequelize.col('direction')), 2),
     })
   ).map((transaction) => transaction.tx_id);
 
@@ -287,8 +287,8 @@ export async function getPriceArrayFromSwapEntries(coinId: number): Promise<{ un
 export async function findAllFullyPricedCoinsIds(): Promise<number[]> {
   // Find all distinct coin_ids
   const allCoins = await TransactionCoins.findAll({
-    attributes: ["coin_id"],
-    group: ["coin_id"],
+    attributes: ['coin_id'],
+    group: ['coin_id'],
   });
 
   // Find coin_ids that have at least one null dollar_value
@@ -296,14 +296,16 @@ export async function findAllFullyPricedCoinsIds(): Promise<number[]> {
     where: {
       dollar_value: null,
     },
-    attributes: ["coin_id"],
-    group: ["coin_id"],
+    attributes: ['coin_id'],
+    group: ['coin_id'],
   });
 
   const partiallyPricedCoinIds = partiallyPricedCoins.map((transaction) => transaction.coin_id);
 
   // Filter out the coin_ids that have at least one null dollar_value
-  const fullyPricedCoinIds = allCoins.map((transaction) => transaction.coin_id).filter((coin_id) => !partiallyPricedCoinIds.includes(coin_id));
+  const fullyPricedCoinIds = allCoins
+    .map((transaction) => transaction.coin_id)
+    .filter((coin_id) => !partiallyPricedCoinIds.includes(coin_id));
 
   return fullyPricedCoinIds;
 }
@@ -313,14 +315,14 @@ export async function fetchAllTransactionCoinData(txId: number): Promise<Transac
     const transactionCoinsData = await TransactionCoins.findAll({
       where: { tx_id: txId },
       include: [
-        { model: Transactions, as: "transaction" },
-        { model: Coins, as: "coin" },
+        { model: Transactions, as: 'transaction' },
+        { model: Coins, as: 'coin' },
       ],
     });
 
     return transactionCoinsData;
   } catch (error) {
-    console.error("Error fetching all transaction coin data:", error);
+    console.error('Error fetching all transaction coin data:', error);
     return [];
   }
 }

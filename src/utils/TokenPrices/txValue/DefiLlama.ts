@@ -37,8 +37,8 @@ export async function getHistoricalTokenPriceFromDefiLlama(
   try {
     const url = `https://coins.llama.fi/prices/historical/${unixTimestamp}/ethereum:${tokenAddress}?searchWidth=4h`;
     const response = await axios.get<LlamaPriceResponse>(url);
-
     const fullTokenKey = `ethereum:${tokenAddress}`;
+
     if (response.data.coins[fullTokenKey]) {
       return response.data.coins[fullTokenKey].price;
     } else {
@@ -167,9 +167,7 @@ export async function getPricesForAllTokensFromDefiLlama(
     const prices = new Map<string, number>();
 
     for (const token of tokens) {
-      console.log(token, block_unixtime);
       const price = await getHistoricalTokenPriceFromDefiLlama(token, block_unixtime);
-      console.log(price);
 
       if (!price) {
         console.log(`Failed to fetch price in getPricesForAllTokensFromDefiLlama for token: ${token}`);
