@@ -118,6 +118,7 @@ async function writeResultsToDatabase(results) {
                 'amountBorrowableToken',
                 'amountCollatToken',
                 'oraclePrice',
+                ' get_p',
                 'amountCollatTokenInUsd',
                 'amountFullInBandInUsd',
             ],
@@ -137,9 +138,11 @@ async function fetchOnChain(chunkSize, i, blockSkipper, nowBlock, contract, mark
             web3Call(contract, 'bands_x', [activeBand], blockNumber),
             web3Call(contract, 'bands_y', [activeBand], blockNumber),
             getMintMarketOraclePrice(market, blockNumber),
-        ]).then(([bandsX, bandsY, oraclePrice]) => {
+            web3Call(contract, 'get_p', [], blockNumber),
+        ]).then(([bandsX, bandsY, oraclePrice, get_p_raw]) => {
             const amountBorrowableToken = Number(bandsX) / 1e18;
             const amountCollatToken = Number(bandsY) / 1e18;
+            const get_p = Number(get_p_raw) / 1e18;
             const amountCollatTokenInUsd = oraclePrice * amountCollatToken;
             const amountFullInBandInUsd = amountCollatTokenInUsd + amountBorrowableToken;
             return {
@@ -149,6 +152,7 @@ async function fetchOnChain(chunkSize, i, blockSkipper, nowBlock, contract, mark
                 amountBorrowableToken,
                 amountCollatToken,
                 oraclePrice,
+                get_p,
                 amountCollatTokenInUsd,
                 amountFullInBandInUsd,
             };

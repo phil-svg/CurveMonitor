@@ -53,6 +53,12 @@ __decorate([
         type: DataType.DECIMAL(30, 15),
         allowNull: false,
     })
+], RiskMintMarketInfo.prototype, "get_p", void 0);
+__decorate([
+    Column({
+        type: DataType.DECIMAL(30, 15),
+        allowNull: false,
+    })
 ], RiskMintMarketInfo.prototype, "amountCollatTokenInUsd", void 0);
 __decorate([
     Column({

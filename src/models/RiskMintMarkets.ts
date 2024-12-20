@@ -63,6 +63,12 @@ export class RiskMintMarketInfo extends Model {
     type: DataType.DECIMAL(30, 15),
     allowNull: false,
   })
+  get_p!: number; // get_p
+
+  @Column({
+    type: DataType.DECIMAL(30, 15),
+    allowNull: false,
+  })
   amountCollatTokenInUsd!: number; // Collateral token in USD
 
   @Column({
