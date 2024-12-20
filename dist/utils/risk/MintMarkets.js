@@ -25,6 +25,7 @@ function simplifyRiskMintMarketInfo(entries) {
         amountBorrowableToken: entry.dataValues.amountBorrowableToken,
         amountCollatToken: entry.dataValues.amountCollatToken,
         oraclePrice: entry.dataValues.oraclePrice,
+        get_p: entry.dataValues.get_p,
         amountCollatTokenInUsd: entry.dataValues.amountCollatTokenInUsd,
         amountFullInBandInUsd: entry.dataValues.amountFullInBandInUsd,
     }));

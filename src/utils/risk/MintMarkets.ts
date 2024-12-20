@@ -60,6 +60,7 @@ interface SimplifiedRiskMintMarketInfo {
   amountBorrowableToken: string;
   amountCollatToken: string;
   oraclePrice: string;
+  get_p: string;
   amountCollatTokenInUsd: string;
   amountFullInBandInUsd: string;
 }
@@ -72,6 +73,7 @@ function simplifyRiskMintMarketInfo(entries: RiskMintMarketInfo[]): SimplifiedRi
     amountBorrowableToken: entry.dataValues.amountBorrowableToken,
     amountCollatToken: entry.dataValues.amountCollatToken,
     oraclePrice: entry.dataValues.oraclePrice,
+    get_p: entry.dataValues.get_p,
     amountCollatTokenInUsd: entry.dataValues.amountCollatTokenInUsd,
     amountFullInBandInUsd: entry.dataValues.amountFullInBandInUsd,
   }));
