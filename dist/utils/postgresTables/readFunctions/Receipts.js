@@ -1,9 +1,20 @@
-import { Receipts } from "../../../models/Receipts.js";
+import { Receipts } from '../../../models/Receipts.js';
 export async function getShortenReceiptByTxHash(txHash) {
     const records = await Receipts.findAll({
         where: { transactionHash: txHash },
-        attributes: ["transactionIndex", "type", "logsBloom", "address", "data", "logIndex", "removed", "topics", "from", "to"],
-        order: [["logIndex", "ASC"]],
+        attributes: [
+            'transactionIndex',
+            'type',
+            'logsBloom',
+            'address',
+            'data',
+            'logIndex',
+            'removed',
+            'topics',
+            'from',
+            'to',
+        ],
+        order: [['logIndex', 'ASC']],
     });
     if (records.length === 0) {
         return null; // No receipts found for this transaction hash
@@ -29,29 +40,29 @@ export async function getReceiptByTxHash(txHash) {
     const records = await Receipts.findAll({
         where: { transactionHash: txHash },
         attributes: [
-            "receipt_id",
-            "tx_id",
-            "transactionHash",
-            "blockHash",
-            "blockNumber",
-            "transactionIndex",
-            "effectiveGasPrice",
-            "cumulativeGasUsed",
-            "gasUsed",
-            "type",
-            "logsBloom",
-            "address",
-            "data",
-            "logIndex",
-            "removed",
-            "topics",
-            "id",
-            "contractAddress",
-            "from",
-            "status",
-            "to",
+            'receipt_id',
+            'tx_id',
+            'transactionHash',
+            'blockHash',
+            'blockNumber',
+            'transactionIndex',
+            'effectiveGasPrice',
+            'cumulativeGasUsed',
+            'gasUsed',
+            'type',
+            'logsBloom',
+            'address',
+            'data',
+            'logIndex',
+            'removed',
+            'topics',
+            'id',
+            'contractAddress',
+            'from',
+            'status',
+            'to',
         ],
-        order: [["logIndex", "ASC"]],
+        order: [['logIndex', 'ASC']],
     });
     if (records.length === 0) {
         return null; // No receipts found for this transaction hash

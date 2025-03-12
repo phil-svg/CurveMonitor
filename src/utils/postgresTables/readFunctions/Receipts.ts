@@ -1,4 +1,4 @@
-import { Receipts } from "../../../models/Receipts.js";
+import { Receipts } from '../../../models/Receipts.js';
 
 interface Log {
   receipt_id: number;
@@ -14,7 +14,7 @@ interface Log {
   to: string;
 }
 
-interface Receipt {
+export interface Receipt {
   tx_id: number;
   transactionHash: string;
   blockHash: string;
@@ -49,8 +49,19 @@ interface ShortenedLog {
 export async function getShortenReceiptByTxHash(txHash: string): Promise<ShortenedReceipt | null> {
   const records = await Receipts.findAll({
     where: { transactionHash: txHash },
-    attributes: ["transactionIndex", "type", "logsBloom", "address", "data", "logIndex", "removed", "topics", "from", "to"],
-    order: [["logIndex", "ASC"]],
+    attributes: [
+      'transactionIndex',
+      'type',
+      'logsBloom',
+      'address',
+      'data',
+      'logIndex',
+      'removed',
+      'topics',
+      'from',
+      'to',
+    ],
+    order: [['logIndex', 'ASC']],
   });
 
   if (records.length === 0) {
@@ -80,29 +91,29 @@ export async function getReceiptByTxHash(txHash: string): Promise<Receipt | null
   const records = await Receipts.findAll({
     where: { transactionHash: txHash },
     attributes: [
-      "receipt_id",
-      "tx_id",
-      "transactionHash",
-      "blockHash",
-      "blockNumber",
-      "transactionIndex",
-      "effectiveGasPrice",
-      "cumulativeGasUsed",
-      "gasUsed",
-      "type",
-      "logsBloom",
-      "address",
-      "data",
-      "logIndex",
-      "removed",
-      "topics",
-      "id",
-      "contractAddress",
-      "from",
-      "status",
-      "to",
+      'receipt_id',
+      'tx_id',
+      'transactionHash',
+      'blockHash',
+      'blockNumber',
+      'transactionIndex',
+      'effectiveGasPrice',
+      'cumulativeGasUsed',
+      'gasUsed',
+      'type',
+      'logsBloom',
+      'address',
+      'data',
+      'logIndex',
+      'removed',
+      'topics',
+      'id',
+      'contractAddress',
+      'from',
+      'status',
+      'to',
     ],
-    order: [["logIndex", "ASC"]],
+    order: [['logIndex', 'ASC']],
   });
 
   if (records.length === 0) {

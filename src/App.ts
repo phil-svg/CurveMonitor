@@ -11,8 +11,6 @@ import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
 import { addCustomLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
 import { preparingLiveModeForRawEvents } from './utils/goingLive/RawTxLogsLive.js';
-import { startAPI } from './utils/api/Server.js';
-import { startTestClient } from './Client.js';
 import { updateTransactionsDetails } from './utils/postgresTables/TransactionsDetails.js';
 import { updateAddressCounts } from './utils/postgresTables/CalledAddressCounts.js';
 import { eventFlags } from './utils/api/utils/EventFlags.js';
@@ -23,7 +21,6 @@ import { updateReceipts } from './utils/postgresTables/Receipts.js';
 import { updateContractCreations } from './utils/postgresTables/ContractCreations.js';
 import { updateCexDexArbDetection } from './utils/postgresTables/mevDetection/cexdex/CexDexArb.js';
 import { updateCleanedTransfers } from './utils/postgresTables/CleanedTransfers.js';
-import { research } from './utils/fiddyResearchTM/ResearchEntryPoint.js';
 import { bootWsProvider } from './utils/web3Calls/generic.js';
 import {
   checkWsConnectionViaNewBlocks,
@@ -35,6 +32,7 @@ import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
 import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
 import { updatePoolsBytecode } from './utils/postgresTables/ByteCode.js';
 import { updateMintMarketForMevScoring } from './utils/risk/MintMarkets.js';
+import { startAPI } from './utils/api/Server.js';
 
 export async function initDatabase() {
   try {

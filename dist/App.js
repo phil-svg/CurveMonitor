@@ -10,7 +10,6 @@ import { parseEvents } from './utils/postgresTables/txParsing/ParseTx.js';
 import { addCustomLabels } from './utils/postgresTables/Labels.js';
 import { subscribeToNewBlocks } from './utils/postgresTables/CurrentBlock.js';
 import { preparingLiveModeForRawEvents } from './utils/goingLive/RawTxLogsLive.js';
-import { startAPI } from './utils/api/Server.js';
 import { updateTransactionsDetails } from './utils/postgresTables/TransactionsDetails.js';
 import { updateAddressCounts } from './utils/postgresTables/CalledAddressCounts.js';
 import { eventFlags } from './utils/api/utils/EventFlags.js';
@@ -28,6 +27,7 @@ import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
 import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
 import { updatePoolsBytecode } from './utils/postgresTables/ByteCode.js';
 import { updateMintMarketForMevScoring } from './utils/risk/MintMarkets.js';
+import { startAPI } from './utils/api/Server.js';
 export async function initDatabase() {
     try {
         await db.sync();

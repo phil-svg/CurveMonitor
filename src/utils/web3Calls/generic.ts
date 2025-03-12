@@ -340,52 +340,6 @@ export async function getTxReceiptClassic(txHash: string): Promise<TransactionRe
   }
 }
 
-export async function getTxReceipt(txHash: string): Promise<any> {
-  const limiter = new Bottleneck({
-    maxConcurrent: 100,
-    minTime: 30,
-  });
-
-  axiosRetry(axios, {
-    retries: 3,
-    retryDelay: (retryCount) => {
-      return retryCount * 2000;
-    },
-    retryCondition: (error) => {
-      return error.code === 'ECONNABORTED' || error.code === 'ERR_SOCKET_CONNECTION_TIMEOUT';
-    },
-  });
-
-  return limiter.schedule(async () => {
-    try {
-      const response = await axios.post(
-        `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY!}`,
-        {
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'eth_getTransactionReceipt',
-          params: [txHash],
-        },
-        {
-          timeout: 1000,
-        }
-      );
-
-      if (response.data && response.data.result) {
-        return response.data.result;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      if (axiosError.code !== 'ECONNABORTED' && axiosError.code !== 'ERR_SOCKET_CONNECTION_TIMEOUT') {
-        console.log(axiosError);
-      }
-      return null;
-    }
-  });
-}
-
 export async function getTxFromTxId(tx_id: number): Promise<any | null> {
   try {
     const txHash = await getTxHashByTxId(tx_id);

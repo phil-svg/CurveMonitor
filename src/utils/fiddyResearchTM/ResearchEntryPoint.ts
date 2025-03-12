@@ -24,6 +24,7 @@ import { calculateTotalVolumeAndVolumePerBot } from './cexdex/GlobalVolume.js';
 import { compareOracleAgainstSpot } from './crvUSD/OralceChart.js';
 import { getPegKeeperAndCrvUSDPriceData } from './crvUSD/PegKeeperAndCrvUSDPrice.js';
 import { barChartRace } from './curvefi/BarChartRace.js';
+import { poolTrafficCalledContractsWOdb } from './curvefi/CalledContractsForPool.js';
 import { dailyTxCount } from './curvefi/DailyTxCountHisto.js';
 import { gasUsageThings, getGasUsageFromCsvFile } from './curvefi/GasUsage.js';
 import { priceImpactThings } from './curvefi/PriceImpact.js';
@@ -107,7 +108,8 @@ export async function research() {
 
   console.log('conducting research');
 
-  await uniswapV2positiveSandwichThings();
+  await poolTrafficCalledContractsWOdb();
+  // await uniswapV2positiveSandwichThings();
   // await fullSandwichJson();
   // await uniswapV3positiveSandwichThings();
   // await anyPoolMevCheck();

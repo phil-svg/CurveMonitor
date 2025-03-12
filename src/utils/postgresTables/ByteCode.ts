@@ -1,7 +1,6 @@
-import axios from 'axios';
 import { Pool } from '../../models/Pools.js';
 import { Bytecode } from '../../models/PoolsByteCode.js';
-import { Coins } from '../../models/Coins.js';
+import { WEB3_HTTP_PROVIDER } from '../web3Calls/generic.js';
 
 /**
  * Fetches the bytecode of a contract from the Ethereum mainnet.
@@ -10,20 +9,7 @@ import { Coins } from '../../models/Coins.js';
  */
 async function getContractBytecode(contractAddress: string): Promise<string | null> {
   try {
-    const response = await axios.post(
-      `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY!}`,
-      {
-        id: 1,
-        jsonrpc: '2.0',
-        method: 'eth_getCode',
-        params: [contractAddress, 'latest'],
-      },
-      {
-        timeout: 1000,
-      }
-    );
-
-    const bytecode = response.data.result;
+    const bytecode = await WEB3_HTTP_PROVIDER.eth.getCode(contractAddress, 'latest');
 
     // Check if the bytecode is more than '0x' (which means it actually has code)
     if (bytecode && bytecode !== '0x') {

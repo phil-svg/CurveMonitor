@@ -1,5 +1,5 @@
 import { getPoolsBySourceAddress } from '../postgresTables/readFunctions/Pools.js';
-import { uniswapV2positiveSandwichThings } from './DefiMonitooor/DexAggregators/uniswapV3/positiveSandwiches/SandwicheResearchUniV2.js';
+import { poolTrafficCalledContractsWOdb } from './curvefi/CalledContractsForPool.js';
 /*
 0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7 3Pool
 0xdc24316b9ae028f1497c275eb9192a3ea0f67022 stETH
@@ -40,7 +40,8 @@ export async function research() {
     const endBlockNumber = 19625525;
     const pendleRouterV4 = '0x888888888889758F76e7103c6CbF23ABbF58F946';
     console.log('conducting research');
-    await uniswapV2positiveSandwichThings();
+    await poolTrafficCalledContractsWOdb();
+    // await uniswapV2positiveSandwichThings();
     // await fullSandwichJson();
     // await uniswapV3positiveSandwichThings();
     // await anyPoolMevCheck();

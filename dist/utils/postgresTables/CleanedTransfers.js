@@ -13,7 +13,7 @@ import { saveTransactionTrace } from './TransactionTraces.js';
 export async function getCleanedTransfersFor1inch(txHash, to) {
     let transactionTraces = await getTransactionTraceViaWeb3Provider(txHash);
     if (!transactionTraces) {
-        console.log('alchemy trace api bugged out for', txHash);
+        console.log('rpc trace api bugged out for', txHash);
         return null;
     }
     // making sure we have all ABIs which are relevant in this tx.
@@ -130,7 +130,7 @@ export async function getCleanedTransfers(txHash, to) {
         transactionTraces = await getTransactionTraceFromDb(txHash);
     }
     if (transactionTraces.length <= 1) {
-        // console.log("alchemy trace api bugged out for", txHash);
+        // console.log("rpc trace api bugged out for", txHash);
         return null;
     }
     // making sure we have all ABIs which are relevant in this tx.

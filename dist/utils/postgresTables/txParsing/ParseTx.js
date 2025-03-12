@@ -10,7 +10,7 @@ import { logProgress, updateConsoleOutput } from '../../helperFunctions/QualityO
 import { getTimestampsByBlockNumbersFromLocalDatabase } from '../readFunctions/Blocks.js';
 import { getEventParsingFromBlock, getEventParsingToBlock, updateEventParsingFromBlock, updateEventParsingToBlock, } from '../readFunctions/BlockScanningData.js';
 import Bottleneck from 'bottleneck';
-import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from '../../../config/Alchemy.js';
+import { MAX_ETH_GET_TRANSACTION_RECEIPT_REQUESTS_PER_SECOND } from '../../../config/RpcThroughput.js';
 import { getCurrentBlockNumber } from '../../web3Calls/generic.js';
 import { getTotalTransactionsCount } from '../readFunctions/Transactions.js';
 import { sequelize } from '../../../config/Database.js';

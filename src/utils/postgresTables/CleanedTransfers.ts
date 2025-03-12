@@ -22,7 +22,7 @@ export async function getCleanedTransfersFor1inch(txHash: string, to: string): P
   let transactionTraces = await getTransactionTraceViaWeb3Provider(txHash);
 
   if (!transactionTraces) {
-    console.log('alchemy trace api bugged out for', txHash);
+    console.log('rpc trace api bugged out for', txHash);
     return null;
   }
 
@@ -161,7 +161,7 @@ export async function getCleanedTransfers(txHash: string, to: string): Promise<R
   }
 
   if (transactionTraces.length <= 1) {
-    // console.log("alchemy trace api bugged out for", txHash);
+    // console.log("rpc trace api bugged out for", txHash);
     return null;
   }
 

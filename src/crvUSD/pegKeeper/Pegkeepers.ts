@@ -5,7 +5,7 @@ import { EventProcessingResult } from './Interfaces.js';
 import { getHistoricalTokenPriceFromDefiLlama } from '../../utils/TokenPrices/txValue/DefiLlama.js';
 import { getReceiptByTxHash } from '../../utils/postgresTables/readFunctions/Receipts.js';
 import { findUpdateCallerTokenReceivedProvide, findUpdateCallerTokenReceivedWithdraw } from './Utils.js';
-import { getTxReceipt, web3Call } from '../../utils/web3Calls/generic.js';
+import { WEB3_HTTP_PROVIDER, web3Call } from '../../utils/web3Calls/generic.js';
 import { getContractPegKeeperHttp, getContractPoolHttp } from './ContractGetter.js';
 
 interface Pair {
@@ -119,9 +119,9 @@ async function processSingleEvent(
   );
   if (!ethPrice) return null;
 
-  let receipt = await getReceiptByTxHash(event.transaction_hash);
+  let receipt: any = await getReceiptByTxHash(event.transaction_hash);
   if (!receipt) {
-    receipt = await getTxReceipt(event.transaction_hash);
+    receipt = await WEB3_HTTP_PROVIDER.eth.getTransactionReceipt(event.transaction_hash);
   }
   if (!receipt) return null;
 

@@ -49,8 +49,8 @@ type CallTrace = Array<{
   };
 }>;
 
-async function getCallTraceViaAlchemy(txHash: string): Promise<any> {
-  const response = await fetch(process.env.WEB3_HTTP!, {
+async function getCallTraceViaRpcProvider(txHash: string): Promise<any> {
+  const response = await fetch(process.env.WEB3_HTTP_MAINNET!, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -484,7 +484,7 @@ async function getRevenueForAddress(
 }
 
 // async function getRevenue(unixtime: number, event: any, market: MarketData): Promise<number> {
-//   const CALL_TRACE = await getCallTraceViaAlchemy(event.transactionHash);
+//   const CALL_TRACE = await getCallTraceViaRpcProvider(event.transactionHash);
 
 //   const buyer = CALL_TRACE[0].action.from;
 //   const to = CALL_TRACE[0].action.to;
@@ -546,7 +546,7 @@ async function getCosts(unixtime: number, txHash: string): Promise<number | null
 // }
 
 async function getRevenueClean(unixtime: number, event: any, market: MarketData): Promise<number | null> {
-  const CALL_TRACE = await getCallTraceViaAlchemy(event.transactionHash);
+  const CALL_TRACE = await getCallTraceViaRpcProvider(event.transactionHash);
 
   const revenueBuyer = await getRevenueForAddress(unixtime, CALL_TRACE, market.llamma, market, event.blockNumber);
   if (revenueBuyer === null) return null;

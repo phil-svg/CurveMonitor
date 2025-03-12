@@ -60,7 +60,7 @@ export interface MarketHealthData {
 export async function getRecentHealthDataForAllMarketsOfUser(
   marketsForLendingUser: UserMarketDataResponse
 ): Promise<MarketHealthData[] | null> {
-  const web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP!));
+  const web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_MAINNET!));
 
   if (marketsForLendingUser.markets.length === 0) {
     return null;
@@ -154,7 +154,7 @@ export interface RealTimeMarketHealthData {
 export async function getRealTimeHealthDataForAllMarketsOfUser(
   marketsForLendingUser: UserMarketDataResponse
 ): Promise<RealTimeMarketHealthData[] | null> {
-  const web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP!));
+  const web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_MAINNET!));
 
   if (marketsForLendingUser.markets.length === 0) {
     return null;

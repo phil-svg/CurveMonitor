@@ -94,15 +94,6 @@ function convertHexReceiptToDecimal(hexTxReceipt: HexTxReceipt): TxReceipt {
 }
 
 export async function fetchAndSaveReceipt(txHash: string, txId: number): Promise<any> {
-  // let hexTxReceipt: HexTxReceipt = await getTxReceipt(txHash);
-  // if (!hexTxReceipt) {
-  //   console.warn(`No receipt found for hash: ${txHash} in fetchAndSaveReceipt`);
-  //   return null;
-  // }
-  //
-  // type: txReceipt.type,
-
-  // const txReceipt: TxReceipt = convertHexReceiptToDecimal(hexTxReceipt);
   let txReceipt = await getTxReceiptClassic(txHash);
 
   if (txReceipt) {

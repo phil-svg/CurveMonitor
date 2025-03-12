@@ -34,14 +34,6 @@ function convertHexReceiptToDecimal(hexTxReceipt) {
     };
 }
 export async function fetchAndSaveReceipt(txHash, txId) {
-    // let hexTxReceipt: HexTxReceipt = await getTxReceipt(txHash);
-    // if (!hexTxReceipt) {
-    //   console.warn(`No receipt found for hash: ${txHash} in fetchAndSaveReceipt`);
-    //   return null;
-    // }
-    //
-    // type: txReceipt.type,
-    // const txReceipt: TxReceipt = convertHexReceiptToDecimal(hexTxReceipt);
     let txReceipt = await getTxReceiptClassic(txHash);
     if (txReceipt) {
         // Iterate over each log in txReceipt.logs.

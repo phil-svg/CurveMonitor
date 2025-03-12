@@ -22,7 +22,7 @@ export async function checkMarketsForLendingUser(chain, userAddress, page = 1, p
     }
 }
 export async function getRecentHealthDataForAllMarketsOfUser(marketsForLendingUser) {
-    const web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP));
+    const web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_MAINNET));
     if (marketsForLendingUser.markets.length === 0) {
         return null;
     }
@@ -81,7 +81,7 @@ async function getUserHealthForMarket(userAddress, controllerAddress, web3HttpPr
     }
 }
 export async function getRealTimeHealthDataForAllMarketsOfUser(marketsForLendingUser) {
-    const web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP));
+    const web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_MAINNET));
     if (marketsForLendingUser.markets.length === 0) {
         return null;
     }

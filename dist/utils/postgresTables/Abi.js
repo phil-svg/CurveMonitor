@@ -298,18 +298,11 @@ import { Pool } from '../../models/Pools.js';
 import { Bytecode } from '../../models/PoolsByteCode.js';
 import { getBytecodeByPoolId } from './readFunctions/PoolsBytecode.js';
 import { readAbiFromAbisPoolsTable } from './readFunctions/Abi.js';
-async function getContractABIfromMetadata(contractAddress) {
+import { WEB3_HTTP_PROVIDER } from '../web3Calls/generic.js';
+export async function getContractABIfromMetadata(contractAddress) {
     try {
         // Step 1: Retrieve the contract bytecode
-        const response = await axios.post(`https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY}`, {
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'eth_getCode',
-            params: [contractAddress, 'latest'],
-        }, {
-            timeout: 1000,
-        });
-        const bytecode = response.data.result;
+        const bytecode = await WEB3_HTTP_PROVIDER.eth.getCode(contractAddress, 'latest');
         // Step 2: Decode the CBOR-encoded metadata hash from the bytecode
         const cborLength = parseInt(bytecode.slice(-4), 16) * 2;
         const cborData = bytecode.slice(-cborLength - 4, -4);
