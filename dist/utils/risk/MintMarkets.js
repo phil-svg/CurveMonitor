@@ -173,7 +173,8 @@ async function processSingleMarket(market) {
     let nowBlock = await getCurrentBlockNumberWithRetry();
     if (!nowBlock)
         return;
-    const MIN_DAYS_IN_DB = 90;
+    // const MIN_DAYS_IN_DB = 90; this does not work if the market is younger than 90 days
+    const MIN_DAYS_IN_DB = 1;
     const minBlockSpan = MIN_DAYS_IN_DB * 24 * 60 * 5; // ~5 blocks per minute
     const blockSkipper = 25; // Fetch every 25th block
     const chunkSize = 10; // Process 10 blocks in parallel

@@ -21,7 +21,7 @@ import { updateReceipts } from './utils/postgresTables/Receipts.js';
 import { updateContractCreations } from './utils/postgresTables/ContractCreations.js';
 import { updateCexDexArbDetection } from './utils/postgresTables/mevDetection/cexdex/CexDexArb.js';
 import { updateCleanedTransfers } from './utils/postgresTables/CleanedTransfers.js';
-import { bootWsProvider } from './utils/web3Calls/generic.js';
+import { bootWsProvider, web3Call } from './utils/web3Calls/generic.js';
 import {
   checkWsConnectionViaNewBlocks,
   eraseWebProvider,
@@ -33,6 +33,7 @@ import { updateTransactionPricing } from './utils/postgresTables/TransactionPric
 import { updatePoolsBytecode } from './utils/postgresTables/ByteCode.js';
 import { updateMintMarketForMevScoring } from './utils/risk/MintMarkets.js';
 import { startAPI } from './utils/api/Server.js';
+import { getLlammaContract } from './crvUSD/mint/Contracts.js';
 
 export async function initDatabase() {
   try {
@@ -65,7 +66,7 @@ export async function main() {
   eventEmitter.removeAllListeners();
   setupDeadWebsocketListener();
 
-  // await updateMintMarketForMevScoring();
+  await updateMintMarketForMevScoring();
 
   await loadAddressProvider();
   await updatePools();

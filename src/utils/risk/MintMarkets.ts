@@ -1,4 +1,5 @@
 import { getLlammaContract } from '../../crvUSD/mint/Contracts.js';
+import { Coins } from '../../models/Coins.js';
 import { RiskMintMarketInfo } from '../../models/RiskMintMarkets.js';
 import { getCurrentBlockNumberWithRetry, web3Call } from '../web3Calls/generic.js';
 import { Op } from 'sequelize';
@@ -261,7 +262,8 @@ async function processSingleMarket(market: MarketData) {
   let nowBlock = await getCurrentBlockNumberWithRetry();
   if (!nowBlock) return;
 
-  const MIN_DAYS_IN_DB = 90;
+  // const MIN_DAYS_IN_DB = 90; this does not work if the market is younger than 90 days
+  const MIN_DAYS_IN_DB = 1;
   const minBlockSpan = MIN_DAYS_IN_DB * 24 * 60 * 5; // ~5 blocks per minute
   const blockSkipper = 25; // Fetch every 25th block
   const chunkSize = 10; // Process 10 blocks in parallel
