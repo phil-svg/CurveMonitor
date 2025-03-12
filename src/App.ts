@@ -65,7 +65,7 @@ export async function main() {
   eventEmitter.removeAllListeners();
   setupDeadWebsocketListener();
 
-  await updateMintMarketForMevScoring();
+  // await updateMintMarketForMevScoring();
 
   await loadAddressProvider();
   await updatePools();
