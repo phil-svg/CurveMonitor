@@ -93,11 +93,16 @@ async function saveParsedEventInLiveMode(parsedTx) {
     // Save to the database + Emit Event
     for (const data of validCalledContractAddresses) {
         try {
+            console.log('calling fetchContractAgeInRealtime');
             await fetchContractAgeInRealtime(data.hash, data.to);
+            console.log('fetching existingTransaction');
             const existingTransaction = await TransactionDetails.findOne({ where: { txId: data.txId } });
+            console.log('existingTransaction', existingTransaction);
             if (!existingTransaction) {
+                console.log('upserting');
                 await TransactionDetails.upsert(data);
                 if (eventFlags.canEmitGeneralTx) {
+                    console.log('emitting');
                     eventEmitter.emit('New Transaction for General-Transaction-Livestream', data.txId);
                 }
             }
@@ -127,24 +132,17 @@ async function processBufferedEvents() {
     const eventBlockNumbers = eventBuffer.flatMap((event) => event.event.blockNumber !== undefined ? [event.event.blockNumber] : []);
     console.log('eventBlockNumbers', eventBlockNumbers);
     const EVENTS = await fetchEventsForChunkParsing(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
-    console.log('EVENTS', EVENTS);
     const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
-    console.log('BLOCK_UNIXTIMES', BLOCK_UNIXTIMES);
     const poolCoins = await getPoolCoinsForLiveMode();
-    console.log('poolCoins', poolCoins);
     // Parsing
-    console.log('parsing');
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, poolCoins);
-    console.log('parsed');
     eventBuffer = [];
     const PARSED_TX = await fetchTransactionsForBlock(eventBlockNumbers[0]);
-    console.log('PARSED_TX', PARSED_TX);
     // effectively updating coin prices once every 10 minutes (50*12s)
     if (eventBlockNumbers[0] % 50 === 0)
         await updatePriceMap();
     // Saving Parsed Tx to db
     try {
-        console.log('calling saveParsedEventInLiveMode');
         await saveParsedEventInLiveMode(PARSED_TX);
     }
     catch (err) {
