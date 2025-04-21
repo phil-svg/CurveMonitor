@@ -33,6 +33,7 @@ import { updateTransactionPricing } from './utils/postgresTables/TransactionPric
 import { updatePoolsBytecode } from './utils/postgresTables/ByteCode.js';
 import { updateMintMarketForMevScoring } from './utils/risk/MintMarkets.js';
 import { startAPI } from './utils/api/Server.js';
+import { startListeningToAllEvents } from './utils/goingLive/AllEvents.js';
 
 export async function initDatabase() {
   try {
@@ -66,6 +67,8 @@ export async function main() {
   setupDeadWebsocketListener();
 
   await updateMintMarketForMevScoring();
+
+  startListeningToAllEvents();
 
   await loadAddressProvider();
   await updatePools();

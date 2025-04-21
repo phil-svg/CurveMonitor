@@ -59,7 +59,7 @@ async function getLogsForBlock(blockNumber: number) {
   while (retries < maxRetries) {
     try {
       const logs: EvmLogEntry[] = await web3HttpProvider.eth.getPastLogs(params);
-      console.log(`Number of logs for block ${blockNumber}: ${logs.length}`);
+      // console.log(`Number of logs for block ${blockNumber}: ${logs.length}`);
       handlers.forEach((handler) => handler(logs));
       return; // Success, exit the retry loop
     } catch (err) {
