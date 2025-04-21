@@ -75,7 +75,7 @@ export async function subscribeToAddress(address: string) {
     const events = await fetchEventsRealTime(logs, address, abi, 'AllEvents');
     if (events.length > 0) {
       events.forEach(async (event: any) => {
-        console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
+        // console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
         // lastEventTime = Date.now();
         await storeEvent(event, poolId);
         bufferEvent(address, event);
@@ -150,25 +150,33 @@ async function processBufferedEvents() {
   const eventBlockNumbers = eventBuffer.flatMap((event) =>
     event.event.blockNumber !== undefined ? [event.event.blockNumber] : []
   );
+  console.log('eventBlockNumbers', eventBlockNumbers);
 
   const EVENTS = await fetchEventsForChunkParsing(
     eventBlockNumbers[0],
     eventBlockNumbers[eventBlockNumbers.length - 1]
   );
+  console.log('EVENTS', EVENTS);
   const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
+  console.log('BLOCK_UNIXTIMES', BLOCK_UNIXTIMES);
   const poolCoins = await getPoolCoinsForLiveMode();
+  console.log('poolCoins', poolCoins);
 
   // Parsing
+  console.log('parsing');
   await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, poolCoins);
+  console.log('parsed');
   eventBuffer = [];
 
   const PARSED_TX = await fetchTransactionsForBlock(eventBlockNumbers[0]);
+  console.log('PARSED_TX', PARSED_TX);
 
   // effectively updating coin prices once every 10 minutes (50*12s)
   if (eventBlockNumbers[0] % 50 === 0) await updatePriceMap();
 
   // Saving Parsed Tx to db
   try {
+    console.log('calling saveParsedEventInLiveMode');
     await saveParsedEventInLiveMode(PARSED_TX);
   } catch (err) {
     console.log(`Err in live-mode ${err}`);
