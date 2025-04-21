@@ -101,6 +101,7 @@ async function saveParsedEventInLiveMode(parsedTx) {
             if (!existingTransaction) {
                 console.log('upserting');
                 await TransactionDetails.upsert(data);
+                console.log('upserting done ');
                 if (eventFlags.canEmitGeneralTx) {
                     console.log('emitting');
                     eventEmitter.emit('New Transaction for General-Transaction-Livestream', data.txId);
@@ -126,11 +127,10 @@ export function getUniqueTransactions(transactions) {
 }
 // when the next block appears, we parse the prev block.
 async function processBufferedEvents() {
-    console.log('eventBuffer', eventBuffer);
+    // console.log('eventBuffer', eventBuffer);
     if (eventBuffer.length === 0)
         return;
     const eventBlockNumbers = eventBuffer.flatMap((event) => event.event.blockNumber !== undefined ? [event.event.blockNumber] : []);
-    console.log('eventBlockNumbers', eventBlockNumbers);
     const EVENTS = await fetchEventsForChunkParsing(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
     const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
     const poolCoins = await getPoolCoinsForLiveMode();
