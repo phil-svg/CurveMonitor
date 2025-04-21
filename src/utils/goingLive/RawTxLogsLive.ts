@@ -97,8 +97,6 @@ export async function subscribeToAddress(address: string) {
 }
 
 async function saveParsedEventInLiveMode(parsedTx: TransactionData[]) {
-  console.log('saveParsedEventInLiveMode', parsedTx);
-
   // solving called contract
   const transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id): id is number => id !== undefined);
   const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
@@ -112,19 +110,13 @@ async function saveParsedEventInLiveMode(parsedTx: TransactionData[]) {
   // Save to the database + Emit Event
   for (const data of validCalledContractAddresses) {
     try {
-      console.log('calling fetchContractAgeInRealtime');
       await fetchContractAgeInRealtime(data.hash, data.to);
 
-      console.log('fetching existingTransaction');
       const existingTransaction = await TransactionDetails.findOne({ where: { txId: data.txId } });
-      console.log('existingTransaction', existingTransaction);
 
       if (!existingTransaction) {
-        console.log('upserting');
         await TransactionDetails.upsert(data as TransactionDetailsCreationAttributes);
-        console.log('upserting done ');
         if (eventFlags.canEmitGeneralTx) {
-          console.log('emitting');
           eventEmitter.emit('New Transaction for General-Transaction-Livestream', data.txId);
         }
       }
