@@ -280,7 +280,7 @@ export async function getRelevantPoolIdsForFastModeOld(): Promise<number[]> {
 
 //  pool gets added if young, or had seen activity in recent times
 export async function getRelevantPoolIdsForFastMode(): Promise<number[]> {
-  const DAYS_FOR_RECENT_ACTIVITY = 14;
+  const DAYS_FOR_RECENT_ACTIVITY = 2;
   const DAYS_FOR_POOL_AGE = 5;
 
   const allPoolIds = await getAllPoolIds();
