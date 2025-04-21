@@ -60,8 +60,7 @@ function bufferEvent(address: string, event: any) {
 
 // buffers events, and processes them in block-chunks (waits for block to be done before parsing.)
 export async function subscribeToAddress(address: string) {
-  // console.log('called subscribeToAddress, voiding for clean debugging purposes');
-  // return;
+  console.log('called subscribeToAddress for', address);
   const contract = await getContractByAddressWithWebsocket(address);
   const poolId = await getPoolIdByPoolAddress(address);
 
