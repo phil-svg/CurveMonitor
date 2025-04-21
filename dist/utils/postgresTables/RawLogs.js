@@ -145,8 +145,9 @@ export async function updateRawLogsForLiveMode() {
 }
 export async function updateRawLogs() {
     // runs every 10th run a full fetch, to make sure we are not leaving any ressurrected pools behind.
-    // const randomNumber = Math.floor(Math.random() * 10);
-    // if (randomNumber !== 0) return;
+    const randomNumber = Math.floor(Math.random() * 10);
+    if (randomNumber !== 0)
+        return;
     const allPoolIds = await getAllPoolIds();
     const poolAddresses = await getAddressesByPoolIds(allPoolIds); // insert poolIdsFull here to be 100%
     // let totalTimeTaken = 0;
