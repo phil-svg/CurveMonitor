@@ -1,7 +1,7 @@
 import { TransactionDetails } from '../../models/TransactionDetails.js';
 import { eventFlags } from '../api/utils/EventFlags.js';
 import { getCurrentFormattedTime } from '../helperFunctions/QualityOfLifeStuff.js';
-import { getContractByAddressWithWebsocket } from '../helperFunctions/Web3.js';
+import { getAbiBy } from '../postgresTables/Abi.js';
 import { insertAtomicArbDetails } from '../postgresTables/AtomicArbs.js';
 import { insertTokenTransfers, solveCleanTransfersForTx } from '../postgresTables/CleanedTransfers.js';
 import { fetchContractAgeInRealtime } from '../postgresTables/ContractCreations.js';
@@ -24,6 +24,7 @@ import { fetchEventsForChunkParsing } from '../postgresTables/readFunctions/RawL
 import { fetchTransactionsForBlock } from '../postgresTables/readFunctions/Transactions.js';
 import { sortAndProcess } from '../postgresTables/txParsing/ParseTx.js';
 import { retryGetTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
+import { fetchEventsRealTime, registerHandler } from './AllEvents.js';
 import eventEmitter from './EventEmitter.js';
 import EventEmitter from './EventEmitter.js';
 // when histo-parsing is finished, subscribe to new events.
@@ -51,23 +52,36 @@ function bufferEvent(address, event) {
 // buffers events, and processes them in block-chunks (waits for block to be done before parsing.)
 export async function subscribeToAddress(address) {
     console.log('called subscribeToAddress for', address);
-    const contract = await getContractByAddressWithWebsocket(address);
+    // const contract = await getContractByAddressWithWebsocket(address);
     const poolId = await getPoolIdByPoolAddress(address);
-    if (!contract)
-        return;
+    // if (!contract) return;
     if (!poolId)
         return;
-    const subscription = contract.events
-        .allEvents({ fromBlock: 'latest' })
-        .on('data', async (event) => {
-        console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
-        // lastEventTime = Date.now();
-        await storeEvent(event, poolId);
-        bufferEvent(address, event);
-    })
-        .on('error', (error) => {
-        console.log(`Subscription error: ${error}`);
+    const abi = await getAbiBy('AbisPools', { id: poolId });
+    if (!abi)
+        return;
+    registerHandler(async (logs) => {
+        const events = await fetchEventsRealTime(logs, address, abi, 'AllEvents');
+        if (events.length > 0) {
+            events.forEach(async (event) => {
+                console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
+                // lastEventTime = Date.now();
+                await storeEvent(event, poolId);
+                bufferEvent(address, event);
+            });
+        }
     });
+    // const subscription = contract.events
+    //   .allEvents({ fromBlock: 'latest' })
+    //   .on('data', async (event: any) => {
+    //     console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
+    //     // lastEventTime = Date.now();
+    //     await storeEvent(event, poolId);
+    //     bufferEvent(address, event);
+    //   })
+    //   .on('error', (error: any) => {
+    //     console.log(`Subscription error: ${error}`);
+    //   });
 }
 async function saveParsedEventInLiveMode(parsedTx) {
     console.log('saveParsedEventInLiveMode', parsedTx);
