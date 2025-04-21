@@ -70,6 +70,7 @@ export async function subscribeToAddress(address) {
     });
 }
 async function saveParsedEventInLiveMode(parsedTx) {
+    console.log('saveParsedEventInLiveMode', parsedTx);
     // solving called contract
     const transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id) => id !== undefined);
     const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));

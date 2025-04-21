@@ -81,6 +81,8 @@ export async function subscribeToAddress(address: string) {
 }
 
 async function saveParsedEventInLiveMode(parsedTx: TransactionData[]) {
+  console.log('saveParsedEventInLiveMode', parsedTx);
+
   // solving called contract
   const transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id): id is number => id !== undefined);
   const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));

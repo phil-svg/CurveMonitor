@@ -205,7 +205,6 @@ async function processSingleMarket(market) {
             return;
         }
         await writeResultsToDatabase(results);
-        console.log(`Mint-Market: ${market.collateral_token.symbol} | Blocks left: ${nowBlock - i}`);
         nowBlock = await getCurrentBlockNumberWithRetry(); // updating the latest block, so there are no gaps
         if (!nowBlock)
             return;
@@ -219,7 +218,7 @@ export async function updateMintMarketForMevScoring() {
     for (const market of markets) {
         await processSingleMarket(market);
     }
-    console.log('First Mint Market Risk Iteration Completed!');
+    // console.log('First Mint Market Risk Iteration Completed!');
     setInterval(async () => {
         try {
             const marketsResponse = await fetchMarkets();
@@ -227,11 +226,9 @@ export async function updateMintMarketForMevScoring() {
                 return;
             const markets = marketsResponse.data;
             for (const market of markets) {
-                console.time();
                 await processSingleMarket(market);
-                console.timeEnd();
             }
-            console.log('Mint Market Risk Iteration Completed!');
+            // console.log('Mint Market Risk Iteration Completed!');
         }
         catch (error) {
             console.error('Error processing markets:', error);
