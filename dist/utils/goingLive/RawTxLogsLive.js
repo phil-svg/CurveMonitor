@@ -1,5 +1,6 @@
 import { TransactionDetails } from '../../models/TransactionDetails.js';
 import { eventFlags } from '../api/utils/EventFlags.js';
+import { getCurrentFormattedTime } from '../helperFunctions/QualityOfLifeStuff.js';
 import { getContractByAddressWithWebsocket } from '../helperFunctions/Web3.js';
 import { insertAtomicArbDetails } from '../postgresTables/AtomicArbs.js';
 import { insertTokenTransfers, solveCleanTransfersForTx } from '../postgresTables/CleanedTransfers.js';
@@ -60,7 +61,7 @@ export async function subscribeToAddress(address) {
     const subscription = contract.events
         .allEvents({ fromBlock: 'latest' })
         .on('data', async (event) => {
-        // console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
+        console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
         // lastEventTime = Date.now();
         await storeEvent(event, poolId);
         bufferEvent(address, event);
