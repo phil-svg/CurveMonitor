@@ -64,13 +64,18 @@ function bufferEvent(address: string, event: any) {
 export async function subscribeToAddress(address: string) {
   console.log('called subscribeToAddress for', address);
   // const contract = await getContractByAddressWithWebsocket(address);
+  console.time('getPoolIdByPoolAddress');
   const poolId = await getPoolIdByPoolAddress(address);
+  console.timeEnd('getPoolIdByPoolAddress');
 
   // if (!contract) return;
   if (!poolId) return;
+  console.time('getAbiBy');
   const abi = await getAbiBy('AbisPools', { id: poolId });
+  console.timeEnd('getAbiBy');
   if (!abi) return;
 
+  console.time('registerHandler');
   registerHandler(async (logs) => {
     const events = await fetchEventsRealTime(logs, address, abi, 'AllEvents');
     if (events.length > 0) {
@@ -82,6 +87,7 @@ export async function subscribeToAddress(address: string) {
       });
     }
   });
+  console.timeEnd('registerHandler');
 
   // const subscription = contract.events
   //   .allEvents({ fromBlock: 'latest' })
