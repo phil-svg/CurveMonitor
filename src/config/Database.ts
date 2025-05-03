@@ -45,6 +45,12 @@ export const sequelize = new Sequelize({
   host: process.env.DATABASE_HOST,
   port: Number(process.env.DATABASE_PORT) || 5432,
   dialect: 'postgres',
+  pool: {
+    max: 20,
+    min: 2,
+    acquire: 30000,
+    idle: 10000,
+  },
   models: [
     ...AbiModels,
     Pool,

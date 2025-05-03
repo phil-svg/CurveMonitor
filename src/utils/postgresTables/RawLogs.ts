@@ -15,8 +15,6 @@ import eventEmitter from '../goingLive/EventEmitter.js';
 import { retry } from '../helperFunctions/Web3Retry.js';
 import { getHighestBlockNumberForPool } from './readFunctions/RawLogs.js';
 import EventEmitter from '../goingLive/EventEmitter.js';
-import { copyFileSync } from 'fs';
-import { ContractUnknownEventPayload } from 'ethers';
 
 export async function storeEvent(event: EventObject, poolId: number): Promise<void> {
   const {
