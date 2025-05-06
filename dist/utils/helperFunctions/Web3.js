@@ -26,9 +26,10 @@ export async function getWeb3HttpProvider() {
     let retries = 0;
     while (retries < MAX_RETRIES) {
         try {
-            web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_MAINNET));
-            await web3HttpProvider.eth.net.isListening(); // This will throw an error if it can't connect
-            return web3HttpProvider;
+            // web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_MAINNET!));
+            // await web3HttpProvider.eth.net.isListening(); // This will throw an error if it can't connect
+            // return web3HttpProvider;
+            return (web3HttpProvider = new Web3(new Web3.providers.HttpProvider(process.env.WEB3_HTTP_MAINNET)));
         }
         catch (error) {
             if (error instanceof Error) {
