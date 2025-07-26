@@ -99,14 +99,14 @@ export async function main() {
 
   eventFlags.canEmitSandwich = true;
 
-  await updateReceipts();
-  await updateTxTraces();
-  await updateAddressCounts();
-  await updateCleanedTransfers();
-  await updateAtomicArbDetection();
-  await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
+  // await updateReceipts();
+  // await updateTxTraces();
+  // await updateAddressCounts();
+  // await updateCleanedTransfers();
+  // await updateAtomicArbDetection();
+  // await updateCexDexArbDetection(); // requires updateCleanedTransfers to have run
 
-  await addCustomLabels();
+  // await addCustomLabels();
   // await updateLabels(); // muted, only has to run when there are changes made to the labels-file
 
   // todo
