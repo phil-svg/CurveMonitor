@@ -118,11 +118,11 @@ export async function processAllAddressesSequentially() {
         ].map((address) => address.toLowerCase());
         if (addressesToIgnore.includes(poolAddresses[i].toLowerCase()))
             continue;
-        let poolId = await getPoolIdByPoolAddress(poolAddresses[i]);
-        let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId);
-        if (!largestBlockNumberStored)
-            largestBlockNumberStored = dbInceptionBlock;
-        await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
+        eventEmitter.emit('ready for subscription', poolAddresses[i]);
+        // let poolId = await getPoolIdByPoolAddress(poolAddresses[i]);
+        // let largestBlockNumberStored = await getHighestBlockNumberForPool(poolId!);
+        // if (!largestBlockNumberStored) largestBlockNumberStored = dbInceptionBlock;
+        // await processBlocksUntilCurrent(poolAddresses[i], largestBlockNumberStored);
         // const end = new Date().getTime();
         // totalTimeTaken += end - start;
         // logProgress("Fetching Raw Logs and Subscribing", 25, i, totalTimeTaken, poolAddresses.length - 1);
