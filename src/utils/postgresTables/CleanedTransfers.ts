@@ -152,13 +152,16 @@ export async function updateCleanedTransfers() {
 }
 
 export async function getCleanedTransfers(txHash: string, to: string): Promise<ReadableTokenTransfer[] | null> {
-  let transactionTraces = await getTransactionTraceFromDb(txHash);
+  // let transactionTraces = await getTransactionTraceFromDb(txHash);
 
-  if (transactionTraces.length <= 1) {
-    const traceFetchAttempt = await getTransactionTraceViaWeb3Provider(txHash);
-    if (traceFetchAttempt) await saveTransactionTrace(txHash, traceFetchAttempt);
-    transactionTraces = await getTransactionTraceFromDb(txHash);
-  }
+  // if (transactionTraces.length <= 1) {
+  //   const traceFetchAttempt = await getTransactionTraceViaWeb3Provider(txHash);
+  //   if (traceFetchAttempt) await saveTransactionTrace(txHash, traceFetchAttempt);
+  //   transactionTraces = await getTransactionTraceFromDb(txHash);
+  // }
+
+  let transactionTraces = await getTransactionTraceViaWeb3Provider(txHash);
+  if (!transactionTraces) return null;
 
   if (transactionTraces.length <= 1) {
     // console.log("rpc trace api bugged out for", txHash);

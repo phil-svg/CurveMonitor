@@ -8,8 +8,6 @@ import { getTokenTransfersFromTransactionTrace, makeTransfersReadable, mergeAndF
 import { parseEventsFromReceiptForEntireTx, parseEventsFromReceiptForEntireTxWithoutDbUsage } from '../txMap/Events.js';
 import { sequelize } from '../../config/Database.js';
 import { QueryTypes } from 'sequelize';
-import { getTransactionTraceFromDb } from './readFunctions/TransactionTrace.js';
-import { saveTransactionTrace } from './TransactionTraces.js';
 export async function getCleanedTransfersFor1inch(txHash, to) {
     let transactionTraces = await getTransactionTraceViaWeb3Provider(txHash);
     if (!transactionTraces) {
@@ -122,13 +120,15 @@ export async function updateCleanedTransfers() {
     console.log(`[✓] updateCleanedTransfers completed successfully.`);
 }
 export async function getCleanedTransfers(txHash, to) {
-    let transactionTraces = await getTransactionTraceFromDb(txHash);
-    if (transactionTraces.length <= 1) {
-        const traceFetchAttempt = await getTransactionTraceViaWeb3Provider(txHash);
-        if (traceFetchAttempt)
-            await saveTransactionTrace(txHash, traceFetchAttempt);
-        transactionTraces = await getTransactionTraceFromDb(txHash);
-    }
+    // let transactionTraces = await getTransactionTraceFromDb(txHash);
+    // if (transactionTraces.length <= 1) {
+    //   const traceFetchAttempt = await getTransactionTraceViaWeb3Provider(txHash);
+    //   if (traceFetchAttempt) await saveTransactionTrace(txHash, traceFetchAttempt);
+    //   transactionTraces = await getTransactionTraceFromDb(txHash);
+    // }
+    let transactionTraces = await getTransactionTraceViaWeb3Provider(txHash);
+    if (!transactionTraces)
+        return null;
     if (transactionTraces.length <= 1) {
         // console.log("rpc trace api bugged out for", txHash);
         return null;
