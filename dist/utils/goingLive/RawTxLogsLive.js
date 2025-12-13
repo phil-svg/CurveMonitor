@@ -11,7 +11,6 @@ import { storeEvent } from '../postgresTables/RawLogs.js';
 import { fetchAndSaveReceipt } from '../postgresTables/Receipts.js';
 import { populateTransactionCoinsWithDollarValuesForSingleTx } from '../postgresTables/TransactionCoins.js';
 import { updateValueUsdForSingleTx } from '../postgresTables/TransactionPricing.js';
-import { saveTransactionTrace } from '../postgresTables/TransactionTraces.js';
 import { solveSingleTdId } from '../postgresTables/TransactionsDetails.js';
 import { fetchDataThenDetectArb } from '../postgresTables/mevDetection/atomic/atomicArb.js';
 import { processSinglCexDexTxId } from '../postgresTables/mevDetection/cexdex/CexDexArb.js';
@@ -165,7 +164,7 @@ async function processBufferedEvents() {
             console.log('failed to fetch transaction-trace during live-mode for', tx.tx_hash);
             continue;
         }
-        await saveTransactionTrace(tx.tx_hash, transactionTrace);
+        // await saveTransactionTrace(tx.tx_hash, transactionTrace);
         const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
         if (!receipt) {
             console.log('failed to fetch transaction-receipt during live-mode for', tx.tx_hash);

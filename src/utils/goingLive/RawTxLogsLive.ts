@@ -201,7 +201,7 @@ async function processBufferedEvents() {
       console.log('failed to fetch transaction-trace during live-mode for', tx.tx_hash);
       continue;
     }
-    await saveTransactionTrace(tx.tx_hash, transactionTrace);
+    // await saveTransactionTrace(tx.tx_hash, transactionTrace);
 
     const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
     if (!receipt) {
