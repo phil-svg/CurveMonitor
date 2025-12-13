@@ -34,18 +34,18 @@ export function startMainWsEndpoint(io: Server): void {
     handleFullSandwichRoom(socket);
     handlePoolSandwichRoom(socket);
     handleGeneralTxLivestream(mainRoom, socket);
-    handleAtomicArbLivestream(mainRoom, socket);
-    handleCexDexArbLivestream(mainRoom, socket);
+    // handleAtomicArbLivestream(mainRoom, socket);
+    // handleCexDexArbLivestream(mainRoom, socket);
     handlePoolTxLivestream(socket);
     handlePoolLabel(socket);
-    handleFullAtomicArbRoom(socket);
-    handleFullCexDexArbRoom(socket);
-    handlePoolSpecificAtomicArbRoom(socket);
-    handlePoolSpecificCexDexArbRoom(socket);
-    handleAtomicArbBotLeaderBoardByTxCountForPoolAndDuration(socket);
-    handleCexDexArbBotLeaderBoardByTxCountForPoolAndDuration(socket);
-    handlePoolSpecificAggregatedMevVolume(socket);
-    handleUserLendingHealth(socket);
+    // handleFullAtomicArbRoom(socket);
+    // handleFullCexDexArbRoom(socket);
+    // handlePoolSpecificAtomicArbRoom(socket);
+    // handlePoolSpecificCexDexArbRoom(socket);
+    // handleAtomicArbBotLeaderBoardByTxCountForPoolAndDuration(socket);
+    // handleCexDexArbBotLeaderBoardByTxCountForPoolAndDuration(socket);
+    // handlePoolSpecificAggregatedMevVolume(socket);
+    // handleUserLendingHealth(socket);
   });
 }
 
