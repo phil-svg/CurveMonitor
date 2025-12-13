@@ -18,8 +18,6 @@ import { BlockScanningData } from '../models/BlockScanningData.js';
 import { CurrentBlock } from '../models/CurrentBlock.js';
 import { TransactionDetails } from '../models/TransactionDetails.js';
 import { AddressesCalledCounts } from '../models/AddressesCalledCount.js';
-import { Receipts } from '../models/Receipts.js';
-import { TransactionTrace } from '../models/TransactionTrace.js';
 import { Contracts } from '../models/Contracts.js';
 import { ProxyCheck } from '../models/ProxyCheck.js';
 import { UnverifiedContracts } from '../models/UnverifiedContracts.js';
@@ -65,8 +63,6 @@ export const sequelize = new Sequelize({
         CurrentBlock,
         TransactionDetails,
         AddressesCalledCounts,
-        Receipts,
-        TransactionTrace,
         Contracts,
         ProxyCheck,
         UnverifiedContracts,
