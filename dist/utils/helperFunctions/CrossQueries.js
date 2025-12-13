@@ -5,7 +5,6 @@ import { priceTransactionFromTxId } from '../TokenPrices/txValue/PriceTransactio
 import { Op } from 'sequelize';
 import { Pool } from '../../models/Pools.js';
 import { getPoolIdByPoolAddress } from '../postgresTables/readFunctions/Pools.js';
-import { Receipts } from '../../models/Receipts.js';
 export async function findAndSortAllVolsPerUniqueAddressesFromAll() {
     try {
         const uniqueAddresses = await findAndCountUniqueCallesPlusCalledContracts();
@@ -136,77 +135,90 @@ export async function getTxIdsForAddressAndPoolAndTimeRange(poolAddress, targetA
     });
     return transactions.map((tx) => tx.tx_id);
 }
-export async function getGasUsedArrayForAllTxForAddressAndPoolAndTimeRange(poolAddress, targetAddress, startDate, endDate) {
-    const poolId = await getPoolIdByPoolAddress(poolAddress);
-    if (poolId === null) {
-        console.log(`Pool with address ${poolAddress} not found.`);
-        return [];
-    }
-    const startUnix = convertDateToUnixTime(startDate);
-    const endUnix = convertDateToUnixTime(endDate);
-    // Query the transactions
-    const transactions = await Transactions.findAll({
-        where: {
-            pool_id: poolId,
-            trader: { [Op.iLike]: targetAddress.toLowerCase() },
-            block_unixtime: {
-                [Op.gte]: startUnix,
-                [Op.lte]: endUnix,
-            },
-        },
-        include: [
-            {
-                model: Receipts,
-                required: true,
-            },
-        ],
-        attributes: ['tx_id', 'tx_hash'],
-    });
-    // Extract gas used from each transaction
-    return transactions.map((tx) => {
-        if (tx.receipts && tx.receipts.length > 0) {
-            const gasUsed = parseInt(tx.receipts[0].gasUsed, 10);
-            return isNaN(gasUsed) ? 0 : gasUsed;
-        }
-        return 0; // Return 0 if no receipt is associated
-    });
-}
-export async function getTxHashExampleArrayForGasUsedForAddressAndPoolAndTimeRange(poolAddress, targetAddress, startDate, endDate, txHashArrLength, lowerGasUsageBoundary, biggerGasUsageBoundary) {
-    const poolId = await getPoolIdByPoolAddress(poolAddress);
-    if (poolId === null) {
-        console.log(`Pool with address ${poolAddress} not found.`);
-        return [];
-    }
-    const startUnix = convertDateToUnixTime(startDate);
-    const endUnix = convertDateToUnixTime(endDate);
-    const transactions = await Transactions.findAll({
-        where: {
-            pool_id: poolId,
-            trader: { [Op.iLike]: targetAddress.toLowerCase() },
-            block_unixtime: {
-                [Op.gte]: startUnix,
-                [Op.lte]: endUnix,
-            },
-        },
-        include: [
-            {
-                model: Receipts,
-                required: true,
-            },
-        ],
-        attributes: ['tx_hash'],
-    });
-    // Filter transactions based on the gas used in the first receipt
-    const filteredTransactions = transactions
-        .filter((tx) => {
-        if (tx.receipts && tx.receipts.length > 0) {
-            const gasUsed = parseInt(tx.receipts[0].gasUsed, 10);
-            return !isNaN(gasUsed) && gasUsed >= lowerGasUsageBoundary && gasUsed <= biggerGasUsageBoundary;
-        }
-        return false;
-    })
-        .slice(0, txHashArrLength);
-    // Extract and return transaction hashes
-    return filteredTransactions.map((tx) => tx.tx_hash);
-}
+// export async function getGasUsedArrayForAllTxForAddressAndPoolAndTimeRange(
+//   poolAddress: string,
+//   targetAddress: string,
+//   startDate: string,
+//   endDate: string
+// ): Promise<number[]> {
+//   const poolId = await getPoolIdByPoolAddress(poolAddress);
+//   if (poolId === null) {
+//     console.log(`Pool with address ${poolAddress} not found.`);
+//     return [];
+//   }
+//   const startUnix = convertDateToUnixTime(startDate);
+//   const endUnix = convertDateToUnixTime(endDate);
+//   // Query the transactions
+//   const transactions = await Transactions.findAll({
+//     where: {
+//       pool_id: poolId,
+//       trader: { [Op.iLike]: targetAddress.toLowerCase() },
+//       block_unixtime: {
+//         [Op.gte]: startUnix,
+//         [Op.lte]: endUnix,
+//       },
+//     },
+//     include: [
+//       {
+//         model: Receipts,
+//         required: true,
+//       },
+//     ],
+//     attributes: ['tx_id', 'tx_hash'],
+//   });
+//   // Extract gas used from each transaction
+//   return transactions.map((tx) => {
+//     if (tx.receipts && tx.receipts.length > 0) {
+//       const gasUsed = parseInt(tx.receipts[0].gasUsed, 10);
+//       return isNaN(gasUsed) ? 0 : gasUsed;
+//     }
+//     return 0; // Return 0 if no receipt is associated
+//   });
+// }
+// export async function getTxHashExampleArrayForGasUsedForAddressAndPoolAndTimeRange(
+//   poolAddress: string,
+//   targetAddress: string,
+//   startDate: string,
+//   endDate: string,
+//   txHashArrLength: number,
+//   lowerGasUsageBoundary: number,
+//   biggerGasUsageBoundary: number
+// ): Promise<string[]> {
+//   const poolId = await getPoolIdByPoolAddress(poolAddress);
+//   if (poolId === null) {
+//     console.log(`Pool with address ${poolAddress} not found.`);
+//     return [];
+//   }
+//   const startUnix = convertDateToUnixTime(startDate);
+//   const endUnix = convertDateToUnixTime(endDate);
+//   const transactions = await Transactions.findAll({
+//     where: {
+//       pool_id: poolId,
+//       trader: { [Op.iLike]: targetAddress.toLowerCase() },
+//       block_unixtime: {
+//         [Op.gte]: startUnix,
+//         [Op.lte]: endUnix,
+//       },
+//     },
+//     include: [
+//       {
+//         model: Receipts,
+//         required: true,
+//       },
+//     ],
+//     attributes: ['tx_hash'],
+//   });
+//   // Filter transactions based on the gas used in the first receipt
+//   const filteredTransactions = transactions
+//     .filter((tx) => {
+//       if (tx.receipts && tx.receipts.length > 0) {
+//         const gasUsed = parseInt(tx.receipts[0].gasUsed, 10);
+//         return !isNaN(gasUsed) && gasUsed >= lowerGasUsageBoundary && gasUsed <= biggerGasUsageBoundary;
+//       }
+//       return false;
+//     })
+//     .slice(0, txHashArrLength);
+//   // Extract and return transaction hashes
+//   return filteredTransactions.map((tx) => tx.tx_hash);
+// }
 //# sourceMappingURL=CrossQueries.js.map

@@ -17,9 +17,7 @@ import { Pool } from './Pools.js';
 import { RawTxLogs } from './RawTxLogs.js';
 import { TransactionCoins } from './TransactionCoins.js';
 import { TransactionDetails } from './TransactionDetails.js'; // Import TransactionDetails
-import { TransactionTrace } from './TransactionTrace.js';
 import { TransactionType } from './TransactionType.js';
-import { Receipts } from './Receipts.js';
 
 @Index(['event_id'])
 @Table({ tableName: 'transactions' })
@@ -88,15 +86,6 @@ export class Transactions extends Model {
 
   @HasOne(() => TransactionDetails, 'txId')
   transactionDetails!: TransactionDetails;
-
-  @HasMany(() => TransactionTrace, 'transactionHash')
-  transactionTraces!: TransactionTrace[];
-
-  @HasMany(() => Receipts, {
-    foreignKey: 'tx_id',
-    sourceKey: 'tx_id',
-  })
-  receipts!: Receipts[];
 }
 
 export type TransactionData = Pick<

@@ -1,7 +1,5 @@
 import {
   findAndSortAllVolsPerUniqueAddressesFromAll,
-  getGasUsedArrayForAllTxForAddressAndPoolAndTimeRange,
-  getTxHashExampleArrayForGasUsedForAddressAndPoolAndTimeRange,
   getTxIdsForAddressAndPoolAndTimeRange,
 } from '../helperFunctions/CrossQueries.js';
 import { saveChunkedDataToExcel } from '../helperFunctions/Excel.js';

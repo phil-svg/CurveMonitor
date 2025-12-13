@@ -9,9 +9,7 @@ import { Pool } from './Pools.js';
 import { RawTxLogs } from './RawTxLogs.js';
 import { TransactionCoins } from './TransactionCoins.js';
 import { TransactionDetails } from './TransactionDetails.js'; // Import TransactionDetails
-import { TransactionTrace } from './TransactionTrace.js';
 import { TransactionType } from './TransactionType.js';
-import { Receipts } from './Receipts.js';
 let Transactions = class Transactions extends Model {
 };
 __decorate([
@@ -79,15 +77,6 @@ __decorate([
 __decorate([
     HasOne(() => TransactionDetails, 'txId')
 ], Transactions.prototype, "transactionDetails", void 0);
-__decorate([
-    HasMany(() => TransactionTrace, 'transactionHash')
-], Transactions.prototype, "transactionTraces", void 0);
-__decorate([
-    HasMany(() => Receipts, {
-        foreignKey: 'tx_id',
-        sourceKey: 'tx_id',
-    })
-], Transactions.prototype, "receipts", void 0);
 Transactions = __decorate([
     Index(['event_id']),
     Table({ tableName: 'transactions' })
