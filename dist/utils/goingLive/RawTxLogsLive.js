@@ -88,6 +88,7 @@ async function saveParsedEventInLiveMode(parsedTx) {
     const transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id) => id !== undefined);
     const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
     const calledContractAddresses = await Promise.all(calledContractPromises);
+    console.log('saveParsedEventInLiveMode, parsedTx:', parsedTx);
     // Filter out null results
     const validCalledContractAddresses = calledContractAddresses.filter((address) => address !== null);
     // Save to the database + Emit Event

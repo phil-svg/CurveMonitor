@@ -102,6 +102,8 @@ async function saveParsedEventInLiveMode(parsedTx: TransactionData[]) {
   const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
   const calledContractAddresses = await Promise.all(calledContractPromises);
 
+  console.log('saveParsedEventInLiveMode, parsedTx:', parsedTx);
+
   // Filter out null results
   const validCalledContractAddresses = calledContractAddresses.filter(
     (address): address is NonNullable<typeof address> => address !== null
