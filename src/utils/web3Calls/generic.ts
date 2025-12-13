@@ -312,7 +312,8 @@ export async function getBlockTimeStampsInBatches(
             );
           } else {
             console.log(
-              `Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`
+              `Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`,
+              error
             );
           }
           retries++;

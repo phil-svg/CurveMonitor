@@ -246,7 +246,7 @@ export async function getBlockTimeStampsInBatches(blockNumbers) {
                         console.log(`getBlockTimeStampsInBatches connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
                     }
                     else {
-                        console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                        console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`, error);
                     }
                     retries++;
                     await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
