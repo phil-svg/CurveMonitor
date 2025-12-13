@@ -211,7 +211,6 @@ export async function getBlockTimeStampFromNode(blockNumber: number): Promise<nu
   while (retries < MAX_RETRIES) {
     try {
       const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
-      console.log('BLOCK', BLOCK);
       return Number(BLOCK.timestamp);
     } catch (error: unknown) {
       if (error instanceof Error) {
