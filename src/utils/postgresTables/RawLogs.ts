@@ -137,7 +137,8 @@ export async function processAllAddressesSequentially(): Promise<void> {
 
   const poolIds = poolIdsWithoutVoided;
 
-  const poolAddresses = await getAddressesByPoolIds(poolIds); // insert poolIdsFull here to be 100%
+  // const poolAddresses = await getAddressesByPoolIds(poolIds); // insert poolIdsFull here to be 100%
+  const poolAddresses = await getAddressesByPoolIds(poolIdsFull); // insert poolIdsFull here to be 100%
   let nowBlock = await getCurrentBlockNumberFromLocalDB();
 
   // let totalTimeTaken = 0;

@@ -99,7 +99,8 @@ export async function processAllAddressesSequentially() {
     console.log('Curve.fi has', poolIdsFull.length, 'pools.');
     const poolIdsWithoutVoided = await getRelevantPoolIdsForFastMode();
     const poolIds = poolIdsWithoutVoided;
-    const poolAddresses = await getAddressesByPoolIds(poolIds); // insert poolIdsFull here to be 100%
+    // const poolAddresses = await getAddressesByPoolIds(poolIds); // insert poolIdsFull here to be 100%
+    const poolAddresses = await getAddressesByPoolIds(poolIdsFull); // insert poolIdsFull here to be 100%
     let nowBlock = await getCurrentBlockNumberFromLocalDB();
     // let totalTimeTaken = 0;
     console.log('Fetching Raw Logs and Subscribing');
