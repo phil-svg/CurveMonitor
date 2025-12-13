@@ -145,7 +145,7 @@ export function getUniqueTransactions(transactions: TransactionData[]): Transact
 
 // when the next block appears, we parse the prev block.
 async function processBufferedEvents() {
-  // console.log('eventBuffer', eventBuffer);
+  console.log('eventBuffer', eventBuffer);
   if (eventBuffer.length === 0) return;
   const eventBlockNumbers = eventBuffer.flatMap((event) =>
     event.event.blockNumber !== undefined ? [event.event.blockNumber] : []

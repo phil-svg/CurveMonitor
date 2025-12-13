@@ -217,7 +217,7 @@ export async function getBlockTimeStampFromNode(blockNumber: number): Promise<nu
         );
         throw new Error('Block returned null'); // Force retry on null
       }
-      console.log(`Successfully fetched block ${blockNumber}:`); // Log success for debug
+      console.log(`Successfully fetched block ${blockNumber}`); // Log success for debug
       return Number(BLOCK.timestamp);
     } catch (error: unknown) {
       if (error instanceof Error) {
