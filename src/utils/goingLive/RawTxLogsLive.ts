@@ -203,11 +203,11 @@ async function processBufferedEvents() {
     }
     // await saveTransactionTrace(tx.tx_hash, transactionTrace);
 
-    const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
-    if (!receipt) {
-      console.log('failed to fetch transaction-receipt during live-mode for', tx.tx_hash);
-      continue;
-    }
+    // const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
+    // if (!receipt) {
+    //   console.log('failed to fetch transaction-receipt during live-mode for', tx.tx_hash);
+    //   continue;
+    // }
 
     // parsing the entire tx:
     const cleanedTransfers = await solveCleanTransfersForTx(txId, tx.tx_hash);

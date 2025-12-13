@@ -8,7 +8,6 @@ import { fetchContractAgeInRealtime } from '../postgresTables/ContractCreations.
 import { storeCexDexArbFlag } from '../postgresTables/IsCexDexArb.js';
 import { updatePriceMap } from '../postgresTables/PriceMap.js';
 import { storeEvent } from '../postgresTables/RawLogs.js';
-import { fetchAndSaveReceipt } from '../postgresTables/Receipts.js';
 import { populateTransactionCoinsWithDollarValuesForSingleTx } from '../postgresTables/TransactionCoins.js';
 import { updateValueUsdForSingleTx } from '../postgresTables/TransactionPricing.js';
 import { solveSingleTdId } from '../postgresTables/TransactionsDetails.js';
@@ -165,11 +164,11 @@ async function processBufferedEvents() {
             continue;
         }
         // await saveTransactionTrace(tx.tx_hash, transactionTrace);
-        const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
-        if (!receipt) {
-            console.log('failed to fetch transaction-receipt during live-mode for', tx.tx_hash);
-            continue;
-        }
+        // const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
+        // if (!receipt) {
+        //   console.log('failed to fetch transaction-receipt during live-mode for', tx.tx_hash);
+        //   continue;
+        // }
         // parsing the entire tx:
         const cleanedTransfers = await solveCleanTransfersForTx(txId, tx.tx_hash);
         if (!cleanedTransfers)
