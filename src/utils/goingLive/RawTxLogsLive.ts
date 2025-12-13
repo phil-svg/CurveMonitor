@@ -55,7 +55,6 @@ async function getPoolCoinsForLiveMode(): Promise<PoolCoinsForLiveMode> {
 }
 
 function bufferEvent(address: string, event: any) {
-  console.log('bufferEvent:', address, event);
   if (!eventBuffer.some((e) => e.address === address && JSON.stringify(e.event) === JSON.stringify(event))) {
     eventBuffer.push({ address, event });
   }
