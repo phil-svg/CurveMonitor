@@ -9,7 +9,8 @@ import { getAbiFromDbClean } from '../postgresTables/readFunctions/Abi.js';
 export async function parseEventsFromReceiptForEntireTx(
   txHash: string
 ): Promise<(ParsedEvent | null | undefined)[] | null> {
-  const receipt = await getShortenReceiptByTxHash(txHash);
+  // const receipt = await getShortenReceiptByTxHash(txHash);
+  const receipt = await getTxReceiptClassic(txHash);
 
   if (!receipt) {
     // console.log(`No receipt for ${txHash} in function parseEventsFromReceiptForEntireTx`);
