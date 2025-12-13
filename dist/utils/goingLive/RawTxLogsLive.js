@@ -45,6 +45,7 @@ async function getPoolCoinsForLiveMode() {
     return POOL_COINS;
 }
 function bufferEvent(address, event) {
+    console.log('bufferEvent:', address, event);
     if (!eventBuffer.some((e) => e.address === address && JSON.stringify(e.event) === JSON.stringify(event))) {
         eventBuffer.push({ address, event });
     }
@@ -122,7 +123,6 @@ export function getUniqueTransactions(transactions) {
 }
 // when the next block appears, we parse the prev block.
 async function processBufferedEvents() {
-    console.log('eventBuffer', eventBuffer);
     if (eventBuffer.length === 0)
         return;
     const eventBlockNumbers = eventBuffer.flatMap((event) => event.event.blockNumber !== undefined ? [event.event.blockNumber] : []);
