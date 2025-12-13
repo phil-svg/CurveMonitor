@@ -182,7 +182,7 @@ export async function getBlockTimeStampFromNode(blockNumber) {
                     }
                 }
                 else {
-                    console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                    console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`, err);
                 }
                 retries++;
                 await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
@@ -213,7 +213,7 @@ export async function getBlockTimeStampFromProvider(blockNumber, web3HttpProvide
                     }
                 }
                 else {
-                    console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`);
+                    console.log(`Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`, error);
                 }
                 retries++;
                 await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
