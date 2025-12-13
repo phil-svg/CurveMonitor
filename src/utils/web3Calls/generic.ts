@@ -204,43 +204,49 @@ export async function web3CallLogFree(
 }
 
 export async function getBlockTimeStampFromNode(blockNumber: number): Promise<number | null> {
-  const MAX_RETRIES = 5; // Maximum number of retries
-  const RETRY_DELAY = 600; // Delay between retries in milliseconds
+  const MAX_RETRIES = 10; // Increased for more resilience
+  let delay = 600; // Starting delay in ms
   let retries = 0;
 
   while (retries < MAX_RETRIES) {
     try {
       const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
-      console.log('BLOCK', BLOCK);
+      if (BLOCK === null) {
+        console.log(
+          `Block ${blockNumber} returned null. Attempt ${retries + 1}/${MAX_RETRIES}. Retrying in ${delay / 1000}s.`
+        );
+        throw new Error('Block returned null'); // Force retry on null
+      }
+      console.log(`Successfully fetched block ${blockNumber}:`, BLOCK); // Log success for debug
       return Number(BLOCK.timestamp);
     } catch (error: unknown) {
       if (error instanceof Error) {
         const err = error as any;
-        if (err.code === 'ECONNABORTED') {
-          console.log(
-            `getBlockTimeStampFromNode connection timed out. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`
-          );
-        } else if (err.message && err.message.includes('CONNECTION ERROR')) {
-          if (retries > 3) {
-            console.log(
-              `getBlockTimeStampFromNode connection error. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`
-            );
-          }
+        console.error(
+          `Error fetching block ${blockNumber}. Attempt ${retries + 1}/${MAX_RETRIES}:`,
+          err.message || err
+        );
+        if (
+          err.code === 'ECONNABORTED' ||
+          err.message.includes('CONNECTION ERROR') ||
+          err.message === 'Block returned null'
+        ) {
+          // Exponential backoff
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          delay = Math.min(delay * 2, 10000); // Cap at 10s
         } else {
-          console.log(
-            `Failed to get block timestamp. Attempt ${retries + 1} of ${MAX_RETRIES}. Retrying in ${RETRY_DELAY / 1000} seconds.`,
-            err
-          );
+          // Non-retryable error
+          return null;
         }
-        retries++;
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      } else {
+        console.error(`Unknown error fetching block ${blockNumber}:`, error);
+        return null;
       }
+      retries++;
     }
   }
 
-  console.log(
-    'Failed to get block timestamp after several attempts. Please check your connection and the status of the Ethereum node.'
-  );
+  console.error(`Failed to get timestamp for block ${blockNumber} after ${MAX_RETRIES} attempts.`);
   return null;
 }
 
