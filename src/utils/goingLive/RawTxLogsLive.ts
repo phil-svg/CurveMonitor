@@ -97,6 +97,7 @@ export async function subscribeToAddress(address: string) {
 }
 
 async function saveParsedEventInLiveMode(parsedTx: TransactionData[]) {
+  console.log('saveParsedEventInLiveMode:', parsedTx);
   // solving called contract
   const transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id): id is number => id !== undefined);
   const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
@@ -143,7 +144,7 @@ export function getUniqueTransactions(transactions: TransactionData[]): Transact
 
 // when the next block appears, we parse the prev block.
 async function processBufferedEvents() {
-  console.log('processBufferedEvents, eventBuffer:', eventBuffer, 'eventBuffer.length', eventBuffer.length);
+  console.log('processBufferedEvents:', 'eventBuffer.length', eventBuffer.length);
   if (eventBuffer.length === 0) return;
   const eventBlockNumbers = eventBuffer.flatMap((event) =>
     event.event.blockNumber !== undefined ? [event.event.blockNumber] : []
@@ -195,11 +196,11 @@ async function processBufferedEvents() {
     }
 
     // fetching and saving of the transaction-trace
-    const transactionTrace = await retryGetTransactionTraceViaWeb3Provider(tx.tx_hash);
-    if (!transactionTrace) {
-      console.log('failed to fetch transaction-trace during live-mode for', tx.tx_hash);
-      continue;
-    }
+    // const transactionTrace = await retryGetTransactionTraceViaWeb3Provider(tx.tx_hash);
+    // if (!transactionTrace) {
+    //   console.log('failed to fetch transaction-trace during live-mode for', tx.tx_hash);
+    //   continue;
+    // }
     // await saveTransactionTrace(tx.tx_hash, transactionTrace);
 
     // const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);

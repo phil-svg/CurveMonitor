@@ -21,7 +21,6 @@ import { getCoinsInBatchesByPools, getPoolIdByPoolAddress } from '../postgresTab
 import { fetchEventsForChunkParsing } from '../postgresTables/readFunctions/RawLogs.js';
 import { fetchTransactionsForBlock } from '../postgresTables/readFunctions/Transactions.js';
 import { sortAndProcess } from '../postgresTables/txParsing/ParseTx.js';
-import { retryGetTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
 import { fetchEventsRealTime, registerHandler } from './AllEvents.js';
 import eventEmitter from './EventEmitter.js';
 import EventEmitter from './EventEmitter.js';
@@ -82,6 +81,7 @@ export async function subscribeToAddress(address) {
     //   });
 }
 async function saveParsedEventInLiveMode(parsedTx) {
+    console.log('saveParsedEventInLiveMode:', parsedTx);
     // solving called contract
     const transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id) => id !== undefined);
     const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
@@ -119,7 +119,7 @@ export function getUniqueTransactions(transactions) {
 }
 // when the next block appears, we parse the prev block.
 async function processBufferedEvents() {
-    console.log('processBufferedEvents, eventBuffer:', eventBuffer, 'eventBuffer.length', eventBuffer.length);
+    console.log('processBufferedEvents:', 'eventBuffer.length', eventBuffer.length);
     if (eventBuffer.length === 0)
         return;
     const eventBlockNumbers = eventBuffer.flatMap((event) => event.event.blockNumber !== undefined ? [event.event.blockNumber] : []);
@@ -158,11 +158,11 @@ async function processBufferedEvents() {
             await updateValueUsdForSingleTx(tx);
         }
         // fetching and saving of the transaction-trace
-        const transactionTrace = await retryGetTransactionTraceViaWeb3Provider(tx.tx_hash);
-        if (!transactionTrace) {
-            console.log('failed to fetch transaction-trace during live-mode for', tx.tx_hash);
-            continue;
-        }
+        // const transactionTrace = await retryGetTransactionTraceViaWeb3Provider(tx.tx_hash);
+        // if (!transactionTrace) {
+        //   console.log('failed to fetch transaction-trace during live-mode for', tx.tx_hash);
+        //   continue;
+        // }
         // await saveTransactionTrace(tx.tx_hash, transactionTrace);
         // const receipt = await fetchAndSaveReceipt(tx.tx_hash, txId);
         // if (!receipt) {
