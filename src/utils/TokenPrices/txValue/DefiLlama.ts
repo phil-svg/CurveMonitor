@@ -149,12 +149,7 @@ export async function getTokenPriceChartData(
       return null; // or handle this case as you see fit
     }
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error response:', error.response);
-      console.error('Axios error request:', error.request);
-    } else {
-      console.error('An unexpected error occurred:', error);
-    }
+    console.log('defillama price fetched failed for', tokenAddress);
     return null;
   }
 }
