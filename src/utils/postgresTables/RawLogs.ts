@@ -17,6 +17,7 @@ import { getHighestBlockNumberForPool } from './readFunctions/RawLogs.js';
 import EventEmitter from '../goingLive/EventEmitter.js';
 
 export async function storeEvent(event: EventObject, poolId: number): Promise<void> {
+  return; // borked and not used
   const {
     address,
     blockHash,
