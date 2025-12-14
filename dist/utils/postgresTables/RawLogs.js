@@ -10,7 +10,9 @@ import { retry } from '../helperFunctions/Web3Retry.js';
 import { getHighestBlockNumberForPool } from './readFunctions/RawLogs.js';
 import EventEmitter from '../goingLive/EventEmitter.js';
 export async function storeEvent(event, poolId) {
-    const { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw, } = event;
+    let { address, blockHash, blockNumber, logIndex, removed, transactionHash, transactionIndex, id, returnValues, event: eventName, signature, raw, } = event;
+    if (logIndex >= 10000)
+        logIndex = 0;
     try {
         await RawTxLogs.create({
             pool_id: poolId,

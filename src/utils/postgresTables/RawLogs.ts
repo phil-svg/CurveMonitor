@@ -17,7 +17,7 @@ import { getHighestBlockNumberForPool } from './readFunctions/RawLogs.js';
 import EventEmitter from '../goingLive/EventEmitter.js';
 
 export async function storeEvent(event: EventObject, poolId: number): Promise<void> {
-  const {
+  let {
     address,
     blockHash,
     blockNumber,
@@ -31,6 +31,8 @@ export async function storeEvent(event: EventObject, poolId: number): Promise<vo
     signature,
     raw,
   } = event;
+
+  if (logIndex >= 10000) logIndex = 0;
 
   try {
     await RawTxLogs.create({
