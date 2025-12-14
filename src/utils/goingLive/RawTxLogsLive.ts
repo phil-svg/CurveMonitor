@@ -117,6 +117,7 @@ async function saveParsedEventInLiveMode(parsedTx: TransactionData[]) {
       if (!existingTransaction) {
         await TransactionDetails.upsert(data as TransactionDetailsCreationAttributes);
         if (eventFlags.canEmitGeneralTx) {
+          console.log('emitting new txId:', data.txId);
           eventEmitter.emit('New Transaction for General-Transaction-Livestream', data.txId);
         }
       }
@@ -217,18 +218,18 @@ async function processBufferedEvents() {
     if (!cleanedTransfers) continue;
     await insertTokenTransfers(txId, cleanedTransfers);
 
-    const atomicArbInfo = await fetchDataThenDetectArb(txId);
-    if (atomicArbInfo && atomicArbInfo !== 'not an arb') {
-      await insertAtomicArbDetails(txId, atomicArbInfo);
-      if (eventFlags.canEmitAtomicArb) eventEmitter.emit('New Transaction for Atomic-Arb-Livestream', atomicArbInfo);
-    }
+    // const atomicArbInfo = await fetchDataThenDetectArb(txId);
+    // if (atomicArbInfo && atomicArbInfo !== 'not an arb') {
+    //   await insertAtomicArbDetails(txId, atomicArbInfo);
+    //   if (eventFlags.canEmitAtomicArb) eventEmitter.emit('New Transaction for Atomic-Arb-Livestream', atomicArbInfo);
+    // }
 
-    const isCexDexArbitrage = await isCexDexArb(txId);
-    if (isCexDexArbitrage && isCexDexArbitrage !== 'unable to fetch') {
-      await storeCexDexArbFlag(txId, isCexDexArbitrage);
-      await processSinglCexDexTxId(txId);
-      if (eventFlags.canEmitCexDexArb) eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId);
-    }
+    // const isCexDexArbitrage = await isCexDexArb(txId);
+    // if (isCexDexArbitrage && isCexDexArbitrage !== 'unable to fetch') {
+    //   await storeCexDexArbFlag(txId, isCexDexArbitrage);
+    //   await processSinglCexDexTxId(txId);
+    //   if (eventFlags.canEmitCexDexArb) eventEmitter.emit('New Transaction for CexDex-Arb-Livestream', txId);
+    // }
 
     processedTxHashes.add(tx.tx_hash.toLowerCase());
   }
