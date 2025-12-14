@@ -89,7 +89,7 @@ export async function main() {
   eventFlags.canEmitCexDexArb = true;
 
   await updateBlockTimestamps();
-  await updateContractCreations();
+  // await updateContractCreations();
   await updateTransactionPricing();
   eventFlags.txPricing = true;
 

@@ -12,7 +12,6 @@ import { preparingLiveModeForRawEvents } from './utils/goingLive/RawTxLogsLive.j
 import { updateTransactionsDetails } from './utils/postgresTables/TransactionsDetails.js';
 import { eventFlags } from './utils/api/utils/EventFlags.js';
 import { updateSandwichDetection } from './utils/postgresTables/mevDetection/sandwich/SandwichDetection.js';
-import { updateContractCreations } from './utils/postgresTables/ContractCreations.js';
 import { bootWsProvider } from './utils/web3Calls/generic.js';
 import { checkWsConnectionViaNewBlocks, eraseWebProvider, setupDeadWebsocketListener, } from './utils/goingLive/WebsocketConnectivityChecks.js';
 import eventEmitter from './utils/goingLive/EventEmitter.js';
@@ -64,7 +63,7 @@ export async function main() {
     eventFlags.canEmitAtomicArb = true;
     eventFlags.canEmitCexDexArb = true;
     await updateBlockTimestamps();
-    await updateContractCreations();
+    // await updateContractCreations();
     await updateTransactionPricing();
     eventFlags.txPricing = true;
     await parseEvents();
