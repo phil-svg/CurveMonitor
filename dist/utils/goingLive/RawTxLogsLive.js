@@ -81,7 +81,6 @@ export async function subscribeToAddress(address) {
     //   });
 }
 async function saveParsedEventInLiveMode(parsedTx) {
-    console.log('saveParsedEventInLiveMode:', parsedTx);
     // solving called contract
     const transactionIds = parsedTx.map((tx) => tx.tx_id).filter((id) => id !== undefined);
     const calledContractPromises = transactionIds.map((txId) => solveSingleTdId(txId));
@@ -124,12 +123,14 @@ async function processBufferedEvents() {
         return;
     const eventBlockNumbers = eventBuffer.flatMap((event) => event.event.blockNumber !== undefined ? [event.event.blockNumber] : []);
     const EVENTS = await fetchEventsForChunkParsing(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
+    console.log('EVENTS', EVENTS);
     const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
     const poolCoins = await getPoolCoinsForLiveMode();
     // Parsing
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, poolCoins);
     eventBuffer = [];
     const PARSED_TX = await fetchTransactionsForBlock(eventBlockNumbers[0]);
+    console.log('PARSED_TX', PARSED_TX);
     // effectively updating coin prices once every 10 minutes (50*12s)
     if (eventBlockNumbers[0] % 50 === 0)
         await updatePriceMap();
