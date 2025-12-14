@@ -126,6 +126,8 @@ async function processBufferedEvents() {
     console.log('EVENTS', EVENTS);
     const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
     const poolCoins = await getPoolCoinsForLiveMode();
+    console.log('BLOCK_UNIXTIMES', BLOCK_UNIXTIMES);
+    console.log('poolCoins', poolCoins);
     // Parsing
     await sortAndProcess(EVENTS, BLOCK_UNIXTIMES, poolCoins);
     eventBuffer = [];
