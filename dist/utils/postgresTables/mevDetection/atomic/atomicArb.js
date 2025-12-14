@@ -1,6 +1,5 @@
 import { extractTransactionAddresses, getTransactionDetails } from '../../readFunctions/TransactionDetails.js';
 import { getTxHashByTxId, getTxIdByTxHash } from '../../readFunctions/Transactions.js';
-import { solveAtomicArb } from './utils/atomicArbDetection.js';
 import { logProgress } from '../../../helperFunctions/QualityOfLifeStuff.js';
 import { getCleanedTransfersForTxIdFromTable } from '../../readFunctions/CleanedTransfers.js';
 import { getTxIdsWithAtomicArb } from '../../readFunctions/AtomicArbs.js';
@@ -62,8 +61,9 @@ export async function fetchDataThenDetectArb(txId) {
         }
     }
     // console.log("cleanedTransfers", cleanedTransfers);
-    const atomicArbDetails = await solveAtomicArb(txId, txHash, cleanedTransfers, from, to);
-    return atomicArbDetails;
+    // const atomicArbDetails = await solveAtomicArb(txId, txHash!, cleanedTransfers, from, to);
+    // return atomicArbDetails;
+    return null;
 }
 async function iterateOverPostiveAtomicArbsFromDb() {
     const txIds = await getTxIdsWithAtomicArb();

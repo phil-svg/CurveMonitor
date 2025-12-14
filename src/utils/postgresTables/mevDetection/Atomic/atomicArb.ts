@@ -77,9 +77,10 @@ export async function fetchDataThenDetectArb(
 
   // console.log("cleanedTransfers", cleanedTransfers);
 
-  const atomicArbDetails = await solveAtomicArb(txId, txHash!, cleanedTransfers, from, to);
+  // const atomicArbDetails = await solveAtomicArb(txId, txHash!, cleanedTransfers, from, to);
 
-  return atomicArbDetails;
+  // return atomicArbDetails;
+  return null;
 }
 
 async function iterateOverPostiveAtomicArbsFromDb() {

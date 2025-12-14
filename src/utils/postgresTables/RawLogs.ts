@@ -32,7 +32,7 @@ export async function storeEvent(event: EventObject, poolId: number): Promise<vo
     raw,
   } = event;
 
-  if (logIndex >= 10000) logIndex = 0;
+  if (logIndex >= 10000) logIndex = 0; // bug in erigon creates huge logIndex that break the db
 
   try {
     await RawTxLogs.create({
