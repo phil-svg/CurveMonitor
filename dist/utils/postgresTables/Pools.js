@@ -217,6 +217,7 @@ async function updateNames() {
         });
         let i = 0;
         for (const pool of poolsWithoutNames) {
+            console.log('Pool not named in db:', pool);
             if (!pool.lp_token)
                 continue;
             i += 1;

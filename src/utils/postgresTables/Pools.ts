@@ -234,6 +234,7 @@ async function updateNames(): Promise<void> {
 
     let i = 0;
     for (const pool of poolsWithoutNames) {
+      console.log('Pool not named in db:', pool);
       if (!pool.lp_token) continue;
       i += 1;
       const NAME = await getPoolNameFromLpToken(pool.lp_token);
