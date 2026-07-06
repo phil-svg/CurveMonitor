@@ -150,6 +150,7 @@ async function processBufferedEvents() {
     event.event.blockNumber !== undefined ? [event.event.blockNumber] : []
   );
 
+  console.log('calling fetchEventsForChunkParsing, eventBlockNumbers:', eventBlockNumbers);
   const EVENTS = await fetchEventsForChunkParsing(
     eventBlockNumbers[0],
     eventBlockNumbers[eventBlockNumbers.length - 1]

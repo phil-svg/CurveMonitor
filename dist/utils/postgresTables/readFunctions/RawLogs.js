@@ -57,6 +57,7 @@ export async function fetchAllDistinctBlockNumbers() {
 }
 // works faster, but less safe
 export async function fetchEventsForChunkParsing(startBlock, endBlock) {
+    console.log('inside fetchEventsForChunkParsing, fetching events from ***RawTxLogs***');
     const events = await RawTxLogs.findAll({
         where: {
             block_number: {
@@ -66,6 +67,7 @@ export async function fetchEventsForChunkParsing(startBlock, endBlock) {
         },
         order: [['block_number', 'ASC']],
     });
+    console.log('inside fetchEventsForChunkParsing, finished fetching events from ***RawTxLogs***');
     return events.map((event) => {
         const plainEvent = event.get();
         const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));

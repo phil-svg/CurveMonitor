@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# run with ./script.sh
+
 # Pull the latest changes from your repository
 git checkout -- package-lock.json
 git pull

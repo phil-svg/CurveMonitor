@@ -118,6 +118,7 @@ async function processBufferedEvents() {
     if (eventBuffer.length === 0)
         return;
     const eventBlockNumbers = eventBuffer.flatMap((event) => event.event.blockNumber !== undefined ? [event.event.blockNumber] : []);
+    console.log('calling fetchEventsForChunkParsing, eventBlockNumbers:', eventBlockNumbers);
     const EVENTS = await fetchEventsForChunkParsing(eventBlockNumbers[0], eventBlockNumbers[eventBlockNumbers.length - 1]);
     console.log('EVENTS', EVENTS);
     const BLOCK_UNIXTIMES = await getTimestampsByBlockNumbersFromLocalDatabase(eventBlockNumbers);
