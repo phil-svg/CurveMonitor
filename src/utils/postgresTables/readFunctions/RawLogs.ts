@@ -67,27 +67,20 @@ export async function fetchAllDistinctBlockNumbers() {
 }
 
 // works faster, but less safe
-export async function fetchEventsForChunkParsing(startBlock: number, endBlock: number): Promise<Partial<RawTxLogs>[]> {
+export async function fetchEventsForChunkParsingOld(
+  startBlock: number,
+  endBlock: number
+): Promise<Partial<RawTxLogs>[]> {
   console.log('inside fetchEventsForChunkParsing, fetching events from ***RawTxLogs***');
-  let events;
-  // const events = await RawTxLogs.findAll({
-  //   where: {
-  //     block_number: {
-  //       [Op.gte]: startBlock,
-  //       [Op.lte]: endBlock,
-  //     },
-  //   },
-  //   order: [['block_number', 'ASC']],
-  // });
-  try {
-    events = await RawTxLogs.findAll({
-      where: { block_number: { [Op.gte]: startBlock, [Op.lte]: endBlock } },
-      order: [['block_number', 'ASC']],
-    });
-  } catch (err) {
-    console.error('fetchEventsForChunkParsing err:', err);
-    throw err;
-  }
+  const events = await RawTxLogs.findAll({
+    where: {
+      block_number: {
+        [Op.gte]: startBlock,
+        [Op.lte]: endBlock,
+      },
+    },
+    order: [['block_number', 'ASC']],
+  });
   console.log('inside fetchEventsForChunkParsing, finished fetching events from ***RawTxLogs***');
 
   return events.map((event) => {
@@ -109,6 +102,67 @@ export async function fetchEventsForChunkParsing(startBlock: number, endBlock: n
       'returnValues',
     ]);
   });
+}
+
+export async function fetchEventsForChunkParsing(startBlock: number, endBlock: number): Promise<Partial<RawTxLogs>[]> {
+  console.log('[chunk] START fetch, blocks', startBlock, '→', endBlock);
+
+  // 1) is the connection even alive?
+  try {
+    await RawTxLogs.sequelize!.authenticate();
+    console.log('[chunk] DB auth OK');
+  } catch (e) {
+    console.error('[chunk] DB AUTH FAILED:', e);
+    return [];
+  }
+
+  // 2) pool state right now
+  const pool = (RawTxLogs.sequelize as any)?.connectionManager?.pool;
+  console.log(
+    '[chunk] pool size:',
+    pool?.size,
+    'available:',
+    pool?.available,
+    'using:',
+    pool?.using,
+    'waiting:',
+    pool?.waiting
+  );
+
+  // 3) the actual query, with a timeout race so a hang becomes a visible error
+  try {
+    const queryPromise = RawTxLogs.findAll({
+      where: { blockNumber: { [Op.gte]: startBlock, [Op.lte]: endBlock } },
+      order: [['blockNumber', 'ASC']],
+    });
+
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('QUERY TIMED OUT after 10s')), 10000));
+
+    const events = (await Promise.race([queryPromise, timeout])) as RawTxLogs[];
+    console.log('[chunk] DONE, rows:', events.length);
+
+    return events.map((event) => {
+      const plainEvent = event.get();
+      const returnValues = Object.fromEntries(
+        Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key)))
+      );
+      return pick({ ...plainEvent, returnValues }, [
+        'eventId',
+        'pool_id',
+        'address',
+        'blockNumber',
+        'transactionHash',
+        'transactionIndex',
+        'logIndex',
+        'removed',
+        'event',
+        'returnValues',
+      ]);
+    });
+  } catch (err) {
+    console.error('[chunk] QUERY FAILED:', err);
+    return [];
+  }
 }
 
 /**

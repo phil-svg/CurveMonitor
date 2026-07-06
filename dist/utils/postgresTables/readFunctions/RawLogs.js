@@ -56,28 +56,17 @@ export async function fetchAllDistinctBlockNumbers() {
     return distinctBlockNumbers.map((row) => row.getDataValue('block_number'));
 }
 // works faster, but less safe
-export async function fetchEventsForChunkParsing(startBlock, endBlock) {
+export async function fetchEventsForChunkParsingOld(startBlock, endBlock) {
     console.log('inside fetchEventsForChunkParsing, fetching events from ***RawTxLogs***');
-    let events;
-    // const events = await RawTxLogs.findAll({
-    //   where: {
-    //     block_number: {
-    //       [Op.gte]: startBlock,
-    //       [Op.lte]: endBlock,
-    //     },
-    //   },
-    //   order: [['block_number', 'ASC']],
-    // });
-    try {
-        events = await RawTxLogs.findAll({
-            where: { block_number: { [Op.gte]: startBlock, [Op.lte]: endBlock } },
-            order: [['block_number', 'ASC']],
-        });
-    }
-    catch (err) {
-        console.error('fetchEventsForChunkParsing err:', err);
-        throw err;
-    }
+    const events = await RawTxLogs.findAll({
+        where: {
+            block_number: {
+                [Op.gte]: startBlock,
+                [Op.lte]: endBlock,
+            },
+        },
+        order: [['block_number', 'ASC']],
+    });
     console.log('inside fetchEventsForChunkParsing, finished fetching events from ***RawTxLogs***');
     return events.map((event) => {
         const plainEvent = event.get();
@@ -95,6 +84,52 @@ export async function fetchEventsForChunkParsing(startBlock, endBlock) {
             'returnValues',
         ]);
     });
+}
+export async function fetchEventsForChunkParsing(startBlock, endBlock) {
+    var _a, _b;
+    console.log('[chunk] START fetch, blocks', startBlock, '→', endBlock);
+    // 1) is the connection even alive?
+    try {
+        await RawTxLogs.sequelize.authenticate();
+        console.log('[chunk] DB auth OK');
+    }
+    catch (e) {
+        console.error('[chunk] DB AUTH FAILED:', e);
+        return [];
+    }
+    // 2) pool state right now
+    const pool = (_b = (_a = RawTxLogs.sequelize) === null || _a === void 0 ? void 0 : _a.connectionManager) === null || _b === void 0 ? void 0 : _b.pool;
+    console.log('[chunk] pool size:', pool === null || pool === void 0 ? void 0 : pool.size, 'available:', pool === null || pool === void 0 ? void 0 : pool.available, 'using:', pool === null || pool === void 0 ? void 0 : pool.using, 'waiting:', pool === null || pool === void 0 ? void 0 : pool.waiting);
+    // 3) the actual query, with a timeout race so a hang becomes a visible error
+    try {
+        const queryPromise = RawTxLogs.findAll({
+            where: { blockNumber: { [Op.gte]: startBlock, [Op.lte]: endBlock } },
+            order: [['blockNumber', 'ASC']],
+        });
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('QUERY TIMED OUT after 10s')), 10000));
+        const events = (await Promise.race([queryPromise, timeout]));
+        console.log('[chunk] DONE, rows:', events.length);
+        return events.map((event) => {
+            const plainEvent = event.get();
+            const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));
+            return pick(Object.assign(Object.assign({}, plainEvent), { returnValues }), [
+                'eventId',
+                'pool_id',
+                'address',
+                'blockNumber',
+                'transactionHash',
+                'transactionIndex',
+                'logIndex',
+                'removed',
+                'event',
+                'returnValues',
+            ]);
+        });
+    }
+    catch (err) {
+        console.error('[chunk] QUERY FAILED:', err);
+        return [];
+    }
 }
 /**
  * Fetches raw transaction log events based on an array of transaction hash and pool id combinations.
