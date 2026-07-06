@@ -58,15 +58,26 @@ export async function fetchAllDistinctBlockNumbers() {
 // works faster, but less safe
 export async function fetchEventsForChunkParsing(startBlock, endBlock) {
     console.log('inside fetchEventsForChunkParsing, fetching events from ***RawTxLogs***');
-    const events = await RawTxLogs.findAll({
-        where: {
-            block_number: {
-                [Op.gte]: startBlock,
-                [Op.lte]: endBlock,
-            },
-        },
-        order: [['block_number', 'ASC']],
-    });
+    let events;
+    // const events = await RawTxLogs.findAll({
+    //   where: {
+    //     block_number: {
+    //       [Op.gte]: startBlock,
+    //       [Op.lte]: endBlock,
+    //     },
+    //   },
+    //   order: [['block_number', 'ASC']],
+    // });
+    try {
+        events = await RawTxLogs.findAll({
+            where: { block_number: { [Op.gte]: startBlock, [Op.lte]: endBlock } },
+            order: [['block_number', 'ASC']],
+        });
+    }
+    catch (err) {
+        console.error('fetchEventsForChunkParsing err:', err);
+        throw err;
+    }
     console.log('inside fetchEventsForChunkParsing, finished fetching events from ***RawTxLogs***');
     return events.map((event) => {
         const plainEvent = event.get();

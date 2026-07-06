@@ -80,7 +80,7 @@ export async function main() {
   // await updateInitialPoolParams(); // muted until useful
   // await updatePoolParamsEvents(); // muted until useful
 
-  await updateRawLogs();
+  // await updateRawLogs();
   await preparingLiveModeForRawEvents();
   await updateRawLogsForLiveMode();
 
