@@ -165,6 +165,7 @@ export async function getBlockTimeStampFromNode(blockNumber) {
     const MAX_RETRIES = 10; // Increased for more resilience
     let delay = 600; // Starting delay in ms
     let retries = 0;
+    console.log('Getting Block Timestmp From Node for Block:', blockNumber);
     while (retries < MAX_RETRIES) {
         try {
             const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);

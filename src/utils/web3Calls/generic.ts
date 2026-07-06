@@ -208,6 +208,8 @@ export async function getBlockTimeStampFromNode(blockNumber: number): Promise<nu
   let delay = 600; // Starting delay in ms
   let retries = 0;
 
+  console.log('Getting Block Timestmp From Node for Block:', blockNumber);
+
   while (retries < MAX_RETRIES) {
     try {
       const BLOCK = await WEB3_HTTP_PROVIDER.eth.getBlock(blockNumber);
