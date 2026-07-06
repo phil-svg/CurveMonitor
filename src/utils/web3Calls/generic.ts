@@ -554,7 +554,7 @@ export async function getTransactionTraceViaWeb3Provider(
       await new Promise((resolve) => setTimeout(resolve, 1000));
       return getTransactionTraceViaWeb3Provider(txHash, attempt + 1);
     } else {
-      throw error;
+      return null;
     }
   }
 }

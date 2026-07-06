@@ -447,7 +447,7 @@ export async function getTransactionTraceViaWeb3Provider(txHash, attempt = 0) {
             return getTransactionTraceViaWeb3Provider(txHash, attempt + 1);
         }
         else {
-            throw error;
+            return null;
         }
     }
 }
