@@ -35,10 +35,23 @@ import { updateMintMarketForMevScoring } from './utils/risk/MintMarkets.js';
 import { startAPI } from './utils/api/Server.js';
 import { startListeningToAllEvents } from './utils/goingLive/AllEvents.js';
 
+export async function initDatabaseA() {
+  try {
+    await db.sync();
+    console.log('[✓] Database synced successfully.\n');
+  } catch (err) {
+    console.error('Error syncing database:', err);
+  }
+}
+
 export async function initDatabase() {
   try {
     await db.sync();
     console.log('[✓] Database synced successfully.\n');
+
+    // one-off: ensure the block_number index exists (safe, non-locking, idempotent)
+    await db.query('CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_block_number ON raw_tx_logs (block_number);');
+    console.log('[✓] block_number index ensured.\n');
   } catch (err) {
     console.error('Error syncing database:', err);
   }
