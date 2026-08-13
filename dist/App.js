@@ -18,7 +18,6 @@ import eventEmitter from './utils/goingLive/EventEmitter.js';
 import { logMemoryUsage } from './utils/helperFunctions/QualityOfLifeStuff.js';
 import { updateTransactionPricing } from './utils/postgresTables/TransactionPricing.js';
 import { updatePoolsBytecode } from './utils/postgresTables/ByteCode.js';
-import { updateMintMarketForMevScoring } from './utils/risk/MintMarkets.js';
 import { startAPI } from './utils/api/Server.js';
 import { startListeningToAllEvents } from './utils/goingLive/AllEvents.js';
 export async function initDatabase() {
@@ -46,7 +45,7 @@ export async function main() {
     await bootWsProvider(); // starting new WS connection.
     eventEmitter.removeAllListeners();
     setupDeadWebsocketListener();
-    await updateMintMarketForMevScoring();
+    // await updateMintMarketForMevScoring();
     startListeningToAllEvents();
     await loadAddressProvider();
     await updatePools();
