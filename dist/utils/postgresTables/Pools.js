@@ -561,7 +561,7 @@ export async function updatePools() {
     // console.log("running updateNCoins");
     await updateNCoins();
     // console.log("running updateInceptionBlock");
-    await updateInceptionBlock();
+    // await updateInceptionBlock();
     // console.log("running updateCreationTimestamp");
     await updateCreationTimestamp();
     // console.log("running updateBasepool");
