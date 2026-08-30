@@ -3,6 +3,55 @@ const handlers = [];
 export function registerHandler(handler) {
     handlers.push(handler);
 }
+// One shared Web3 instance for log-decoding (building one per call is expensive; the abi coder is stateless).
+let decodingWeb3 = null;
+async function getDecodingWeb3() {
+    if (!decodingWeb3)
+        decodingWeb3 = await getWeb3HttpProvider();
+    return decodingWeb3;
+}
+// topic0 -> event abi item, computed once per unique (interned) ABI array.
+const topicMapCache = new WeakMap();
+async function getTopicMap(abi) {
+    let topicMap = topicMapCache.get(abi);
+    if (topicMap)
+        return topicMap;
+    const web3 = await getDecodingWeb3();
+    topicMap = new Map();
+    for (const item of abi) {
+        if (item.type === 'event') {
+            topicMap.set(web3.eth.abi.encodeEventSignature(item), item);
+        }
+    }
+    topicMapCache.set(abi, topicMap);
+    return topicMap;
+}
+/**
+ * Decodes a single raw log against the given ABI. Returns the same formatted-event shape
+ * as fetchEventsRealTime, or null if the log's topic0 matches no event in the ABI.
+ */
+export async function decodeLogWithAbi(log, abi) {
+    const topicMap = await getTopicMap(abi);
+    const eventAbi = topicMap.get(log.topics[0]);
+    if (!eventAbi)
+        return null;
+    const web3 = await getDecodingWeb3();
+    const decoded = web3.eth.abi.decodeLog(eventAbi.inputs, log.data, log.topics.slice(1));
+    const returnValues = Object.entries(decoded)
+        .filter(([key]) => isNaN(Number(key)) && key !== '__length__')
+        .reduce((obj, [key, value]) => (Object.assign(Object.assign({}, obj), { [key]: value })), {});
+    return {
+        address: log.address,
+        event: eventAbi.name,
+        returnValues,
+        blockNumber: log.blockNumber,
+        transactionHash: log.transactionHash,
+        transactionIndex: log.transactionIndex,
+        blockHash: log.blockHash,
+        logIndex: log.logIndex,
+        removed: log.removed,
+    };
+}
 export async function startListeningToAllEvents() {
     let web3HttpProvider = await getWeb3HttpProvider();
     let lastBlockNumber = await web3HttpProvider.eth.getBlockNumber();

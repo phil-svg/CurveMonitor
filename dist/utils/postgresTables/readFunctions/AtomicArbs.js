@@ -58,7 +58,7 @@ export async function printTopUniqueRevenueEntries(lowerBound, higherBound) {
             where: {
                 revenue: { [Op.ne]: null }, // Filter out entries where revenue is null
             },
-            order: [["revenue", "DESC"]],
+            order: [["revenue", "DESC"]], // Order by revenue in descending order
             limit: higherBound * 5, // Increase limit to ensure we can filter down to the desired range
         });
         const uniqueTxHashes = new Set();

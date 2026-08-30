@@ -85,8 +85,8 @@ async function getMostRecentBlockNumberInRiskTable(controllerAddress) {
     try {
         // Query the BorrowableData table for the highest block number associated with the market address
         const recentBlock = await RiskMintMarketInfo.findOne({
-            where: { controller: controllerAddress },
-            order: [['blockNumber', 'DESC']],
+            where: { controller: controllerAddress }, // Match the controller address
+            order: [['blockNumber', 'DESC']], // Sort in descending order to get the most recent block number
             attributes: ['blockNumber'], // Only fetch the blockNumber field
         });
         // If a record is found, return the block number

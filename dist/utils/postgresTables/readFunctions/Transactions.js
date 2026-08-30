@@ -292,7 +292,7 @@ export async function getLowestBlockNumberForTransactions(poolId) {
 export async function getTimeSinceLastTransactionInDays(poolId) {
     const latestTransaction = await Transactions.findOne({
         where: { pool_id: poolId },
-        order: [['block_unixtime', 'DESC']],
+        order: [['block_unixtime', 'DESC']], // Order by block_unixtime in descending order
         attributes: ['block_unixtime'],
         raw: true,
     });

@@ -3,6 +3,20 @@ import axios, { AxiosError } from 'axios';
 import { getAddressById, getAllPoolIds, getPoolBy } from './readFunctions/Pools.js';
 import { NULL_ADDRESS } from '../helperFunctions/Constants.js';
 import Bottleneck from 'bottleneck';
+import { createHash } from 'crypto';
+
+// Most pools are factory clones sharing a handful of identical ABIs. Interning by content hash
+// lets every caller hold a reference to one shared array instead of its own parsed copy.
+const internedAbis = new Map<string, any[]>();
+
+export function internAbi(abi: any[] | null): any[] | null {
+  if (!abi || !Array.isArray(abi)) return abi;
+  const key = createHash('sha256').update(JSON.stringify(abi)).digest('hex');
+  const existing = internedAbis.get(key);
+  if (existing) return existing;
+  internedAbis.set(key, abi);
+  return abi;
+}
 
 const resolveAddress = async (options: { address?: string; id?: number }): Promise<string | null> => {
   if (options.address) {
@@ -24,7 +38,7 @@ export const getAbiByForPools = async (options: { id?: number }): Promise<any[] 
     return null;
   }
   const abiRecord = await AbisPools.findOne({ where: { pool_id: options.id } });
-  return abiRecord ? abiRecord.abi : null;
+  return abiRecord ? internAbi(abiRecord.abi) : null;
 };
 
 // Fetches the ABI record for the given address or id from the AbisRelatedToAddressProvider table.
@@ -34,7 +48,7 @@ export const getAbiByForAddressProvider = async (options: { address?: string; id
     return null;
   }
   const abiRecord = await AbisRelatedToAddressProvider.findOne({ where: { address } });
-  return abiRecord ? abiRecord.abi : null;
+  return abiRecord ? internAbi(abiRecord.abi) : null;
 };
 
 // this function returning null means sc not verified
@@ -149,7 +163,7 @@ export async function getAbiBy(tableName: string, options: { address?: string; i
     }
 
     if (!abi) {
-      abi = await fetchAbiFromEtherscan(address);
+      abi = internAbi(await fetchAbiFromEtherscan(address));
       if (options.id && abi) {
         await storeAbiForPools(options.id, abi);
       } else if (options.address && abi) {

@@ -109,7 +109,7 @@ export async function fetchAbiFromEtherscanForChain(address, chain) {
         }
     };
     const etherscanLimiter = new Bottleneck({
-        maxConcurrent: 1,
+        maxConcurrent: 1, // Max number of concurrent requests
         minTime: 200, // Minimum time between requests
     });
     const ABIString = await etherscanLimiter.schedule(() => fetchAbi());

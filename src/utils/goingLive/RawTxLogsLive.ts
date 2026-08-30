@@ -26,7 +26,7 @@ import { fetchEventsForChunkParsing } from '../postgresTables/readFunctions/RawL
 import { fetchTransactionsForBlock } from '../postgresTables/readFunctions/Transactions.js';
 import { sortAndProcess } from '../postgresTables/txParsing/ParseTx.js';
 import { retryGetTransactionTraceViaWeb3Provider } from '../web3Calls/generic.js';
-import { fetchEventsRealTime, registerHandler } from './AllEvents.js';
+import { decodeLogWithAbi, registerHandler, EvmLogEntry } from './AllEvents.js';
 import eventEmitter from './EventEmitter.js';
 import EventEmitter from './EventEmitter.js';
 
@@ -60,40 +60,46 @@ function bufferEvent(address: string, event: any) {
   }
 }
 
+// One routing table instead of one closure per pool: address -> pool info. The ABI references
+// are interned (shared), so this map stays small even with thousands of pools.
+const routedPools = new Map<string, { poolId: number; abi: any[] }>();
+let logRouterRegistered = false;
+
 // buffers events, and processes them in block-chunks (waits for block to be done before parsing.)
 export async function subscribeToAddress(address: string) {
   console.log('called subscribeToAddress for', address);
-  // const contract = await getContractByAddressWithWebsocket(address);
   const poolId = await getPoolIdByPoolAddress(address);
 
-  // if (!contract) return;
   if (!poolId) return;
   const abi = await getAbiBy('AbisPools', { id: poolId });
   if (!abi) return;
 
-  registerHandler(async (logs) => {
-    const events = await fetchEventsRealTime(logs, address, abi, 'AllEvents');
-    if (events.length > 0) {
-      events.forEach(async (event: any) => {
-        console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
-        // lastEventTime = Date.now();
-        await storeEvent(event, poolId);
-        bufferEvent(address, event);
-      });
-    }
-  });
+  routedPools.set(address.toLowerCase(), { poolId, abi });
 
-  // const subscription = contract.events
-  //   .allEvents({ fromBlock: 'latest' })
-  //   .on('data', async (event: any) => {
-  //     console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
-  //     // lastEventTime = Date.now();
-  //     await storeEvent(event, poolId);
-  //     bufferEvent(address, event);
-  //   })
-  //   .on('error', (error: any) => {
-  //     console.log(`Subscription error: ${error}`);
-  //   });
+  if (!logRouterRegistered) {
+    logRouterRegistered = true;
+    registerHandler((logs) => {
+      void routeLogsToPools(logs);
+    });
+  }
+}
+
+// Single per-block pass: each log is matched against the routing table by address,
+// then decoded with that pool's ABI (topic maps are cached per unique ABI).
+async function routeLogsToPools(logs: EvmLogEntry[]) {
+  for (const log of logs) {
+    const poolInfo = routedPools.get(log.address.toLowerCase());
+    if (!poolInfo) continue;
+    try {
+      const event = await decodeLogWithAbi(log, poolInfo.abi);
+      if (!event) continue;
+      console.log(`New Event spotted at ${getCurrentFormattedTime()}`);
+      await storeEvent(event, poolInfo.poolId);
+      bufferEvent(log.address, event);
+    } catch (err) {
+      console.log(`Failed to decode/store live log ${log.transactionHash} (logIndex ${log.logIndex}):`, err);
+    }
+  }
 }
 
 async function saveParsedEventInLiveMode(parsedTx: TransactionData[]) {

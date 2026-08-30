@@ -99,13 +99,16 @@ export async function getPastEvents(
     return null;
   }
 
+  // always fetch over HTTP, even if the passed contract is bound to the WS provider
+  const HTTP_CONTRACT = new WEB3_HTTP_PROVIDER.eth.Contract(CONTRACT.options.jsonInterface, CONTRACT.options.address);
+
   let retries = 0;
   const maxRetries = 12;
   let EVENT_ARRAY: Array<object> = [];
 
   while (retries < maxRetries) {
     try {
-      const events = await CONTRACT.getPastEvents(eventName, { fromBlock, toBlock });
+      const events = await HTTP_CONTRACT.getPastEvents(eventName, { fromBlock, toBlock });
       for (const DATA of events) {
         EVENT_ARRAY.push(DATA);
       }

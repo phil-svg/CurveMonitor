@@ -115,7 +115,7 @@ export function removeDuplicatesAndUpdatePositions(transfers) {
             {
                 from: '0x74de5d4fcbf63e00296fd95d33236b9794016631',
                 to: '0x2acf35c9a3f4c5c3f4c78ef5fb64c3ee82f07c45',
-                tokenAddress: '0x0000000000085d4780b73119b644ae5ecd22b376',
+                tokenAddress: '0x0000000000085d4780b73119b644ae5ecd22b376', // real
                 tokenSymbol: 'TUSD',
                 parsedAmount: 237.97344971942732,
                 position: 9,
@@ -123,7 +123,7 @@ export function removeDuplicatesAndUpdatePositions(transfers) {
             {
                 from: '0x0000000000085d4780b73119b644ae5ecd22b376',
                 to: '0x2acf35c9a3f4c5c3f4c78ef5fb64c3ee82f07c45',
-                tokenAddress: '0xb650eb28d35691dd1bd481325d40e65273844f9b',
+                tokenAddress: '0xb650eb28d35691dd1bd481325d40e65273844f9b', // fake
                 tokenSymbol: 'TUSD',
                 parsedAmount: 237.97344971942732,
                 position: 10,

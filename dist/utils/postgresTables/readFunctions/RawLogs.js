@@ -33,32 +33,35 @@ export async function getEntriesByBlockNumberAndPoolId(blockNumber, poolId) {
     }
 }
 export async function fetchDistinctBlockNumbers() {
-    const distinctBlockNumbers = await RawTxLogs.findAll({
+    const distinctBlockNumbers = (await RawTxLogs.findAll({
         attributes: [[fn('DISTINCT', col('block_number')), 'block_number']],
         order: [['block_number', 'ASC']],
-    });
-    return distinctBlockNumbers.map((row) => row.getDataValue('block_number'));
+        raw: true,
+    }));
+    return distinctBlockNumbers.map((row) => row.block_number);
 }
 export async function fetchDistinctBlockNumbersInBatch(offset, batchSize) {
-    const distinctBlockNumbers = await RawTxLogs.findAll({
+    const distinctBlockNumbers = (await RawTxLogs.findAll({
         attributes: [[fn('DISTINCT', col('block_number')), 'block_number']],
         order: [['block_number', 'ASC']],
         offset: offset,
         limit: batchSize,
-    });
-    return distinctBlockNumbers.map((row) => row.getDataValue('block_number'));
+        raw: true,
+    }));
+    return distinctBlockNumbers.map((row) => row.block_number);
 }
 export async function fetchAllDistinctBlockNumbers() {
-    const distinctBlockNumbers = await RawTxLogs.findAll({
+    const distinctBlockNumbers = (await RawTxLogs.findAll({
         attributes: [[fn('DISTINCT', col('block_number')), 'block_number']],
         order: [['block_number', 'ASC']],
-    });
-    return distinctBlockNumbers.map((row) => row.getDataValue('block_number'));
+        raw: true,
+    }));
+    return distinctBlockNumbers.map((row) => row.block_number);
 }
 // works faster, but less safe
 export async function fetchEventsForChunkParsingOld(startBlock, endBlock) {
     console.log('inside fetchEventsForChunkParsing, fetching events from ***RawTxLogs***');
-    const events = await RawTxLogs.findAll({
+    const events = (await RawTxLogs.findAll({
         where: {
             block_number: {
                 [Op.gte]: startBlock,
@@ -66,10 +69,10 @@ export async function fetchEventsForChunkParsingOld(startBlock, endBlock) {
             },
         },
         order: [['block_number', 'ASC']],
-    });
+        raw: true,
+    }));
     console.log('inside fetchEventsForChunkParsing, finished fetching events from ***RawTxLogs***');
-    return events.map((event) => {
-        const plainEvent = event.get();
+    return events.map((plainEvent) => {
         const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));
         return pick(Object.assign(Object.assign({}, plainEvent), { returnValues }), [
             'eventId',
@@ -105,12 +108,12 @@ export async function fetchEventsForChunkParsing(startBlock, endBlock) {
         const queryPromise = RawTxLogs.findAll({
             where: { blockNumber: { [Op.gte]: startBlock, [Op.lte]: endBlock } },
             order: [['blockNumber', 'ASC']],
+            raw: true,
         });
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('QUERY TIMED OUT after 10s')), 10000));
         const events = (await Promise.race([queryPromise, timeout]));
         console.log('[chunk] DONE, rows:', events.length);
-        return events.map((event) => {
-            const plainEvent = event.get();
+        return events.map((plainEvent) => {
             const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));
             return pick(Object.assign(Object.assign({}, plainEvent), { returnValues }), [
                 'eventId',
@@ -141,16 +144,16 @@ export async function fetchRawEventsByTransactionHashes(transactionHashesWithPoo
     const transactionHashes = transactionHashesWithPoolIds.map((t) => t.transaction_hash);
     const poolIds = transactionHashesWithPoolIds.map((t) => t.pool_id);
     // Find all entries that match both transaction hash and pool id
-    const events = await RawTxLogs.findAll({
+    const events = (await RawTxLogs.findAll({
         where: {
             transaction_hash: { [Op.in]: transactionHashes },
             pool_id: { [Op.in]: poolIds },
         },
         order: [['block_number', 'ASC']],
-    });
+        raw: true,
+    }));
     // Map the raw events to a simplified format
-    return events.map((event) => {
-        const plainEvent = event.get({ plain: true });
+    return events.map((plainEvent) => {
         const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));
         return pick(plainEvent, [
             'eventId',
@@ -167,7 +170,7 @@ export async function fetchRawEventsByTransactionHashes(transactionHashesWithPoo
     });
 }
 export async function fetchEventsForChunkParsingForPoolId(startBlock, endBlock, poolId) {
-    const events = await RawTxLogs.findAll({
+    const events = (await RawTxLogs.findAll({
         where: {
             block_number: {
                 [Op.gte]: startBlock,
@@ -176,9 +179,9 @@ export async function fetchEventsForChunkParsingForPoolId(startBlock, endBlock, 
             pool_id: poolId,
         },
         order: [['block_number', 'ASC']],
-    });
-    return events.map((event) => {
-        const plainEvent = event.get({ plain: true }); // Ensure to get plain object
+        raw: true,
+    }));
+    return events.map((plainEvent) => {
         const returnValues = Object.fromEntries(Object.entries(plainEvent.returnValues).filter(([key]) => isNaN(Number(key))));
         return pick(Object.assign(Object.assign({}, plainEvent), { returnValues }), [
             'eventId',

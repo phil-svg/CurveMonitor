@@ -33,7 +33,7 @@ export async function coinExistsByAddress(address) {
     `;
     try {
         const results = await sequelize.query(query, {
-            replacements: { address },
+            replacements: { address }, // Safely inject the address into the query
             type: QueryTypes.SELECT,
             raw: true,
         });
@@ -160,7 +160,7 @@ export async function getTokenDetailsForTokenArray(tokenAddresses) {
     `;
     try {
         const tokenDetails = await sequelize.query(query, {
-            replacements: addressArray,
+            replacements: addressArray, // Insert token addresses into placeholders
             type: QueryTypes.SELECT,
             raw: true,
         });

@@ -428,7 +428,7 @@ export async function getSwapVolumeBucketsForPoolAndToAddress(poolAddress, toAdd
         const matchResult = label.match(/\d+/g);
         const [start, end] = matchResult ? matchResult.map(Number) : [0, 0]; // Default to [0, 0] if no match
         return {
-            Bucket: `${start / 1000}k$-${end / 1000}k$`,
+            Bucket: `${start / 1000}k$-${end / 1000}k$`, // Format label
             Count: count,
             'Total Volume': totalVolume,
         };

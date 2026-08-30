@@ -743,7 +743,7 @@ async function loadSandwichDataFromCSVfile() {
     return new Promise((resolve, reject) => {
         const sandwichData = [];
         const parser = createReadStream('../sandwiches-ng.csv').pipe(parse({
-            columns: true,
+            columns: true, // Assumes the first row contains column headers
             skip_empty_lines: true,
         }));
         parser.on('data', (row) => {

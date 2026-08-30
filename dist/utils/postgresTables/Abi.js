@@ -3,6 +3,20 @@ import axios, { AxiosError } from 'axios';
 import { getAddressById, getAllPoolIds } from './readFunctions/Pools.js';
 import { NULL_ADDRESS } from '../helperFunctions/Constants.js';
 import Bottleneck from 'bottleneck';
+import { createHash } from 'crypto';
+// Most pools are factory clones sharing a handful of identical ABIs. Interning by content hash
+// lets every caller hold a reference to one shared array instead of its own parsed copy.
+const internedAbis = new Map();
+export function internAbi(abi) {
+    if (!abi || !Array.isArray(abi))
+        return abi;
+    const key = createHash('sha256').update(JSON.stringify(abi)).digest('hex');
+    const existing = internedAbis.get(key);
+    if (existing)
+        return existing;
+    internedAbis.set(key, abi);
+    return abi;
+}
 const resolveAddress = async (options) => {
     if (options.address) {
         return options.address.toLowerCase();
@@ -24,7 +38,7 @@ export const getAbiByForPools = async (options) => {
         return null;
     }
     const abiRecord = await AbisPools.findOne({ where: { pool_id: options.id } });
-    return abiRecord ? abiRecord.abi : null;
+    return abiRecord ? internAbi(abiRecord.abi) : null;
 };
 // Fetches the ABI record for the given address or id from the AbisRelatedToAddressProvider table.
 export const getAbiByForAddressProvider = async (options) => {
@@ -33,7 +47,7 @@ export const getAbiByForAddressProvider = async (options) => {
         return null;
     }
     const abiRecord = await AbisRelatedToAddressProvider.findOne({ where: { address } });
-    return abiRecord ? abiRecord.abi : null;
+    return abiRecord ? internAbi(abiRecord.abi) : null;
 };
 // this function returning null means sc not verified
 export async function fetchAbiFromEtherscan(address) {
@@ -66,7 +80,7 @@ export async function fetchAbiFromEtherscan(address) {
         }
     };
     const etherscanLimiter = new Bottleneck({
-        maxConcurrent: 1,
+        maxConcurrent: 1, // Max number of concurrent requests
         minTime: 200, // Minimum time between requests
     });
     const ABIString = await etherscanLimiter.schedule(() => fetchAbi());
@@ -142,7 +156,7 @@ export async function getAbiBy(tableName, options) {
             return null;
         }
         if (!abi) {
-            abi = await fetchAbiFromEtherscan(address);
+            abi = internAbi(await fetchAbiFromEtherscan(address));
             if (options.id && abi) {
                 await storeAbiForPools(options.id, abi);
             }
@@ -209,7 +223,7 @@ async function getAllBytecodesWithPoolIds() {
     try {
         // Fetch all entries from the Bytecode table, including related pool IDs
         const bytecodes = await Bytecode.findAll({
-            attributes: ['poolId', 'bytecode'],
+            attributes: ['poolId', 'bytecode'], // Select only the poolId and bytecode fields
             include: {
                 model: Pool,
                 attributes: [], // No attributes from Pool are needed, just the association

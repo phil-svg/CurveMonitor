@@ -44,9 +44,9 @@ async function getAllTxForSameBlockAndPoolWithoutTheSandwich(txId, poolId, exclu
 }
 function simplifyTransactionCoinData(transactionCoinsData) {
     return transactionCoinsData.map((coin) => ({
-        symbol: coin.coin.symbol,
-        decimals: coin.coin.decimals,
-        coinAddress: coin.coin.address,
+        symbol: coin.coin.symbol, // Access coin symbol
+        decimals: coin.coin.decimals, // Access coin symbol
+        coinAddress: coin.coin.address, // Access coin address
         direction: coin.direction,
         amount: coin.amount,
         dollarValue: coin.dollar_value ? coin.dollar_value : 0, // Default to 0 if dollar_value is null

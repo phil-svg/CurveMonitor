@@ -6,9 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { Table, Column, Model, DataType, Index } from 'sequelize-typescript';
 // indexes
-let RiskMintMarketInfo = 
-// table structure
-class RiskMintMarketInfo extends Model {
+let RiskMintMarketInfo = class RiskMintMarketInfo extends Model {
 };
 __decorate([
     Column({

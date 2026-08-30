@@ -73,9 +73,9 @@ export async function getTokenPriceChartData(tokenAddress, start, span, period, 
     const url = `https://coins.llama.fi/chart/${tokenQueryParam}`;
     try {
         const params = {
-            start,
-            span,
-            period,
+            start, // Unix timestamp of earliest data point requested
+            span, // Number of data points returned
+            period, // Duration between data points
             searchWidth, // Time range on either side to find price data
         };
         const response = await axios.get(url, { params });

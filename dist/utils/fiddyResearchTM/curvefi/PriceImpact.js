@@ -27,10 +27,10 @@ export async function fetchSortedTransactionIdsByDateAndPool(poolAddress, startD
             },
         },
         order: [
-            ['block_unixtime', 'ASC'],
+            ['block_unixtime', 'ASC'], // Sort by time first
             ['tx_position', 'ASC'], // Then by transaction position within the block
         ],
-        attributes: ['tx_id'],
+        attributes: ['tx_id'], // Only fetch the transaction IDs
         raw: true,
     });
     // Map the results to an array of transaction IDs
